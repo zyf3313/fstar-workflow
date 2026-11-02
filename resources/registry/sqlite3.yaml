@@ -1,0 +1,6 @@
+schema: "fstar.tool.registry.v1"
+tool: sqlite3
+kind: cli
+capabilities: [{"id": "data-access", "match": "strong", "basis": "read-only SQLite schema and query access; a write statement is never a verification probe"}]
+version_cmd: ["--version"]
+minimal_calls: {"data-access": ["{path}", ":memory:", "SELECT 1"]}

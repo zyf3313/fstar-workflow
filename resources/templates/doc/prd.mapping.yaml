@@ -1,0 +1,41 @@
+{
+  "schema": "fstar.template-map.v1",
+  "artifact_type": "prd",
+  "slots": {
+    "artifact_type": {
+      "start_marker": "<!-- fstar:slot:artifact_type:start -->",
+      "end_marker": "<!-- fstar:slot:artifact_type:end -->"
+    },
+    "version": {
+      "start_marker": "<!-- fstar:slot:version:start -->",
+      "end_marker": "<!-- fstar:slot:version:end -->"
+    },
+    "review_state": {
+      "start_marker": "<!-- fstar:slot:review_state:start -->",
+      "end_marker": "<!-- fstar:slot:review_state:end -->"
+    },
+    "author": {
+      "start_marker": "<!-- fstar:slot:author:start -->",
+      "end_marker": "<!-- fstar:slot:author:end -->"
+    },
+    "date": {
+      "start_marker": "<!-- fstar:slot:date:start -->",
+      "end_marker": "<!-- fstar:slot:date:end -->"
+    },
+    "reviewer": {
+      "start_marker": "<!-- fstar:slot:reviewer:start -->",
+      "end_marker": "<!-- fstar:slot:reviewer:end -->"
+    }
+  },
+  "items": {
+    "mode": "markers",
+    "start_template": "<!-- fstar:item:{id}:start -->",
+    "end_template": "<!-- fstar:item:{id}:end -->"
+  },
+  "references": {
+    "mode": "markers",
+    "prefix": "<!-- fstar:ref:",
+    "suffix": " -->",
+    "separator": "#"
+  }
+}

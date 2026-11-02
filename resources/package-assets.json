@@ -1,0 +1,455 @@
+{
+  "schema": "fstar.package-assets.v1",
+  "generated_by": "scripts/build-package.cjs",
+  "cli_version": "0.1.0",
+  "resource_version": "1",
+  "supported_data_schemas": [
+    1
+  ],
+  "source_ref": "zyf3313/fstar-trellis-ext@674bea37cf2f6f25cd20dab93e1a54ae1f13ce66 (verified reachable 2026-11-01; templates are structural adaptations with provenance notes, never verbatim copies)",
+  "license_status": "source-pending-adaptation-only",
+  "notes": [
+    "Source fixed-commit originals verified 2026-11-01: prd.zh-CN.md / technical-design.zh-CN.md / technical-design-profiles.zh-CN.md exist at the pinned commit; fstar templates differ from them (slot markers, restructured sections) and each carries a provenance note. Upstream license remains pending; verbatim copying stays disallowed.",
+    "npm package name verified available 2026-11-01: fstar-workflow unregistered (fstar, @fstar/*, fstar-hook also free; near-names fstarter/fstar-wangeditor are unrelated)."
+  ],
+  "files": [
+    {
+      "source": "bin/fstar.cjs",
+      "destination": "bin/fstar.cjs",
+      "kind": "launcher",
+      "sha256": "d3950996ca48c4dee14d79a2682be700fcecbebb2786807714bd834073f1759f"
+    },
+    {
+      "source": "bin/fstar-hook.cjs",
+      "destination": "bin/fstar-hook.cjs",
+      "kind": "launcher",
+      "sha256": "986e55d2e40fa49aaf4b5e535e093f84be3885f72580dd52d4dac907e2777db2"
+    },
+    {
+      "source": "bin/fstar-bootstrap.py",
+      "destination": "bin/fstar-bootstrap.py",
+      "kind": "launcher",
+      "sha256": "b5881f64aa87ea686f00b69ea2dd05f977a4cc7165163f6a11003f88e44964c8"
+    },
+    {
+      "source": "src/fstar/__init__.py",
+      "destination": "src/fstar/__init__.py",
+      "kind": "python",
+      "sha256": "16e1d9d8ffc9a2194c2cc87a8893e8e80dd4401b110567f1556ed6dc463f7a66"
+    },
+    {
+      "source": "src/fstar/__main__.py",
+      "destination": "src/fstar/__main__.py",
+      "kind": "python",
+      "sha256": "307299fda7b77d22c64cb51430ec75e5f59d78e9c948786afb3b2544fe45e4b7"
+    },
+    {
+      "source": "src/fstar/cli.py",
+      "destination": "src/fstar/cli.py",
+      "kind": "python",
+      "sha256": "52d1b91f1e5d6b6367410939da4ebd3848728ebbdd11723f57de98679121378b"
+    },
+    {
+      "source": "src/fstar/config.py",
+      "destination": "src/fstar/config.py",
+      "kind": "python",
+      "sha256": "111926dbaa681139fa1bea25d4b027a64dde7067b604ca4c2d01c5a241dd7aa2"
+    },
+    {
+      "source": "src/fstar/content.py",
+      "destination": "src/fstar/content.py",
+      "kind": "python",
+      "sha256": "21a9c85850572ad677a9e521475b4e34776e90337b542de25e99e94bf4d0bb57"
+    },
+    {
+      "source": "src/fstar/dispatch.py",
+      "destination": "src/fstar/dispatch.py",
+      "kind": "python",
+      "sha256": "120cc75414b297611869f1d4d9913082b544ab4df9609d53520b361a9c397211"
+    },
+    {
+      "source": "src/fstar/evidence.py",
+      "destination": "src/fstar/evidence.py",
+      "kind": "python",
+      "sha256": "45e7f10a4bb744bc85d751f3ac9e73656b522f0c1090dc41e07899d1b5dc6dde"
+    },
+    {
+      "source": "src/fstar/extensions.py",
+      "destination": "src/fstar/extensions.py",
+      "kind": "python",
+      "sha256": "30e5fc27db886372dc5fcb92081e5eefa76814d5f4bbcb541688b2a9ebed9630"
+    },
+    {
+      "source": "src/fstar/installer.py",
+      "destination": "src/fstar/installer.py",
+      "kind": "python",
+      "sha256": "88a3d5c7ef5623843058fd8e2ffe6f38d94fe561fa3241cf1911264dcb2c79cf"
+    },
+    {
+      "source": "src/fstar/knowledge.py",
+      "destination": "src/fstar/knowledge.py",
+      "kind": "python",
+      "sha256": "43ff8d0688a0e26ecdbd475c1aeeaddee2a78f816c3e773e4a52aa07720384d9"
+    },
+    {
+      "source": "src/fstar/learn_bridge.py",
+      "destination": "src/fstar/learn_bridge.py",
+      "kind": "python",
+      "sha256": "751ac11c31a48c9f04ff5d6b1680a7255c2b71305a44ed20448b9d66e737c159"
+    },
+    {
+      "source": "src/fstar/models.py",
+      "destination": "src/fstar/models.py",
+      "kind": "python",
+      "sha256": "f247683ae7bd4ad77e3f3c4a04103b2389fd0a261c833fd12c9747b028d8c439"
+    },
+    {
+      "source": "src/fstar/project.py",
+      "destination": "src/fstar/project.py",
+      "kind": "python",
+      "sha256": "55d7f68a573e412776e7568f38a5ce78d121a6721e1f60615c6a8adb457303dd"
+    },
+    {
+      "source": "src/fstar/runtime/__init__.py",
+      "destination": "src/fstar/runtime/__init__.py",
+      "kind": "python",
+      "sha256": "876eb526798ca7c8fd728ef3447c6aba56effeb74ec4e2263ddfa155ec6efec4"
+    },
+    {
+      "source": "src/fstar/runtime/__main__.py",
+      "destination": "src/fstar/runtime/__main__.py",
+      "kind": "python",
+      "sha256": "8e612672460d4889c1c7e19aca585acce4dfc6afa49bea8faff58119d651cbb3"
+    },
+    {
+      "source": "src/fstar/runtime/hooks.py",
+      "destination": "src/fstar/runtime/hooks.py",
+      "kind": "python",
+      "sha256": "53be2b5f32ef247cd0732ab0af58d324cf9c2f8b48bf3c153e3733446c329ec4"
+    },
+    {
+      "source": "src/fstar/runtime/inject.py",
+      "destination": "src/fstar/runtime/inject.py",
+      "kind": "python",
+      "sha256": "31a611858f28e0b82b7922244a91dc6d0089b44710fae3d76f67b57b6051da9c"
+    },
+    {
+      "source": "src/fstar/runtime/registration.py",
+      "destination": "src/fstar/runtime/registration.py",
+      "kind": "python",
+      "sha256": "e8645f5ba3ce9c8daea7ac11ed58439b6c1244ac9c76400cb03dec26ded45c55"
+    },
+    {
+      "source": "src/fstar/store.py",
+      "destination": "src/fstar/store.py",
+      "kind": "python",
+      "sha256": "8d1b99707f14f157fabec62b0e70d557457547314b1a096acb5e2f9089fc3e93"
+    },
+    {
+      "source": "src/fstar/tasks.py",
+      "destination": "src/fstar/tasks.py",
+      "kind": "python",
+      "sha256": "26413de456a63dea760bd8f02b3ed0dac679e10ebe4c2409e6cfa3d82819b8ac"
+    },
+    {
+      "source": "src/fstar/tool_classifier.py",
+      "destination": "src/fstar/tool_classifier.py",
+      "kind": "python",
+      "sha256": "83e0c63616929b1bae2b14d408b6c13227a79cc3522c11a66915ba8b32434075"
+    },
+    {
+      "source": "src/fstar/tools.py",
+      "destination": "src/fstar/tools.py",
+      "kind": "python",
+      "sha256": "11a0a15f9d5fd74a268ba6f082e6c109070cfb2abcf5c1e0413d9d5a3d0cc8ba"
+    },
+    {
+      "source": "src/fstar/tools_bridge.py",
+      "destination": "src/fstar/tools_bridge.py",
+      "kind": "python",
+      "sha256": "117cadb2f7cc0ed55f3741ad2c445b4ac5ec2dbce4827a790e05c93189daaf81"
+    },
+    {
+      "source": "resources/skills/fstar-archive/SKILL.md",
+      "destination": "resources/skills/fstar-archive/SKILL.md",
+      "kind": "resource",
+      "sha256": "2b5715c465bf782a6e62dac8e71ac546c64d2c607b98b0e4f6b28734df89a06c"
+    },
+    {
+      "source": "resources/skills/fstar-check/SKILL.md",
+      "destination": "resources/skills/fstar-check/SKILL.md",
+      "kind": "resource",
+      "sha256": "5ca446be859a6bdcd504659245de44837822e43c58e9c3aab526b05ee8e7272d"
+    },
+    {
+      "source": "resources/skills/fstar-clarify/SKILL.md",
+      "destination": "resources/skills/fstar-clarify/SKILL.md",
+      "kind": "resource",
+      "sha256": "94c5fffc732ecdbb000a2a5e024e6517d6a31d8db0b1b891bf30a7509de34ed0"
+    },
+    {
+      "source": "resources/skills/fstar-continue/SKILL.md",
+      "destination": "resources/skills/fstar-continue/SKILL.md",
+      "kind": "resource",
+      "sha256": "539d7ff744241bc9c70f378d0631b9bc09b9c6081b39b6c64f023aa6a7778878"
+    },
+    {
+      "source": "resources/skills/fstar-debug/SKILL.md",
+      "destination": "resources/skills/fstar-debug/SKILL.md",
+      "kind": "resource",
+      "sha256": "72531e3035c089bdc384af97bbfc6024398f8ea80de3113e111d420e286948b0"
+    },
+    {
+      "source": "resources/skills/fstar-doc/SKILL.md",
+      "destination": "resources/skills/fstar-doc/SKILL.md",
+      "kind": "resource",
+      "sha256": "146512cea403afe1631316d082735c52c2691246b2f46a813376a3f409f3cbff"
+    },
+    {
+      "source": "resources/skills/fstar-execute/SKILL.md",
+      "destination": "resources/skills/fstar-execute/SKILL.md",
+      "kind": "resource",
+      "sha256": "9fa1e38b3ed17636028587b39e3832d5fb217c1726b6add41ee5137bd09fdaa6"
+    },
+    {
+      "source": "resources/skills/fstar-help/SKILL.md",
+      "destination": "resources/skills/fstar-help/SKILL.md",
+      "kind": "resource",
+      "sha256": "06e6444306e58fb6c2ef07a461c30bd23ae295ef1058fc67c2de18d0a67b1848"
+    },
+    {
+      "source": "resources/skills/fstar-init/SKILL.md",
+      "destination": "resources/skills/fstar-init/SKILL.md",
+      "kind": "resource",
+      "sha256": "766deef2520ccecf63237fdf2a3a8aab024cd105936bb84086caea6ada1262a0"
+    },
+    {
+      "source": "resources/skills/fstar-learn/SKILL.md",
+      "destination": "resources/skills/fstar-learn/SKILL.md",
+      "kind": "resource",
+      "sha256": "5a959df431ad4c7bffeb758ffb6612db563e636984cd3e91575e5657182ab1a1"
+    },
+    {
+      "source": "resources/skills/fstar-plan/SKILL.md",
+      "destination": "resources/skills/fstar-plan/SKILL.md",
+      "kind": "resource",
+      "sha256": "e68f01f7b242434cc38480ac3f944e7ae97181a1448f18d008fc5d8b6e425df5"
+    },
+    {
+      "source": "resources/skills/fstar-tools/SKILL.md",
+      "destination": "resources/skills/fstar-tools/SKILL.md",
+      "kind": "resource",
+      "sha256": "febefc9754dc64959a203811bd22979e2fc20f1eadbae73f2c9a2fa23b78db6c"
+    },
+    {
+      "source": "resources/agents/fstar-check.md",
+      "destination": "resources/agents/fstar-check.md",
+      "kind": "resource",
+      "sha256": "5f24bd2259ac94e63f4b008747f3e0474fae37fd3d7fa8cee0e0b95a9ec220e4"
+    },
+    {
+      "source": "resources/agents/fstar-editor.md",
+      "destination": "resources/agents/fstar-editor.md",
+      "kind": "resource",
+      "sha256": "d0c361f8a50172683f1533217912a24819911a8a9cd68f6c5437f53e60730ed3"
+    },
+    {
+      "source": "resources/agents/fstar-implement.md",
+      "destination": "resources/agents/fstar-implement.md",
+      "kind": "resource",
+      "sha256": "ac9aad02abea3f3952aed0b8ed5a5347372ea1b2d16c833e18a87c569e626b77"
+    },
+    {
+      "source": "resources/agents/fstar-research.md",
+      "destination": "resources/agents/fstar-research.md",
+      "kind": "resource",
+      "sha256": "40b3af8cca46d50579783f69d3d9fc4e7f4151270a73986f2040bf4ebe266f53"
+    },
+    {
+      "source": "resources/templates/doc/design.mapping.yaml",
+      "destination": "resources/templates/doc/design.mapping.yaml",
+      "kind": "resource",
+      "sha256": "dbcbe7f0fb806e72c47d770f92c362d8ff1ba5519e6cb477d22fc2c556427644"
+    },
+    {
+      "source": "resources/templates/doc/design.md",
+      "destination": "resources/templates/doc/design.md",
+      "kind": "resource",
+      "sha256": "de6baddb795f177d629b1fc30713332abe1124ba58cf8091cce56c66bb320c55"
+    },
+    {
+      "source": "resources/templates/doc/prd.mapping.yaml",
+      "destination": "resources/templates/doc/prd.mapping.yaml",
+      "kind": "resource",
+      "sha256": "9b4c67433f03b7aed2c017dd08ffc18cc2e88590ed9f756a745f3aff01f53048"
+    },
+    {
+      "source": "resources/templates/doc/prd.md",
+      "destination": "resources/templates/doc/prd.md",
+      "kind": "resource",
+      "sha256": "0e1877ca062eb95ed1aa50db0cf3c7341853e87adaa099ebdab99c90e9ba170d"
+    },
+    {
+      "source": "resources/templates/entry/project-index.md",
+      "destination": "resources/templates/entry/project-index.md",
+      "kind": "resource",
+      "sha256": "a00e11dafcb8d59d1f7b876828fe55bf1292ba5ab69b9ab3aa54f59760a01719"
+    },
+    {
+      "source": "resources/templates/entry/user-index.md",
+      "destination": "resources/templates/entry/user-index.md",
+      "kind": "resource",
+      "sha256": "48ee29656eb3c8af41ac7449e6d53880a540618c28c03b2c0861124c84639fd6"
+    },
+    {
+      "source": "resources/templates/knowledge/memory.md",
+      "destination": "resources/templates/knowledge/memory.md",
+      "kind": "resource",
+      "sha256": "e455e1072c61838f284d0348871c4202a5cc64e8ee4aa767b7d9e1ee6194bcb9"
+    },
+    {
+      "source": "resources/templates/knowledge/rule.md",
+      "destination": "resources/templates/knowledge/rule.md",
+      "kind": "resource",
+      "sha256": "558b635bbcbdb96f32ff81894f4ddf5b5285a1ad35e91242bf4ddd54f0923900"
+    },
+    {
+      "source": "resources/templates/knowledge/spec.md",
+      "destination": "resources/templates/knowledge/spec.md",
+      "kind": "resource",
+      "sha256": "e8a5e37354be46a69af7fbcc5224e6726e85e07cc6d8333ece4b4215536dc221"
+    },
+    {
+      "source": "resources/templates/task/check.md",
+      "destination": "resources/templates/task/check.md",
+      "kind": "resource",
+      "sha256": "aa3f32d092cb6aa6985ece0595b0cd35356f0df99afdd476fe5a3deb04d3ef32"
+    },
+    {
+      "source": "resources/templates/task/clarify.md",
+      "destination": "resources/templates/task/clarify.md",
+      "kind": "resource",
+      "sha256": "4ad62cb773e92d0831d61f90e93a1c55a81d5d0e81dd96a1b575b929ac6e887a"
+    },
+    {
+      "source": "resources/templates/task/plan.mapping.yaml",
+      "destination": "resources/templates/task/plan.mapping.yaml",
+      "kind": "resource",
+      "sha256": "1ce20103c0f6ae82047a15acb59cd4d093039356101ca7e2913158b580c4ffef"
+    },
+    {
+      "source": "resources/templates/task/plan.md",
+      "destination": "resources/templates/task/plan.md",
+      "kind": "resource",
+      "sha256": "738f6dfcab6ed7e2586f6645fd4c0f5a3e2dcdee794a0600a75c8bb64a7f469d"
+    },
+    {
+      "source": "resources/templates/task/research.md",
+      "destination": "resources/templates/task/research.md",
+      "kind": "resource",
+      "sha256": "5c489ced403a1681feb4e9ad8eb0c3d7b3aba78c25fb9bb2fa91f8ddc24ae35f"
+    },
+    {
+      "source": "resources/references/document-checklist.md",
+      "destination": "resources/references/document-checklist.md",
+      "kind": "resource",
+      "sha256": "955aa4e4592e421bb3e871677c0768e39f60ddfc5822b99c0b3fcc0f9f1b8fd0"
+    },
+    {
+      "source": "resources/references/knowledge-format.md",
+      "destination": "resources/references/knowledge-format.md",
+      "kind": "resource",
+      "sha256": "93ace2103128f6330edf9d4d65b7f83c8acbffb119ac5db5ae4ea23501440c9f"
+    },
+    {
+      "source": "resources/references/technical-design-profiles.md",
+      "destination": "resources/references/technical-design-profiles.md",
+      "kind": "resource",
+      "sha256": "d51219967f3bb9aabbee5f5a908763ff6806c84709474ec2c941850626f073d5"
+    },
+    {
+      "source": "resources/references/tool-bindings.md",
+      "destination": "resources/references/tool-bindings.md",
+      "kind": "resource",
+      "sha256": "ce7d9d23158fd3a507367eede300857588a6e2415b63f9d55d19a79369182266"
+    },
+    {
+      "source": "resources/capabilities/code-structure.md",
+      "destination": "resources/capabilities/code-structure.md",
+      "kind": "resource",
+      "sha256": "ed506644084fc53b85082284a7b6e8a2461b666808414567b20505d1102b7061"
+    },
+    {
+      "source": "resources/capabilities/data-access.md",
+      "destination": "resources/capabilities/data-access.md",
+      "kind": "resource",
+      "sha256": "a334ec4fac7561f45c06fff990d3b93b253886affa6e8ad2a3c2efd9ee755bd1"
+    },
+    {
+      "source": "resources/capabilities/knowledge-retrieval.md",
+      "destination": "resources/capabilities/knowledge-retrieval.md",
+      "kind": "resource",
+      "sha256": "5f591b8edb208ed1997df3da7ba348de68d7507c3c3181d426a8a61be4e44533"
+    },
+    {
+      "source": "resources/capabilities/test-execution.md",
+      "destination": "resources/capabilities/test-execution.md",
+      "kind": "resource",
+      "sha256": "6bf3cc80e0fa24dae285c7bbb06a458a722d7e24a24bc04c2264094f66cbae04"
+    },
+    {
+      "source": "resources/capabilities/web-research.md",
+      "destination": "resources/capabilities/web-research.md",
+      "kind": "resource",
+      "sha256": "3a41d84882b525ad6ece8f5b403c48290d8e619277e4d542b64cace7c1c6fea8"
+    },
+    {
+      "source": "resources/registry/codegraph.yaml",
+      "destination": "resources/registry/codegraph.yaml",
+      "kind": "resource",
+      "sha256": "f2bcc21aaa55593371fb4be7e03afa851d34782e519940d0f6dcc3c9cf205f0f"
+    },
+    {
+      "source": "resources/registry/gh.yaml",
+      "destination": "resources/registry/gh.yaml",
+      "kind": "resource",
+      "sha256": "a05d5a32dc6ca54a84b8b64ceb980013ba47e423eae08e42d7f2080fbf2b94ac"
+    },
+    {
+      "source": "resources/registry/psql.yaml",
+      "destination": "resources/registry/psql.yaml",
+      "kind": "resource",
+      "sha256": "968004476c9b33c70e61b4a332c0aa1a4038ea214b92714df5a4205eccc01f30"
+    },
+    {
+      "source": "resources/registry/pytest.yaml",
+      "destination": "resources/registry/pytest.yaml",
+      "kind": "resource",
+      "sha256": "929890a59eac6433123019f5bf5ec591e0e896d51404859781da8c2ddecb938a"
+    },
+    {
+      "source": "resources/registry/qmd.yaml",
+      "destination": "resources/registry/qmd.yaml",
+      "kind": "resource",
+      "sha256": "3b346aa2e58339d4e69da021d2fcda3bb3a2f26fa9d7aab3355a0b91c9cd4eda"
+    },
+    {
+      "source": "resources/registry/sqlite3.yaml",
+      "destination": "resources/registry/sqlite3.yaml",
+      "kind": "resource",
+      "sha256": "86901956f3aebe2359c8de9076e4cf293979b2875ca7648037fcf95bd3dffef5"
+    },
+    {
+      "source": "resources/schemas/tools.schema.json",
+      "destination": "resources/schemas/tools.schema.json",
+      "kind": "resource",
+      "sha256": "64ba9c62604e03c8a9ab3d9e702580a4a096327abc607e352797b409b4b9416a"
+    },
+    {
+      "source": "resources/runtime/routing.md",
+      "destination": "resources/runtime/routing.md",
+      "kind": "resource",
+      "sha256": "07b98389d517d15f16a314ca8e1b9cb88e92e9a181ad37b44498b2f3e7d38340"
+    }
+  ]
+}

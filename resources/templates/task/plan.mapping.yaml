@@ -1,0 +1,16 @@
+{
+  "schema": "fstar.template-map.v1",
+  "artifact_type": "plan",
+  "slots": {},
+  "items": {
+    "mode": "markers",
+    "start_template": "<!-- fstar:item:{id}:start -->",
+    "end_template": "<!-- fstar:item:{id}:end -->"
+  },
+  "references": {
+    "mode": "markers",
+    "prefix": "<!-- fstar:ref:",
+    "suffix": " -->",
+    "separator": "#"
+  }
+}

@@ -1,0 +1,22 @@
+# fstar routing
+
+This is the sole package routing source. It decides what to invoke before invocation; commands remain responsible for state validation.
+
+## Always-available minimal loop
+
+Clarify the goal in conversation, invoke `fstar-execute` through the host native implement role, invoke independent `fstar-check`, return every failed check to repair and recheck, then wait for explicit user confirmation. Session nodes are not persisted and no fstar metadata is created. This does not prohibit delivery files. Never fall back to main-Agent production editing. `fstar-debug` is core-automatic: route to it when a native dispatch fails twice (at most one automatic retry, with the prior reason) or a repair shows no progress.
+
+## Extension negotiation
+
+Package IDs are exactly `planning-review`, `persistent-task`, `multi-agent`, `project-governance`, and `tool-capability`. Grants are independent. Reuse an existing grant. Otherwise explain benefit and cost and recommend only one highest-value package. Default to full scope, allow explicit custom included/excluded capabilities, but never remove implement/check separation, repair after failure, or user-only completion. After refusal, continue the minimal loop and do not ask again unless new facts materially change value or cost. Planning authorization does not create task.json. Mid-work authorization imports valid work without redoing it.
+
+Before consuming a package member, check that member is in the current grant's `included` list; `excluded` and unlisted members are unavailable. Task recovery reads the task's `extensions` records; never substitute `capabilities`, which records tool facts. For session-only work, retain the authorization records returned by `extension enable` in the caller's session and pass them as the `extensions` array in hook and dispatch JSON payloads. On disable remove that record from subsequent payloads. Separate CLI invocations cannot remember these grants. These records guide cooperating callers and are not a same-permission security boundary.
+
+- Planning/review need: use `fstar-clarify` only with `clarify`, `fstar-doc` only for included `prd` or `design`, and `fstar-plan` only with `plan`. Use the editor and document check only when their respective members are included.
+- Persistence/recovery need: `fstar-continue` requires `recovery` (pass `--workflow`), `fstar-archive` requires `archive` (pass `--workflow`), and `fstar dispatch orphan <task> --workflow` requires `recovery`. These workflow consumption entries reread the stored grant at call time.
+- Safety machinery always on: the `task`, `evidence`, `lease`, and `events` members never gate task consistency or recoverability. Evidence staleness and invalidation, lease acquisition/renewal/expiry/takeover, whole-tree archive recovery, and append-only event integrity keep running for any persistent task regardless of how those members are trimmed; harvesting a worker result, invalidating evidence, or recovering an interrupted archive never checks an extension member. Custom trimming of `task`/`evidence`/`lease`/`events` only records the user's intent to skip optional persistent-lifecycle workflow consumption; it can never disable safety bookkeeping.
+- Enhanced collaboration: require `research`, `parallel-implement`, `version-injection`, or `change-propagation` for the respective enhancement; base implement/check remains available.
+- Governance: use specs, knowledge, rules, or memory only with the corresponding included member; route learning according to its actual destination. Project initialization precedes project governance and includes an initial proposal-only tool scan; binding requires user confirmation. The current CLI initializes the skeleton but does not yet run that scan or apply collected context; report those gaps.
+- Tool capabilities: use contracts, bindings, classification, validation, or fallback only with the corresponding included package member. These five members are distinct from the five tool capability contracts.
+
+A recall intent queries indexed knowledge and archived task listing with sources and applicability differences; it does not restore an archived task and has no recall skill. Continue resumes only the current task and never scans archive candidates. Only after a successful `fstar-archive` operation may routing show other long-unarchived candidates; reminders never auto-archive. `fstar-help` explains observed installed entries only.

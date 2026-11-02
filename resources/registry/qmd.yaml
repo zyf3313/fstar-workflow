@@ -1,0 +1,6 @@
+schema: "fstar.tool.registry.v1"
+tool: qmd
+kind: cli
+capabilities: [{"id": "knowledge-retrieval", "match": "strong", "basis": "collection retrieval with keyword and semantic routes over verifiable source paths"}]
+version_cmd: ["--version"]
+minimal_calls: {}

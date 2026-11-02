@@ -1,0 +1,6 @@
+schema: "fstar.tool.registry.v1"
+tool: psql
+kind: cli
+capabilities: [{"id": "data-access", "match": "strong", "basis": "read-only database schema and query access over an explicit connection"}]
+version_cmd: ["--version"]
+minimal_calls: {}

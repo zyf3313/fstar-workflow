@@ -1,0 +1,23 @@
+# Local conversation logs contain session metadata and machine-specific paths.
+/docs/conversation/
+
+# Tooling and local agent state — never shipped, never versioned.
+.codegraph/
+.claude/
+
+# Trellis task/workflow bookkeeping lives locally while the fstar workflow is
+# still being built. It will be replaced by .fstar/ (the product's own task
+# tree) and added to the repository at that point.
+.trellis/
+
+# Python bytecode and local caches.
+__pycache__/
+*.py[cod]
+
+# Node/npm local artifacts.
+node_modules/
+npm-debug.log*
+*.tgz
+
+# OS noise.
+.DS_Store

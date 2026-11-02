@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "fstar://schemas/tools.schema.json",
+  "title": "fstar tools.yaml v1",
+  "description": "Distribution contract for project/.fstar/tools.yaml and user/tools.yaml. The runtime validates this schema with explicit stdlib checks in fstar.tools (no third-party jsonschema dependency); this file is the published shape, not a runtime dependency. Bindings are configuration with user confirmations; availability facts are never stored here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "detected_at", "tools", "bindings", "history"],
+  "properties": {
+    "schema": {
+      "const": "fstar.tools.v1",
+      "description": "Document schema identifier. Missing or unknown values are errors, never silently defaulted."
+    },
+    "detected_at": {
+      "type": ["string", "null"],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$",
+      "description": "ISO-8601 UTC time of the saved discovery snapshot. Null when no snapshot has been saved. It never means currently available; availability is a runtime fact."
+    },
+    "tools": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/tool"},
+      "description": "Tool snapshots. Identifiers are unique inside the file."
+    },
+    "bindings": {
+      "type": "object",
+      "propertyNames": {
+        "enum": ["code-structure", "web-research", "knowledge-retrieval", "data-access", "test-execution"]
+      },
+      "additionalProperties": {"$ref": "#/definitions/binding"},
+      "description": "Capability selection. A missing key inherits from the next layer; an explicit null tool unbinds and stops fallback. Each binding references a tool in the same file."
+    },
+    "history": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/history"},
+      "description": "Committed binding changes only. Proposals and rejected changes are never recorded as authorization."
+    }
+  },
+  "definitions": {
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool", "kind", "version", "capabilities"],
+      "properties": {
+        "tool": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["cli", "mcp", "skill", "builtin"]},
+        "version": {"type": ["string", "null"], "description": "Null when the version is unknown; never invented."},
+        "capabilities": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/match"}
+        }
+      }
+    },
+    "match": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "match", "basis", "basis_source"],
+      "properties": {
+        "id": {
+          "enum": ["code-structure", "web-research", "knowledge-retrieval", "data-access", "test-execution"]
+        },
+        "match": {"enum": ["strong", "weak", "none"]},
+        "basis": {"type": "string", "minLength": 1},
+        "basis_source": {"$ref": "#/definitions/basis_source"}
+      },
+      "description": "Classification only. A strong match requires a registry basis or a confirmed user judgment; a probe can only produce weak; an unclassified tool is none."
+    },
+    "basis_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "reference"],
+      "properties": {
+        "kind": {"enum": ["registry", "probe", "user", "unclassified"]},
+        "reference": {"type": "string", "minLength": 1},
+        "confirmation": {"$ref": "#/definitions/confirmation"}
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool", "reason", "confirmation"],
+      "properties": {
+        "tool": {"type": ["string", "null"], "minLength": 1},
+        "reason": {"type": "string", "minLength": 1},
+        "confirmation": {"$ref": "#/definitions/confirmation"}
+      }
+    },
+    "confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "type", "at", "actor", "reference", "quote", "scope", "validates"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "type": {"enum": ["command", "conversation", "review"]},
+        "at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+        },
+        "actor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["role", "id"],
+          "properties": {
+            "role": {"const": "user"},
+            "id": {"type": "string", "minLength": 1}
+          }
+        },
+        "reference": {"type": "string", "minLength": 1},
+        "quote": {"type": "string"},
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target", "path", "changes"],
+          "properties": {
+            "target": {"enum": ["user", "project"]},
+            "path": {"type": "string", "minLength": 1},
+            "changes": {
+              "type": "object",
+              "propertyNames": {
+                "enum": ["code-structure", "web-research", "knowledge-retrieval", "data-access", "test-execution"]
+              },
+              "additionalProperties": {"type": ["string", "null"]}
+            },
+            "tools": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [{"$ref": "#/definitions/tool"}, {"type": "null"}]
+              },
+              "description": "Tool metadata/classification snapshots included in the confirmed diff."
+            }
+          }
+        },
+        "validates": {"type": "string", "minLength": 1}
+      }
+    },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "at", "kind", "changes", "source", "before_digest"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+        },
+        "kind": {"const": "binding_changed"},
+        "changes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bindings", "tools"],
+          "properties": {
+            "bindings": {
+              "type": "object",
+              "propertyNames": {
+                "enum": ["code-structure", "web-research", "knowledge-retrieval", "data-access", "test-execution"]
+              },
+              "additionalProperties": {"type": ["string", "null"]}
+            },
+            "tools": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [{"$ref": "#/definitions/tool"}, {"type": "null"}]
+              }
+            }
+          }
+        },
+        "source": {"$ref": "#/definitions/confirmation"},
+        "before_digest": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "fstar-workflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Node launcher + Python 3.9+ stdlib kernel for the fstar personal workflow system. npm package name availability has NOT been verified; this metadata is local-build only and does not claim publishability.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "fstar": "bin/fstar.cjs",
+    "fstar-hook": "bin/fstar-hook.cjs"
+  },
+  "files": [
+    "bin/fstar.cjs",
+    "bin/fstar-hook.cjs",
+    "bin/fstar-bootstrap.py",
+    "src/fstar/**/*.py",
+    "resources/**/*.md",
+    "resources/**/*.yaml",
+    "resources/**/*.json",
+    "scripts/build-package.cjs",
+    "resources/package-assets.json"
+  ],
+  "scripts": {
+    "build:package": "node scripts/build-package.cjs",
+    "test:package": "node --test tests/test_package.cjs"
+  },
+  "fstar": {
+    "cli_version": "0.1.0",
+    "resource_version": "1",
+    "supported_data_schemas": [1],
+    "source_ref": "zyf3313/fstar-trellis-ext@674bea37cf2f6f25cd20dab93e1a54ae1f13ce66 (verified reachable 2026-11-01; templates are structural adaptations with provenance notes, never verbatim copies)",
+    "license_status": "source-pending-adaptation-only"
+  }
+}

@@ -1,0 +1,6 @@
+schema: "fstar.tool.registry.v1"
+tool: gh
+kind: cli
+capabilities: [{"id": "web-research", "match": "strong", "basis": "upstream repository facts over the GitHub API with version and source references"}]
+version_cmd: ["--version"]
+minimal_calls: {}

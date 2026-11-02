@@ -1,0 +1,6 @@
+schema: "fstar.tool.registry.v1"
+tool: pytest
+kind: cli
+capabilities: [{"id": "test-execution", "match": "strong", "basis": "project test runner with reproducible command, exit code, and failure output; isolated fixtures only"}]
+version_cmd: ["--version"]
+minimal_calls: {}

@@ -1,0 +1,6 @@
+schema: "fstar.tool.registry.v1"
+tool: codegraph
+kind: cli
+capabilities: [{"id": "code-structure", "match": "strong", "basis": "symbol-level definition, reference, and impact queries with file:line results"}]
+version_cmd: ["--version"]
+minimal_calls: {}
