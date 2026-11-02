@@ -1,6 +1,9 @@
 # fstar-workflow
 
 Read `AGENTS.md` for this project's Trellis instructions.
-Before continuing requirements discussion or planning, read `docs/project-context.md`.
-It preserves the prior conversation's goals, decisions, proposals, and open questions.
-Load individual reference files only as needed; do not load full conversation snapshots by default.
+
+The authoritative project context lives in the archived task tree under
+`.trellis/tasks/archive/` and in `.trellis/workflow.md`. The previous
+`docs/project-context.md` snapshot was removed; its decisions are carried by
+the archived tasks (`10-25-fstar-workflow-design` and its children) and the
+code itself.

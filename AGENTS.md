@@ -22,8 +22,8 @@ Managed by Trellis. Edits outside this block are preserved; edits inside may be 
 
 ## Project context (user maintained)
 
-Before continuing product discussion or planning for fstar-workflow, read
-`docs/project-context.md`. It records the user's goals, prior decisions,
-unconfirmed proposals, and open questions migrated from the previous project.
+Start with `README.md` for what fstar-workflow is and how it is laid out.
+Authoritative product decisions live in the archived task tree under
+`.trellis/tasks/archive/` (the parent task `10-25-fstar-workflow-design` owns
+the requirement set; its children own the per-area decisions and evidence).
 Do not treat illustrative designs as approved implementation requirements.
-Read historical conversation snapshots only when a specific detail needs verification.
