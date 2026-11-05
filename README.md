@@ -39,11 +39,21 @@ npx --no-install fstar version
 ```bash
 fstar version                      # CLI, resource, and data schema versions
 fstar doctor                       # read-only install and host health report
-fstar install --host claude        # write resources and host hook entries
+fstar install --host claude        # in an fstar project: writes <project>/.claude
+fstar install --host claude --user-level   # explicitly writes ~/.claude
 fstar uninstall --host claude      # remove only what the installer owns
+fstar update                       # refresh an existing install's resources
 ```
 
-`install --dry-run` prints the full plan without writing anything.
+Host root priority: `--host-root claude=PATH` > `--user-level` (`~/.claude`) >
+the current fstar project's `.claude`. Outside a fstar project, a bare
+`fstar install` refuses to guess and points at `--user-level` or `fstar init`.
+`install --dry-run` prints the full plan without writing anything; an
+interactive TTY is asked to confirm the host roots before any write.
+`update`/`uninstall` resolve roots the same way and refuse with
+`uninstall_host_root_mismatch` when the recorded install targets other roots
+than the resolved ones (e.g. a user-level install seen from inside a project —
+pass `--user-level`).
 
 ## What it does
 

@@ -39,6 +39,7 @@ from .config import ConfigError, load_config
 from .content import ROLES, SKILLS, validate_resources
 from .models import DomainError
 from .runtime import registration
+from .store import find_project_root
 
 MANIFEST_SCHEMA = "fstar.install.v1"
 ENTRY_INDEX_SCHEMA = "fstar.entries.v1"
@@ -117,10 +118,16 @@ class ResourceSelection:
 def roots_from_args(args, *, bundle_root: Optional[Path] = None) -> Roots:
     """Build the roots for one CLI invocation.
 
-    Defaults are the product's real user-level locations (``~/.fstar`` and
-    ``~/.claude``); ``--user-data-root``/``--runtime-root``/``--host-root``
-    override them explicitly for fixtures and advanced targets. Every test
-    and every operation in this task passes explicit temporary roots.
+    ``--user-data-root``/``--runtime-root`` keep their user-level defaults
+    (``~/.fstar``). Host roots resolve in priority order for install and
+    uninstall: an explicit ``--host-root HOST=PATH`` wins, then
+    ``--user-level`` (``~/.claude``), then the current fstar project's
+    ``<project>/.claude``. Outside a project with neither flag the
+    resolution fails before any plan is built (zero writes) with guidance
+    to pass ``--user-level`` or run ``fstar init`` first. Commands that
+    never write host state fall back to the user-level root so their
+    reports stay readable; every test and every operation in this task
+    passes explicit temporary roots.
     """
     user = getattr(args, "user_data_root", None)
     runtime = getattr(args, "runtime_root", None)
@@ -135,12 +142,31 @@ def roots_from_args(args, *, bundle_root: Optional[Path] = None) -> Roots:
         if name not in SUPPORTED_HOSTS:
             raise DomainError("unknown_host", "Unknown host", {"host": name, "hosts": list(SUPPORTED_HOSTS)})
         host_roots[name] = Path(value)
+    # Same marker the runtime hooks use: a project is where
+    # .fstar/.schema-version lives, not the --project override alone.
+    project_root = Path(project).expanduser() if project else find_project_root(Path.cwd())
     if "claude" not in host_roots:
-        host_roots["claude"] = Path.home() / ".claude"
+        user_level = bool(getattr(args, "user_level", False))
+        # Read-only commands (doctor/version/...) must resolve without
+        # failing outside a project; they never act on the host root.
+        writes_host = getattr(args, "command", None) in ("install", "update", "uninstall")
+        if not user_level and project_root is not None:
+            host_roots["claude"] = project_root / ".claude"
+        elif user_level or not writes_host:
+            host_roots["claude"] = Path.home() / ".claude"
+        else:
+            raise DomainError(
+                "host_root_required",
+                "No fstar project in the current directory and no host root was given; "
+                "run inside an fstar project, pass --user-level to install to ~/.claude, "
+                "or run fstar init first",
+                {"hint_user_level": "--user-level", "hint_init": "fstar init",
+                 "searched_from": str(Path.cwd())},
+            )
     return Roots(
         user_root=user_root,
         runtime_root=runtime_root,
-        project_root=Path(project) if project else None,
+        project_root=project_root,
         host_roots=host_roots,
         bundle_root=bundle_root,
     )
@@ -539,11 +565,34 @@ def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = 
     target_hosts = list(hosts)
     if operation in ("update", "uninstall") and not target_hosts and manifest:
         # Update re-verifies and uninstall removes the host entries this
-        # installation itself owns, but only where an explicit host root is
-        # known. Without one, nothing is guessed.
-        owned_hosts = sorted({record.get("host") for record in manifest.get("settings_entries", [])
-                              if record.get("ownership") == "owned" and record.get("host")})
-        target_hosts = [host for host in owned_hosts if host in resolved.host_roots]
+        # installation itself owns, but only where the resolved host root
+        # actually matches the recorded one. Without an exact path match
+        # (e.g. a user-level install seen from inside a project), nothing
+        # is guessed — the user passes --user-level to select it.
+        owned_roots = {record["host"]: Path(record["settings_path"]).parent
+                       for record in manifest.get("settings_entries", [])
+                       if record.get("ownership") == "owned" and record.get("host")}
+        target_hosts = [host for host, root in sorted(owned_roots.items())
+                        if host in resolved.host_roots and root == resolved.host_roots[host]]
+    if operation in ("update", "uninstall") and manifest:
+        # The same refusal applies when the user names hosts with --host but
+        # no host root was actually selected: --host picks which hosts to
+        # touch, not where they live. Update would otherwise refresh only
+        # the cache while the live host entries stay pinned to the recorded
+        # root — the same half-operated state as a half-uninstall.
+        owned_roots = {record["host"]: Path(record["settings_path"]).parent
+                       for record in manifest.get("settings_entries", [])
+                       if record.get("ownership") == "owned" and record.get("host")}
+        matching = {host for host, root in owned_roots.items()
+                    if host in resolved.host_roots and root == resolved.host_roots[host]}
+        if owned_roots and not matching:
+            recorded = {str(root) for root in owned_roots.values()}
+            raise DomainError(
+                "uninstall_host_root_mismatch",
+                "The recorded install targets other host roots than the ones "
+                "currently resolved; pass --user-level or --host-root to select it",
+                {"recorded": sorted(recorded),
+                 "resolved": {name: str(path) for name, path in resolved.host_roots.items()}})
     for host in target_hosts:
         if host not in SUPPORTED_HOSTS:
             raise DomainError("unknown_host", "Unknown host", {"host": host, "hosts": list(SUPPORTED_HOSTS)})
@@ -991,7 +1040,16 @@ def _matches_written_state(current: Optional[bytes], item: Mapping) -> bool:
 
 
 def _recover_abandoned_transactions(roots: Roots) -> None:
-    """Replay journals left by a crashed install/update/uninstall."""
+    """Replay journals left by a crashed install/update/uninstall.
+
+    Entries are only restored when they live under a root this invocation
+    actually resolved (the user root or one of the current host roots).
+    A journal holding entries outside those roots is kept pending instead
+    of being deleted: the host root now depends on where the command runs
+    (project-level vs ``--user-level``), so a crash journal recorded
+    against another host root must stay replayable until an invocation
+    resolves it — deleting it would abandon the half-written state.
+    """
     backups = roots.user_root / "install-backups"
     if not backups.is_dir():
         return
@@ -999,6 +1057,7 @@ def _recover_abandoned_transactions(roots: Roots) -> None:
         if not re.fullmatch(r"op-[0-9a-f]{12}", journal.parent.name):
             continue
         entries = []
+        skipped = False
         try:
             lines = journal.read_text(encoding="utf-8").splitlines()
         except OSError:
@@ -1010,11 +1069,14 @@ def _recover_abandoned_transactions(roots: Roots) -> None:
                     directory = Path(record["mkdir"])
                     if any(_within(directory.resolve(), root) for root in roots.host_roots.values()):
                         entries.append({"mkdir": str(directory), "existed": False})
+                    else:
+                        skipped = True
                     continue
                 path = Path(record["path"])
                 resolved_path = path.resolve()
                 if not (_within(resolved_path, roots.user_root)
                         or any(_within(resolved_path, root) for root in roots.host_roots.values())):
+                    skipped = True
                     continue
                 before = (base64.b64decode(record["before"])
                           if record.get("before") is not None else None)
@@ -1023,7 +1085,8 @@ def _recover_abandoned_transactions(roots: Roots) -> None:
             except (ValueError, KeyError, TypeError):
                 continue  # torn tail line from the crash
         _restore_entries(entries)
-        journal.unlink(missing_ok=True)
+        if not skipped:
+            journal.unlink(missing_ok=True)
 
 
 def pending_transactions(user_root: Path) -> List[str]:
@@ -2081,6 +2144,8 @@ def register_commands(subparsers) -> None:
     install.add_argument("--dry-run", action="store_true", help="print the plan without writing")
     install.add_argument("--conflict", choices=list(CONFLICT_POLICIES), default="keep",
                          help="treatment for installer-owned files modified by the user")
+    install.add_argument("--user-level", action="store_true",
+                         help="target ~/.claude instead of the current fstar project's .claude")
     install.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_install})
 
     update = subparsers.add_parser(
@@ -2088,6 +2153,8 @@ def register_commands(subparsers) -> None:
     update.add_argument("--dry-run", action="store_true", help="print the plan without writing")
     update.add_argument("--modified", choices=list(CONFLICT_POLICIES), default="keep",
                         help="treatment for installer-owned files modified by the user")
+    update.add_argument("--user-level", action="store_true",
+                        help="target ~/.claude instead of the current fstar project's .claude")
     update.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_update})
 
     uninstall = subparsers.add_parser(
@@ -2095,6 +2162,8 @@ def register_commands(subparsers) -> None:
     uninstall.add_argument("--host", action="append", choices=list(SUPPORTED_HOSTS), default=[],
                            help="restrict removal to these hosts; repeatable")
     uninstall.add_argument("--dry-run", action="store_true", help="print the plan without writing")
+    uninstall.add_argument("--user-level", action="store_true",
+                           help="target ~/.claude instead of the current fstar project's .claude")
     uninstall.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_uninstall})
 
     doctor_parser = subparsers.add_parser(
@@ -2117,7 +2186,8 @@ def register_commands(subparsers) -> None:
 
     for parser in (install, update, uninstall, doctor_parser, migrate_parser, version_parser):
         parser.add_argument("--host-root", action="append", default=[], metavar="HOST=PATH",
-                            help="override a host root for fixtures/advanced targets; repeatable")
+                            help="explicit host root override; default is the current fstar "
+                                 "project's .claude, or ~/.claude with --user-level; repeatable")
 
 
 def _roots(args):
@@ -2133,7 +2203,33 @@ def _handle_install(args):
     plan = plan_install(operation="install", roots=roots, hosts=args.host, conflict_policy=args.conflict)
     if args.dry_run:
         return {"dry_run": True, **plan}
+    if _declines_confirmation(args, plan):
+        return {"dry_run": False, "aborted": True, "reason": "user_declined",
+                "host_roots": plan["roots"]["host_roots"], "warnings": plan["warnings"]}
     return {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
+
+
+def _declines_confirmation(args, plan: dict) -> bool:
+    """Interactive install confirmation; only a real TTY is asked.
+
+    Non-interactive runs (scripts, pipes, --json) must never block: they
+    proceed without a prompt, and --dry-run is checked before this runs.
+    """
+    import sys
+
+    if getattr(args, "json", False) or not sys.stdin.isatty():
+        return False
+    writes_host = bool(plan.get("settings_entries") or plan.get("host_files"))
+    if not writes_host:
+        return False
+    roots_display = "\n".join("  %s: %s" % (name, path)
+                              for name, path in sorted(plan["roots"]["host_roots"].items()))
+    print("fstar install will write to the following host roots:\n%s" % roots_display)
+    try:
+        answer = input("Proceed? [Y/n] ")
+    except EOFError:
+        return False
+    return answer.strip().lower() in ("n", "no")
 
 
 def _handle_update(args):
