@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Node launcher + Python 3.9+ stdlib kernel for the fstar personal workflow system. Package name fstar-workflow verified unregistered (2026-11-01); release readiness is decided by the owner, not by this metadata.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=18"
   },
@@ -29,7 +29,9 @@
   "fstar": {
     "cli_version": "0.1.0",
     "resource_version": "1",
-    "supported_data_schemas": [1],
+    "supported_data_schemas": [
+      1
+    ],
     "source_ref": "zyf3313/fstar-trellis-ext@674bea37cf2f6f25cd20dab93e1a54ae1f13ce66 (verified reachable 2026-11-01; templates are structural adaptations with provenance notes, never verbatim copies)",
     "license_status": "source-pending-adaptation-only"
   }
