@@ -1,0 +1,2 @@
+{"file": ".trellis/tasks/11-04-project-default-host/prd.md", "reason": "需求与 AC：项目级默认/用户级显式/TTY 确认/manifest 归属"}
+{"file": ".trellis/tasks/11-04-project-default-host/design.md", "reason": "解析顺序、uninstall 收紧、doctor 不改的决定"}

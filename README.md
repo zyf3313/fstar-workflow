@@ -164,6 +164,19 @@ touched are never removed.
 
 Codex trust is a deliberate gap, not a bug: the host requires a human to
 approve each hook the first time, and no installer can consent on your behalf.
+To collect live evidence without changing your real configuration, run the
+read-only adapter plan and copy the four commands into a disposable project
+hook configuration, then approve the trust prompt in the Codex TUI:
+
+```bash
+fstar --json hook plan --host codex
+```
+
+If any event does not fire, keep the event payload and exit status as evidence
+and file it against the `to_verify` item in the plan. Do not commit the
+project hook file. `fstar install --host codex` remains read-only by design,
+while `--host claude` continues to use its independently verified `.claude`
+adapter; the two host roots never share configuration.
 
 ## Command reference
 

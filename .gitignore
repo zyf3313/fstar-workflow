@@ -5,10 +5,12 @@
 .codegraph/
 .claude/
 
-# Trellis task/workflow bookkeeping lives locally while the fstar workflow is
-# still being built. It will be replaced by .fstar/ (the product's own task
-# tree) and added to the repository at that point.
-.trellis/
+# fstar workflow data: tasks/specs/archive ARE tracked; only runtime state,
+# local overrides, and identity stay local.
+.fstar/runtime/
+.fstar/*.local.yaml
+.fstar/.identity
+
 
 # Python bytecode and local caches.
 __pycache__/

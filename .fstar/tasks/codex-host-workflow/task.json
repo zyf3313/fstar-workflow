@@ -1,0 +1,56 @@
+{
+  "acceptance": null,
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": null,
+  "createdAt": "2026-11-05T10:04:27.051939Z",
+  "creator": "agent",
+  "description": "",
+  "events": [
+    {
+      "at": "2026-11-05T10:04:27.052513Z",
+      "data": {
+        "parent": null
+      },
+      "id": "f447908a-5e4b-475e-bb99-f5511ce91faa",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-05T10:04:27.052509Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "fa819732-51a1-4cfd-8546-8030ce9f3d31",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    }
+  ],
+  "evidence": [],
+  "extensions": [],
+  "id": "06c4e9e8-b9f0-46d8-b400-5817d4e5a258",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {}
+  },
+  "name": "codex-host-workflow",
+  "notes": "",
+  "phase": "planning",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "Verify and repair Codex host workflow",
+  "worktree_path": ""
+}

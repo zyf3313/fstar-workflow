@@ -1,9 +1,10 @@
 # fstar-workflow
 
-Read `AGENTS.md` for this project's Trellis instructions.
+Read `AGENTS.md` for this project's instructions.
 
-The authoritative project context lives in the archived task tree under
-`.trellis/tasks/archive/` and in `.trellis/workflow.md`. The previous
-`docs/project-context.md` snapshot was removed; its decisions are carried by
-the archived tasks (`10-25-fstar-workflow-design` and its children) and the
-code itself.
+This project runs on the fstar workflow itself (self-hosted since 2026-11-05):
+project data root is `.fstar/`, the CLI is the globally installed
+`fstar-workflow` npm package, and branch/version/publish rules live in
+`CONTRIBUTING.md`. Authoritative design decisions are carried by the archived
+task tree under `.fstar/archive/` (parent task `10-25-fstar-workflow-design`)
+and by the code itself.

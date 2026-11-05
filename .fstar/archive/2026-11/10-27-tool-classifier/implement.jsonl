@@ -1,0 +1,5 @@
+{"file": ".trellis/tasks/10-25-fstar-workflow-design/prd.md", "reason": "当前已批准范围：五能力、绑定与分类边界、包授权分离；不重开旧审批"}
+{"file": ".trellis/tasks/10-25-fstar-workflow-design/design.md", "reason": "当前跨任务契约 §3.5–§3.6/§4；自动注入可能截断，实施前必须 Read 补齐全文"}
+{"file": ".trellis/tasks/10-25-fstar-workflow-design/implement.md", "reason": "完整读取父计划；核对 #7 依赖与集成 #25/#26 验收口径"}
+{"file": ".trellis/tasks/10-25-fstar-workflow-design/research/tools-capabilities.md", "reason": "分类器三层结构、L2 三档、三层验证脚本化与性能边界依据；旧 code-text/turn-context/AI 例外以当前父文档为准"}
+{"file": ".trellis/tasks/10-27-tool-binding/prd.md", "reason": "前置 tool-binding 交付边界：TB-03 match/basis_source 约束、TB-07 唯一命令与 scan 协议"}

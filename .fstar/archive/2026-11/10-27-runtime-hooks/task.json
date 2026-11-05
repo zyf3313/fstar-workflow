@@ -1,0 +1,57 @@
+{
+  "id": "6ed6f156-5e98-5925-ab0d-e3288408c081",
+  "name": "runtime-hooks",
+  "title": "Hooks 与宿主适配",
+  "description": "实现 5 个 hook（session-context/turn-context/worker-context/worker-result/doc-change）与双宿主适配；check 注入已批准用例，文档变更使对应 review/check evidence stale，回收重核指纹。",
+  "phase": "completed",
+  "blocked": null,
+  "evidence": [],
+  "lease": null,
+  "acceptance": null,
+  "completedAt": "2026-11-02",
+  "archivedAt": "2026-11-05",
+  "children": [],
+  "priority": "P0",
+  "creator": "FrancisZhang",
+  "assignee": "FrancisZhang",
+  "createdAt": "2026-10-27",
+  "branch": "",
+  "base_branch": "main",
+  "worktree_path": "",
+  "commit": "",
+  "pr_url": "",
+  "notes": "",
+  "meta": {
+    "trellis_migration": {
+      "migrated_at": "2026-11-05",
+      "source": ".trellis",
+      "original_status": "completed",
+      "dev_type": null,
+      "scope": "fstar v1 runtime-hooks: four semantic hooks (session-context/worker-context/worker-result/doc-change) with verified host event mapping; single harvest path delegated to dispatch; passive skip vs explicit errors; injection budgets/fingerprints; core-API-only writes",
+      "package": null,
+      "subtasks": [],
+      "relatedFiles": []
+    }
+  },
+  "capabilities": [],
+  "extensions": [],
+  "events": [
+    {
+      "id": "evt-7220184e392b",
+      "at": "2026-11-05T00:00:00Z",
+      "source": {
+        "type": "command",
+        "actor": "FrancisZhang",
+        "reference": "migration"
+      },
+      "type": "migrated",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/archive/2026-11/10-27-runtime-hooks"
+        },
+        "from": "trellis"
+      }
+    }
+  ]
+}

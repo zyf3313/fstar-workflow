@@ -1,0 +1,6 @@
+{"file":".trellis/tasks/10-25-fstar-workflow-design/prd.md","reason":"验收依据：用户级资源、项目只数据、真实阻塞不得静默豁免"}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/design.md","reason":"完整读取；§4.4/6/8、doctor/回滚/兼容与迁移契约"}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/implement.md","reason":"第9项验证与集成27–32对照；五态结果与真实命令证据"}
+{"file":".trellis/tasks/10-27-runtime-dispatch/research/dispatch-host-capabilities.md","reason":"验证证据等级与live-delivery=0现状，检查不得宣称宿主验收"}
+{"file":"resources/references/knowledge-format.md","reason":"doctor对知识schema检查的公开格式来源，knowledge未交付须pending"}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"检查隔离fixture、pack smoke与证据记录标准"}

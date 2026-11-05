@@ -1,0 +1,69 @@
+{
+  "id": "423ff750-8769-5d2d-9f58-d075d57c81ec",
+  "name": "fstar-workflow-design",
+  "title": "设计并实现个人工作流系统 fstar-workflow",
+  "description": "参考 Trellis 完整闭环体验，独立设计并实现个人跨项目工作流；父任务负责需求总集、10 个子任务契约与集成验收。当前处于规划：doc 四件套恢复 design.md，用例经用户批准且指纹新鲜后驱动 check 编写测试与运行证据，生产缺陷交 fixing/implement。",
+  "phase": "completed",
+  "blocked": null,
+  "evidence": [],
+  "lease": null,
+  "acceptance": null,
+  "completedAt": "2026-11-02",
+  "archivedAt": "2026-11-05",
+  "children": [
+    "10-27-core-commands",
+    "10-27-project-layout",
+    "10-27-workflow-content",
+    "10-27-runtime-hooks",
+    "10-27-runtime-dispatch",
+    "10-27-package-install",
+    "10-27-e2e-verify",
+    "10-27-tool-binding",
+    "10-27-tool-classifier",
+    "10-27-knowledge-base",
+    "11-01-host-skill-adaptation"
+  ],
+  "priority": "P0",
+  "creator": "FrancisZhang",
+  "assignee": "FrancisZhang",
+  "createdAt": "2026-10-25",
+  "branch": "",
+  "base_branch": "main",
+  "worktree_path": "",
+  "commit": "",
+  "pr_url": "",
+  "notes": "",
+  "meta": {
+    "trellis_migration": {
+      "migrated_at": "2026-11-05",
+      "source": ".trellis",
+      "original_status": "completed",
+      "dev_type": null,
+      "scope": null,
+      "package": null,
+      "subtasks": [],
+      "relatedFiles": []
+    }
+  },
+  "capabilities": [],
+  "extensions": [],
+  "events": [
+    {
+      "id": "evt-73936f036346",
+      "at": "2026-11-05T00:00:00Z",
+      "source": {
+        "type": "command",
+        "actor": "FrancisZhang",
+        "reference": "migration"
+      },
+      "type": "migrated",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/archive/2026-11/10-25-fstar-workflow-design"
+        },
+        "from": "trellis"
+      }
+    }
+  ]
+}

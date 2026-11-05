@@ -1,0 +1,57 @@
+{
+  "id": "34505ab1-8796-511d-bbc0-467b74dbb775",
+  "name": "project-default-host",
+  "title": "install 默认项目级宿主根",
+  "description": "fstar install 默认写入当前项目的 .claude/ 而非用户级 ~/.claude/，含交互确认与向后兼容",
+  "phase": "completed",
+  "blocked": null,
+  "evidence": [],
+  "lease": null,
+  "acceptance": null,
+  "completedAt": "2026-11-05",
+  "archivedAt": "2026-11-05",
+  "children": [],
+  "priority": "P2",
+  "creator": "FrancisZhang",
+  "assignee": "FrancisZhang",
+  "createdAt": "2026-11-04",
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": "",
+  "commit": "",
+  "pr_url": "",
+  "notes": "",
+  "meta": {
+    "trellis_migration": {
+      "migrated_at": "2026-11-05",
+      "source": ".trellis",
+      "original_status": "completed",
+      "dev_type": null,
+      "scope": null,
+      "package": null,
+      "subtasks": [],
+      "relatedFiles": []
+    }
+  },
+  "capabilities": [],
+  "extensions": [],
+  "events": [
+    {
+      "id": "evt-dc75f661c44d",
+      "at": "2026-11-05T00:00:00Z",
+      "source": {
+        "type": "command",
+        "actor": "FrancisZhang",
+        "reference": "migration"
+      },
+      "type": "migrated",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/archive/2026-11/11-04-project-default-host"
+        },
+        "from": "trellis"
+      }
+    }
+  ]
+}

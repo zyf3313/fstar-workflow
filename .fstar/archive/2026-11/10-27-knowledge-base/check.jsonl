@@ -1,0 +1,17 @@
+{"file":".trellis/tasks/10-25-fstar-workflow-design/prd.md","reason":"Verify current approved scope, exact authorization, two knowledge categories and absence of obsolete history/decisions behavior."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/design.md","reason":"Read full parent design if truncated; check precedence, format, API ownership and recoverable group updates against current contracts."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/implement.md","reason":"Parent knowledge validation and integration criteria; current delivered baseline is 323 tests with classifier complete."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend quality navigation; load applicable bodies instead of relying on index summaries."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Review explicit errors and partial failure reporting without inventing conventions from placeholders."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Review observable acceptance coverage and actual verification evidence."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Review shared parser/storage reuse and public API boundaries."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Review transaction stages, reader visibility, recovery, caller contracts and honest integration limits."}
+{"file":"resources/references/knowledge-format.md","reason":"Single schema authority; validate all fields before active/confirmed filtering and preserve language/precedence policy."}
+{"file":"resources/templates/knowledge/rule.md","reason":"Rule template compatibility and strength semantics."}
+{"file":"resources/templates/knowledge/memory.md","reason":"Memory template compatibility, trust filtering and no automatic promotion."}
+{"file":"resources/templates/knowledge/spec.md","reason":"Spec template compatibility and project language override."}
+{"file":"resources/templates/entry/user-index.md","reason":"Check topic/strength/kind navigation, real links and preservation of unrelated user prose."}
+{"file":"resources/templates/entry/project-index.md","reason":"Check authority priority, complete topic/read navigation and context/reference links."}
+{"file":"resources/skills/fstar-learn/SKILL.md","reason":"Check exact existing authorization, no repeated confirmation, topic-first changes and group recovery semantics."}
+{"file":"resources/skills/fstar-init/SKILL.md","reason":"Check init taxonomy ownership and existing-index preservation; no false integration claims."}
+{"file":"resources/capabilities/knowledge-retrieval.md","reason":"Check source/freshness reporting and tools read-only boundary, without claiming regex provides semantic consistency."}

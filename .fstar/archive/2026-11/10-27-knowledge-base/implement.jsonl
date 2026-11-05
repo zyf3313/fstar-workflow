@@ -1,0 +1,18 @@
+{"file":".trellis/tasks/10-25-fstar-workflow-design/prd.md","reason":"Current approved knowledge, ownership, language and authorization requirements; overrides historical proposals."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/design.md","reason":"Current cross-child contracts; read the full file if injection truncates it, especially 3.9, 3.11 and 4.1–4.5."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/implement.md","reason":"Delivered 323-test/classifier baseline, child ownership and parent integration acceptance; not a pending classifier blocker."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend guideline navigation; read applicable bodies and recognize current placeholders."}
+{"file":".trellis/spec/backend/directory-structure.md","reason":"Applicable module organization guidance; current body is a scaffold, not additional policy."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Applicable error-handling guidance; align concrete errors with current public DomainError contract."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Applicable backend quality guidance alongside this child's observable acceptance criteria."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Reuse public config/storage helpers; avoid private parser/helper coupling and duplicate schema owners."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Explicit init/learn/runtime/tools/installer interfaces and transaction failure boundaries."}
+{"file":"resources/references/knowledge-format.md","reason":"Sole current rule/memory/spec format authority, filtering, language and precedence."}
+{"file":"resources/templates/knowledge/rule.md","reason":"Existing rule frontmatter and concise body contract."}
+{"file":"resources/templates/knowledge/memory.md","reason":"Existing memory kind/trust schema and source/scope body contract."}
+{"file":"resources/templates/knowledge/spec.md","reason":"Existing spec schema and configurable English-default policy."}
+{"file":"resources/templates/entry/user-index.md","reason":"User rules/memory strength/kind navigation and preserved local customization."}
+{"file":"resources/templates/entry/project-index.md","reason":"Project overview/topic/read-condition/authority navigation and existing-document priority."}
+{"file":"resources/skills/fstar-learn/SKILL.md","reason":"Approved candidate, exact authorization, topic and transaction behavior; caller wiring remains separate."}
+{"file":"resources/skills/fstar-init/SKILL.md","reason":"Init owns whole-project discovery and taxonomy through ProjectContext; preserve existing indexes."}
+{"file":"resources/capabilities/knowledge-retrieval.md","reason":"Read-only retrieval/provenance/freshness boundary; no search engine or tool binding writes here."}
