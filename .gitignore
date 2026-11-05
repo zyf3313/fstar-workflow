@@ -21,3 +21,7 @@ npm-debug.log*
 
 # OS noise.
 .DS_Store
+
+# Host-generated local directories (agent workspaces).
+.agents/
+.codex/

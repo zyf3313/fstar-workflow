@@ -1,7 +1,6 @@
 {
   "name": "fstar-workflow",
   "version": "0.1.0",
-  "private": true,
   "description": "Node launcher + Python 3.9+ stdlib kernel for the fstar personal workflow system. Package name fstar-workflow verified unregistered (2026-11-01); release readiness is decided by the owner, not by this metadata.",
   "license": "MIT",
   "engines": {
