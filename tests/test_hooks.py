@@ -839,12 +839,15 @@ class RegistrationPlanTests(HookCase):
         # Uninstall guidance must not be a command-substring heuristic.
         self.assertNotIn("contains", result["uninstall"])
 
-    def test_codex_plan_shape_with_to_verify(self):
+    def test_codex_plan_shape_verified_live_2026_11_05(self):
         result = registration.plan("codex")
         self.assertEqual(len(result["entries"]), 4)
-        unverified = [entry for entry in result["entries"] if not entry["verified"]]
-        self.assertTrue(unverified)
-        self.assertTrue(all(entry.get("to_verify") or entry.get("fallback") for entry in result["entries"]))
+        # All four codex hook events fired live with exit code 0 on 2026-11-05
+        # (SessionStart / SubagentStart / SubagentStop / PostToolUse); evidence
+        # is observed-schema, no residual to_verify gaps remain.
+        self.assertTrue(all(entry["verified"] for entry in result["entries"]))
+        self.assertTrue(all(not entry["to_verify"] for entry in result["entries"]))
+        self.assertTrue(all(entry["hooks"][0]["evidence"] == "observed-schema" for entry in result["entries"]))
 
     def test_unknown_host_rejected(self):
         with self.assertRaises(DomainError):

@@ -160,7 +160,7 @@ touched are never removed.
 | Host | Hooks | Skills | Agents |
 |---|---|---|---|
 | Claude Code | verified live | verified live | verified live |
-| Codex CLI | user-level hooks require an interactive trust review, so unattended install reports `unsupported-for-unattended` and writes nothing | not adapted | not adapted |
+| Codex CLI | four hook events verified live (SessionStart / SubagentStart / SubagentStop / PostToolUse fired with exit code 0 on 2026-11-05); installer still requires manual trust approval in the TUI before any `.codex/hooks.json` is written, and remains read-only when run headless | not adapted | not adapted |
 
 Codex trust is a deliberate gap, not a bug: the host requires a human to
 approve each hook the first time, and no installer can consent on your behalf.

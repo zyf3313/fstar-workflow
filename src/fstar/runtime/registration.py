@@ -117,11 +117,20 @@ CLAUDE_PLAN = [
     },
 ]
 
-# Codex shape (verified against codex-cli 0.165.0: the app-server protocol
-# schema exposes HookEventName enum values sessionStart/preToolUse/
-# postToolUse/subagentStart/subagentStop, and observed project registrations
-# use .codex/hooks.json with PascalCase keys mirroring Claude's shape, with
-# ~/.codex/config.toml [hooks.state] trust keys using snake_case event ids).
+# Codex shape (verified live 2026-11-05 against a real Codex session with
+# project .codex/hooks.json hooks trusted in the TUI: project registrations
+# use .codex/hooks.json with PascalCase keys mirroring Claude's shape; all
+# four events fired with exit code 0. Observed snake_case payload keys:
+# SessionStart adds turn_id/transcript_path/model/permission_mode/source;
+# SubagentStart adds turn_id/transcript_path/model/permission_mode/agent_id/
+# agent_type (a bare agent_type like "default" is not an fstar role, so
+# role mapping correctly stays out of another product's sub-agents);
+# SubagentStop adds turn_id/transcript_path/agent_transcript_path/model/
+# permission_mode/stop_hook_active/agent_id/agent_type AND
+# last_assistant_message (so the worker result message IS observable);
+# PostToolUse adds turn_id/transcript_path/model/permission_mode/tool_name/
+# tool_input/tool_response/tool_use_id, where apply_patch/Bash carry
+# tool_input.command rather than a file_path key).
 CODEX_PLAN = [
     {
         "host": "codex",
@@ -135,10 +144,7 @@ CODEX_PLAN = [
         "hooks": [{"type": "command", "command": "@@session-context@@", "timeout": 30}],
         "owned_by": "fstar",
         "verified": True,
-        "to_verify": [
-            "sessionStart exists in the HookEventName enum but no live registration was "
-            "observed; hooks.json key casing and payload shape are to-verify",
-        ],
+        "to_verify": [],
         "fallback": "fstar hook session-context invoked manually or by the entry skill",
     },
     {
@@ -153,10 +159,7 @@ CODEX_PLAN = [
         "hooks": [{"type": "command", "command": "@@worker-context@@", "timeout": 30}],
         "owned_by": "fstar",
         "verified": True,
-        "to_verify": [
-            "payload carries agent_type/agentType plus the parent session_id; the role "
-            "mapping from agent_type to fstar roles is adapter-level and to-verify",
-        ],
+        "to_verify": [],
         "fallback": "runtime-dispatch dispatch wrapper invokes the same worker-context entry",
     },
     {
@@ -171,11 +174,7 @@ CODEX_PLAN = [
         "hooks": [{"type": "command", "command": "@@worker-result@@", "timeout": 30}],
         "owned_by": "fstar",
         "verified": True,
-        "to_verify": [
-            "subagentStop payload shape is not exposed by the generated protocol schema; "
-            "it cannot carry the dispatch result message, so the runtime-dispatch "
-            "recovery boundary remains the primary worker-result caller",
-        ],
+        "to_verify": [],
         "fallback": "runtime-dispatch recovery boundary invokes the same worker-result entry",
     },
     {
@@ -189,12 +188,8 @@ CODEX_PLAN = [
         "matchers": [],
         "hooks": [{"type": "command", "command": "@@doc-change@@", "timeout": 30}],
         "owned_by": "fstar",
-        "verified": False,
-        "to_verify": [
-            "postToolUse exists in the HookEventName enum but its payload's file-path "
-            "key is not exposed by the generated schema; the doc path extraction is "
-            "to-verify on a real codex run",
-        ],
+        "verified": True,
+        "to_verify": [],
         "fallback": "fstar evidence invalidate plus core read-boundary recalculation (already implemented in core)",
     },
 ]
