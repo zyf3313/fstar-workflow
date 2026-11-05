@@ -1,0 +1,57 @@
+{
+  "id": "3d185e1c-a4cd-52ec-b953-572165d5cfcd",
+  "name": "workflow-content",
+  "title": "工作流资产内容",
+  "description": "编写 13 个 skill（12 通用 + 1 可选）、4 个 Agent 角色卡、16 份模板与工作流路由；含 doc/design.md、用例审批前置、check 测试代码边界及逐用例运行证据映射。",
+  "phase": "completed",
+  "blocked": null,
+  "evidence": [],
+  "lease": null,
+  "acceptance": null,
+  "completedAt": "2026-11-02",
+  "archivedAt": "2026-11-05",
+  "children": [],
+  "priority": "P0",
+  "creator": "FrancisZhang",
+  "assignee": "FrancisZhang",
+  "createdAt": "2026-10-27",
+  "branch": "",
+  "base_branch": "main",
+  "worktree_path": "",
+  "commit": "",
+  "pr_url": "",
+  "notes": "",
+  "meta": {
+    "trellis_migration": {
+      "migrated_at": "2026-11-05",
+      "source": ".trellis",
+      "original_status": "completed",
+      "dev_type": null,
+      "scope": null,
+      "package": null,
+      "subtasks": [],
+      "relatedFiles": []
+    }
+  },
+  "capabilities": [],
+  "extensions": [],
+  "events": [
+    {
+      "id": "evt-818a6ed819bb",
+      "at": "2026-11-05T00:00:00Z",
+      "source": {
+        "type": "command",
+        "actor": "FrancisZhang",
+        "reference": "migration"
+      },
+      "type": "migrated",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/archive/2026-11/10-27-workflow-content"
+        },
+        "from": "trellis"
+      }
+    }
+  ]
+}

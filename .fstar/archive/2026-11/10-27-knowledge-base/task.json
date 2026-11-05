@@ -1,0 +1,57 @@
+{
+  "id": "febfec88-ae37-5373-a62b-4b19b01a3a48",
+  "name": "knowledge-base",
+  "title": "项目长期知识库",
+  "description": "实现 <项目>/.fstar/knowledge/ 三目录（decisions/references/context）与 fstar-learn 沉淀路由，衔接本地知识检索维度",
+  "phase": "completed",
+  "blocked": null,
+  "evidence": [],
+  "lease": null,
+  "acceptance": null,
+  "completedAt": "2026-11-02",
+  "archivedAt": "2026-11-05",
+  "children": [],
+  "priority": "P1",
+  "creator": "FrancisZhang",
+  "assignee": "FrancisZhang",
+  "createdAt": "2026-10-27",
+  "branch": "",
+  "base_branch": "main",
+  "worktree_path": "",
+  "commit": "",
+  "pr_url": "",
+  "notes": "",
+  "meta": {
+    "trellis_migration": {
+      "migrated_at": "2026-11-05",
+      "source": ".trellis",
+      "original_status": "completed",
+      "dev_type": null,
+      "scope": null,
+      "package": null,
+      "subtasks": [],
+      "relatedFiles": []
+    }
+  },
+  "capabilities": [],
+  "extensions": [],
+  "events": [
+    {
+      "id": "evt-2a9199f491bb",
+      "at": "2026-11-05T00:00:00Z",
+      "source": {
+        "type": "command",
+        "actor": "FrancisZhang",
+        "reference": "migration"
+      },
+      "type": "migrated",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/archive/2026-11/10-27-knowledge-base"
+        },
+        "from": "trellis"
+      }
+    }
+  ]
+}

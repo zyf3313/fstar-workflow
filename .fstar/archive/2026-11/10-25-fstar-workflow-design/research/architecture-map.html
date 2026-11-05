@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fstar 工作流架构总图</title>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --panel2:#fbfcfd; --line:#e3e7ec; --line2:#d3d9e0;
+  --fg:#1b2129; --fg2:#4a5563; --fg3:#78838f;
+  --h:#4a6fa5; --a:#7c5cd6; --s:#1f9d6b; --t:#b8791b; --f:#0d8fa6; --c:#d1483f; --d:#64748b;
+  --hl:#fff3bf; --hld:#b8860b;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#12151a; --panel:#191d23; --panel2:#1f242b; --line:#2a3038; --line2:#39414b;
+    --fg:#e6eaf0; --fg2:#b3bcc7; --fg3:#7d8794;
+    --h:#7ba4dd; --a:#a78bfa; --s:#4ecb8f; --t:#e0a44a; --f:#3ec5da; --c:#f0736a; --d:#94a3b8;
+    --hl:#4a3f10; --hld:#ffd77a;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+code,.mono,pre{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+a{color:var(--h)}
+
+/* ── header ─────────────────────────── */
+header{
+  position:sticky; top:0; z-index:50; background:var(--panel);
+  border-bottom:1px solid var(--line); box-shadow:var(--shadow);
+}
+.hwrap{max-width:1680px;margin:0 auto;padding:10px 20px}
+.htop{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1{font-size:16px;margin:0;font-weight:650;letter-spacing:.2px}
+.tag{font-size:11px;padding:2px 8px;border-radius:20px;background:#fff3cd;color:#7a5c00;border:1px solid #f0dfa0}
+@media (prefers-color-scheme:dark){.tag{background:#4a3f10;color:#ffd77a;border-color:#6b5a1c}}
+.htop .meta{font-size:12px;color:var(--fg3)}
+nav{display:flex;gap:4px;margin-top:9px;flex-wrap:wrap}
+nav button{
+  font:inherit;font-size:13px;padding:5px 13px;border:1px solid var(--line2);background:var(--panel2);
+  color:var(--fg2);border-radius:7px;cursor:pointer;transition:.12s;
+}
+nav button:hover{background:var(--line);color:var(--fg)}
+nav button[aria-selected="true"]{background:var(--fg);color:var(--panel);border-color:var(--fg);font-weight:600}
+nav button .n{opacity:.55;font-size:11px;margin-left:5px}
+
+/* ── layout ─────────────────────────── */
+main{max-width:1680px;margin:0 auto;padding:20px}
+.view{display:none}
+.view.on{display:block}
+h2{font-size:15px;margin:26px 0 10px;font-weight:650;display:flex;align-items:center;gap:8px}
+h2:first-child{margin-top:0}
+h2::before{content:"";width:3px;height:15px;background:var(--h);border-radius:2px}
+h3{font-size:13px;margin:0 0 8px;font-weight:650;color:var(--fg2)}
+.hint{font-size:12px;color:var(--fg3);margin:-4px 0 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:14px}
+
+/* ── layer stack ────────────────────── */
+.stack{display:flex;flex-direction:column}
+.layer{border:1px solid var(--line);border-radius:11px;background:var(--panel);overflow:hidden;position:relative}
+.layer::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--dc,var(--d))}
+.lhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:11px 16px 11px 20px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.lhead .idx{font-size:16px;color:var(--dc,var(--d));font-weight:700}
+.lhead .nm{font-size:14px;font-weight:650}
+.lhead .role{font-size:12.5px;color:var(--fg2)}
+.lhead .bound{margin-left:auto;font-size:11.5px;color:var(--fg3);border:1px dashed var(--line2);border-radius:6px;padding:1px 8px;white-space:nowrap}
+.lbody{padding:12px 16px 13px 20px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lbody .lead{font-size:12px;color:var(--fg3);margin-right:2px}
+.conn{display:flex;align-items:center;gap:10px;padding:7px 0 7px 22px}
+.conn .lbl{font-size:12px;color:var(--fg2);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:2px 11px}
+.conn .ar{color:var(--fg3);font-size:12px}
+.conn .stem{width:1px;height:16px;background:var(--line2)}
+
+/* ── chips ───────────────────────────── */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;font-size:12.5px;line-height:1.5;
+  padding:3px 10px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);
+  color:var(--fg);cursor:default;transition:.12s;white-space:nowrap;
+}
+.chip .bul{width:6px;height:6px;border-radius:50%;background:var(--dc,var(--d));flex:none}
+.chip.k-h{--dc:var(--h)} .chip.k-a{--dc:var(--a)} .chip.k-s{--dc:var(--s)}
+.chip.k-t{--dc:var(--t)} .chip.k-f{--dc:var(--f)} .chip.k-c{--dc:var(--c)} .chip.k-d{--dc:var(--d)}
+.chip:hover{cursor:pointer;border-color:var(--dc,var(--line2));transform:translateY(-1px)}
+.chip.pin{background:var(--hl);border-color:var(--hld);box-shadow:0 0 0 2px rgba(184,134,11,.18)}
+.chip.dim{opacity:.32}
+.chip.was{outline:1px dashed var(--hld)}
+.chip .sm{font-size:11px;color:var(--fg3)}
+.chip.norel{opacity:.5}
+.sep{width:1px;height:18px;background:var(--line2);margin:0 4px}
+
+/* ── state machine strip ────────────── */
+.sm{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:14px 16px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;margin-bottom:14px}
+.sm .ph{
+  font-size:12px;padding:4px 11px;border-radius:7px;border:1px solid var(--line2);background:var(--panel);
+  cursor:pointer;transition:.12s;position:relative;
+}
+.sm .ph:hover{border-color:var(--h);transform:translateY(-1px)}
+.sm .ph.on{background:var(--hl);border-color:var(--hld);font-weight:600}
+.sm .ph.term{opacity:.62;font-style:italic}
+.sm .ar{color:var(--fg3);font-size:12px;padding:0 1px}
+.sm .loop{font-size:11.5px;color:var(--t);border:1px dashed var(--t);border-radius:6px;padding:2px 8px;margin-left:8px}
+.sm .gap{width:14px}
+.sm .sep2{width:1px;height:20px;background:var(--line2);margin:0 10px}
+
+/* ── matrix ──────────────────────────── */
+.mwrap{overflow:auto;max-height:none;border:1px solid var(--line);border-radius:11px;background:var(--panel)}
+table.mx{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px;min-width:1400px}
+table.mx th,table.mx td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:9px 10px;vertical-align:top}
+table.mx thead th{
+  position:sticky;top:0;z-index:5;background:var(--panel2);font-size:11.5px;font-weight:650;
+  text-align:left;color:var(--fg2);border-bottom:1px solid var(--line2);
+}
+table.mx thead th .bul{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+table.mx td.col-h{background:color-mix(in srgb,var(--h) 5%,transparent)}
+table.mx th.rowh{
+  position:sticky;left:0;z-index:4;background:var(--panel);min-width:168px;max-width:168px;
+  border-right:1px solid var(--line2);font-weight:600;
+}
+table.mx thead th.rowh{z-index:6}
+table.mx tr.cross th.rowh{background:color-mix(in srgb,var(--fg3) 7%,var(--panel))}
+table.mx tr:hover td,table.mx tr:hover th.rowh{background:color-mix(in srgb,var(--fg) 3.5%,var(--panel))}
+.phname{display:flex;align-items:center;gap:7px}
+.phname .dot{width:8px;height:8px;border-radius:50%;background:var(--pc,var(--d));flex:none}
+.phname .t{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.phname .s{font-size:11px;color:var(--fg3);font-weight:400;margin-left:auto;text-align:right}
+td .none{color:var(--fg3);opacity:.5;font-size:12px}
+td .stackv{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+td .plus{font-size:11px;color:var(--fg3)}
+
+/* ── detail panel ───────────────────── */
+.detail{
+  position:sticky;bottom:0;margin-top:12px;background:var(--panel);border:1px solid var(--line2);
+  border-radius:11px;padding:12px 16px;box-shadow:0 -2px 12px rgba(16,24,40,.06);
+  display:flex;gap:16px;align-items:flex-start;min-height:58px;
+}
+.detail .di{flex:none;min-width:150px}
+.detail .dt{font-size:13.5px;font-weight:650}
+.detail .dk{font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px}
+.detail .dd{font-size:12.5px;color:var(--fg2);margin-top:3px}
+.detail .links{flex:1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.detail .links .lt{font-size:11.5px;color:var(--fg3);margin-right:2px}
+.detail .close{position:absolute;right:12px;top:8px;font-size:16px;color:var(--fg3);cursor:pointer;background:none;border:0}
+
+/* ── tables (lists) ─────────────────── */
+table.lt{width:100%;border-collapse:collapse;font-size:12.5px}
+table.lt th{text-align:left;font-size:11.5px;font-weight:650;color:var(--fg2);padding:7px 9px;border-bottom:1px solid var(--line2);background:var(--panel2);position:sticky;top:0}
+table.lt td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+table.lt tr:last-child td{border-bottom:none}
+table.lt td.nw{white-space:nowrap}
+.tagx{display:inline-block;font-size:11px;padding:1px 7px;border-radius:5px;background:var(--panel2);border:1px solid var(--line2);color:var(--fg2);white-space:nowrap}
+.ok{color:var(--s)} .no{color:var(--c)} .wa{color:var(--t)}
+
+/* ── tabs ────────────────────────────── */
+.tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{font:inherit;font-size:12.5px;padding:4px 12px;border:1px solid var(--line2);background:var(--panel);color:var(--fg2);border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--panel);border-color:var(--fg);font-weight:600}
+.pane{display:none} .pane.on{display:block}
+
+/* ── dir tree ────────────────────────── */
+pre.tree{
+  margin:0;font-size:12.5px;line-height:1.75;background:var(--panel2);border:1px solid var(--line);
+  border-radius:9px;padding:14px 16px;overflow:auto;
+}
+pre.tree .c{color:var(--fg3)}
+pre.tree .hl2{color:var(--h);font-weight:600}
+pre.tree .hl3{color:var(--s);font-weight:600}
+pre.tree .hl4{color:var(--t);font-weight:600}
+pre.tree .dim5{color:var(--fg3);font-style:italic}
+
+/* ── mermaid ─────────────────────────── */
+.merm{position:relative}
+.merm pre{background:#0f1216;color:#d7e0ea;border-radius:9px;padding:14px 16px;overflow:auto;font-size:12px;line-height:1.6;max-height:460px}
+.merm .copy{position:absolute;right:10px;top:10px;font:inherit;font-size:11.5px;padding:3px 10px;border:1px solid var(--line2);background:var(--panel);color:var(--fg2);border-radius:6px;cursor:pointer}
+.merm .copy:hover{background:var(--line)}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--fg2);margin-bottom:12px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+footer{max-width:1680px;margin:0 auto;padding:26px 20px 40px;color:var(--fg3);font-size:12px;border-top:1px solid var(--line);margin-top:20px}
+@media print{
+  header{position:static} nav,.detail,.tabs{display:none} .view{display:block!important} .pane{display:block!important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hwrap">
+    <div class="htop">
+      <h1>fstar 工作流架构总图</h1>
+      <span class="tag">规划草案 · 不构成实现授权</span>
+      <span class="meta">2026-10-26 · 源自 research/ 下 7 份盘点文件</span>
+    </div>
+    <nav id="nav">
+      <button data-v="v1" aria-selected="true">架构分层<span class="n">6 层</span></button>
+      <button data-v="v2">阶段映射<span class="n">交叉矩阵</span></button>
+      <button data-v="v3">全量清单</button>
+      <button data-v="v4">规则与边界</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════ V1 ═══════════ -->
+<section class="view on" id="v1">
+  <div class="hint">
+    从下往上读：<b>存储层</b>的每一次写入都要经过<b>底座</b>校验；<b>触发层</b>只做定位不做判定。
+    鼠标悬停任意标签可高亮它的全部对应物。
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--h)"></i>Hook 触发</span>
+    <span><i style="background:var(--a)"></i>Agent 角色</span>
+    <span><i style="background:var(--s)"></i>Skill 能力</span>
+    <span><i style="background:var(--t)"></i>Template 模板</span>
+    <span><i style="background:var(--f)"></i>产物文件</span>
+    <span><i style="background:var(--c)"></i>核心命令</span>
+    <span><i style="background:var(--d)"></i>目录 / 结构</span>
+  </div>
+
+  <div class="stack" id="stack"></div>
+
+  <div class="card" style="margin-top:18px">
+    <h3>三条不可破的边界</h3>
+    <div class="grid2" style="margin-top:8px">
+      <div>
+        <span class="tagx">边界 1</span>
+        <div style="margin-top:6px;font-size:12.5px;color:var(--fg2)">
+          <b>存储层 → 底座是单向强制。</b>所有状态写入走 <code>fstar task state set</code>，命令内部校验转移合法性；Agent 不能直写 <code>task.json</code>。
+        </div>
+      </div>
+      <div>
+        <span class="tagx">边界 2</span>
+        <div style="margin-top:6px;font-size:12.5px;color:var(--fg2)">
+          <b>Hook 从不写状态。</b>它只做定位、注入、提醒；所有判定永远在核心命令层。
+        </div>
+      </div>
+      <div>
+        <span class="tagx">边界 3</span>
+        <div style="margin-top:6px;font-size:12.5px;color:var(--fg2)">
+          <b>方法细节不写两遍。</b>角色卡只写权限、输入契约、交付格式、禁止事项；方法细节在 skill 的 <code>references/</code>。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ V2 ═══════════ -->
+<section class="view" id="v2">
+  <div class="hint">
+    行为阶段，列为六个维度。<b>悬停任意标签</b>，全图同一实体同时高亮 —— 这就是「谁在什么阶段负责什么」。
+  </div>
+
+  <h2>状态机</h2>
+  <div class="sm" id="sm"></div>
+
+  <h2>阶段 × 维度 交叉矩阵</h2>
+  <div class="mwrap"><table class="mx" id="mx"></table></div>
+
+  <div class="detail" id="detail">
+    <div class="di">
+      <div class="dk">当前选中</div>
+      <div class="dt" id="dTitle">未选中</div>
+      <div class="dd" id="dDesc">点击任意标签查看它的全部对应关系</div>
+    </div>
+    <div class="links" id="dLinks"><span class="lt">关联：</span></div>
+  </div>
+</section>
+
+<!-- ═══════════ V3 ═══════════ -->
+<section class="view" id="v3">
+  <div class="tabs" id="tabs">
+    <button data-p="p1" aria-selected="true">Hooks</button>
+    <button data-p="p2">Skills</button>
+    <button data-p="p3">Agents</button>
+    <button data-p="p4">Templates</button>
+    <button data-p="p5">目录结构</button>
+    <button data-p="p6">核心命令</button>
+    <button data-p="p8">能力维度</button>
+    <button data-p="p7">缺口与冲突</button>
+  </div>
+  <div class="pane on" id="p1"></div>
+  <div class="pane" id="p2"></div>
+  <div class="pane" id="p3"></div>
+  <div class="pane" id="p4"></div>
+  <div class="pane" id="p5"></div>
+  <div class="pane" id="p6"></div>
+  <div class="pane" id="p8"></div>
+  <div class="pane" id="p7"></div>
+</section>
+
+<!-- ═══════════ V4 ═══════════ -->
+<section class="view" id="v4">
+  <h2>六个维度的职责边界</h2>
+  <div class="card" style="padding:0;overflow:auto">
+    <table class="lt">
+      <thead><tr><th class="nw">维度</th><th>负责</th><th>明确不负责</th></tr></thead>
+      <tbody>
+        <tr><td class="nw"><span class="chip k-h"><i class="bul"></i>Hooks</span></td><td>宿主事件发生时定位上下文、触发提醒、注入最小信息</td><td>状态转移校验、耗时调研、代替用户验收</td></tr>
+        <tr><td class="nw"><span class="chip k-a"><i class="bul"></i>Agents</span></td><td>规定执行者权限、输入契约、交付格式、禁止事项</td><td>重复写方法细节（方法在 skill reference）</td></tr>
+        <tr><td class="nw"><span class="chip k-s"><i class="bul"></i>Skills</span></td><td>告诉 Agent 一类工作怎么做</td><td>保证状态转移合法、代替命令</td></tr>
+        <tr><td class="nw"><span class="chip k-t"><i class="bul"></i>Templates</span></td><td>产物骨架</td><td>执行命令、授权记录、自动触发</td></tr>
+        <tr><td class="nw"><span class="chip k-d"><i class="bul"></i>目录结构</span></td><td>内容归属与持久化</td><td>运行状态（分离在 <code>runtime/</code>）</td></tr>
+        <tr><td class="nw"><span class="chip k-c"><i class="bul"></i>核心命令</span></td><td>校验批准、版本、证据、租约、状态转移</td><td>语义判断（语义在 skill / agent）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>状态机的三个维度</h2>
+  <div class="card" style="padding:0;overflow:auto">
+    <table class="lt">
+      <thead><tr><th class="nw">维度</th><th>含义</th><th>性质</th></tr></thead>
+      <tbody>
+        <tr><td class="nw"><code>phase</code> 阶段</td><td>走到哪一步</td><td>标量、互斥、可推进</td></tr>
+        <tr><td class="nw"><code>evidence</code> 证据</td><td>支撑当前阶段的产物</td><td>可失效（指纹变化 → <code>stale</code>）</td></tr>
+        <tr><td class="nw"><code>ownership</code> 在途</td><td>谁在做（会话租约）</td><td>可丢失、可过期（心跳超时 → <code>orphaned</code>）</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin-top:10px">
+    <code>blocked</code> <b>不是阶段</b>，而是阶段上的属性 <code>{ reason, since }</code>，解除后回到原阶段。<code>dropped</code> 是终态阶段。
+  </p>
+
+  <h2>回规划转移（2026-10-26 补）</h2>
+  <div class="card" style="font-size:12.5px;color:var(--fg2)">
+    <code>planned / implementing / checking / fixing → drafting</code>：Agent 发起，必须带回规划原因（需求/设计根本性变更，或 debug 判定根因在需求侧），全部证据标记 <code>stale</code>，租约释放。<code>done</code> 不重开 <code>drafting</code>——重开走 <code>done → implementing</code>。这条转移同时是 <code>fstar-debug</code>「必要时回规划」和中途需求大变更的合法路径。
+  </div>
+
+  <h2>系统必须硬拒的情况</h2>
+  <div class="card">
+    <ul style="margin:0;padding-left:20px;font-size:12.5px;color:var(--fg2);line-height:1.9">
+      <li>Agent 写 <code>done</code> 或 <code>archived</code></li>
+      <li><code>drafting → implementing</code></li>
+      <li><code>checking → done</code></li>
+      <li>stale 证据下进 <code>awaiting_acceptance</code></li>
+      <li>容器在子节点未全 <code>done</code>/<code>dropped</code> 时进 <code>awaiting_acceptance</code></li>
+    </ul>
+  </div>
+
+  <h2>归档判据</h2>
+  <div class="card" style="font-size:13px;font-family:ui-monospace,Menlo,monospace">
+    phase = done &nbsp;∧&nbsp; 子节点 ∈ {done, dropped} &nbsp;∧&nbsp; 无 stale 证据 &nbsp;∧&nbsp; 无未决问题
+  </div>
+
+  <h2>规范优先级（已确认）</h2>
+  <div class="card" style="padding:0;overflow:auto">
+    <table class="lt">
+      <thead><tr><th class="nw">场景</th><th>生效内容</th></tr></thead>
+      <tbody>
+        <tr><td class="nw">项目有明确规定</td><td>用项目的，<b>覆盖</b>全局对应项</td></tr>
+        <tr><td class="nw">项目没规定</td><td>用用户级 <code>rules/</code> 补缺</td></tr>
+        <tr><td class="nw">两者都没说</td><td>走产品默认行为</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin-top:10px">
+    按<b>事项与适用范围</b>判断是否覆盖，不因为存在一个项目规范文件就忽略全部全局规则。不回写全局：某个项目的例外不会自动改变其他项目。
+    此优先级只管 fstar 的用户/项目内容，<b>不改变宿主系统指令、权限限制或用户当前明确指令</b>。
+  </p>
+
+  <h2>知识落点</h2>
+  <div class="card" style="padding:0;overflow:auto">
+    <table class="lt">
+      <thead><tr><th class="nw">内容</th><th>保存位置</th></tr></thead>
+      <tbody>
+        <tr><td class="nw">长期有效的项目规范、决定及原因</td><td><code>项目 specs/&lt;主题&gt;.md</code></td></tr>
+        <tr><td class="nw">当前任务的技术取舍</td><td><code>任务 design.md</code></td></tr>
+        <tr><td class="nw">调研过程、候选方案与依据</td><td><code>任务 research/&lt;主题&gt;.md</code></td></tr>
+        <tr><td class="nw">跨项目个人规则</td><td><code>用户级 rules/</code></td></tr>
+        <tr><td class="nw">个人偏好和经验</td><td><code>用户级 memory/</code></td></tr>
+        <tr><td class="nw">已有项目的决策文档</td><td>仅引用，<b>不迁移、不删除</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>一次完整任务的调用时序</h2>
+  <div class="card" style="padding:0;overflow:auto">
+    <table class="lt">
+      <thead><tr><th class="nw">角色</th><th>动作</th><th class="nw">触发的层</th></tr></thead>
+      <tbody id="seq"></tbody>
+    </table>
+  </div>
+
+  <h2>等价 Mermaid 源码</h2>
+  <p class="hint">可直接粘进 Markdown 文档、Notion 或 issue。需要渲染时用 Mermaid Live Editor 或任意支持 Mermaid 的平台。</p>
+  <div class="merm" id="merm">
+    <button class="copy" id="copyMerm">复制</button>
+    <pre id="mermSrc"></pre>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  fstar-workflow · 架构总图 —— 由 <code>research/</code> 下 7 份盘点文件汇总，非实现规格。
+  数据源：<code>docs/project-context.md</code>（状态机）、<code>directory-proposal.md</code>、<code>hooks-skills-templates.md</code>、<code>skills-detailed.md</code>、<code>worker-adapter-protocol.md</code>、<code>three-lists.md</code>、<code>policy-decisions.md</code>。
+</footer>
+
+<script>
+/* ═══════════════ 数据模型 ═══════════════ */
+const K = {h:'h',a:'a',s:'s',t:'t',f:'f',c:'c',d:'d'};
+const KLABEL = {h:'Hook',a:'Agent',s:'Skill',t:'Template',f:'产物',c:'命令',d:'目录'};
+
+/* 五类「hook」—— 只有 A / B 是真正的宿主事件 hook */
+const HOOK_CATS = [
+  {k:'A', n:'宿主事件 hook',        sub:'宿主在固定事件调用固定脚本',            builtin:'内置',         v1:'✅ 第一版', note:'工作流环节 → 有对应 skill'},
+  {k:'B', n:'运行时事件',           sub:'协作运行时产出的完成 / 失败 / 取消事件',   builtin:'内置',         v1:'✅ 第一版', note:'工作流环节 → 有对应 skill'},
+  {k:'C', n:'核心命令后置回调',      sub:'task 命令成功后跑 config 里配的任意 shell', builtin:'机制存在',     v1:'❌ 不开放', note:'扩展点 → 无 skill'},
+  {k:'D', n:'会话身份解析（非 hook）', sub:'被 hook / CLI / 命令多处调用的解析函数',  builtin:'内置基础设施',  v1:'✅ 第一版', note:'基础设施 → 无 skill'},
+  {k:'E', n:'外部集成示例',          sub:'Trellis 提供的模板，照抄改可用',          builtin:'不提供',       v1:'❌ 不带',   note:'外部集成 → 无 skill'},
+];
+
+const HOOKS = [
+  // A 宿主事件 hook
+  {id:'h:session', cat:'A', n:'session-context', tr:'SessionStart（startup / clear / compact）', do:'识别用户级·项目级入口，定位当前会话任务，摘要 + 规则指针', sk:'fstar-continue', bind:'软', out:'runtime/sessions/<id>.json'},
+  {id:'h:turn',    cat:'A', n:'turn-context',    tr:'UserPromptSubmit（每轮输入）',              do:'刷新阶段、阻塞、待验收 / 待归档提示',                 sk:'fstar-continue', bind:'软', out:'runtime/reminders.json'},
+  {id:'h:worker',  cat:'A', n:'worker-context',  tr:'PreToolUse Task / Agent（派发前）',          do:'按角色注入任务、适用 rules/spec、修订、context 清单', sk:'fstar-execute / fstar-check', bind:'硬', out:'读 implement.jsonl / check.jsonl'},
+  // B 运行时事件
+  {id:'h:result',  cat:'B', n:'worker-result',   tr:'运行时 done / error / killed',              do:'保存交付引用，安排检查或标记待处理（worker done ≠ 验收）', sk:'fstar-check', bind:'软', out:'task.json 事件、acceptance/'},
+  // C 核心命令后置回调
+  {id:'h:after',   cat:'C', n:'after_create / after_start / after_finish / after_archive', tr:'task 核心命令成功后（源码已核实 4 个调用点）', do:'执行 config.yaml 里配置的任意 shell 命令；拿到 TASK_JSON_PATH；失败只警告不阻断', sk:'无', bind:'—', out:'扩展点，第一版不开放'},
+  // D 会话身份解析
+  {id:'h:bridge',  cat:'D', n:'会话身份解析链',   tr:'被 hook / CLI / 命令多处调用（非单点触发）', do:'TRELLIS_CONTEXT_ID → hook payload → 已验证平台环境变量 → 30s shell-ticket 桥（21 平台审计，12 个无验证名）', sk:'无', bind:'—', out:'runtime/leases/'},
+  // E 外部集成示例
+  {id:'h:linear',  cat:'E', n:'linear_sync.py',   tr:'由 after_* 回调调用，或手动 sync',          do:'把任务事件同步到 Linear（外部 issue 系统），依赖外部 linearis CLI 与 hooks.local.json', sk:'无', bind:'—', out:'外部系统'},
+];
+
+const SKILLS = [
+  {id:'s:init', n:'fstar-init', tr:'进入未接入项目且确定持续开发；或整理刷新规范', ag:'主 Agent', cmd:'fstar project init', tpl:'entry/project-index、knowledge/spec', out:'.fstar/{index.md,config.yaml,.gitignore}、specs/', refs:['onboarding','spec-bootstrap'], no:'创建任务、写 PRD、全仓库扫描生成空规范'},
+  {id:'s:clarify', n:'fstar-clarify', tr:'需求不清、新功能、范围变更、需技术设计', ag:'主 Agent + research', cmd:'task create → state set drafting→planned', tpl:'task/prd、task/design、task/implement', out:'tasks/<id>/{prd,design,implement}.md、research/、subtasks/', refs:['clarification','design-profiles'], no:'实施、写代码、自行把状态推到 implementing'},
+  {id:'s:execute', n:'fstar-execute', tr:'planned 且用户确认启动；实施中需求变更', ag:'implement', cmd:'state set planned→implementing + 取租约', tpl:'—', out:'代码变更、任务事件', refs:['before-dev','dispatch','changes','capability-discovery'], no:'用户验收、归档、判定自己完成'},
+  {id:'s:check', n:'fstar-check', tr:'实施交付后；修复后复查；需求变更致证据失效', ag:'check', cmd:'implementing→checking；checking→fixing；→awaiting_acceptance（需证据新鲜）', tpl:'task/check', out:'acceptance/check-<n>.md', refs:['testing','document-consistency'], no:'替用户验收、把检查通过当作任务完成'},
+  {id:'s:continue', n:'fstar-continue', tr:'用户说继续 / 恢复；打开项目；多候选任务', ag:'主 Agent', cmd:'inspect + 租约检查', tpl:'—', out:'runtime/sessions/、runtime/reminders.json', refs:[], no:'自动推进到验收、自动归档、静默重复派发'},
+  {id:'s:finish', n:'fstar-finish', tr:'awaiting_acceptance；用户要求收尾', ag:'主 Agent', cmd:'awaiting_acceptance→done（仅用户）→ archived（判据全满足）', tpl:'—', out:'acceptance/acceptance-<n>.json、archive/<年月>/', refs:['acceptance-archive'], no:'替用户验收、自动归档、把技术完成当授权'},
+  {id:'s:debug', n:'fstar-debug', tr:'同问题反复失败；根因不明；检查多次不过', ag:'主 Agent + implement', cmd:'可能回退到 drafting', tpl:'—', out:'research/ 或 design.md', refs:['root-cause'], no:'直接大范围改代码'},
+  {id:'s:learn', n:'fstar-learn', tr:'用户说「记住」；主动识别到可复用经验；收尾时', ag:'主 Agent', cmd:'—', tpl:'knowledge/rule、knowledge/memory、knowledge/spec', out:'~/.fstar/rules/、~/.fstar/memory/、.fstar/specs/', refs:['knowledge-routing'], no:'把局部实现经验自动升级为全局规则'},
+  {id:'s:recall', n:'fstar-recall', tr:'「上次怎么做的」「之前讨论过吗」', ag:'主 Agent + research', cmd:'—', tpl:'—', out:'只读', refs:['history-sources'], no:'把历史结论当当前事实'},
+  {id:'s:help', n:'fstar-help', tr:'用法、配置、定制、故障排查', ag:'主 Agent', cmd:'—', tpl:'—', out:'只读', refs:['layout','configuration'], no:'写状态'},
+  {id:'s:tools', n:'fstar-tools', tr:'需要某能力维度；初始化时；绑定失效；用户要换工具', ag:'主 Agent', cmd:'查绑定 → 三层验证 → 调用 → 记录 → 缺口走降级', tpl:'—', out:'tools.yaml、runtime/tool-status.json、检查报告', refs:['contracts','probe','bindings'], no:'自动安装任何工具；自动改绑定'},
+  {id:'s:ui', n:'fstar-ui-design（可选）', tr:'有实际界面 / 交互需求', ag:'主 Agent', cmd:'—', tpl:'optional/ui-baseline、optional/ui-feature', out:'specs/ui-baseline.md 或 design/ui-feature.md', refs:['ui-design'], no:'无 UI 需求时也要执行'},
+];
+
+const AGENTS = [
+  {id:'a:research', n:'research', inp:'调研问题、任务路径', out:'research/<主题>.md（每主题一份）', no:'改代码、改 spec、写其他任务目录', dir:'tasks/<id>/research/'},
+  {id:'a:implement', n:'implement', inp:'PRD、design、implement、context 清单、specs', out:'代码变更、实施交付说明', no:'git commit / push / merge、判定任务完成', dir:'工作区 + 任务事件'},
+  {id:'a:check', n:'check', inp:'交付物、检查清单、specs、测试命令', out:'acceptance/check-<n>.md + 证据引用', no:'替用户验收、扩大范围重构', dir:'tasks/<id>/acceptance/'},
+  {id:'a:main', n:'主 Agent（宿主主会话）', inp:'用户输入 + 全部上下文', out:'决策、派发、命令调用', no:'越过验收闸门；不写状态', dir:'—'},
+];
+
+const TEMPLATES = [
+  {g:'task × 5', items:[
+    {id:'t:prd', n:'prd.md', out:'tasks/<id>/prd.md', note:'目标、范围、AC、未决问题'},
+    {id:'t:design', n:'design.md', out:'tasks/<id>/design.md（复杂任务）', note:'边界、接口、取舍、兼容性'},
+    {id:'t:implement', n:'implement.md', out:'tasks/<id>/implement.md（复杂任务）', note:'顺序、检查点、验证与回退'},
+    {id:'t:research', n:'research.md', out:'tasks/<id>/research/<主题>.md', note:'问题、来源、发现、限制'},
+    {id:'t:check', n:'check.md', out:'tasks/<id>/acceptance/check-<轮次>.md', note:'覆盖版本、验证命令与结果、缺口'},
+  ]},
+  {g:'knowledge × 3', items:[
+    {id:'t:rule', n:'rule.md', out:'~/.fstar/rules/<主题>.md', note:'要求、范围、原因、确认来源'},
+    {id:'t:memory', n:'memory.md', out:'~/.fstar/memory/<主题>.md', note:'偏好/经验、场景、来源；非强制规则'},
+    {id:'t:spec', n:'spec.md', out:'.fstar/specs/<主题>.md', note:'项目约束、例子、验证方法'},
+  ]},
+  {g:'entry × 2', items:[
+    {id:'t:uindex', n:'user-index.md', out:'~/.fstar/index.md', note:'用户规则/记忆/定制资源索引'},
+    {id:'t:pindex', n:'project-index.md', out:'.fstar/index.md', note:'项目简短背景、文档和规范索引'},
+  ]},
+  {g:'optional × 5', items:[
+    {id:'t:explore', n:'exploration.md', out:'research/exploration.md（仅重要选型）', note:'选型证据与取舍'},
+    {id:'t:review', n:'review-change.md', out:'research/change-<序号>.md（仅大范围变更）', note:'不建第二套状态台账'},
+    {id:'t:cases', n:'test-cases.md', out:'acceptance/test-cases.md（复杂功能）', note:'用例定义；与 check 的运行结果分开'},
+    {id:'t:uibase', n:'ui-baseline.md', out:'项目 UI 基线', note:'不反复随任务复制'},
+    {id:'t:uifeat', n:'ui-feature.md', out:'tasks/<id>/design/ui-feature.md', note:'功能页面、状态和交互设计'},
+  ]},
+];
+
+const COMMANDS = [
+  {id:'c:create', n:'task create', do:'建任务', note:'生成 task.json + prd.md'},
+  {id:'c:set', n:'task state set', do:'转移状态（唯一合法写入口）', note:'命令内部校验转移合法性'},
+  {id:'c:archive', n:'task archive', do:'移动到 archive/', note:'必须在移动前把验收与证据写入 task.json'},
+  {id:'c:lease', n:'task lease acquire/release/takeover', do:'单写者租约、代次、接管记录', note:'接管需记作废原因与新 owner'},
+  {id:'c:evidence', n:'evidence record/invalidate', do:'写 validates 指纹、计算 stale', note:'唯一归属在 fstar-check'},
+  {id:'c:inspect', n:'inspect', do:'巡检被手改坏的 task.json', note:'算出归档缺失项'},
+  {id:'c:reminder', n:'reminder snooze/dedupe', do:'提醒去重与暂缓', note:'提醒 ≠ 自动归档'},
+  {id:'c:init', n:'project init', do:'项目接入', note:'只建 index.md / config.yaml / .gitignore'},
+  {id:'c:spawn', n:'dispatch（派发 + 变更传导）', do:'协作层：v1 经宿主原生子 Agent；协议自研', note:'运行时后置，触发条件见 policy-decisions.md'},
+];
+
+const PHASES = [
+  {id:'init', n:'接入', s:'非状态机', c:'var(--d)'},
+  {id:'drafting', n:'drafting', s:'需求澄清', c:'var(--h)'},
+  {id:'planned', n:'planned', s:'方案就绪', c:'var(--h)'},
+  {id:'implementing', n:'implementing', s:'实施中', c:'var(--a)'},
+  {id:'checking', n:'checking', s:'检查中', c:'var(--a)'},
+  {id:'fixing', n:'fixing', s:'修复闭环', c:'var(--t)'},
+  {id:'awaiting_acceptance', n:'awaiting_acceptance', s:'待用户验收', c:'#e07b39'},
+  {id:'done', n:'done', s:'用户已验收', c:'var(--s)'},
+  {id:'archived', n:'archived', s:'已归档', c:'var(--fg3)'},
+  {id:'dropped', n:'dropped', s:'已放弃', c:'var(--fg3)', term:1},
+  {id:'remind', n:'归档提醒', s:'跨阶段', c:'var(--t)', cross:1},
+  {id:'learn', n:'知识沉淀', s:'跨阶段', c:'var(--s)', cross:1},
+  {id:'recall', n:'回忆', s:'跨阶段', c:'var(--d)', cross:1},
+  {id:'light', n:'轻量任务', s:'跨阶段', c:'var(--d)', cross:1},
+];
+
+/* 矩阵：phase → {dim: [chip…]} */
+const MATRIX = [
+  {p:'init', c:{
+    h:[['h:session','session-context']], a:[['a:main','主 Agent']], s:[['s:init','fstar-init']],
+    cmd:[['c:init','project init']], tpl:[['t:pindex','entry/project-index'],['t:spec','knowledge/spec']],
+    f:[['f:index','.fstar/index.md'],['f:cfg','.fstar/config.yaml'],['f:specs','.fstar/specs/']] }},
+  {p:'drafting', c:{
+    h:[['h:turn','turn-context']], a:[['a:main','主 Agent'],['a:research','research']],
+    s:[['s:clarify','fstar-clarify']], cmd:[['c:create','task create']],
+    tpl:[['t:prd','task/prd'],['t:research','task/research']],
+    f:[['f:prd','prd.md'],['f:research','research/']] }},
+  {p:'planned', c:{
+    h:[['h:turn','turn-context']], a:[['a:main','主 Agent']], s:[['s:clarify','fstar-clarify（收尾）']],
+    cmd:[['c:set','state set planned']],
+    tpl:[['t:design','task/design'],['t:implement','task/implement']],
+    f:[['f:design','design.md'],['f:implement','implement.md'],['f:context','implement.jsonl / check.jsonl'],['f:subtasks','subtasks/']] }},
+  {p:'implementing', c:{
+    h:[['h:worker','worker-context']], a:[['a:implement','implement']], s:[['s:execute','fstar-execute']],
+    cmd:[['c:set','state set implementing'],['c:lease','lease acquire（单写者）']], tpl:[],
+    f:[['f:code','代码变更'],['f:history','task.json 事件']] }},
+  {p:'checking', c:{
+    h:[['h:worker','worker-context']], a:[['a:check','check']], s:[['s:check','fstar-check']],
+    cmd:[['c:set','state set checking']], tpl:[['t:check','task/check']],
+    f:[['f:check','acceptance/check-<n>.md']] }},
+  {p:'fixing', c:{
+    h:[['h:worker','worker-context']], a:[['a:implement','implement']],
+    s:[['s:check','fstar-check'],['s:execute','fstar-execute']], cmd:[['c:set','state set fixing']], tpl:[],
+    f:[['f:code','代码变更'],['f:history','task.json 事件']] }},
+  {p:'awaiting_acceptance', c:{
+    h:[['h:turn','turn-context']], a:[['a:main','主 Agent']], s:[['s:finish','fstar-finish']],
+    cmd:[['c:set','state set awaiting_acceptance（校验证据新鲜）']], tpl:[],
+    f:[['f:check','acceptance/check-*.md']] }},
+  {p:'done', c:{
+    h:[], a:[['a:main','主 Agent（仅用户）']], s:[['s:finish','fstar-finish']],
+    cmd:[['c:set','state set done']], tpl:[],
+    f:[['f:accept','acceptance/acceptance-<n>.json']] }},
+  {p:'archived', c:{
+    h:[['h:turn','turn-context（巡检）']], a:[['a:main','主 Agent']], s:[['s:finish','fstar-finish']],
+    cmd:[['c:archive','archive（判据全满足）']], tpl:[],
+    f:[['f:archive','archive/<年月>/<任务目录>/']] }},
+  {p:'dropped', c:{
+    h:[], a:[['a:main','主 Agent（仅用户）']], s:[['s:finish','fstar-finish'],['s:debug','fstar-debug']],
+    cmd:[['c:set','state set dropped']], tpl:[], f:[['f:history','task.json 事件']] }},
+  {p:'remind', c:{
+    h:[['h:session','session-context'],['h:turn','turn-context']], a:[['a:main','主 Agent']],
+    s:[['s:continue','fstar-continue']], cmd:[['c:inspect','inspect'],['c:reminder','reminder']],
+    tpl:[], f:[['f:reminders','runtime/reminders.json']] }},
+  {p:'learn', c:{
+    h:[['h:turn','turn-context（轮末触发候选）']], a:[['a:main','主 Agent']], s:[['s:learn','fstar-learn']],
+    cmd:[], tpl:[['t:rule','knowledge/rule'],['t:memory','knowledge/memory'],['t:spec','knowledge/spec']],
+    f:[['f:rules','~/.fstar/rules/'],['f:memory','~/.fstar/memory/'],['f:specs','.fstar/specs/']] }},
+  {p:'recall', c:{
+    h:[['h:turn','turn-context']], a:[['a:main','主 Agent'],['a:research','research']],
+    s:[['s:recall','fstar-recall']], cmd:[], tpl:[], f:[['f:ro','只读']] }},
+  {p:'light', c:{
+    h:[['h:turn','turn-context']], a:[['a:main','主 Agent（不派子 Agent）']], s:[['s:clarify','fstar-clarify（轻量分支）']],
+    cmd:[['c:none','不建 task 目录']], tpl:[], f:[['f:light','会话内；验收确认保留']] }},
+];
+
+/* 实体元信息（用于详情面板） */
+const INFO = {};
+HOOKS.forEach(h=>{
+  const cat=HOOK_CATS.find(c=>c.k===h.cat);
+  INFO[h.id]={
+    t:h.n,
+    k:(h.cat==='A'||h.cat==='B')?'Hook':'非 hook（'+cat.n+'）',
+    d:h.do,
+    extra:'类别 '+h.cat+' '+cat.n+' · 触发：'+h.tr+' · 落盘：'+h.out+(h.sk!=='无'?' · 对应 skill：'+h.sk+'（'+h.bind+'）':' · 无对应 skill')
+  };
+});
+SKILLS.forEach(s=>INFO[s.id]={t:s.n,k:'Skill',d:s.no?'不负责：'+s.no:'',extra:'触发：'+s.tr+' · Agent：'+s.ag+' · 命令：'+s.cmd+(s.refs.length?' · references：'+s.refs.join('/'):'')});
+AGENTS.forEach(a=>INFO[a.id]={t:a.n,k:'Agent',d:'禁止：'+a.no,extra:'输入：'+a.inp+' · 输出：'+a.out});
+COMMANDS.forEach(c=>INFO[c.id]={t:c.n,k:'命令',d:c.note,extra:c.do});
+TEMPLATES.forEach(g=>g.items.forEach(t=>INFO[t.id]={t:t.n,k:'Template',d:t.note,extra:'产物：'+t.out}));
+Object.assign(INFO,{
+  'f:index':{t:'.fstar/index.md',k:'产物',d:'项目短背景、入口、规范索引（引用已有 docs）',extra:'项目级'},
+  'f:cfg':{t:'.fstar/config.yaml',k:'产物',d:'稳定项目 ID、配置格式版本、工作流选择',extra:'项目级'},
+  'f:specs':{t:'.fstar/specs/',k:'产物',d:'已确认的项目规范。优先于用户级 rules/',extra:'项目级'},
+  'f:prd':{t:'prd.md',k:'产物',d:'用户问题、目标、范围、验收条件、未决问题',extra:'任务级'},
+  'f:research':{t:'research/',k:'产物',d:'本任务调研、来源、结论和未决问题',extra:'任务级'},
+  'f:design':{t:'design.md',k:'产物',d:'技术边界、数据和接口、取舍、兼容性（复杂任务）',extra:'任务级'},
+  'f:implement':{t:'implement.md',k:'产物',d:'执行步骤、验证方式、检查点与回退（复杂任务）',extra:'任务级'},
+  'f:context':{t:'implement.jsonl / check.jsonl',k:'产物',d:'按阶段列出上下文路径和读取理由；实施与检查各一份',extra:'任务级 · 沿用 Trellis 已验证的形状'},
+  'f:subtasks':{t:'subtasks/',k:'产物',d:'子任务目录，结构同构，不复制父任务完整背景',extra:'任务级'},
+  'f:code':{t:'代码变更',k:'产物',d:'实际工作区改动；由 implement 角色产生',extra:'任务级'},
+  'f:history':{t:'task.json events[]',k:'产物',d:'追加式事件数组：阶段变化、租约、需求修订引用',extra:'任务级 · 需求正文在 design.md 修订章节'},
+  'f:check':{t:'acceptance/check-<序号>.md',k:'产物',d:'检查范围、执行的验证、结果、问题；关联检查覆盖的版本',extra:'任务级'},
+  'f:accept':{t:'acceptance/acceptance-<序号>.json',k:'产物',d:'用户验收决定、范围、关联版本/检查报告、时间、可追溯确认来源',extra:'任务级 · 记录本身不能证明真实授权'},
+  'f:archive':{t:'archive/<年月>/<任务目录>/',k:'产物',d:'主任务整棵目录移入；不单独归档子任务',extra:'项目级'},
+  'f:reminders':{t:'runtime/reminders.json',k:'产物',d:'本机提醒去重、暂缓时间；删除只影响提醒节奏',extra:'项目级 runtime/ · 不入库'},
+  'f:rules':{t:'~/.fstar/rules/',k:'产物',d:'用户明确确认的跨项目规则，带范围·来源·原因',extra:'用户级'},
+  'f:memory':{t:'~/.fstar/memory/',k:'产物',d:'个人偏好与跨项目经验；不自动升级为规则',extra:'用户级'},
+  'f:ro':{t:'只读',k:'产物',d:'不写任何文件',extra:'—'},
+  'f:light':{t:'会话内',k:'产物',d:'轻量任务不建任务目录；但保留一次明确的用户验收确认',extra:'—'},
+  'd:user':{t:'~/.fstar/',k:'目录',d:'用户级：跨项目个人内容（rules/memory/workflows/skills/templates）',extra:'运行状态分离在 runtime/'},
+  'd:proj':{t:'<项目>/.fstar/',k:'目录',d:'项目级：项目知识与任务（specs/tasks/archive）',extra:'运行状态分离在 runtime/'},
+  'd:task':{t:'tasks/<任务ID>-<名称>/',k:'目录',d:'任务级：一个完整需求 = 一个主任务，子任务在其内',extra:'目录体现归属，不靠 JSON 关联'},
+  'd:rt':{t:'runtime/',k:'目录',d:'sessions / leases / reminders，本机状态，不入库',extra:'删除后不能仅据此认定执行者已停止'},
+  'c:none':{t:'不建 task 目录',k:'命令',d:'轻量任务：省的是产物和阶段跳转，不是验收',extra:'仍保留一次明确的用户确认'},
+  'cap:code-structure':{t:'code-structure',k:'能力维度',d:'X 在哪定义 / 谁调用它 / 改这里影响什么',extra:'判定要点：符号级定位 · 可追溯到文件行 · 能区分「符号不存在」与「没索引到」｜推荐：CodeGraph、LSP'},
+  'cap:web-research':{t:'web-research',k:'能力维度',d:'当前版本 / 官方文档 / 上游仓库事实',extra:'判定要点：能读到原始来源 · 能给出版本与出处｜推荐：WebSearch、gh、Exa MCP'},
+  'cap:knowledge-retrieval':{t:'knowledge-retrieval',k:'能力维度',d:'找回项目里以前做过的决定和文档',extra:'判定要点：集合新鲜度 · 关键词与语义两条路线 · 来源路径可验证｜推荐：QMD、项目已有索引'},
+  'cap:data-access':{t:'data-access',k:'能力维度',d:'查 schema、查数据、跑只读 SQL',extra:'判定要点：只读边界 · 最小权限 · 连接与查询真成功｜推荐：DBHub、psql'},
+  'cap:test-execution':{t:'test-execution',k:'能力维度',d:'跑起来看结果对不对',extra:'判定要点：有可执行命令 · 结果可复现 · 失败能定位｜推荐：项目自带 runner'},
+});
+
+/* ═══════════════ 视图 1：分层栈 ═══════════════ */
+const LAYERS = [
+  {i:'①', n:'触发层 · Hooks（仅 A / B 两类为真 hook）', role:'宿主事件发生时的定位、提示、提醒', bound:'只做「找到」，不做「判定」', k:'h',
+   lead:'内置 4 个真 hook',
+   chips:[['h:session','session-context'],['h:turn','turn-context'],['h:worker','worker-context'],['h:result','worker-result']],
+   tail:'非 hook（不在触发层）：C after_* 命令后置回调 · D 会话身份解析链 · E linear_sync 外部集成 —— 详见「全量清单 › Hooks」'},
+  {i:'②', n:'编排层 · Agent 角色', role:'谁干、写到哪、禁止什么', bound:'主 Agent 不是第四张角色卡', k:'a',
+   lead:'3 角色卡 + 主 Agent 协调',
+   chips:[['a:main','主 Agent'],['a:research','research'],['a:implement','implement'],['a:check','check']],
+   tail:'派发传输（已定：原生优先）：v1 宿主原生子 Agent · 协议自研 · 适配器自研 · 对等运行时后置'},
+  {i:'③', n:'能力层 · Skills', role:'一类工作怎么做', bound:'只加载命中的 SKILL.md', k:'s',
+   lead:'11 通用 + 1 可选',
+   chips:SKILLS.map(s=>[s.id,s.n.replace('（可选）','')]),
+   tail:'references/ 按当前子任务再读，不预载'},
+  {i:'④', n:'工具层 · Tools', role:'用什么做', bound:'只提议，不自动安装', k:'t',
+   lead:'5 个能力维度',
+   chips:[['cap:code-structure','code-structure'],['cap:web-research','web-research'],['cap:knowledge-retrieval','knowledge-retrieval'],['cap:data-access','data-access'],['cap:test-execution','test-execution']],
+   tail:'能力契约（fstar 定）→ 绑定（用户配）→ 实际工具（外部）｜分类器三层：L1 探测 → L2 按能力匹配 → L3 验证｜Python 确定性实现，AI 不进分类路径'},
+  {i:'⑤', n:'产物层 · Templates', role:'文档骨架', bound:'不是命令 / 授权记录 / 触发器', k:'t',
+   lead:'15 份',
+   chips:TEMPLATES.flatMap(g=>g.items.map(t=>[t.id,t.n])),
+   tail:'task×5 · knowledge×3 · entry×2 · optional×5'},
+  {i:'⑥', n:'存储层 · 目录结构', role:'内容归属与持久化', bound:'运行状态分离在 runtime/', k:'d',
+   lead:'三级',
+   chips:[['d:user','用户级 ~/.fstar/'],['d:proj','项目级 .fstar/'],['d:task','任务级 tasks/<id>/'],['d:rt','runtime/（不入库）']],
+   tail:'已有 README / docs 优先引用，不复制'},
+  {i:'⑦', n:'底座 · 核心命令 + 状态机', role:'唯一权威，Agent 自觉不算数', bound:'硬拒非法转移', k:'c',
+   lead:'9 个命令族',
+   chips:COMMANDS.map(c=>[c.id,c.n]),
+   tail:'7 阶段 + fixing 闭环 + dropped 终态 ｜ phase(标量) · evidence(可失效) · ownership(租约/心跳)'},
+];
+const CONNS = [
+  '注入：当前任务 / 阶段 / 阻塞 / 待办提醒',
+  '调用能力',
+  '需要外部能力时查绑定',
+  '写产物时套用骨架',
+  '落到',
+  '任何写入必须经过',
+];
+
+function chip(id,label,k,extra){
+  const e=document.createElement('span');
+  e.className='chip k-'+k; e.dataset.id=id; if(extra)e.dataset.rel=extra;
+  e.innerHTML='<i class="bul"></i><span>'+label+'</span>';
+  e.addEventListener('mouseenter',()=>hl(id));
+  e.addEventListener('mouseleave',()=>hl(null));
+  e.addEventListener('click',ev=>{ev.stopPropagation();pin(id)});
+  return e;
+}
+function renderStack(){
+  const box=document.getElementById('stack');
+  LAYERS.forEach((L,idx)=>{
+    const sec=document.createElement('div');
+    sec.className='layer'; sec.style.setProperty('--dc','var(--'+L.k+')');
+    sec.innerHTML=`<div class="lhead"><span class="idx">${L.i}</span><span class="nm">${L.n}</span><span class="role">${L.role}</span><span class="bound">${L.bound}</span></div>`;
+    const body=document.createElement('div'); body.className='lbody';
+    const lead=document.createElement('span'); lead.className='lead'; lead.textContent=L.lead; body.appendChild(lead);
+    L.chips.forEach(([id,label])=>body.appendChild(chip(id,label,L.k)));
+    if(L.tail){const t=document.createElement('span');t.className='chip norel';t.style.fontSize='11.5px';t.textContent=L.tail;body.appendChild(t);}
+    sec.appendChild(body); box.appendChild(sec);
+    if(idx<CONNS.length){
+      const c=document.createElement('div'); c.className='conn';
+      c.innerHTML=`<span class="stem"></span><span class="lbl">${CONNS[idx]}</span><span class="stem"></span><span class="ar">▼</span>`;
+      box.appendChild(c);
+    }
+  });
+}
+
+/* ═══════════════ 视图 2：状态机 + 矩阵 ═══════════════ */
+const SM_FLOW=['drafting','planned','implementing','checking','awaiting_acceptance','done','archived'];
+function renderSM(){
+  const box=document.getElementById('sm');
+  const mk=(pid,label)=>{
+    const p=PHASES.find(x=>x.id===pid);
+    const e=document.createElement('span'); e.className='ph'; e.dataset.ph=pid;
+    e.style.setProperty('--pc',p.c);
+    e.innerHTML=`<span class="dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${p.c};margin-right:6px"></span>${label||p.n}`;
+    e.addEventListener('mouseenter',()=>rowHi(pid));
+    e.addEventListener('mouseleave',()=>rowHi(null));
+    e.addEventListener('click',()=>{rowHi(pid,true)});
+    return e;
+  };
+  SM_FLOW.forEach((pid,i)=>{
+    box.appendChild(mk(pid));
+    if(i<SM_FLOW.length-1){const a=document.createElement('span');a.className='ar';a.textContent='→';box.appendChild(a);}
+  });
+  const loop=document.createElement('span'); loop.className='loop';
+  loop.textContent='↺ checking ⇄ fixing（失败闭环）';
+  box.appendChild(loop);
+  const sep=document.createElement('span'); sep.className='sep2'; box.appendChild(sep);
+  const d=document.createElement('span'); d.className='ph term'; d.dataset.ph='dropped';
+  d.innerHTML='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--fg3);margin-right:6px"></span>dropped';
+  d.addEventListener('mouseenter',()=>rowHi('dropped')); d.addEventListener('mouseleave',()=>rowHi(null));
+  box.appendChild(d);
+  const sep2=document.createElement('span'); sep2.className='sep2'; box.appendChild(sep2);
+  ['remind','learn','recall','light'].forEach(pid=>{
+    const e=mk(pid); e.classList.add('term'); box.appendChild(e);
+    const a=document.createElement('span');a.className='gap';box.appendChild(a);
+  });
+  const lab=document.createElement('span'); lab.className='loop'; lab.style.borderColor='var(--line2)'; lab.style.color='var(--fg3)';
+  lab.textContent='后 4 项为跨阶段能力，不在状态机主链上';
+  box.appendChild(lab);
+}
+const DIMS=[['h','Hook'],['a','Agent'],['s','Skill'],['cmd','命令'],['tpl','Template'],['f','产物']];
+const DIMK={h:'h',a:'a',s:'s',cmd:'c',tpl:'t',f:'f'};
+function renderMatrix(){
+  const t=document.getElementById('mx');
+  let h='<thead><tr><th class="rowh">阶段</th>';
+  DIMS.forEach(([d,l])=>{h+=`<th><span class="bul" style="background:var(--${DIMK[d]})"></span>${l}</th>`;});
+  h+='</tr></thead><tbody>';
+  MATRIX.forEach(row=>{
+    const p=PHASES.find(x=>x.id===row.p);
+    h+=`<tr data-ph="${row.p}" class="${p.cross?'cross':''}">`;
+    h+=`<th class="rowh"><div class="phname"><span class="dot" style="background:${p.c}"></span><span class="t">${p.n}</span><span class="s">${p.s}</span></div></th>`;
+    DIMS.forEach(([d])=>{
+      const cells=row.c[d]||[];
+      if(!cells.length){h+='<td><span class="none">—</span></td>';return;}
+      h+='<td><div class="stackv">';
+      cells.forEach(([id,label],i)=>{
+        if(i) h+='<span class="plus">或</span>';
+        h+=`<span class="chip k-${DIMK[d]}" data-id="${id}"><i class="bul"></i>${label}</span>`;
+      });
+      h+='</div></td>';
+    });
+    h+='</tr>';
+  });
+  h+='</tbody>';
+  t.innerHTML=h;
+  t.querySelectorAll('.chip').forEach(e=>{
+    e.addEventListener('mouseenter',()=>hl(e.dataset.id));
+    e.addEventListener('mouseleave',()=>hl(null));
+    e.addEventListener('click',ev=>{ev.stopPropagation();pin(e.dataset.id)});
+  });
+}
+
+/* ═══════════════ 高亮 / 详情 ═══════════════ */
+let pinned=null, hovered=null;
+function rels(id){const e=document.querySelector('[data-id="'+id+'"]');return e&&e.dataset.rel?e.dataset.rel.split(','):[];}
+function hlSet(){ const s=new Set(); const a=hovered||pinned; if(a){s.add(a);rels(a).forEach(r=>s.add(r));} return s; }
+function hl(id){ hovered=id; applyHL(); }
+function applyHL(){
+  const s=hlSet(), on=s.size>0;
+  document.querySelectorAll('[data-id]').forEach(e=>{
+    const id=e.dataset.id, r=e.dataset.rel?e.dataset.rel.split(','):[];
+    const hit=!on || s.has(id) || r.some(x=>s.has(x));
+    e.classList.toggle('dim',on&&!hit);
+    e.classList.toggle('pin',on&&s.has(id));
+    e.classList.toggle('was',on&&!s.has(id)&&r.some(x=>s.has(x)));
+  });
+  document.querySelectorAll('tr[data-ph]').forEach(tr=>{
+    const hit=!on||[...tr.querySelectorAll('[data-id]')].some(e=>s.has(e.dataset.id));
+    tr.style.opacity=(on&&!hit)?'.34':'1';
+  });
+  if(hovered) showDetail(hovered); else if(pinned) showDetail(pinned);
+}
+function pin(id){ pinned = (pinned===id)?null:id; applyHL(); if(pinned)showDetail(pinned); else clearDetail(); }
+function clearDetail(){
+  document.getElementById('dTitle').textContent='未选中';
+  document.getElementById('dDesc').textContent='点击任意标签查看它的全部对应关系';
+  document.getElementById('dLinks').innerHTML='<span class="lt">关联：</span>';
+}
+function showDetail(id){
+  const info=INFO[id];
+  const t=document.getElementById('dTitle'), d=document.getElementById('dDesc'), l=document.getElementById('dLinks');
+  if(info){t.textContent=info.t; d.innerHTML='<span class="tagx">'+info.k+'</span> '+info.d+(info.extra?'<br>'+info.extra:'');}
+  else {t.textContent=id; d.textContent='';}
+  // 找矩阵中所有出现该实体的位置
+  const found=[];
+  MATRIX.forEach(row=>{
+    const p=PHASES.find(x=>x.id===row.p);
+    DIMS.forEach(([dm])=>{
+      (row.c[dm]||[]).forEach(([cid,label])=>{
+        if(cid===id) found.push({p:p, dm:dm, label:label});
+      });
+    });
+  });
+  l.innerHTML='<span class="lt">出现在：</span>';
+  if(!found.length){l.innerHTML+='<span class="chip norel">仅在分层图中</span>';return;}
+  found.forEach(f=>{
+    const e=document.createElement('span'); e.className='chip k-'+DIMK[f.dm];
+    e.innerHTML='<i class="bul"></i>'+f.p.n+' · '+f.label;
+    e.addEventListener('mouseenter',()=>hl(f.p.id));
+    e.addEventListener('mouseleave',()=>hl(null));
+    l.appendChild(e);
+  });
+}
+function rowHi(pid,stick){
+  document.querySelectorAll('tr[data-ph]').forEach(tr=>{
+    tr.style.background=(pid&&tr.dataset.ph===pid)?'color-mix(in srgb,var(--h) 9%,transparent)':'';
+  });
+  document.querySelectorAll('.sm .ph').forEach(e=>e.classList.toggle('on',e.dataset.ph===pid));
+  if(stick&&pid){
+    const tr=document.querySelector('tr[data-ph="'+pid+'"]');
+    if(tr)tr.scrollIntoView({block:'center',behavior:'smooth'});
+  }
+}
+
+/* ═══════════════ 视图 3：清单 ═══════════════ */
+function tbl(headers,rows){
+  let h='<div class="card" style="padding:0;overflow:auto"><table class="lt"><thead><tr>';
+  headers.forEach(x=>h+=`<th class="${x.nw?'nw':''}">${x.t||x}</th>`);
+  h+='</tr></thead><tbody>';
+  rows.forEach(r=>{h+='<tr>';r.forEach(c=>h+=`<td class="${c&&c.nw?'nw':''}">${c&&c.html!==undefined?c.html:c}</td>`);h+='</tr>';});
+  return h+'</tbody></table></div>';
+}
+function renderLists(){
+  // ── Hooks：按五类分组 ──
+  const CATCOLOR = {A:'var(--h)', B:'var(--h)', C:'var(--fg3)', D:'var(--f)', E:'var(--fg3)'};
+  let hh = `<div class="card"><h3>先厘清：这是四种不同机制，不是一个东西</h3>
+    <p class="hint" style="margin:0 0 10px">
+      只有 <b>A / B</b> 是真正的「宿主事件 hook」。C / D / E 被混进 hook 表纯属历史原因 ——
+      C 是配置里的任意 shell 扩展点，D 是被多处调用的解析函数，E 是给用户抄的外部集成模板。
+    </p>
+    <div style="overflow:auto"><table class="lt">
+    <thead><tr><th class="nw">类</th><th>名称</th><th>本质</th><th class="nw">是否内置</th><th class="nw">第一版</th><th>与 Skill 的关系</th></tr></thead>
+    <tbody>`;
+  HOOK_CATS.forEach(c=>{
+    hh += `<tr>
+      <td class="nw"><span class="tagx" style="border-color:${CATCOLOR[c.k]};color:${CATCOLOR[c.k]};font-weight:700">${c.k}</span></td>
+      <td><b>${c.n}</b></td><td>${c.sub}</td>
+      <td class="nw">${c.builtin}</td><td class="nw">${c.v1}</td><td>${c.note}</td></tr>`;
+  });
+  hh += `</tbody></table></div></div>`;
+
+  HOOK_CATS.forEach(c=>{
+    const items = HOOKS.filter(x=>x.cat===c.k);
+    if(!items.length) return;
+    hh += `<h3 style="margin-top:4px"><span class="tagx" style="border-color:${CATCOLOR[c.k]};color:${CATCOLOR[c.k]};font-weight:700">${c.k}</span> ${c.n} <span style="font-weight:400;font-size:12px;color:var(--fg3)">— ${c.sub}</span></h3>`;
+    hh += tbl(['名称','触发','fstar 行为','对应 Skill','绑定','落盘'],
+      items.map(x=>[
+        {html:`<span class="chip ${c.k==='A'||c.k==='B'?'k-h':'norel'}" ${c.k==='A'||c.k==='B'?`data-id="${x.id}"`:''}><i class="bul" style="background:${CATCOLOR[c.k]}"></i>${x.n}</span>`},
+        x.tr, x.do,
+        {html:x.sk==='无'?'<span class="none">无</span>':`<span class="tagx">${x.sk}</span>`},
+        {html:x.bind==='硬'?'<span class="tagx" style="color:var(--s)">硬绑定</span>':x.bind==='软'?'<span class="tagx">软触发</span>':'—'},
+        {html:`<code>${x.out}</code>`}]));
+  });
+
+  hh += `<div class="card"><h3>关键：hook 不「对应」skill</h3>
+    <p class="hint" style="margin:0 0 10px">正确关系是 <b>hook 提供判断依据，skill 由 description 触发</b>，不是硬绑定。</p>
+    <pre class="tree" style="line-height:1.85">Hook（时机） ──注入上下文──▶ 主 Agent ──读到内容──▶ 触发某个 Skill
+                                                    <span class="c">（靠 description 匹配，不是 hook 写死）</span>
+
+<span class="c">例：</span>session-context 注入「当前任务 + 阶段」
+     └─▶ 主 Agent 读到 <span class="hl2">awaiting_acceptance</span>
+           └─▶ 匹配到 <span class="hl3">fstar-finish</span> 的 description
+                 └─▶ 调用 fstar-finish</pre>
+    <div style="margin-top:12px;font-size:12.5px;color:var(--fg2);line-height:1.85">
+      <b>唯一的例外是 <code>worker-context</code>：</b>它必须按 role 分流（implement 角色注入实现上下文、check 角色注入检查清单），
+      这是<b>硬绑定</b>，因为派发时角色已经确定，不需要靠 description 猜。
+    </div>
+    <p class="hint" style="margin:12px 0 0">
+      所以「hook 是否都对应一个 skill」的答案是：<b>对应「工作流环节」的有，对应「基础设施 / 扩展点」的没有。</b>
+    </p></div>`;
+
+  hh += `<div class="card"><h3>第一版明确不做的</h3><p class="hint" style="margin:0">避免把「提醒」做成「自动」</p>
+     <ul style="margin:8px 0 0;padding-left:20px;font-size:12.5px;color:var(--fg2);line-height:1.9">
+     <li>❌ 独立归档提醒 hook → 收敛进 <code>fstar-continue</code> 的巡检逻辑</li>
+     <li>❌ 每次文件修改后自动检查（PostToolUse）</li>
+     <li>❌ 会话结束自动总结 / 自动沉淀</li>
+     <li>❌ 自动 commit / push / 验收 / 归档</li>
+     <li>❌ 用户级或项目级的自定义 hook 执行入口（= C 类不开放）</li>
+     <li>❌ 外部 issue 系统同步（= E 类不带）</li></ul></div>`;
+  document.getElementById('p1').innerHTML = hh;
+
+  // Skills
+  document.getElementById('p2').innerHTML = tbl(
+    ['Skill','触发','Agent','核心命令 / 状态转移','模板','落盘位置','references','不负责'],
+    SKILLS.map(s=>[
+      {html:`<span class="chip k-s" data-id="${s.id}"><i class="bul"></i>${s.n}</span>`},
+      s.tr,s.ag,{html:`<code>${s.cmd}</code>`},s.tpl==='—'?'—':s.tpl,{html:`<code>${s.out}</code>`},
+      s.refs.length?{html:s.refs.map(r=>`<span class="tagx">${r}</span>`).join(' ')}:'—',s.no]))
+  + `<div class="card"><h3>与 Trellis 的对应</h3>
+     <p class="hint" style="margin:0">10 通用 + 1 可选 UI 技能；3 个 Agent 角色。触发靠 description 精确描述用户意图，不靠主 Agent 记忆。每次只加载命中的 SKILL.md；references/ 按当前子任务再读。<b>不新增技能索引层</b>——宿主已用 skillListingBudgetFraction 封顶描述预算，超预算描述被丢弃导致自动触发静默失效，属个人配置策展问题。</p></div>`;
+
+  // Agents
+  document.getElementById('p3').innerHTML = tbl(
+    ['Agent','输入','输出','禁止','对应目录'],
+    AGENTS.map(a=>[
+      {html:`<span class="chip k-a" data-id="${a.id}"><i class="bul"></i>${a.n}</span>`},
+      a.inp,a.out,a.no,{html:`<code>${a.dir}</code>`}]))
+  + `<div class="card"><h3>派发传输（2026-10-27 已定：原生优先）</h3>
+     <p class="hint" style="margin:0 0 10px">协议由 fstar 定义、适配器由 fstar 实现；对等进程运行时<b>后置</b>，不是放弃。理由：四个差异化能力都不在派发层，原生代码量小 3–5 倍，协议抽象对了实现可替换。</p>
+     <div class="grid2" style="margin-top:8px">
+      <div><span class="tagx" style="border-color:var(--s);color:var(--s);font-weight:700">✅ v1 采用 · 宿主原生子 Agent</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">Claude Code <code>Task</code>/<code>Agent</code>、Codex <code>SubagentStart</code>。零额外进程、上下文同源、hook 注册点单一。<br><b>代价：</b>平台相关、消息送达有延迟（下一工具轮次才到）、<b>跨会话恢复未验证</b>。</div></div>
+      <div><span class="tagx">⏸ 后置 · 自研协作运行时</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">对等进程 + <code>events.jsonl</code> + 适配器。平台中立、可重放、可接管、Codex 真 <code>turn/steer</code>/<code>turn/interrupt</code>。<br><b>代价：</b>1,670–2,310 行；与原生并存则两套语义长期并存（Trellis 的教训）。</div></div>
+     </div>
+     <p class="hint" style="margin:10px 0 0"><b>必记风险：</b>跨会话 worker 恢复在原生方案下未验证。若不可用，v1 接受「重派」降级，<code>fstar-continue</code> 需写明 <code>orphaned</code> 首选动作从「唤醒原执行者」降级为「重派」。<br>角色卡只写权限 / 输入契约 / 交付格式，<b>方法细节放 skill reference</b>。详见 <code>policy-decisions.md</code>。</p></div>`;
+
+  // Templates
+  let th='';
+  TEMPLATES.forEach(g=>{
+    th+=`<h3>${g.g}</h3>`+tbl(['模板','产物位置','核心内容'],
+      g.items.map(t=>[{html:`<span class="chip k-t" data-id="${t.id}"><i class="bul"></i>${t.n}</span>`},
+        {html:`<code>${t.out}</code>`},t.note]));
+  });
+  document.getElementById('p4').innerHTML = th + `<div class="card"><h3>已合并掉的旧资产</h3>
+    <ul style="margin:8px 0 0;padding-left:20px;font-size:12.5px;color:var(--fg2);line-height:1.9">
+    <li><code>test-execution.zh-CN.md</code> → 并入 <code>task/check.md</code>（用例定义与运行结果必须切开）</li>
+    <li><code>technical-design-profiles.zh-CN.md</code> → 降为 <code>plan</code> 的 <code>references/design-profiles.md</code></li>
+    <li><code>review-change.zh-CN.md</code> → 作为 <code>acceptance/</code> + <code>task.json</code> 的人类可读视图</li>
+    <li><code>templates/knowledge/decision.md</code> → <b>已删除</b>（用户确认第一版不设独立 <code>decisions/</code>）</li></ul>
+    <p class="hint" style="margin:10px 0 0"><b>命名冲突待处理：</b>旧 <code>prd.zh-CN.md</code>（人读产品需求书）与 fstar <code>prd.md</code>（任务记录）同名不同物，必须改名或明确双轨，否则两处权威源冲突。</p></div>`;
+
+  // 目录
+  document.getElementById('p5').innerHTML = `<div class="card"><h3>安装包（产品默认资源）</h3>
+    <pre class="tree">hooks/                          <span class="c">平台无关逻辑入口</span>
+adapters/&lt;宿主&gt;/                <span class="c">claude │ codex 的事件·配置·安装适配</span>
+workflows/default.md            <span class="c">阶段与角色路由（条件块表达平台差异）</span>
+skills/fstar-*/SKILL.md         <span class="c">能力层</span>
+skills/fstar-*/references/      <span class="c">按需参考</span>
+agents/{research,implement,check}.md
+templates/{entry,task,knowledge,optional}/
+capabilities/&lt;能力&gt;.md          <span class="c">④ 工具层：能力契约（判定要点 + 降级路径）</span>
+schemas/                        <span class="c">task / context / event / acceptance 格式校验</span></pre></div>
+    <div class="card"><h3>用户级 <code>~/.fstar/</code> —— 跨项目个人内容</h3>
+    <pre class="tree"><span class="hl2">index.md</span>                <span class="c">个人内容索引（条目摘要 + 适用情形 + 路径）</span>
+<span class="hl2">config.yaml</span>              <span class="c">用户默认配置、工作流版本/来源、平台选择</span>
+<span class="hl2">.gitignore</span>               <span class="c">忽略 runtime/ 与本机配置</span>
+config.local.yaml        <span class="c">本机路径、可执行文件位置（不入库）</span>
+<span class="hl3">rules/&lt;主题&gt;.md</span>          <span class="c">明确约束，带范围·来源·原因</span>
+<span class="hl3">memory/&lt;主题&gt;.md</span>         <span class="c">偏好与经验，非强制</span>
+workflows/&lt;名称&gt;.md      <span class="c">自定义或覆盖流程</span>
+skills/&lt;能力&gt;/           <span class="c">SKILL.md + references/ + scripts/</span>
+capabilities/&lt;能力&gt;.md   <span class="c">覆盖/扩展能力契约</span>
+templates/&lt;产物&gt;.md      <span class="c">自定义模板</span>
+tools.yaml               <span class="c">探测结果 + 能力→工具绑定</span>
+tools.local.yaml         <span class="c">本机路径、验证状态（不入库）</span>
+<span class="dim5">runtime/projects.json</span>        <span class="c">已知项目 ID ↔ 本机路径</span>
+<span class="dim5">runtime/sessions/&lt;id&gt;.json</span>   <span class="c">非项目会话定位</span></pre></div>
+    <div class="card"><h3>项目级 <code>&lt;项目&gt;/.fstar/</code> —— 项目知识与任务</h3>
+    <pre class="tree"><span class="hl2">index.md</span>                <span class="c">项目短背景、入口、规范索引（引用已有 docs）</span>
+<span class="hl2">config.yaml</span>              <span class="c">稳定项目 ID、配置格式版本、工作流选择</span>
+.gitignore / config.local.yaml
+<span class="hl3">specs/&lt;主题&gt;.md</span>          <span class="c">已确认的项目规范（约束与做法）</span>
+specs/&lt;领域&gt;/index.md    <span class="c">子索引（规模需要时才建）</span>
+<span class="hl4">knowledge/</span>             <span class="c">长期知识（事实与历史，不随任务归档消失）</span>
+  decisions/             <span class="c">长期决定与原因，时间序，不覆盖</span>
+  references/            <span class="c">外部资料快照 + 来源</span>
+  context/               <span class="c">领域术语、上下文、常见问题</span>
+tools.yaml               <span class="c">项目级能力绑定覆盖</span>
+<span class="hl4">tasks/&lt;任务ID&gt;-&lt;名称&gt;/</span>
+archive/&lt;年份月份&gt;/&lt;任务目录&gt;/
+<span class="dim5">runtime/sessions/  runtime/leases/  runtime/reminders.json</span>   <span class="c">不入库</span></pre></div>
+    <div class="card"><h3>任务级 <code>tasks/&lt;任务ID&gt;-&lt;名称&gt;/</code></h3>
+    <pre class="tree"><span class="hl2">task.json</span>          <span class="c">稳定 ID·标题·阶段·阻塞·依赖·文档修订·交付版本·证据引用</span>
+<span class="hl2">prd.md</span>             <span class="c">用户问题·目标·范围·验收条件·未决问题</span>
+<span class="hl2">design.md</span>          <span class="c">技术边界·数据接口·取舍·兼容性</span>
+<span class="hl2">implement.md</span>       <span class="c">执行步骤·验证方式·检查点·回退</span>
+<span class="hl2">implement.jsonl</span>    <span class="c">实施时注入的上下文清单（每行 file + reason）</span>
+<span class="hl2">check.jsonl</span>        <span class="c">检查时注入的上下文清单（每行 file + reason）</span>
+<span class="hl2">events[]</span>          <span class="c">task.json 内追加式事件数组：阶段变化·租约·修订引用</span>
+<span class="hl3">research/&lt;主题&gt;.md</span>
+<span class="hl4">acceptance/check-&lt;序号&gt;.md</span>
+acceptance/acceptance-&lt;序号&gt;.json
+acceptance/artifacts/
+<span class="hl3">subtasks/&lt;子任务ID&gt;-&lt;名称&gt;/</span>      <span class="c">子任务同构，不复制父任务背景</span></pre>
+    <h3 style="margin-top:14px">最小创建量</h3>
+    <p class="hint" style="margin:0">用户级持久化 <b>3</b> 个文件 · 正式项目初始化 <b>3</b> 个文件 · 创建任务 <b>2</b> 个文件· 小事 <b>0</b> 个</p></div>`;
+
+  // 命令
+  document.getElementById('p6').innerHTML = tbl(
+    ['命令','职责','备注'],
+    COMMANDS.map(c=>[{html:`<span class="chip k-c" data-id="${c.id}"><i class="bul"></i>${c.n}</span>`},c.do,c.note]))
+  + `<div class="card"><p class="hint" style="margin:0"><b>Trellis 正是栽在 <code>archive</code> 这一步：</b>它的「完成」由<b>目录位置</b>定义（子任务不在 <code>tasks/</code> 里就算完成），任何验收与证据模型都必须在移动之前落盘，移动后 active 指针已被删除。</p></div>`;
+
+  // 能力维度
+  const CAPS=[
+    {id:'cap:code-structure', n:'code-structure', ans:'X 在哪定义 / 谁调用它 / 改这里影响什么', pts:['符号级定位（定义 / 引用 / 影响面）','结果可追溯到 文件:行','能区分「符号不存在」与「工具没索引到」'], rec:'CodeGraph、LSP', deg:'无法回答影响面 → 明确说明缺口，不用字面量结果冒充结构结论'},
+    {id:'cap:web-research', n:'web-research', ans:'当前版本 / 官方文档 / 上游仓库事实', pts:['能读到原始来源','能给出版本与出处','外部事实可复验'], rec:'WebSearch、gh、Exa MCP', deg:'来源不可达 → 报告该来源未读到，不以推测代替'},
+    {id:'cap:knowledge-retrieval', n:'knowledge-retrieval', ans:'找回项目里以前做过的决定和文档', pts:['集合新鲜度','关键词与语义两条路线','来源路径可验证'], rec:'QMD、项目已有索引', deg:'检索质量不足 → 说明覆盖/召回缺口，不重复已拒请求'},
+    {id:'cap:data-access', n:'data-access', ans:'查 schema、查数据、跑只读 SQL', pts:['只读边界','最小权限','连接与查询真成功'], rec:'DBHub、psql', deg:'无法连指定数据源 → 退到本地 schema / 迁移 / fixture，声明未验证项'},
+    {id:'cap:test-execution', n:'test-execution', ans:'跑起来看结果对不对', pts:['有可执行命令','结果可复现','失败能定位'], rec:'项目自带 runner', deg:'无可执行命令 → 列为未覆盖项，不以静态检查冒充执行'},
+  ];
+  document.getElementById('p8').innerHTML = `
+    <div class="card"><h3>能力契约 → 绑定 → 实际工具</h3>
+      <p class="hint" style="margin:0 0 12px"><b>fstar 相对 Trellis 的第 5 个自研增量。</b>Trellis 的工具是写死的（指南直接点名 CodeGraph / QMD / Exa，hook 是固定脚本），工具换了就偏离上游文档。fstar 拆成三层：</p>
+      <pre class="tree" style="line-height:1.9"><span class="hl3">能力 capability</span>     稳定，fstar 定义，跨人不变
+                    <span class="c">定义 · 判定要点 · 降级路径 · 记录要求</span>
+                         ↑
+<span class="hl4">绑定 binding</span>       可变，用户/项目配置，随时可换
+                    <span class="c">能力 → 实际工具 · 作用域 · 授权状态 · 选择理由</span>
+                         ↓
+<span class="hl2">工具 tool</span>          外部事实，随时会变
+                    <span class="c">CLI / MCP server / 宿主 skill / 内置能力</span></pre>
+      <p class="hint" style="margin:12px 0 0">
+        由此解决两个难点：<b>每人工具不同</b> → 各写各的绑定，契约一个字不改；
+        <b>工具不定时变化</b> → 探测结果带 <code>detected_at</code>，<b>只提议、不自动换</b>。
+      </p></div>
+
+    <div class="card"><h3>分类器三层 · <span style="font-size:13px;font-weight:500;color:var(--fg2)">Python 确定性实现，AI 不进分类路径</span></h3>
+      <div class="grid2" style="margin-top:8px">
+        <div><span class="tagx">L1 存在性探测</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">清点 PATH 可执行文件 / MCP server / 已装 skill，产出候选清单（名+类型+版本）。<br><b>不做判断</b>，只做清点。</div></div>
+        <div><span class="tagx">L2 能力特征匹配</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">读工具自述（<code>--help</code> / MCP tool 列表 / skill description），与维度<b>判定要点</b>匹配。<br><b>不靠名字匹配</b>，靠能力描述。</div></div>
+        <div><span class="tagx">L3 绑定与验证</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">生成提案 → 用户确认 → 写 <code>tools.yaml</code>。三层验证：可发现 → 客户端加载 → 一次最小真实调用。</div></div>
+        <div><span class="tagx" style="border-color:var(--c);color:var(--c)">硬边界</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px"><b>fstar 只提议，不装。</b>能力缺失 → 说明缺口 + 给建议来源 + 走降级路径。发现工具缺失不等于有权自动安装。</div></div>
+      </div>
+      <h3 style="margin-top:16px">L2 内部三档 <span style="font-size:13px;font-weight:500;color:var(--fg2)">— 解决「新工具不定时冒出来」</span></h3>
+      <div class="grid2" style="margin-top:8px">
+        <div><span class="tagx">L2a 声明式注册表</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">安装包 <code>registry/&lt;tool&gt;.yaml</code> 声明能力映射。<br><b>精确</b>，可 review 可回滚。</div></div>
+        <div><span class="tagx">L2b 维度通用探针</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">能力契约自带探测模式，试未注册工具。<br>召回中等，<b>命中一律标 weak</b>。</div></div>
+        <div><span class="tagx">L2c 未分类残渣</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">两档都没命中 → 列候选，用户手动绑一行。<br><b>不引入 AI 兜底</b>。</div></div>
+        <div><span class="tagx">升 strong 的条件</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">必须经注册表或用户确认，探针不能自行升级。</div></div>
+      </div>
+      <p class="hint" style="margin:12px 0 0"><b>三层验证大部分可脚本化：</b>「最小真实调用」= 从项目抽一个已知符号 → 跑工具 → 比对 <code>file:line</code>。CodeGraph 能否索引本仓库由脚本判定，无需 AI。<br>
+      <b>性能边界：</b>完整扫描只在 <code>fstar init</code> / 显式 <code>fstar tools scan</code>；<code>session-context</code> 只做 <code>shutil.which</code> 存在性检查 + <code>detected_at</code> 过期判断；<code>turn-context</code> 不碰工具。</p></div>
+      <p class="hint" style="margin:12px 0 0"><b>为什么必须三层：</b>旧扩展项目的实证——QMD 可执行文件在 ≠ 集合新鲜 ≠ 检索质量达标；CodeGraph 存在 ≠ 当前仓库已索引 ≠ 内容新鲜；发现 Exa/gh ≠ 认证成功 ≠ 私库权限；DB 配置存在 ≠ 指定数据源连接 ≠ 查询成功。</p></div>
+
+    <h3>第一版 5 个能力维度</h3>
+    ${CAPS.map(c=>`<div class="card"><h3><span class="chip k-t" data-id="${c.id}"><i class="bul"></i>${c.n}</span></h3>
+      <div style="font-size:12.5px;color:var(--fg2);line-height:1.8">
+        <b>能回答：</b>${c.ans}<br>
+        <b>判定要点：</b>${c.pts.map(x=>'<span class="tagx">'+x+'</span>').join(' ')}<br>
+        <b>推荐实现：</b>${c.rec}<br>
+        <b>降级路径：</b>${c.deg}
+      </div></div>`).join('')}
+
+    <div class="card"><h3>三个挂钩点</h3>
+      <div class="grid2" style="margin-top:8px">
+        <div><span class="tagx">初始化</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px"><code>fstar-init</code> 跑 L1 探测 + L2 匹配，生成绑定提案；用户确认后写 <code>tools.yaml</code>。</div></div>
+        <div><span class="tagx">Hook</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px"><code>session-context</code> 检查 <code>detected_at</code> 是否过期、有无新增可用工具 → <b>提示</b>「检测到新工具 X，可能匹配维度 Y」；<b>不自动改绑定</b>。</div></div>
+        <div><span class="tagx">Skill</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px">新增 <code>fstar-tools</code>：查绑定 → 按需三层验证 → 调用 → 记录用了哪个 → 缺口时按契约降级。</div></div>
+        <div><span class="tagx">记录</span><div style="font-size:12.5px;color:var(--fg2);margin-top:6px"><code>task.json</code> 的 <code>capabilities[]</code> 记 capability + tool + 版本；检查报告记录实际使用的能力/工具/版本。</div></div>
+      </div></div>
+
+    <div class="card"><h3>存储落点</h3>
+      ${tbl(['路径','内容','入库'],[
+        ['<code>~/.fstar/tools.yaml</code>','探测结果 + 能力→工具绑定','✅'],
+        ['<code>~/.fstar/tools.local.yaml</code>','本机路径、验证状态','❌'],
+        ['<code>.fstar/tools.yaml</code>','项目级覆盖','✅'],
+        ['<code>~/.fstar/runtime/tool-status.json</code>','验证结果（事实）','❌'],
+        ['<code>~/.fstar/tools/registry.d/*.yaml</code>','用户自写的工具注册条目','✅'],
+        ['安装包 <code>registry/*.yaml</code>','fstar 维护的已知工具注册表','✅'],
+      ])}
+      <p class="hint" style="margin:10px 0 0">优先级：<b>项目级 &gt; 用户级 &gt; 安装包默认推荐</b>（与已定的「项目规范优先于全局」同构）。注册表同理：<b>用户 <code>registry.d/</code> &gt; 安装包 <code>registry/</code></b>。</p></div>`;
+
+  // 缺口
+  document.getElementById('p7').innerHTML = tbl(
+    ['#','能力','归属','状态'],
+    [[9,'归档巡检与提醒','fstar-continue','<span class="wa">需补：巡检项清单、去重与暂缓键、提醒文案</span>'],
+     [10,'提交与发布','fstar-finish 内分「提交 → 验收 → 归档」三段','<span class="ok">不新增技能</span>'],
+     [11,'回滚','fstar-execute 异常路径','<span class="ok">不单列技能</span>'],
+     [12,'证据失效判定','唯一归属 fstar-check（算+标）；plan 只提升指纹；execute 只读不判','<span class="ok">已定</span>'],
+     [13,'多会话租约接管','fstar-continue（他人活跃租约只读不写）','<span class="wa">需显式化</span>'],
+     [14,'产品自身升级 / 迁移','CLI 更新机制，fstar-help 提供说明','<span class="wa">可延后</span>']]
+  ) + `<h3>文档冲突</h3>` + tbl(['项','冲突','处置'],
+    [['skills 数量','~~hooks-skills-templates.md 列 12 个（含 fstar-research）~~ 已同步（2026-10-26）','两份文件均为 10+1'],
+     ['调研能力归属','早期把 trellis-research 当 skill','已确认是 Agent 角色，<b>无同名 skill</b>'],
+     ['技能常驻成本','曾按 338 个技能全量描述估 23k tokens 常驻','实际由宿主封顶在 ~2,720 tokens（上下文 1%）；代价是超预算描述被丢弃导致自动触发静默失效']])
+  + `<h3>尚未定的技术细节</h3>` + tbl(['项','影响'],
+    [['task.json events[] 的事件粒度与容量上限','决定追加式事件数组的字段与裁剪策略'],
+     ['task.json 写入的事务一致性','决定命令实现形态（写顺序、失败恢复）'],
+     ['验收 JSON 的可核验确认来源','验收记录本身不能证明真实用户授权，需宿主输入来源或其他可核验记录'],
+     ['提醒去重 / 暂缓键的格式','决定 runtime/reminders.json 的 schema'],
+     ['租约接管记录格式','决定 runtime/leases/&lt;任务ID&gt;.json 的 schema'],
+     ['版本固定机制','CLI 包版本 / 已安装资源版本 / 数据格式版本，三者关系待定义'],
+     ['~~两条派发路径的取舍~~ ✅ 已定（2026-10-27）：原生优先 + 协议接口，运行时后置','原生方案下跨会话 worker 恢复未验证 → 重派降级'],
+     ['旧 prd.zh-CN.md 改名','避免与 fstar prd.md 双权威']]);
+}
+
+/* ═══════════════ 时序表 ═══════════════ */
+const SEQ=[
+  ['用户','启动会话','—'],
+  ['Hook','session-context → 识别项目、定位当前任务、注入摘要','①'],
+  ['主 Agent','调 fstar-clarify；需要外部事实时派 research agent','②③'],
+  ['主 Agent','task create → task.json + prd.md','⑥'],
+  ['主 Agent','复杂度判定 → design.md / implement.md / subtasks/','③④⑤'],
+  ['主 Agent','state set drafting→planned','⑥'],
+  ['用户','<b>★ 闸门 1</b>：启动确认','—'],
+  ['主 Agent','调 fstar-execute；lease acquire（单写者）','②③⑥'],
+  ['Hook','worker-context → 按 implement 角色注入上下文','①'],
+  ['派发','宿主原生子 Agent（协议自研；跨会话恢复未验证则重派降级）','②'],
+  ['执行者','交付：变更清单 + 自检结果','②'],
+  ['Hook','worker-result → 存交付引用，安排检查（≠ 验收）','①'],
+  ['主 Agent','派 check agent → acceptance/check-<n>.md（带 validates 指纹）','②③'],
+  ['主 Agent','verdict=fail → fixing → 回 implement → 修复 → 回 checking','⑥'],
+  ['主 Agent','verdict=pass → awaiting_acceptance（证据指纹须 = 当前需求/设计指纹）','⑥'],
+  ['用户','<b>★ 闸门 2</b>：验收确认','—'],
+  ['主 Agent','fstar-finish：提交 → acceptance-<n>.json','③⑤'],
+  ['主 Agent','fstar-learn 候选 → 用户确认 → rules / memory / specs','③⑤'],
+  ['主 Agent','archive 判据满足 → 整棵目录移入 archive/<年月>/','⑤⑥'],
+  ['Hook','turn-context 巡检 → 提醒「还有哪些完成没归档」（可暂缓·去重，不自动归档）','①'],
+];
+function renderSeq(){
+  document.getElementById('seq').innerHTML = SEQ.map(r=>
+    `<tr><td class="nw">${r[0]}</td><td>${r[1]}</td><td class="nw">${r[2]==='—'?'—':'<span class="tagx">'+r[2]+'</span>'}</td></tr>`).join('');
+}
+
+/* ═══════════════ Mermaid 源码 ═══════════════ */
+const MERM = `flowchart TB
+  subgraph L1["① 触发层 · Hooks（只做定位，不做判定）"]
+    H1[session-context]:::h
+    H2[turn-context]:::h
+    H3[worker-context]:::h
+    H4[worker-result]:::h
+  end
+  subgraph L2["② 编排层 · Agent 角色"]
+    A0[主 Agent]:::a
+    A1[research]:::a
+    A2[implement]:::a
+    A3[check]:::a
+  end
+  subgraph L3["③ 能力层 · Skills"]
+    S1[fstar-clarify]:::s
+    S2[fstar-execute]:::s
+    S3[fstar-check]:::s
+    S4[fstar-finish]:::s
+    S5[fstar-continue]:::s
+    S6[fstar-learn]:::s
+  end
+  subgraph L3T["④ 工具层 · Tools"]
+    T1[code-structure]:::t
+    T2[web-research]:::t
+    T3[knowledge-retrieval]:::t
+    T4[data-access]:::t
+  end
+  subgraph L4["⑤ 产物层 · Templates"]
+    T1[task/prd]:::t
+    T2[task/check]:::t
+    T3[knowledge/*]:::t
+  end
+  subgraph L5["⑤ 存储层 · 目录结构"]
+    D1[~/.fstar/]:::d
+    D2[.fstar/specs/]:::d
+    D3[tasks/<id>/]:::d
+    D4[archive/<年月>/]:::d
+  end
+  subgraph L6["⑥ 底座 · 核心命令 + 状态机（唯一权威）"]
+    C1[task state set]:::c
+    C2[evidence record]:::c
+    C3[task archive]:::c
+    C4[lease acquire]:::c
+  end
+
+  H1 --> A0
+  H2 --> A0
+  H3 --> A2
+  H3 --> A3
+  H4 --> A0
+  A0 --> S1
+  A0 --> S5
+  A0 --> S6
+  A0 --> A1
+  S1 --> C1
+  S2 --> C4
+  S3 --> C2
+  S5 --> C1
+  S1 --> T1
+  S3 --> T2
+  S6 --> T3
+  S1 --> T3
+  S2 --> T1
+  S3 --> T4
+  T1 --> D3
+  T2 --> D3
+  T3 --> D1
+  T3 --> D2
+  C1 --> D3
+  C3 --> D4
+
+  classDef h fill:#e8f0fb,stroke:#4a6fa5,color:#1b2129
+  classDef a fill:#efe8fb,stroke:#7c5cd6,color:#1b2129
+  classDef s fill:#e6f6ee,stroke:#1f9d6b,color:#1b2129
+  classDef t fill:#fdf3e0,stroke:#b8791b,color:#1b2129
+  classDef d fill:#eef1f5,stroke:#64748b,color:#1b2129
+  classDef c fill:#fdeceb,stroke:#d1483f,color:#1b2129`;
+
+const MERM_STATE = `stateDiagram-v2
+  [*] --> drafting
+  drafting --> planned : prd(+design/implement)
+  planned --> implementing : 用户启动确认
+  implementing --> checking : 实施交付物
+  checking --> fixing : verdict=fail
+  fixing --> checking : 修复交付物
+  checking --> awaiting_acceptance : 通过且证据指纹新鲜
+  planned --> drafting : 回规划（原因+stale+释放租约）
+  implementing --> drafting : 回规划（同上）
+  checking --> drafting : 回规划（同上）
+  fixing --> drafting : 回规划（同上）
+  awaiting_acceptance --> done : 用户验收
+  done --> archived : 归档判据全满足
+  done --> implementing : 用户重开
+  drafting --> dropped : 用户放弃
+  planned --> dropped : 用户放弃
+  implementing --> dropped : 用户放弃
+  checking --> dropped : 用户放弃`;
+
+/* ═══════════════ 启动 ═══════════════ */
+document.getElementById('nav').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('#nav button').forEach(x=>x.setAttribute('aria-selected','false'));
+  b.setAttribute('aria-selected','true');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(b.dataset.v).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected','false'));
+  b.setAttribute('aria-selected','true');
+  document.querySelectorAll('.pane').forEach(v=>v.classList.remove('on'));
+  document.getElementById(b.dataset.p).classList.add('on');
+});
+document.getElementById('copyMerm').addEventListener('click',()=>{
+  const txt=document.getElementById('mermSrc').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const b=document.getElementById('copyMerm'); b.textContent='已复制';
+    setTimeout(()=>b.textContent='复制',1400);
+  });
+});
+document.addEventListener('click',e=>{
+  if(e.target.closest('.chip'))return;
+  if(pinned){pinned=null;applyHL();clearDetail();}
+});
+// 清单页的标签：给原生 tooltip，并支持点击后在「阶段映射」页定位
+document.addEventListener('mouseover',e=>{
+  const c=e.target.closest('.chip[data-id]');
+  if(!c||c.title)return;
+  const info=INFO[c.dataset.id];
+  if(info)c.title=info.t+' · '+info.k+(info.d?'\n'+info.d:'')+(info.extra?'\n'+info.extra:'');
+});
+document.addEventListener('click',e=>{
+  const c=e.target.closest('.chip[data-id]');
+  if(!c)return;
+  const id=c.dataset.id;
+  // 找到该实体出现在哪些阶段
+  const phases=[];
+  MATRIX.forEach(r=>DIMS.forEach(([dm])=>{(r.c[dm]||[]).forEach(([cid])=>{if(cid===id)phases.push(r.p);});}));
+  if(!phases.length)return;
+  document.querySelectorAll('#nav button').forEach(x=>x.setAttribute('aria-selected','false'));
+  const nb=document.querySelector('#nav button[data-v="v2"]'); if(nb)nb.setAttribute('aria-selected','true');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('v2').classList.add('on');
+  pinned=id; applyHL(); showDetail(id);
+  const tr=document.querySelector('tr[data-ph="'+phases[0]+'"]');
+  if(tr)tr.scrollIntoView({block:'center',behavior:'smooth'});
+});
+
+renderStack(); renderSM(); renderMatrix(); renderLists(); renderSeq();
+document.getElementById('mermSrc').textContent =
+  '%% ── 分层总图 ──\n'+MERM+'\n\n%% ── 状态机 ──\n'+MERM_STATE;
+</script>
+</body>
+</html>

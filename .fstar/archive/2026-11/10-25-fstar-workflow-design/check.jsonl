@@ -1,0 +1,3 @@
+{"file":".trellis/tasks/10-25-fstar-workflow-design/design.md","reason":"Verify current authoritative state/evidence gates, native implementation, check self-repair, knowledge policies and shared interfaces"}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/research/trellis-execution-check-review.md","reason":"Independent checks, scope/version handoff and truthful evidence; do not reintroduce testcase approval"}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/research/personal-template-review.md","reason":"Validate content against approved template source and fstar adaptations"}

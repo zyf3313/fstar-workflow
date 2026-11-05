@@ -1,0 +1,3 @@
+{"file": ".trellis/tasks/10-27-e2e-verify/evidence/live-host-2026-11-01.md", "reason": "F5 gap 证据 + 真实宿主 live 验证协议（备份→install→断言→还原）"}
+{"file": ".trellis/tasks/10-25-fstar-workflow-design/design.md", "reason": "父设计 §2.3 表 46/294 行：宿主用户目录 skills/agents 适配要求"}
+{"file": "resources/runtime/routing.md", "reason": "routing 引用的 skill 名单与调用约束，宿主侧入口必须与之对齐"}

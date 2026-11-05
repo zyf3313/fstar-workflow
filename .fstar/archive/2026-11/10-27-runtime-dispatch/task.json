@@ -1,0 +1,57 @@
+{
+  "id": "0205edc6-fd77-55fc-8233-8b47a91ba918",
+  "name": "runtime-dispatch",
+  "title": "派发协议与原生适配",
+  "description": "实现 fstar 自研派发协议与原生适配（implement/check/research/editor）；check 用例批准/指纹前置校验、限测试代码写入、变更传导、失败重试与交付回收。",
+  "phase": "completed",
+  "blocked": null,
+  "evidence": [],
+  "lease": null,
+  "acceptance": null,
+  "completedAt": "2026-11-02",
+  "archivedAt": "2026-11-05",
+  "children": [],
+  "priority": "P0",
+  "creator": "FrancisZhang",
+  "assignee": "FrancisZhang",
+  "createdAt": "2026-10-27",
+  "branch": "",
+  "base_branch": "main",
+  "worktree_path": "",
+  "commit": "",
+  "pr_url": "",
+  "notes": "",
+  "meta": {
+    "trellis_migration": {
+      "migrated_at": "2026-11-05",
+      "source": ".trellis",
+      "original_status": "completed",
+      "dev_type": null,
+      "scope": "fstar v1 runtime-dispatch: fstar.dispatch.v1 native dispatch protocol; CLI dispatch prepares/validates only; single validated harvest path with replay protection; dependency/write-safe parallel groups; unified change messages; max one retry; orphan read-only recovery; editor baseline guard",
+      "package": null,
+      "subtasks": [],
+      "relatedFiles": []
+    }
+  },
+  "capabilities": [],
+  "extensions": [],
+  "events": [
+    {
+      "id": "evt-81c5347d948e",
+      "at": "2026-11-05T00:00:00Z",
+      "source": {
+        "type": "command",
+        "actor": "FrancisZhang",
+        "reference": "migration"
+      },
+      "type": "migrated",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/archive/2026-11/10-27-runtime-dispatch"
+        },
+        "from": "trellis"
+      }
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{"file":".trellis/tasks/10-25-fstar-workflow-design/prd.md","reason":"Current approved product scope, acceptance criteria and language/authorization requirements; overrides historical proposals."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/design.md","reason":"Current cross-child contracts and 32-item integration checklist; read the full file if injection truncates it."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/implement.md","reason":"Child delivery records, 515-test baseline and parent integration acceptance gates; e2e must verify against these, not historical research."}
+{"file":".trellis/tasks/10-27-e2e-verify/prd.md","reason":"This child's acceptance criteria: full lifecycle loop, review/acceptance gates, case-driven checking, minimal loop and extension negotiation."}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+    "-B",
+    "-m",
+    "unittest",
+    "test_delivery"
+  ],
+  "cwd": "isolated project fixture (removed after run)",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "F\n======================================================================\nFAIL: test_value (test_delivery.DeliveryTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/jc/_t2cms2s37g2qgn6rst44x000000gn/T/fstar-e2e-l3d6zqik/project/test_delivery.py\", line 6, in test_value\n    self.assertEqual(4, src.value)\nAssertionError: 4 != 2\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+  "duration_seconds": 0.035302415999999504,
+  "python": "3.9.6 (default, Aug 17 2026, 12:07:42) \n[Clang 21.0.0 (clang-2100.3.34.1)]",
+  "evidence_level": "fixture-test"
+}

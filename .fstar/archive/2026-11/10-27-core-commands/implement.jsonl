@@ -1,0 +1,5 @@
+{"file":".trellis/tasks/10-25-fstar-workflow-design/design.md","reason":"Current self-contained cross-child authority for core lifecycle, exact 26 fields, command surface, source/event envelopes, evidence, lease, archive root and fixed defaults."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/implement.md","reason":"Current kickoff and completion contract; §2 governs child refresh/approval, §3 defines core verification expectations."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend spec entry point; currently placeholders, so do not invent project conventions from empty guides."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/research/data-formats.md","reason":"Source-backed historical format inventory for nested storage and atomic archive concerns; parent design overrides obsolete state, field, artifact and archive-path text."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/research/trellis-execution-check-review.md","reason":"Source-backed execution/check research; apply parent design's current role, evidence and repair contract."}

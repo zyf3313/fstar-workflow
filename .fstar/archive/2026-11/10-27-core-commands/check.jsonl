@@ -1,0 +1,5 @@
+{"file":".trellis/tasks/10-25-fstar-workflow-design/design.md","reason":"Current authoritative contract to verify three-state lifecycle, exact schema, source/event envelopes, evidence freshness, lease takeover, extension actions and .fstar/archive layout."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/implement.md","reason":"Current child completion checklist, including core negative tests, source trust limitation, event cap, atomic IO and archive retry behavior."}
+{"file":".trellis/spec/backend/index.md","reason":"Quality/spec entry point; currently unfilled, use concrete child acceptance criteria and parent contract rather than placeholder rules."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/research/data-formats.md","reason":"Source-backed format history for consistency checks only; do not reinstate obsolete 23-field, seven-state, testcase approval, review-log or tasks/archive requirements."}
+{"file":".trellis/tasks/10-25-fstar-workflow-design/research/trellis-execution-check-review.md","reason":"Check role separation, measured verification evidence and scoped repair/recheck; no mocked claims of anti-AI identity security."}

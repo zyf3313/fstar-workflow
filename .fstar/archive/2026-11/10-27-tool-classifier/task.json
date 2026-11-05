@@ -1,0 +1,57 @@
+{
+  "id": "f58e1bfb-d348-57d0-9c21-18c9c07a98ad",
+  "name": "tool-classifier",
+  "title": "Python 工具分类器",
+  "description": "用 Python 实现确定性分类器：L1 存在性探测、L2a 声明式注册表、L2b 维度通用探针、L2c 未分类残渣，三层验证脚本化",
+  "phase": "completed",
+  "blocked": null,
+  "evidence": [],
+  "lease": null,
+  "acceptance": null,
+  "completedAt": "2026-11-02",
+  "archivedAt": "2026-11-05",
+  "children": [],
+  "priority": "P1",
+  "creator": "FrancisZhang",
+  "assignee": "FrancisZhang",
+  "createdAt": "2026-10-27",
+  "branch": "",
+  "base_branch": "main",
+  "worktree_path": "",
+  "commit": "",
+  "pr_url": "",
+  "notes": "",
+  "meta": {
+    "trellis_migration": {
+      "migrated_at": "2026-11-05",
+      "source": ".trellis",
+      "original_status": "completed",
+      "dev_type": null,
+      "scope": "fstar v1 tool-classifier: Python deterministic L1 inventory (PATH/MCP/skills) and L2 registry-strong/probe-weak/manual-residual classification; scan_tools -> fstar.tools.scan.v1; read-only safe probes; no AI in classification path; no auto-install; zero CLI additions",
+      "package": null,
+      "subtasks": [],
+      "relatedFiles": []
+    }
+  },
+  "capabilities": [],
+  "extensions": [],
+  "events": [
+    {
+      "id": "evt-357286b4acdd",
+      "at": "2026-11-05T00:00:00Z",
+      "source": {
+        "type": "command",
+        "actor": "FrancisZhang",
+        "reference": "migration"
+      },
+      "type": "migrated",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/archive/2026-11/10-27-tool-classifier"
+        },
+        "from": "trellis"
+      }
+    }
+  ]
+}

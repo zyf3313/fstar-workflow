@@ -1,0 +1,57 @@
+{
+  "id": "24799d11-0337-5e41-8bb9-cf22f7c7340c",
+  "name": "core-commands",
+  "title": "核心命令与状态机",
+  "description": "实现 task/state/evidence/review/lease/acceptance/archive/inspect/reminder/doc 命令与状态机；用例 approved 且指纹新鲜才准 check，证据失效、单写者租约和验收闸门。",
+  "phase": "completed",
+  "blocked": null,
+  "evidence": [],
+  "lease": null,
+  "acceptance": null,
+  "completedAt": "2026-11-02",
+  "archivedAt": "2026-11-05",
+  "children": [],
+  "priority": "P0",
+  "creator": "FrancisZhang",
+  "assignee": "FrancisZhang",
+  "createdAt": "2026-10-27",
+  "branch": "",
+  "base_branch": "main",
+  "worktree_path": "",
+  "commit": "",
+  "pr_url": "",
+  "notes": "",
+  "meta": {
+    "trellis_migration": {
+      "migrated_at": "2026-11-05",
+      "source": ".trellis",
+      "original_status": "completed",
+      "dev_type": null,
+      "scope": null,
+      "package": null,
+      "subtasks": [],
+      "relatedFiles": []
+    }
+  },
+  "capabilities": [],
+  "extensions": [],
+  "events": [
+    {
+      "id": "evt-e7eaaa52267d",
+      "at": "2026-11-05T00:00:00Z",
+      "source": {
+        "type": "command",
+        "actor": "FrancisZhang",
+        "reference": "migration"
+      },
+      "type": "migrated",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/archive/2026-11/10-27-core-commands"
+        },
+        "from": "trellis"
+      }
+    }
+  ]
+}
