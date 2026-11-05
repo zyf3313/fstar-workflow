@@ -874,6 +874,37 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
         record_step(self.scenario, "S1-archived-record", "read archived task.json", 0,
                     "archivedAt and completed phase persist", json.dumps({"phase": archived_record["phase"], "archivedAt": archived_record["archivedAt"]}), "pass", setup="fixture-read")
 
+        # S1-12 combined install -> lifecycle -> doctor in one fixture. This
+        # closes the prior coverage gap where S1 tested lifecycle without
+        # install and S6 tested install without lifecycle.
+        claude_root = self.host_root / "claude"
+        codex_root = self.host_root / "codex"
+        claude_root.mkdir(parents=True, exist_ok=True)
+        codex_root.mkdir(parents=True, exist_ok=True)
+        host_args = ["--host-root", "claude=%s" % claude_root,
+                     "--host-root", "codex=%s" % codex_root]
+        self.step("S1-12a", ["install", "--host", "claude", "--host", "codex"] + host_args,
+                  expected="Claude installs in the fixture while Codex stays read-only and unsupported",
+                  check=self.expect_ok(lambda payload: self.require(
+                      (claude_root / "settings.json").is_file()
+                      and any(c["kind"] == "host_unsupported" for c in payload["conflicts"]),
+                      "claude_settings=%s codex_unsupported=%s" % (
+                          (claude_root / "settings.json").is_file(),
+                          any(c["kind"] == "host_unsupported" for c in payload["conflicts"])))))
+        self.assertFalse(list(codex_root.rglob("*")))
+        document = json.loads((claude_root / "settings.json").read_text(encoding="utf-8"))
+        claude_hooks = [hook["command"]
+                        for groups in document["hooks"].values()
+                        for group in groups
+                        for hook in group.get("hooks", [])
+                        if "fstar-hook" in hook["command"]]
+        self.assertEqual(4, len(claude_hooks))
+        self.step("S1-12b", ["doctor"] + host_args,
+                  expected="installed resources and Claude entries stay healthy",
+                  check=self.expect_ok(lambda payload: self.require(
+                      payload["healthy"] and payload["counts"]["hooks"] == 4,
+                      "healthy=%s counts=%s" % (payload["healthy"], payload["counts"]))))
+
         # S1-11 archive reminders: 30-day-old unarchived task, defer + dedupe
         stale = self.make_old_task("old-task")
         self.step("S1-11a", ["task", "create", "Second deliverable", "--name", "second-task",
