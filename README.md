@@ -1,5 +1,9 @@
 # fstar-workflow
 
+[![npm version](https://img.shields.io/npm/v/fstar-workflow.svg)](https://www.npmjs.com/package/fstar-workflow)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-zyf3313%2Ffstar--workflow-black)](https://github.com/zyf3313/fstar-workflow)
+
 A cross-project workflow system for AI coding agents. It keeps task state,
 evidence, and routing **on disk instead of in the conversation**, so work
 survives context compaction, session restarts, and machine changes.
@@ -27,10 +31,12 @@ Plan ──► Start ──► Implement ⇄ Check ──► Fresh evidence ─�
 **From npm (recommended):**
 
 ```bash
-npm install -g fstar-workflow
+npm install -g fstar-workflow@latest
 ```
 
-**From GitHub, without publishing:**
+Package page: https://www.npmjs.com/package/fstar-workflow
+
+**From GitHub (latest commit, bypassing the registry):**
 
 ```bash
 npm install -g github:zyf3313/fstar-workflow
