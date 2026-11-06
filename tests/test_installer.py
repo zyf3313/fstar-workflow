@@ -25,6 +25,9 @@ from fstar import installer  # noqa: E402
 from fstar.models import DomainError  # noqa: E402
 
 BUNDLE_ROOT = REPO
+# The bundled resource version (package.json fstar.resource_version); tests
+# must follow it instead of hardcoding a version id.
+BUNDLE_VERSION = str(installer.load_bundle_manifest(BUNDLE_ROOT)["resource_version"])
 
 
 def _sha(path: Path) -> str:
@@ -87,8 +90,8 @@ class TestFreshInstall(InstallerCase):
         self.assertTrue((self.user_root / ".install-manifest.json").is_file())
         self.assertTrue((self.user_root / ".asset-hashes.json").is_file())
         self.assertTrue((self.user_root / "entry-index.json").is_file())
-        self.assertEqual((self.user_root / "version").read_text().strip(), "1")
-        cache = self.user_root / "resources" / "1"
+        self.assertEqual((self.user_root / "version").read_text().strip(), BUNDLE_VERSION)
+        cache = self.user_root / "resources" / BUNDLE_VERSION
         self.assertTrue((cache / "manifest.json").is_file())
         self.assertTrue((cache / "runtime" / "routing.md").is_file())
 
@@ -266,7 +269,7 @@ class TestSettingsOwnership(InstallerCase):
 
 class TestFileOwnership(InstallerCase):
     def test_user_file_with_same_path_is_not_overwritten(self):
-        cache = self.user_root / "resources" / "1"
+        cache = self.user_root / "resources" / BUNDLE_VERSION
         (cache / "runtime").mkdir(parents=True)
         target = cache / "runtime" / "routing.md"
         target.write_text("user content", encoding="utf-8")
@@ -278,7 +281,7 @@ class TestFileOwnership(InstallerCase):
 
     def test_modified_owned_file_is_kept_by_default(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("locally modified", encoding="utf-8")
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots)
@@ -289,7 +292,7 @@ class TestFileOwnership(InstallerCase):
 
     def test_explicit_overwrite_backs_up_the_old_bytes(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("locally modified", encoding="utf-8")
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots, conflict_policy="overwrite")
@@ -302,7 +305,7 @@ class TestFileOwnership(InstallerCase):
 
     def test_new_policy_writes_dot_new_and_never_clobbers_existing(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("locally modified", encoding="utf-8")
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots, conflict_policy="new")
@@ -313,7 +316,7 @@ class TestFileOwnership(InstallerCase):
 
     def test_existing_dot_new_is_never_overwritten(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("locally modified", encoding="utf-8")
         collision = target.with_name("routing.md.new")
         collision.write_text("user new file", encoding="utf-8")
@@ -325,7 +328,7 @@ class TestFileOwnership(InstallerCase):
 
     def test_uninstall_keeps_modified_owned_file(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("locally modified", encoding="utf-8")
         roots = self.roots()
         plan = installer.plan_install(operation="uninstall", roots=roots)
@@ -348,7 +351,7 @@ class TestFileOwnership(InstallerCase):
         self.assertTrue(self.user_root.is_dir())
 
     def test_unowned_same_name_file_is_not_removed(self):
-        cache = self.user_root / "resources" / "1" / "runtime"
+        cache = self.user_root / "resources" / BUNDLE_VERSION / "runtime"
         cache.mkdir(parents=True)
         target = cache / "routing.md"
         target.write_text("user content", encoding="utf-8")
@@ -419,11 +422,11 @@ class TestResourceVersions(InstallerCase):
         self._write_cache("A", "routing A")
         self.install(hosts=["claude"])
         self.assertTrue((self.user_root / "resources" / "A" / "runtime" / "routing.md").is_file())
-        self.assertTrue((self.user_root / "resources" / "1").is_dir())
+        self.assertTrue((self.user_root / "resources" / BUNDLE_VERSION).is_dir())
 
     def test_same_version_with_different_content_is_refused(self):
         self.install(hosts=["claude"])
-        cache = self.user_root / "resources" / "1"
+        cache = self.user_root / "resources" / BUNDLE_VERSION
         (cache / "runtime" / "routing.md").write_text("different", encoding="utf-8")
         manifest = json.loads((cache / "manifest.json").read_text())
         manifest["files"][0]["sha256"] = _sha(cache / "runtime" / "routing.md")
@@ -453,14 +456,14 @@ class TestResourceVersions(InstallerCase):
         # AC-04: a resources-version bump installs a separate cache and must
         # not mutate or delete the old version other projects may pin.
         self.install(hosts=["claude"])
-        old_cache = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        old_cache = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         old_bytes = old_cache.read_bytes()
         bundle = self.tmp / "bundle"
         shutil.copytree(BUNDLE_ROOT / "resources", bundle / "resources")
         routing = bundle / "resources" / "runtime" / "routing.md"
-        routing.write_text("routing for version 2\n", encoding="utf-8")
+        routing.write_text("routing for version 9\n", encoding="utf-8")
         manifest = json.loads((bundle / "resources" / "package-assets.json").read_text())
-        manifest["resource_version"] = "2"
+        manifest["resource_version"] = "9"
         for record in manifest["files"]:
             if record["source"] == "resources/runtime/routing.md":
                 record["sha256"] = _sha(routing)
@@ -469,14 +472,14 @@ class TestResourceVersions(InstallerCase):
                                 project_root=self.project_root, host_roots={"claude": self.host_root},
                                 bundle_root=bundle)
         plan = installer.plan_install(operation="update", roots=roots)
-        self.assertEqual(plan["version"], "2")
+        self.assertEqual(plan["version"], "9")
         installer.apply_plan(plan, roots=roots)
-        self.assertEqual((self.user_root / "version").read_text().strip(), "2")
-        self.assertEqual((self.user_root / "resources" / "2" / "runtime" / "routing.md").read_text(),
-                         "routing for version 2\n")
+        self.assertEqual((self.user_root / "version").read_text().strip(), "9")
+        self.assertEqual((self.user_root / "resources" / "9" / "runtime" / "routing.md").read_text(),
+                         "routing for version 9\n")
         self.assertEqual(old_cache.read_bytes(), old_bytes)
-        selection = installer.resolve_resources(user_root=self.user_root, requested_version="1")
-        self.assertEqual(selection.root, self.user_root / "resources" / "1")
+        selection = installer.resolve_resources(user_root=self.user_root, requested_version=BUNDLE_VERSION)
+        self.assertEqual(selection.root, self.user_root / "resources" / BUNDLE_VERSION)
 
     def test_resolve_does_not_create_a_cache(self):
         before = _tree_snapshot(self.user_root)
@@ -703,7 +706,7 @@ class TestPathEncoding(InstallerCase):
         outside = self.tmp / "outside"
         outside.mkdir()
         (self.user_root / "resources").mkdir(parents=True, exist_ok=True)
-        (self.user_root / "resources" / "1").symlink_to(outside)
+        (self.user_root / "resources" / BUNDLE_VERSION).symlink_to(outside)
         roots = self.roots()
         plan = installer.plan_install(operation="install", roots=roots)
         with self.assertRaises(DomainError) as caught:
@@ -713,15 +716,15 @@ class TestPathEncoding(InstallerCase):
 
     def test_write_new_refuses_symlinked_ancestor(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("locally modified", encoding="utf-8")
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots, conflict_policy="new")
         # After planning, redirect the cache version directory outside the user
         # root; the .new write must not follow it.
         moved = self.tmp / "moved-cache"
-        (self.user_root / "resources" / "1").rename(moved)
-        (self.user_root / "resources" / "1").symlink_to(moved)
+        (self.user_root / "resources" / BUNDLE_VERSION).rename(moved)
+        (self.user_root / "resources" / BUNDLE_VERSION).symlink_to(moved)
         with self.assertRaises(DomainError) as caught:
             installer.apply_plan(plan, roots=roots)
         self.assertEqual(caught.exception.code, "unsafe_path")
@@ -742,7 +745,7 @@ class TestCorruptManifest(InstallerCase):
         self.install(hosts=["claude"])
         manifest_path = self.user_root / ".install-manifest.json"
         manifest_path.write_text("{broken", encoding="utf-8")
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("user edit", encoding="utf-8")
         roots = self.roots()
         plan = installer.plan_install(operation="install", roots=roots)
@@ -770,7 +773,7 @@ class TestTransaction(InstallerCase):
         self.install(hosts=["claude"])
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots)
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("changed under us", encoding="utf-8")
         with self.assertRaises(DomainError) as caught:
             installer.apply_plan(plan, roots=roots)
@@ -778,7 +781,7 @@ class TestTransaction(InstallerCase):
 
     def test_failed_write_restores_previous_bytes(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         original = target.read_text()
         target.write_text("locally modified", encoding="utf-8")
         roots = self.roots()
@@ -819,7 +822,7 @@ class TestTransaction(InstallerCase):
 
     def test_rollback_preserves_edit_after_our_write(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("locally modified", encoding="utf-8")
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots, conflict_policy="overwrite")
@@ -842,7 +845,7 @@ class TestTransaction(InstallerCase):
     def test_metadata_failure_rolls_back_files_and_metadata(self):
         self.install(hosts=["claude"])
         settings_before = (self.host_root / "settings.json").read_text()
-        cache_file = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        cache_file = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         cache_file.write_text("locally modified", encoding="utf-8")
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots, conflict_policy="overwrite")
@@ -861,9 +864,9 @@ class TestTransaction(InstallerCase):
         # left behind pretending the update succeeded.
         self.assertEqual(cache_file.read_text(), "locally modified")
         self.assertEqual((self.host_root / "settings.json").read_text(), settings_before)
-        self.assertEqual((self.user_root / "version").read_text().strip(), "1")
+        self.assertEqual((self.user_root / "version").read_text().strip(), BUNDLE_VERSION)
         manifest = json.loads((self.user_root / ".install-manifest.json").read_text())
-        self.assertEqual(manifest["version"], "1")
+        self.assertEqual(manifest["version"], BUNDLE_VERSION)
 
     def test_settings_created_after_plan_is_rejected(self):
         roots = self.roots()
@@ -940,7 +943,7 @@ class TestInterruptedInstall(InstallerCase):
         self.install(hosts=["claude"])
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots)
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         target.write_text("modified before apply", encoding="utf-8")
         # apply re-verifies and refuses a stale plan instead of writing.
         with self.assertRaises(DomainError):
@@ -953,7 +956,7 @@ class TestInterruptedInstall(InstallerCase):
         (self.user_root / "rules" / "keep.md").write_text("x", encoding="utf-8")
         roots = self.roots()
         installer.apply_plan(installer.plan_install(operation="uninstall", roots=roots), roots=roots)
-        self.assertFalse((self.user_root / "resources" / "1" / "runtime" / "routing.md").exists())
+        self.assertFalse((self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md").exists())
         self.assertTrue((self.user_root / "rules" / "keep.md").is_file())
         self.assertTrue(self.user_root.is_dir())
 
@@ -976,7 +979,7 @@ class TestDurableRecovery(InstallerCase):
 
     def test_pending_transaction_is_recovered(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         original = target.read_bytes()
         target.write_bytes(b"half written by crashed install")
         journal = self._crash_journal(target, original, b"half written by crashed install")
@@ -987,7 +990,7 @@ class TestDurableRecovery(InstallerCase):
 
     def test_recovery_keeps_newer_user_edit(self):
         self.install(hosts=["claude"])
-        target = self.user_root / "resources" / "1" / "runtime" / "routing.md"
+        target = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         journal = self._crash_journal(target, target.read_bytes(), b"crashed value")
         target.write_bytes(b"user newer content")
         installer.recover_pending(self.roots())
@@ -995,7 +998,7 @@ class TestDurableRecovery(InstallerCase):
         self.assertFalse(journal.exists())
 
     def test_recovery_removes_file_created_by_crashed_transaction(self):
-        created = self.user_root / "resources" / "1" / "runtime" / "created.md"
+        created = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "created.md"
         created.parent.mkdir(parents=True, exist_ok=True)
         created.write_bytes(b"created by crashed install")
         journal = self._crash_journal(created, None, b"created by crashed install")
@@ -1164,7 +1167,7 @@ class TestDoctor(InstallerCase):
 
     def test_missing_resource_is_reported(self):
         self.install(hosts=["claude"])
-        (self.user_root / "resources" / "1" / "runtime" / "routing.md").unlink()
+        (self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md").unlink()
         report = installer.doctor(roots=self.roots())
         self.assertTrue(any(d["code"] == "RESOURCE_MISSING" for d in report["diagnostics"]))
 
@@ -1181,7 +1184,7 @@ class TestVersionReport(InstallerCase):
     def test_three_versions_are_separated(self):
         report = installer.version_report(roots=self.roots())
         self.assertEqual(report["cli_version"], "0.1.0")
-        self.assertEqual(report["resource_version"]["selected"], "1")
+        self.assertEqual(report["resource_version"]["selected"], "2")
         self.assertEqual(report["data_schema"]["current"], 1)
 
     def test_release_readiness_reports_verified_evidence_but_not_ready(self):
@@ -1220,7 +1223,7 @@ class TestContainment(InstallerCase):
         self.assertEqual(caught.exception.code, "unsafe_path")
 
     def test_symlinked_target_is_not_taken_over(self):
-        cache = self.user_root / "resources" / "1" / "runtime"
+        cache = self.user_root / "resources" / BUNDLE_VERSION / "runtime"
         cache.mkdir(parents=True)
         real = self.tmp / "outside.md"
         real.write_text("outside", encoding="utf-8")
@@ -1261,10 +1264,10 @@ class TestCommandSurface(InstallerCase):
         self.assertTrue(payload["healthy"])
 
     def test_unhealthy_doctor_exits_non_zero_and_still_reports(self):
-        cache = self.user_root / "resources" / "1" / "runtime"
+        cache = self.user_root / "resources" / BUNDLE_VERSION / "runtime"
         cache.mkdir(parents=True)
         (cache / "routing.md").write_text("x", encoding="utf-8")
-        (self.user_root / "resources" / "1" / "manifest.json").write_text(
+        (self.user_root / "resources" / BUNDLE_VERSION / "manifest.json").write_text(
             json.dumps({"schema": "fstar.package-assets.v1", "resource_version": "1",
                         "files": [{"source": "runtime/routing.md",
                                    "sha256": _sha(cache / "routing.md"), "installed": True}]}),

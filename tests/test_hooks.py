@@ -123,6 +123,29 @@ class SessionContextTests(HookCase):
         self.assertEqual(result["marker"], inject.HOOK_MARKER)
         self.assertTrue(all("sha256" in item and "version" in item for item in result["inputs"]))
 
+    def test_capabilities_are_discoverable_without_a_grant(self):
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        self.assertEqual(result["extensions"], {})
+        self.assertIn("capabilities", {item["kind"] for item in result["inputs"]})
+        text = "\n".join(item["text"] for item in result["loaded"]
+                         if item["kind"] == "capabilities")
+        for package in ("planning-review", "persistent-task", "multi-agent",
+                        "project-governance", "tool-capability"):
+            self.assertIn(package, text)
+
+    def test_indexes_are_readable_without_a_grant(self):
+        (self.project / ".fstar" / "index.md").write_text("PROJECT INDEX DEFAULT")
+        (self.user_root / "index.md").write_text("USER INDEX DEFAULT")
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        self.assertEqual(result["extensions"], {})
+        loaded = {item["path"]: item["text"] for item in result["loaded"]}
+        self.assertIn("PROJECT INDEX DEFAULT", loaded.get(".fstar/index.md", ""))
+        self.assertIn("USER INDEX DEFAULT", loaded.get("~/.fstar/index.md", ""))
+
 
 class ExtensionConsumerTests(HookCase):
     def test_recovered_task_scope_controls_injected_documents_and_specs(self):

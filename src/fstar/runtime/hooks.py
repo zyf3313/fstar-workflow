@@ -191,13 +191,19 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     routing = inject.routing_input(root)
     if routing:
         inputs.append(routing)
+    # Discovery is always on: a package that stays off and unannounced is
+    # effectively absent. Grants still gate every package member.
+    capabilities = inject.capabilities_input(root)
+    if capabilities:
+        inputs.append(capabilities)
     context = {}
     persistent_context = False
 
     task_summary = None
     tool_notes: List[str] = []
-    learn_hint = ("Learn candidates attach only to existing session/result/recovery/archive "
-                  "nodes; no per-turn scan and no standalone candidate ledger exists.")
+    learn_hint = ("Learn candidates attach to existing session/result/recovery/archive "
+                  "nodes; a durable convention stated by the user is a session-node "
+                  "candidate. No per-turn scan and no standalone candidate ledger exists.")
     if project_root is not None:
         store = located["store"]
         service = _service_for(store, clock)
@@ -231,10 +237,10 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     if project_root is not None and includes(context, "tool-capability", "bindings"):
         tool_notes = _light_tool_check(project_root, user)
 
-    # Indexes can refer to several different governance members, so only
-    # expose them when the whole indexed surface is authorized.
-    if {"specs", "knowledge", "rules", "memory"} <= context.get("project-governance", set()):
-        inputs.extend(inject.index_inputs(project_root, user))
+    # Indexes are read-only context: inject them by default so user-level rules
+    # and project knowledge stay visible without an extension grant. Writing to
+    # these surfaces still requires project-governance and explicit confirmation.
+    inputs.extend(inject.index_inputs(project_root, user))
 
     grant_text = "Extension members in this context: %s" % json.dumps(
         {key: sorted(value) for key, value in context.items()}, sort_keys=True)
