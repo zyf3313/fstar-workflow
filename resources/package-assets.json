@@ -2,7 +2,7 @@
   "schema": "fstar.package-assets.v1",
   "generated_by": "scripts/build-package.cjs",
   "cli_version": "0.1.0",
-  "resource_version": "1",
+  "resource_version": "2",
   "supported_data_schemas": [
     1
   ],
@@ -125,19 +125,19 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "53be2b5f32ef247cd0732ab0af58d324cf9c2f8b48bf3c153e3733446c329ec4"
+      "sha256": "75b5e0f6adb1fe787d1635c58da2a494ee46b516ea06fab6fc0832c5a8fa6083"
     },
     {
       "source": "src/fstar/runtime/inject.py",
       "destination": "src/fstar/runtime/inject.py",
       "kind": "python",
-      "sha256": "31a611858f28e0b82b7922244a91dc6d0089b44710fae3d76f67b57b6051da9c"
+      "sha256": "18eb4421eaa1531590491d3864cfc1ee6cf4a4745832a8a9a91ed48e7e57bc05"
     },
     {
       "source": "src/fstar/runtime/registration.py",
       "destination": "src/fstar/runtime/registration.py",
       "kind": "python",
-      "sha256": "e8645f5ba3ce9c8daea7ac11ed58439b6c1244ac9c76400cb03dec26ded45c55"
+      "sha256": "0807fbf0c38ae6e0eebf4ed640032bcad3a34cc3169b60c0ddd546d599976891"
     },
     {
       "source": "src/fstar/store.py",
@@ -446,10 +446,16 @@
       "sha256": "64ba9c62604e03c8a9ab3d9e702580a4a096327abc607e352797b409b4b9416a"
     },
     {
+      "source": "resources/runtime/capabilities.md",
+      "destination": "resources/runtime/capabilities.md",
+      "kind": "resource",
+      "sha256": "f0bd881b5961c2ea95786feb0500c74319ad8d534793ef2ebc9b498d45bd23e2"
+    },
+    {
       "source": "resources/runtime/routing.md",
       "destination": "resources/runtime/routing.md",
       "kind": "resource",
-      "sha256": "07b98389d517d15f16a314ca8e1b9cb88e92e9a181ad37b44498b2f3e7d38340"
+      "sha256": "3b434993b24003b0f343dc899708ba0e11062db1d36b5a81b441cf890ecd124c"
     }
   ]
 }

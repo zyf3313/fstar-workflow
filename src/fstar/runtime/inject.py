@@ -117,6 +117,18 @@ def routing_input(root: Optional[Path] = None) -> Optional[InjectedInput]:
     return _fingerprinted("routing", root / "runtime" / "routing.md", relative="runtime/routing.md")
 
 
+def capabilities_input(root: Optional[Path] = None) -> Optional[InjectedInput]:
+    """The optional-capability index, injected without any grant.
+
+    Capabilities that stay off and unannounced are effectively absent, so the
+    session context always carries one line per package. This is discovery
+    only: consuming a package member still requires an explicit grant.
+    """
+    root = root if root is not None else resource_root()
+    return _fingerprinted("capabilities", root / "runtime" / "capabilities.md",
+                          relative="runtime/capabilities.md")
+
+
 def role_card(role: str, root: Optional[Path] = None) -> Optional[InjectedInput]:
     """Full role card text for one of the four roles."""
     if role not in ROLES:
