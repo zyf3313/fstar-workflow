@@ -1183,7 +1183,9 @@ class TestDoctor(InstallerCase):
 class TestVersionReport(InstallerCase):
     def test_three_versions_are_separated(self):
         report = installer.version_report(roots=self.roots())
-        self.assertEqual(report["cli_version"], "0.1.0")
+        # cli_version follows package.json fstar.cli_version; read it from
+        # the bundle so version bumps don't require editing this test.
+        self.assertEqual(report["cli_version"], installer.load_bundle_manifest(BUNDLE_ROOT)["cli_version"])
         self.assertEqual(report["resource_version"]["selected"], "2")
         self.assertEqual(report["data_schema"]["current"], 1)
 
