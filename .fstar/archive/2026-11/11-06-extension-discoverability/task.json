@@ -1,0 +1,342 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-06T08:08:25.574282Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "7b44dcf8-6238-40cd-9e25-0a374b2e8dd0"
+    ],
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user",
+        "session": null
+      },
+      "at": "2026-11-06T08:08:25.572586Z",
+      "quote": "",
+      "reference": "user quote: 可以 (2026-11-06, approve branch cleanup and task archive after published 0.2.0)",
+      "scope": "accept",
+      "source_id": "user quote: 可以 (2026-11-06, approve branch cleanup and task archive after published 0.2.0)",
+      "type": "command",
+      "validates": "ad1dac30657f8d2912c0b2b028fe1f7c31fa81f4dffa7bd09b0cb71e7daf0c05"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      ],
+      "task": "ad1dac30657f8d2912c0b2b028fe1f7c31fa81f4dffa7bd09b0cb71e7daf0c05"
+    }
+  },
+  "archivedAt": "2026-11-06T08:08:36.387565Z",
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": "2026-11-06T08:08:25.574302Z",
+  "createdAt": "2026-11-06T03:55:33.736195Z",
+  "creator": "agent",
+  "description": "Make optional capabilities discoverable at session start and inject project/user indexes by default, while writes keep explicit confirmation.",
+  "events": [
+    {
+      "at": "2026-11-06T03:55:33.736860Z",
+      "data": {
+        "parent": null
+      },
+      "id": "fed5fe57-0d3b-4f7c-959f-3b5816558190",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-06T03:55:33.736857Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "c7e42a46-6cab-4d08-81b4-b7e33af3b5dd",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-06T03:56:58.366604Z",
+      "data": {
+        "snapshot": "033198c98bb89affbbd130851905798e0af40032d5c10e55b64ff9feed480dca"
+      },
+      "id": "5057cb27-37a3-4344-9ede-2789830c7cde",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T03:56:58.365179Z",
+        "quote": "",
+        "reference": "user quote: 可以 (2026-11-06, approved: implement extension discoverability then record proxy rule)",
+        "scope": "start",
+        "source_id": "user quote: 可以 (2026-11-06, approved: implement extension discoverability then record proxy rule)",
+        "type": "command",
+        "validates": "b4ec75455d60be42297707d2ed0e17c1f31a3c64ad5c7d662a58b258b8c70acd"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-06T08:08:04.268100Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": "local"
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "07f65424-1b42-4144-baaf-3822c0d56350",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "local"
+        },
+        "at": "2026-11-06T08:08:04.268097Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "866786a9-035e-4031-9e8f-807bbd33c5bf",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-06T08:08:04.270572Z",
+      "data": {
+        "evidence_id": "7b44dcf8-6238-40cd-9e25-0a374b2e8dd0",
+        "state": "valid"
+      },
+      "id": "3371f3ed-f4a7-4258-9649-d80cdbb7b336",
+      "source": {
+        "id": "fstar-check-agent",
+        "role": "check",
+        "session_id": "independent-check"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-06T08:08:04.271769Z",
+      "data": {
+        "reason": "final independent check recorded"
+      },
+      "id": "039f27c0-4716-4a59-8303-0e4df37f1a3e",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": "local"
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-06T08:08:25.574305Z",
+      "data": {
+        "evidence_refs": [
+          "7b44dcf8-6238-40cd-9e25-0a374b2e8dd0"
+        ]
+      },
+      "id": "912db9a5-b124-484a-9464-c0d28ea553c7",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T08:08:25.572586Z",
+        "quote": "",
+        "reference": "user quote: 可以 (2026-11-06, approve branch cleanup and task archive after published 0.2.0)",
+        "scope": "accept",
+        "source_id": "user quote: 可以 (2026-11-06, approve branch cleanup and task archive after published 0.2.0)",
+        "type": "command",
+        "validates": "ad1dac30657f8d2912c0b2b028fe1f7c31fa81f4dffa7bd09b0cb71e7daf0c05"
+      },
+      "type": "accepted"
+    },
+    {
+      "at": "2026-11-06T08:08:36.387565Z",
+      "data": {
+        "archived_at": "2026-11-06T08:08:36.387565Z",
+        "operation_id": "7720fb9e-c7bc-4995-9a28-51a94a70d33c",
+        "target": ".fstar/archive/2026-11/11-06-extension-discoverability"
+      },
+      "id": "868bcfde-5201-499c-8c2e-d31dd4a7a2ee",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T08:08:36.387351Z",
+        "quote": "",
+        "reference": "user quote: 可以 (2026-11-06, approve task archive)",
+        "scope": "archive",
+        "source_id": "user quote: 可以 (2026-11-06, approve task archive)",
+        "type": "command",
+        "validates": "95f65d83ef344c0303b88f58d8e4e4a0f8c4ebc6ec0a30b50b9c0f3bf42685ba"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-06T08:08:36.390334Z",
+      "data": {
+        "operation_id": "7720fb9e-c7bc-4995-9a28-51a94a70d33c",
+        "target": ".fstar/archive/2026-11/11-06-extension-discoverability"
+      },
+      "id": "e7f52a27-4449-4931-8697-0853f4cc39ef",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T08:08:36.387351Z",
+        "quote": "",
+        "reference": "user quote: 可以 (2026-11-06, approve task archive)",
+        "scope": "archive",
+        "source_id": "user quote: 可以 (2026-11-06, approve task archive)",
+        "type": "command",
+        "validates": "95f65d83ef344c0303b88f58d8e4e4a0f8c4ebc6ec0a30b50b9c0f3bf42685ba"
+      },
+      "type": "archived"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "paths": []
+      },
+      "environment": {
+        "platform": "darwin",
+        "python": "3.9.6"
+      },
+      "id": "7b44dcf8-6238-40cd-9e25-0a374b2e8dd0",
+      "items": [
+        {
+          "command": "session_context probe; unittest tests.test_hooks.SessionContextTests",
+          "exit_code": 0,
+          "plan_item": "R-001",
+          "requirement_ids": [
+            "R-001"
+          ],
+          "result": "passed",
+          "retries": 0
+        },
+        {
+          "command": "session_context probe with and without indexes; symlink rejection probe",
+          "exit_code": 0,
+          "plan_item": "R-002",
+          "requirement_ids": [
+            "R-002"
+          ],
+          "result": "passed",
+          "retries": 0
+        },
+        {
+          "command": "grep routing.md trigger text; full suites",
+          "exit_code": 0,
+          "plan_item": "R-003",
+          "requirement_ids": [
+            "R-003"
+          ],
+          "result": "passed",
+          "retries": 0
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-06T08:08:04.269976Z",
+      "producer": {
+        "id": "fstar-check-agent",
+        "role": "check",
+        "session_id": "independent-check"
+      },
+      "run_id": "check-2026-11-06-extension-discoverability",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/11-06-extension-discoverability/prd.md",
+          "dependencies": [],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "603dd4c621aff5c9a859d6910db6fa4b21a146f4432a70e26712e66b86af9f3e"
+            },
+            {
+              "id": "R-002",
+              "sha256": "603dd4c621aff5c9a859d6910db6fa4b21a146f4432a70e26712e66b86af9f3e"
+            },
+            {
+              "id": "R-003",
+              "sha256": "603dd4c621aff5c9a859d6910db6fa4b21a146f4432a70e26712e66b86af9f3e"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "id": "10cb92a0-955e-4aa0-9650-a6444ffde23a",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/11-06-extension-discoverability/prd.md": {
+          "R-001": {
+            "dependencies": [],
+            "end_marker": "### R-002",
+            "start_marker": "### R-001"
+          },
+          "R-002": {
+            "dependencies": [],
+            "end_marker": "### R-003",
+            "start_marker": "### R-002"
+          },
+          "R-003": {
+            "dependencies": [],
+            "end_marker": "## 不做",
+            "start_marker": "### R-003"
+          }
+        },
+        "mode": "file"
+      },
+      "artifact_map_sha256": "9a36fda428e7e30e9c052c1f14d4962b035e65120270805339adf5d482ef7737",
+      "artifact_map_source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "local"
+        },
+        "at": "2026-11-06",
+        "quote": "",
+        "reference": "artifact map for acceptance check",
+        "scope": "task",
+        "source_id": "coordinator",
+        "type": "command",
+        "validates": ""
+      }
+    }
+  },
+  "name": "11-06-extension-discoverability",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "Extension discoverability and default read-side injection",
+  "worktree_path": ""
+}
