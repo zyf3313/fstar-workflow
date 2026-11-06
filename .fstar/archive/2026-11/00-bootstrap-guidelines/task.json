@@ -1,0 +1,227 @@
+{
+  "acceptance": null,
+  "archivedAt": "2026-11-06T14:33:37.451554Z",
+  "assignee": "FrancisZhang",
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": null,
+  "createdAt": "2026-10-25",
+  "creator": "FrancisZhang",
+  "description": "Fill in project development guidelines for AI agents",
+  "events": [
+    {
+      "at": "2026-11-05T00:00:00Z",
+      "data": {
+        "details": {
+          "from": "trellis",
+          "source_dir": ".trellis/tasks/00-bootstrap-guidelines"
+        },
+        "from": "trellis"
+      },
+      "id": "evt-f4feb3884eeb",
+      "source": {
+        "actor": "FrancisZhang",
+        "reference": "migration",
+        "type": "command"
+      },
+      "type": "migrated"
+    },
+    {
+      "at": "2026-11-06T14:27:19.168433Z",
+      "data": {
+        "disposition": "discard",
+        "reason": "Trellis 时代的引导任务；迁移到 fstar 自举后项目规范已由 AGENTS.md / CONTRIBUTING.md / specs 承担，任务不再适用"
+      },
+      "id": "b502b632-c622-480b-8e8d-c9d296250db8",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T14:27:19.166737Z",
+        "quote": "",
+        "reference": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "scope": "drop",
+        "source_id": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "type": "command",
+        "validates": "f586dfee5717670181d3bd5c8fbbc96405e82f5d8e32c3b8c80688a0a104a9ea"
+      },
+      "type": "dropped"
+    },
+    {
+      "at": "2026-11-06T14:33:20.440157Z",
+      "data": {
+        "previous": {
+          "action": "discard",
+          "at": "2026-11-06T14:27:19.168427Z",
+          "by": {
+            "id": "user",
+            "role": "user",
+            "session": null
+          },
+          "confirmation": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-06T14:27:19.166737Z",
+            "quote": "",
+            "reference": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+            "scope": "drop",
+            "source_id": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+            "type": "command",
+            "validates": "f586dfee5717670181d3bd5c8fbbc96405e82f5d8e32c3b8c80688a0a104a9ea"
+          },
+          "pending_cleanup": true,
+          "pending_knowledge": false,
+          "reason": "Trellis 时代的引导任务；迁移到 fstar 自举后项目规范已由 AGENTS.md / CONTRIBUTING.md / specs 承担，任务不再适用"
+        },
+        "reason": "re-dispose as keep for archive"
+      },
+      "id": "938e3081-03dc-4d27-84be-3fc9220ac3d7",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T14:33:20.439250Z",
+        "quote": "",
+        "reference": "coordinator cleanup",
+        "scope": "drop",
+        "source_id": "coordinator cleanup",
+        "type": "command",
+        "validates": "f586dfee5717670181d3bd5c8fbbc96405e82f5d8e32c3b8c80688a0a104a9ea"
+      },
+      "type": "revived"
+    },
+    {
+      "at": "2026-11-06T14:33:37.125501Z",
+      "data": {
+        "disposition": "keep",
+        "reason": "Trellis 时代的 init 引导占位任务；迁移 fstar 自举后规范由 AGENTS.md/CONTRIBUTING.md/specs 承担，任务无实质内容"
+      },
+      "id": "d1377eda-df4a-4c9a-a61d-8381e54c6001",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T14:33:37.124661Z",
+        "quote": "",
+        "reference": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "scope": "drop",
+        "source_id": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "type": "command",
+        "validates": "73119b20d58f4376ecad302ec7fa960b4403e4dc4747e1d6cb6dfc41ef835bde"
+      },
+      "type": "dropped"
+    },
+    {
+      "at": "2026-11-06T14:33:37.451554Z",
+      "data": {
+        "archived_at": "2026-11-06T14:33:37.451554Z",
+        "operation_id": "86820c33-57e7-495b-a4df-5538a0b2c6c5",
+        "target": ".fstar/archive/2026-11/00-bootstrap-guidelines"
+      },
+      "id": "04cc3107-13e5-4482-9a42-0251a1c6a7f1",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T14:33:37.451249Z",
+        "quote": "",
+        "reference": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "scope": "archive",
+        "source_id": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "type": "command",
+        "validates": "73119b20d58f4376ecad302ec7fa960b4403e4dc4747e1d6cb6dfc41ef835bde"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-06T14:33:37.453615Z",
+      "data": {
+        "operation_id": "86820c33-57e7-495b-a4df-5538a0b2c6c5",
+        "target": ".fstar/archive/2026-11/00-bootstrap-guidelines"
+      },
+      "id": "a0940c3b-e261-4cfa-915c-c228416ce430",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T14:33:37.451249Z",
+        "quote": "",
+        "reference": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "scope": "archive",
+        "source_id": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "type": "command",
+        "validates": "73119b20d58f4376ecad302ec7fa960b4403e4dc4747e1d6cb6dfc41ef835bde"
+      },
+      "type": "archived"
+    }
+  ],
+  "evidence": [],
+  "extensions": [],
+  "id": "02e75531-84d3-57b2-adea-14704c3e95e3",
+  "lease": null,
+  "meta": {
+    "disposition": {
+      "action": "keep",
+      "at": "2026-11-06T14:33:37.125496Z",
+      "by": {
+        "id": "user",
+        "role": "user",
+        "session": null
+      },
+      "confirmation": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-06T14:33:37.124661Z",
+        "quote": "",
+        "reference": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "scope": "drop",
+        "source_id": "user quote: 00-bootstrap-guidelines 这个任务可以删了 (2026-11-06)",
+        "type": "command",
+        "validates": "73119b20d58f4376ecad302ec7fa960b4403e4dc4747e1d6cb6dfc41ef835bde"
+      },
+      "pending_cleanup": false,
+      "pending_knowledge": false,
+      "reason": "Trellis 时代的 init 引导占位任务；迁移 fstar 自举后规范由 AGENTS.md/CONTRIBUTING.md/specs 承担，任务无实质内容"
+    },
+    "trellis_migration": {
+      "dev_type": "docs",
+      "migrated_at": "2026-11-05",
+      "original_status": "in_progress",
+      "package": null,
+      "relatedFiles": [
+        ".trellis/spec/backend/",
+        ".trellis/spec/frontend/"
+      ],
+      "scope": null,
+      "source": ".trellis",
+      "subtasks": []
+    }
+  },
+  "name": "00-bootstrap-guidelines",
+  "notes": "First-time setup task created by trellis init (fullstack project)",
+  "phase": "planning",
+  "pr_url": "",
+  "priority": "P1",
+  "title": "Bootstrap Guidelines",
+  "worktree_path": ""
+}
