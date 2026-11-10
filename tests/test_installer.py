@@ -1186,7 +1186,7 @@ class TestVersionReport(InstallerCase):
         # cli_version follows package.json fstar.cli_version; read it from
         # the bundle so version bumps don't require editing this test.
         self.assertEqual(report["cli_version"], installer.load_bundle_manifest(BUNDLE_ROOT)["cli_version"])
-        self.assertEqual(report["resource_version"]["selected"], "2")
+        self.assertEqual(report["resource_version"]["selected"], BUNDLE_VERSION)
         self.assertEqual(report["data_schema"]["current"], 1)
 
     def test_release_readiness_reports_verified_evidence_but_not_ready(self):

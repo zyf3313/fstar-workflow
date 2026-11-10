@@ -1,0 +1,78 @@
+{
+  "acceptance": null,
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": null,
+  "createdAt": "2026-11-09T14:41:47.223180Z",
+  "creator": "agent",
+  "description": "fstar-init skill: classify global skills in batches, bind at most one tool per capability at project level, summarize once, confirm once.",
+  "events": [
+    {
+      "at": "2026-11-09T14:41:47.223534Z",
+      "data": {
+        "parent": null
+      },
+      "id": "5ba671fa-52a7-440f-93fe-338a6c50a4b4",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-09T14:41:47.223530Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "f56d8e35-6bfe-4deb-9354-b762dfd5dafd",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-09T14:42:17.374047Z",
+      "data": {
+        "snapshot": "d94f272eed2a343d2ea1ef486084598f59a9045b37a368b645de809133c75f8a"
+      },
+      "id": "06077480-2db3-47d3-b631-601182f6f7ef",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-09T14:42:17.373254Z",
+        "quote": "",
+        "reference": "user quote: 每个场景选 1 个（推荐）; 全部放在项目级；init 技能时让 AI 识别并分批插入 (2026-11-09)",
+        "scope": "start",
+        "source_id": "user quote: 每个场景选 1 个（推荐）; 全部放在项目级；init 技能时让 AI 识别并分批插入 (2026-11-09)",
+        "type": "command",
+        "validates": "68dcf00c85505ac654becc1dc2e5912f64493aaa1f1af8a4be989942d6aa02db"
+      },
+      "type": "started"
+    }
+  ],
+  "evidence": [],
+  "extensions": [],
+  "id": "bc403651-5eaf-44e1-8157-f106617d6ca5",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {}
+  },
+  "name": "11-09-init-capability-binding",
+  "notes": "",
+  "phase": "in_progress",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "Init-time capability binding by the agent",
+  "worktree_path": ""
+}
