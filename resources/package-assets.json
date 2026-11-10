@@ -2,7 +2,7 @@
   "schema": "fstar.package-assets.v1",
   "generated_by": "scripts/build-package.cjs",
   "cli_version": "0.2.0",
-  "resource_version": "2",
+  "resource_version": "3",
   "supported_data_schemas": [
     1
   ],
@@ -125,13 +125,13 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "75b5e0f6adb1fe787d1635c58da2a494ee46b516ea06fab6fc0832c5a8fa6083"
+      "sha256": "d493abdd9fb626a22f785a97cfd5d409b92f37aa5f55e39249c5465be8ae1a42"
     },
     {
       "source": "src/fstar/runtime/inject.py",
       "destination": "src/fstar/runtime/inject.py",
       "kind": "python",
-      "sha256": "18eb4421eaa1531590491d3864cfc1ee6cf4a4745832a8a9a91ed48e7e57bc05"
+      "sha256": "2ad88f57212c2ec85715acbf56720da1b7d000b79eb68c9d2cdbbe44c7a1a4a5"
     },
     {
       "source": "src/fstar/runtime/registration.py",
@@ -221,7 +221,7 @@
       "source": "resources/skills/fstar-init/SKILL.md",
       "destination": "resources/skills/fstar-init/SKILL.md",
       "kind": "resource",
-      "sha256": "766deef2520ccecf63237fdf2a3a8aab024cd105936bb84086caea6ada1262a0"
+      "sha256": "8ebf01ad8d35675d67581ee4f7b1cfc59dcd2dfbd1724f37deb8b6d594171505"
     },
     {
       "source": "resources/skills/fstar-learn/SKILL.md",
@@ -455,7 +455,7 @@
       "source": "resources/runtime/routing.md",
       "destination": "resources/runtime/routing.md",
       "kind": "resource",
-      "sha256": "3b434993b24003b0f343dc899708ba0e11062db1d36b5a81b441cf890ecd124c"
+      "sha256": "fab83d346df33caa554406b18a9fe9ec7b6385ae9a3b73afb5fe0e2c730df72d"
     }
   ]
 }

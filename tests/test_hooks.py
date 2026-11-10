@@ -146,6 +146,80 @@ class SessionContextTests(HookCase):
         self.assertIn("PROJECT INDEX DEFAULT", loaded.get(".fstar/index.md", ""))
         self.assertIn("USER INDEX DEFAULT", loaded.get("~/.fstar/index.md", ""))
 
+    @staticmethod
+    def _bound_layer(path, tool="codegraph", capability="code-structure"):
+        """Serialize a valid tools.yaml layer carrying one confirmed binding."""
+        from fstar import tools
+        confirmation = {
+            "source_id": "input-1", "type": "conversation",
+            "at": "2026-10-29T09:00:00Z",
+            "actor": {"role": "user", "id": "user-1"},
+            "reference": "host/session-1/input-1", "quote": "use it",
+            "scope": {"target": "project" if ".fstar" in path.parts else "user",
+                      "path": str(path), "changes": {capability: tool}, "tools": {}},
+            "validates": "proposal-digest",
+        }
+        snapshot = {
+            "tool": tool, "kind": "mcp", "version": None,
+            "capabilities": [{"id": capability, "match": "strong", "basis": "symbol-level lookup",
+                              "basis_source": {"kind": "registry", "reference": "registry/x.yaml@v1"}}],
+        }
+        document = {
+            "schema": "fstar.tools.v1", "detected_at": "2026-10-29T08:00:00Z",
+            "tools": [snapshot],
+            "bindings": {capability: {"tool": tool, "reason": "user selected",
+                                     "confirmation": confirmation}},
+            "history": [],
+        }
+        path.write_text(tools.serialize_tools(document), encoding="utf-8")
+
+    def test_binding_table_injected_without_a_grant(self):
+        project_tools = self.project / ".fstar" / "tools.yaml"
+        self._bound_layer(project_tools, tool="codegraph", capability="code-structure")
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        self.assertEqual(result["extensions"], {})
+        self.assertIn("bindings", {item["kind"] for item in result["inputs"]})
+        text = "\n".join(item["text"] for item in result["loaded"] if item["kind"] == "bindings")
+        self.assertIn("code-structure: codegraph", text)
+        self.assertIn("web-research: unbound", text)
+        # Discovery only: the injected table must not claim write authorization.
+        self.assertIn("does not authorize writing", text)
+
+    def test_binding_table_missing_layers_inject_all_unbound(self):
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        text = "\n".join(item["text"] for item in result["loaded"] if item["kind"] == "bindings")
+        for capability in ("code-structure", "web-research", "knowledge-retrieval",
+                           "data-access", "test-execution"):
+            self.assertIn("%s: unbound" % capability, text)
+
+    def test_binding_table_invalid_layer_never_breaks_injection(self):
+        (self.project / ".fstar" / "tools.yaml").write_text(
+            "schema: \"fstar.tools.v1\"\nbindings: {bad\n", encoding="utf-8")
+        # A valid user layer must not be masked by the invalid project layer.
+        user_tools = self.user_root / "tools.yaml"
+        self._bound_layer(user_tools, tool="qmd", capability="knowledge-retrieval")
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        text = "\n".join(item["text"] for item in result["loaded"] if item["kind"] == "bindings")
+        self.assertIn("project tools.yaml exists but is invalid", text)
+        self.assertIn("fstar tools scan", text)
+        self.assertIn("knowledge-retrieval: qmd", text)
+
+    def test_worker_context_carries_binding_table(self):
+        project_tools = self.project / ".fstar" / "tools.yaml"
+        self._bound_layer(project_tools, tool="codegraph", capability="code-structure")
+        result = hooks.worker_context({"role": "fstar-implement"}, start=self.project,
+                                      user_root=self.user_root, runtime_root=self.runtime_root,
+                                      clock=self.clock, as_json=True)
+        self.assertIn("bindings", {item["kind"] for item in result["inputs"]})
+        text = "\n".join(item["text"] for item in result["loaded"] if item["kind"] == "bindings")
+        self.assertIn("code-structure: codegraph", text)
+
 
 class ExtensionConsumerTests(HookCase):
     def test_recovered_task_scope_controls_injected_documents_and_specs(self):

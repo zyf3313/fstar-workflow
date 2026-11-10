@@ -214,6 +214,25 @@ class SemanticContentTests(unittest.TestCase):
         text = (RESOURCES / "runtime" / "routing.md").read_text()
         for phrase in ("only one highest-value package", "After refusal", "do not ask again", "native implement", "independent `fstar-check`", "explicit user confirmation", "`fstar-debug` is core-automatic", "at most one automatic retry"):
             self.assertIn(phrase, text)
+        # Init runs the scan; applying bindings is still gated and project-only.
+        self.assertIn("runs an initial proposal-only tool scan", text)
+        self.assertIn("written at project level only", text)
+        self.assertNotIn("does not yet run that scan", text)
+
+    def test_init_skill_binds_by_agent_with_one_confirmation(self):
+        text = (RESOURCES / "skills/fstar-init/SKILL.md").read_text()
+        for phrase in ("Initial capability binding", "at most one tool",
+                       "30–50 entries", "project-level only",
+                       "never overwrite silently", "Present one summary",
+                       "tools_bridge"):
+            self.assertIn(phrase, text)
+        self.assertIn("never create or edit the user-level `~/.fstar/tools.yaml`", text)
+        self.assertIn("leave the capability unbound", text)
+
+    def test_routing_declares_read_only_binding_table_injection(self):
+        text = (RESOURCES / "runtime" / "routing.md").read_text()
+        self.assertIn("inject the resolved read-only binding table without any grant", text)
+        self.assertIn("reading it is discovery and never authorizes changing tools.yaml", text)
 
     def test_archive_only_reminders_and_continue_boundary(self):
         archive = (RESOURCES / "skills/fstar-archive/SKILL.md").read_text()

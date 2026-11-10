@@ -196,6 +196,12 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     capabilities = inject.capabilities_input(root)
     if capabilities:
         inputs.append(capabilities)
+    # The resolved binding table is discovery too: reading it never authorizes
+    # writing tools.yaml, so it is injected without a tool-capability grant.
+    # A binding that stays invisible would be effectively unbound.
+    bindings = inject.bindings_input(project_root, user)
+    if bindings:
+        inputs.append(bindings)
     context = {}
     persistent_context = False
 
@@ -372,6 +378,12 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
     card = inject.role_card(role, root)
     if card:
         inputs.append(card)
+    # Same read-only binding table as session-context: the worker must see
+    # which tool each capability resolves to without any grant, and reading
+    # it never authorizes changing it.
+    bindings = inject.bindings_input(project_root, user)
+    if bindings:
+        inputs.append(bindings)
 
     task_line = inject.session_only_reference()
     context = {}

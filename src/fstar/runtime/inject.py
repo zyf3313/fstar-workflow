@@ -14,6 +14,7 @@ All state reads go through core APIs; this module performs no writes.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import List, Optional
@@ -97,6 +98,11 @@ def _load_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _digest_text(text: str) -> str:
+    """SHA-256 of synthesized text with no backing file to read."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def _fingerprinted(kind: str, path: Path, *, relative: Optional[str] = None, version: str = "1") -> Optional[InjectedInput]:
     """Read one file and return it fingerprinted, or None when missing."""
     try:
@@ -127,6 +133,61 @@ def capabilities_input(root: Optional[Path] = None) -> Optional[InjectedInput]:
     root = root if root is not None else resource_root()
     return _fingerprinted("capabilities", root / "runtime" / "capabilities.md",
                           relative="runtime/capabilities.md")
+
+
+def bindings_input(project_root: Optional[Path], user_root: Path) -> Optional[InjectedInput]:
+    """The resolved capability binding table, injected read-only without a grant.
+
+    A binding that stays invisible is effectively unbound: session and worker
+    context must carry the five-line capability → tool table so the table
+    survives compaction and handoff. Reading the table is discovery, not
+    authorization: writing tools.yaml still requires the tool-capability
+    grant and an exact user confirmation (same boundary as capabilities.md).
+
+    Read-only everywhere: a missing tools.yaml layer is a normal state that
+    yields a table of unbound capabilities; an invalid layer must not break
+    passive session injection (the explicit `fstar tools` commands surface
+    the validation error, and the light health check reports the file).
+    """
+    from .. import tools
+
+    repair_hints = []
+    project_loaded = None
+    if project_root is not None:
+        path = project_root / ".fstar" / "tools.yaml"
+        try:
+            project_loaded = tools.load_tools(path)
+        except DomainError:
+            # One invalid layer must not mask a valid other layer, and must
+            # not break passive injection: skip it and surface a repair hint.
+            repair_hints.append("project")
+    user_loaded = None
+    try:
+        user_loaded = tools.load_tools(user_root / "tools.yaml")
+    except DomainError:
+        repair_hints.append("user")
+    resolution = tools.resolve_bindings(project=project_loaded, user=user_loaded)
+    lines = ["# Resolved capability bindings (read-only)", ""]
+    lines.append("Discovery only: reading a binding does not authorize writing one. When a task")
+    lines.append("matches a capability below, use the bound tool; unbound means no tool qualifies,")
+    lines.append("so fall back per the capability contract instead of substituting another tool.")
+    lines.append("")
+    for scope in repair_hints:
+        lines.append("- %s tools.yaml exists but is invalid; run `fstar tools scan` to repair it." % scope)
+    for capability in resolution["capabilities"]:
+        snapshot = capability["tool"]
+        name = snapshot["tool"] if snapshot else None
+        if capability["state"] == "bound" and name:
+            lines.append("- %s: %s (kind=%s, version=%s)" % (
+                capability["capability"], name, snapshot["kind"], snapshot["version"]))
+        elif capability["state"] == "recommended" and name:
+            lines.append("- %s: unbound, recommended %s (not confirmed)" % (
+                capability["capability"], name))
+        else:
+            lines.append("- %s: unbound" % capability["capability"])
+    lines.append("")
+    text = "\n".join(lines)
+    return InjectedInput("bindings", "synthesized:resolve_bindings", text, _digest_text(text), "1")
 
 
 def role_card(role: str, root: Optional[Path] = None) -> Optional[InjectedInput]:
