@@ -41,6 +41,15 @@ function loadPackageMetadata() {
   if (!pkg.fstar || !pkg.fstar.resource_version || !Array.isArray(pkg.fstar.supported_data_schemas)) {
     throw new Error('package.json is missing the fstar {cli_version, resource_version, supported_data_schemas} block');
   }
+  // `npm version` bumps package.json "version" but never the fstar.cli_version
+  // field, so a release could ship a manifest that reports the previous CLI
+  // version. Refuse to build a package whose declared CLI version does not
+  // match the published one.
+  if (pkg.fstar.cli_version && pkg.fstar.cli_version !== pkg.version) {
+    throw new Error(
+      `package.json fstar.cli_version (${pkg.fstar.cli_version}) does not match version (${pkg.version}); ` +
+      'set them to the same value before packaging');
+  }
   return pkg;
 }
 
