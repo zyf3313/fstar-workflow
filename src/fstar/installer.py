@@ -611,7 +611,7 @@ def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = 
                               "reason": "no --host-root %s=PATH provided; nothing will be written for this host" % host})
             continue
         settings_entries.extend(_plan_host_settings(host, resolved, operation, manifest))
-        host_files.extend(_plan_host_files(host, resolved, operation, manifest, bundle))
+        host_files.extend(_plan_host_files(host, resolved, operation, manifest, bundle, conflict_policy))
     return {
         "schema": "fstar.install-plan.v1",
         "operation": operation,
@@ -760,7 +760,7 @@ HOST_FILE_KINDS = {
 
 
 def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional[dict],
-                     bundle: Mapping) -> List[dict]:
+                     bundle: Mapping, conflict_policy: str = "keep") -> List[dict]:
     """Plan the per-file adaptation of bundled skills/agents into the host root.
 
     Ownership is per-file content hash from the install manifest, the same
@@ -802,7 +802,15 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
         elif current_hash == expected_hash:
             action = "reuse_owned" if record_owned is not None else "reuse_external"
         elif record_owned is not None and current_hash != record_owned.get("installed_hash"):
-            action = "keep_modified"
+            # Owned but modified by the user: honor the same conflict policy
+            # as cache files (_file_action) — keep by default, overwrite or
+            # write-new only on the explicit flag.
+            if conflict_policy == "overwrite":
+                action = "overwrite"
+            elif conflict_policy == "new":
+                action = "write_new"
+            else:
+                action = "keep_modified"
         elif record_owned is not None:
             # Owned and unmodified, but the bundle content changed (a new
             # version of the same resource): the installer already owns the
@@ -1350,10 +1358,24 @@ def _apply_host_file(entry: dict, roots: Roots, backup_root: Path, applied: dict
         # Host files live under the HOST root, not the user data root; the
         # symlink-ancestor boundary is the host root that owns this file.
         _reject_symlink_ancestors(destination, roots.host_roots[entry["host"]])
+    if action == "write_new":
+        target = destination.with_name(destination.name + ".new")
+        _reject_symlink_ancestors(target.parent, roots.host_roots[entry["host"]])
+        if target.exists() or target.is_symlink():
+            # An existing .new belongs to someone else; never clobber it.
+            applied["kept"].append({"path": str(target), "action": "existing_new_conflict",
+                                     "host": entry["host"], "kind": entry["kind"]})
+            return
+        payload = _source_bytes(entry)
+        _atomic_write_bytes(target, payload)
+        applied["files"].append({"path": str(target), "action": action, "backup": None,
+                                 "written_hash": _sha256_bytes(payload),
+                                 "host": entry["host"], "kind": entry["kind"]})
+        return
     if action == "overwrite" and not destination.exists():
         # Nothing to overwrite: fall through to a plain write.
         action = "write"
-    if action == "write":
+    if action in ("write", "overwrite"):
         payload = _source_bytes(entry)
         if entry.get("expected_hash") is not None and _sha256_bytes(payload) != entry["expected_hash"]:
             raise DomainError("resource_integrity", "Source file no longer matches its planned hash",

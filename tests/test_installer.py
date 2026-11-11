@@ -590,6 +590,30 @@ class TestHostSkillAdaptation(InstallerCase):
         self.assertEqual([k["action"] for k in kept], ["keep_modified"])
         self.assertEqual(target.read_text(encoding="utf-8"), "user edited")
 
+    def test_update_overwrites_owned_modified_host_file(self):
+        # Regression: _apply_host_file dropped existing 'overwrite' entries
+        # through to invalid_plan_action because the write branch matched
+        # only 'write'. An owned, modified host file under
+        # conflict_policy='overwrite' must refresh like a cache file.
+        self.install(hosts=["claude"])
+        target = self.host_root / "skills" / "fstar-help" / "SKILL.md"
+        target.write_text("user edited", encoding="utf-8")
+        roots = self.roots()
+        plan = installer.plan_install(operation="update", roots=roots, conflict_policy="overwrite")
+        entry = next(e for e in plan["host_files"]
+                     if Path(e["destination"]).resolve() == target.resolve())
+        self.assertEqual("overwrite", entry["action"])
+        result = installer.apply_plan(plan, roots=roots)
+        written = [f for f in result["applied"]["files"]
+                   if Path(f["path"]).resolve() == target.resolve()]
+        self.assertEqual(["overwrite"], [f["action"] for f in written])
+        self.assertTrue(Path(written[0]["backup"]).is_file())
+        self.assertEqual(Path(written[0]["backup"]).read_text(encoding="utf-8"), "user edited")
+        self.assertEqual(
+            target.read_text(encoding="utf-8"),
+            (BUNDLE_ROOT / "resources" / "skills" / "fstar-help" / "SKILL.md").read_text(),
+        )
+
     def test_dry_run_writes_nothing_to_the_host(self):
         before = _tree_snapshot(self.host_root)
         plan = installer.plan_install(operation="install", roots=self.roots(), hosts=["claude"])
