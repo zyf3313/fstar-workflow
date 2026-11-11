@@ -83,7 +83,7 @@
       "source": "src/fstar/installer.py",
       "destination": "src/fstar/installer.py",
       "kind": "python",
-      "sha256": "a65165af57e49005af4fc9fb7770753919572c5af5395cae7d439cc90c4d9dd7"
+      "sha256": "0cfa29b54c66b5aa6011d13895ea16ceb838eeb1060ba24a2ddcdef5235e481b"
     },
     {
       "source": "src/fstar/knowledge.py",

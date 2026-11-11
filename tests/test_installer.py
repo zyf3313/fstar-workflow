@@ -700,6 +700,25 @@ class TestHostSkillAdaptation(InstallerCase):
             (BUNDLE_ROOT / "resources" / "skills" / "fstar-help" / "SKILL.md").read_text(),
         )
 
+    def test_overwritten_host_file_baseline_moves_with_the_content(self):
+        # Regression: the manifest only re-recorded host files written with
+        # action "write", so an "overwrite" kept the previous installed_hash
+        # and doctor reported the refreshed file as user-modified forever.
+        self.install(hosts=["claude"])
+        target = self.host_root / "skills" / "fstar-help" / "SKILL.md"
+        target.write_text("user edited", encoding="utf-8")
+        roots = self.roots()
+        plan = installer.plan_install(operation="update", roots=roots, conflict_policy="overwrite")
+        installer.apply_plan(plan, roots=roots)
+        manifest = json.loads((self.user_root / ".install-manifest.json").read_text())
+        record = next(r for r in manifest["host_file_entries"]
+                      if Path(r["destination"]).resolve() == target.resolve())
+        self.assertEqual(_sha(target), record["installed_hash"])
+        report = installer.doctor(roots=roots)
+        self.assertTrue(report["healthy"], report["diagnostics"])
+        self.assertEqual([], [d for d in report["diagnostics"]
+                              if d["code"] == "HOST_FILE_MODIFIED"])
+
     def test_dry_run_writes_nothing_to_the_host(self):
         before = _tree_snapshot(self.host_root)
         plan = installer.plan_install(operation="install", roots=self.roots(), hosts=["claude"])

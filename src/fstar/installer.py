@@ -1597,7 +1597,10 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
     manifest["settings_entries"] = sorted(settings.values(), key=lambda record: record["key"])
     host_files = {record["destination"]: record for record in manifest.get("host_file_entries", [])}
     for entry in plan.get("host_files", []):
-        if entry["action"] == "write":
+        if entry["action"] in ("write", "overwrite"):
+            # An overwritten file now carries the incoming content, so the
+            # recorded baseline must move with it; keeping the old hash
+            # would report the refreshed file as user-modified forever.
             host_files[entry["destination"]] = {
                 "host": entry["host"],
                 "kind": entry["kind"],
