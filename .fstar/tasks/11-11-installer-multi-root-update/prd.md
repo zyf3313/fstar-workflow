@@ -65,10 +65,43 @@ resolved: {claude: ".../vibecoding/fstar/.claude"}
 - When 在 A 上 uninstall
 - Then A 的记录被移除、B 的记录仍在
 
-### R-003 回归测试
+### R-003 host 文件基线随刷新内容移动
+
+`overwrite` / `reuse_owned` 之后，manifest 的 `installed_hash` 必须与磁盘内容
+一致：
+
+- manifest 回写只处理 `action == "write"`，`overwrite` 保留旧哈希 → doctor
+  永远报 `HOST_FILE_MODIFIED`；
+- `reuse_owned` 分支用 `setdefault`，同样保留旧哈希。
+
+两处都改为跟随当前内容（owned 记录才更新，externally_owned 不动）。
+
+验收：
+
+- Given 一个 owned 且被用户改过的 host skill
+- When `fstar update --modified overwrite` 刷新它
+- Then manifest 的 installed_hash 等于新文件哈希，doctor 不报 HOST_FILE_MODIFIED
+- And 再次 update 后基线依然正确
+
+### R-004 发布标签不得漂移
+
+`npm version` 只改 `package.json` 的 `version`，不会改 `fstar.cli_version`
+字段，导致 0.3.2 发布出去仍自报 0.3.1。修复：
+
+- `scripts/build-package.cjs` 在 `fstar.cli_version ≠ version` 时**拒绝打包**；
+- package.json 两字段同步。
+
+验收：
+
+- Given cli_version 与 version 不一致
+- When 运行 `node scripts/build-package.cjs`
+- Then 构建失败并给出明确原因
+
+### R-005 回归测试
 
 覆盖：显式 root 绕过、隐式 root 按 host_file 记录放行、双 root settings
-记录并存、单 root uninstall 不影响另一 root、旧 key 迁移。
+记录并存、单 root uninstall 不影响另一 root、旧 key 迁移、overwrite 后
+基线跟随、reuse 后基线不复活、cli_version 漂移拒绝打包。
 
 ## 不做
 
