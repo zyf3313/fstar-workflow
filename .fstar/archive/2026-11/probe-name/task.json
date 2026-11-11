@@ -1,0 +1,151 @@
+{
+  "acceptance": null,
+  "archivedAt": "2026-11-11T14:51:07.338922Z",
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": null,
+  "createdAt": "2026-11-11T14:50:17.409079Z",
+  "creator": "agent",
+  "description": "d",
+  "events": [
+    {
+      "at": "2026-11-11T14:50:17.409360Z",
+      "data": {
+        "parent": null
+      },
+      "id": "fe0553c1-49ae-4c45-bff7-81c4d137c055",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "at": "2026-11-11T14:50:17.409357Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "b48aa764-614b-4342-b312-0e6a87cfcdeb",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-11T14:50:50.305659Z",
+      "data": {
+        "disposition": "keep",
+        "reason": "accidental probe task from checking create() return shape"
+      },
+      "id": "bb727a09-96dd-4ab5-a184-f7cb6c62c630",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": "s1"
+        },
+        "at": "2026-11-11T15:00:00Z",
+        "quote": "probe-name 是误建的，清掉",
+        "reference": "session/s1/input-probe",
+        "scope": {},
+        "source_id": "input-probe",
+        "type": "conversation",
+        "validates": "aa69835e58651dec10a77c8f9229ad0c23e5c9ad123bb0eee53b008be8d8ffa7"
+      },
+      "type": "dropped"
+    },
+    {
+      "at": "2026-11-11T14:51:07.338922Z",
+      "data": {
+        "archived_at": "2026-11-11T14:51:07.338922Z",
+        "operation_id": "4cf15b7c-5ef5-4090-b64d-243e06c3b22d",
+        "target": ".fstar/archive/2026-11/probe-name"
+      },
+      "id": "87ec74fa-bcb3-4d03-8d3e-599fa50ca780",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": "s1"
+        },
+        "at": "2026-11-11T15:01:00Z",
+        "quote": "归档掉这个误建任务",
+        "reference": "session/s1/input-probe-archive",
+        "scope": {},
+        "source_id": "input-probe-archive",
+        "type": "conversation",
+        "validates": "aa69835e58651dec10a77c8f9229ad0c23e5c9ad123bb0eee53b008be8d8ffa7"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-11T14:51:07.341466Z",
+      "data": {
+        "operation_id": "4cf15b7c-5ef5-4090-b64d-243e06c3b22d",
+        "target": ".fstar/archive/2026-11/probe-name"
+      },
+      "id": "53aa339c-f9fb-40df-aaaf-c634a4b6836e",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": "s1"
+        },
+        "at": "2026-11-11T15:01:00Z",
+        "quote": "归档掉这个误建任务",
+        "reference": "session/s1/input-probe-archive",
+        "scope": {},
+        "source_id": "input-probe-archive",
+        "type": "conversation",
+        "validates": "aa69835e58651dec10a77c8f9229ad0c23e5c9ad123bb0eee53b008be8d8ffa7"
+      },
+      "type": "archived"
+    }
+  ],
+  "evidence": [],
+  "extensions": [],
+  "id": "3b330443-70aa-40dc-af15-ac8d8905deb5",
+  "lease": null,
+  "meta": {
+    "disposition": {
+      "action": "keep",
+      "at": "2026-11-11T14:50:50.305457Z",
+      "by": {
+        "id": "user",
+        "role": "user",
+        "session": "s1"
+      },
+      "confirmation": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": "s1"
+        },
+        "at": "2026-11-11T15:00:00Z",
+        "quote": "probe-name 是误建的，清掉",
+        "reference": "session/s1/input-probe",
+        "scope": {},
+        "source_id": "input-probe",
+        "type": "conversation",
+        "validates": "aa69835e58651dec10a77c8f9229ad0c23e5c9ad123bb0eee53b008be8d8ffa7"
+      },
+      "pending_cleanup": false,
+      "pending_knowledge": false,
+      "reason": "accidental probe task from checking create() return shape"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {}
+  },
+  "name": "probe-name",
+  "notes": "",
+  "phase": "planning",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "t",
+  "worktree_path": ""
+}

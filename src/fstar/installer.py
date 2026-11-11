@@ -498,7 +498,8 @@ def _settings_file(host: str) -> str:
 
 def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = None,
                  hosts: Sequence[str] = (), conflict_policy: str = "keep",
-                 requested_version: Optional[str] = None) -> dict:
+                 requested_version: Optional[str] = None,
+                 explicit_roots: bool = False) -> dict:
     """Build the full action/conflict/expected-hash plan. Pure read."""
     if operation not in ("install", "update", "uninstall"):
         raise DomainError("invalid_operation", "Unknown installer operation", {"operation": operation})
@@ -563,36 +564,32 @@ def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = 
         _check_version_immutability(cache_root, version, files)
     settings_entries = []
     target_hosts = list(hosts)
-    if operation in ("update", "uninstall") and not target_hosts and manifest:
+    owned_roots = _manifest_owned_roots(manifest)
+    if operation in ("update", "uninstall") and manifest:
         # Update re-verifies and uninstall removes the host entries this
         # installation itself owns, but only where the resolved host root
-        # actually matches the recorded one. Without an exact path match
-        # (e.g. a user-level install seen from inside a project), nothing
-        # is guessed — the user passes --user-level to select it.
-        owned_roots = {record["host"]: Path(record["settings_path"]).parent
-                       for record in manifest.get("settings_entries", [])
-                       if record.get("ownership") == "owned" and record.get("host")}
-        target_hosts = [host for host, root in sorted(owned_roots.items())
-                        if host in resolved.host_roots and root == resolved.host_roots[host]]
-    if operation in ("update", "uninstall") and manifest:
-        # The same refusal applies when the user names hosts with --host but
-        # no host root was actually selected: --host picks which hosts to
-        # touch, not where they live. Update would otherwise refresh only
-        # the cache while the live host entries stay pinned to the recorded
-        # root — the same half-operated state as a half-uninstall.
-        owned_roots = {record["host"]: Path(record["settings_path"]).parent
-                       for record in manifest.get("settings_entries", [])
-                       if record.get("ownership") == "owned" and record.get("host")}
-        matching = {host for host, root in owned_roots.items()
-                    if host in resolved.host_roots and root == resolved.host_roots[host]}
-        if owned_roots and not matching:
-            recorded = {str(root) for root in owned_roots.values()}
+        # actually matches a recorded one. An explicit --host-root or
+        # --user-level is the user's own selection and is authoritative:
+        # the mismatch refusal only guards implicit resolution (the current
+        # project's .claude), where acting on the wrong root would silently
+        # refresh the cache while leaving the live host entries stale.
+        matching = {host for host, roots_set in owned_roots.items()
+                    if host in resolved.host_roots and resolved.host_roots[host] in roots_set}
+        if owned_roots and not matching and not explicit_roots:
+            recorded = {str(root) for roots_set in owned_roots.values() for root in roots_set}
             raise DomainError(
                 "uninstall_host_root_mismatch",
                 "The recorded install targets other host roots than the ones "
                 "currently resolved; pass --user-level or --host-root to select it",
                 {"recorded": sorted(recorded),
                  "resolved": {name: str(path) for name, path in resolved.host_roots.items()}})
+    if operation in ("update", "uninstall") and not target_hosts:
+        if explicit_roots:
+            # The user named the root: touch exactly the hosts they selected.
+            target_hosts = [host for host in sorted(resolved.host_roots) if host in SUPPORTED_HOSTS]
+        elif manifest:
+            target_hosts = [host for host, roots_set in sorted(owned_roots.items())
+                            if host in resolved.host_roots and resolved.host_roots[host] in roots_set]
     for host in target_hosts:
         if host not in SUPPORTED_HOSTS:
             raise DomainError("unknown_host", "Unknown host", {"host": host, "hosts": list(SUPPORTED_HOSTS)})
@@ -710,7 +707,7 @@ def _plan_host_settings(host: str, roots: Roots, operation: str, manifest: Optio
         matcher = "|".join(shape.get("matchers") or [])
         group = {"matcher": matcher, "hooks": [hook]}
         existing = _find_hook_group(document, shape["event"], group)
-        owned_entry = _owned_setting(manifest, host, shape["event"], group)
+        owned_entry = _owned_setting(manifest, host, shape["event"], group, settings_path)
         if operation == "uninstall":
             action = "remove_owned" if owned_entry is not None else "keep"
         elif existing is not None:
@@ -735,14 +732,25 @@ def _plan_host_settings(host: str, roots: Roots, operation: str, manifest: Optio
     return entries
 
 
-def _owned_setting(manifest: Optional[dict], host: str, event: str, group: Mapping) -> Optional[dict]:
+def _owned_setting(manifest: Optional[dict], host: str, event: str, group: Mapping,
+                   settings_path: Optional[Path] = None) -> Optional[dict]:
+    """The owned record for this exact host, settings file, event, and hook.
+
+    The settings file path is part of the identity: the same hook registered
+    at a different host root belongs to a different installation target, and
+    treating it as this root's owned record would let an operation here
+    remove or re-own an entry it never created.
+    """
     if not manifest:
         return None
     for record in manifest.get("settings_entries", []):
-        if record.get("host") == host and record.get("event") == event:
-            if (record.get("ownership") == "owned"
-                    and record.get("canonical_hash") == _canonical_hash(group)):
-                return record
+        if record.get("host") != host or record.get("event") != event:
+            continue
+        if settings_path is not None and record.get("settings_path") != str(settings_path):
+            continue
+        if (record.get("ownership") == "owned"
+                and record.get("canonical_hash") == _canonical_hash(group)):
+            return record
     return None
 
 
@@ -757,6 +765,40 @@ HOST_FILE_KINDS = {
         + [("agent", "agents/fstar-%s.md" % role) for role in ROLES]
     ),
 }
+
+
+def _manifest_owned_roots(manifest: Optional[dict]) -> Dict[str, set]:
+    """Every host root this installation owns content in, per host.
+
+    Settings records alone are not enough: older manifests collapsed
+    same-host records by a ``host:event`` key, so an installation at a
+    second host root erased the first root's settings record while its
+    per-file ownership records survived. Host-file records carry both the
+    package-relative source and the destination, so the root is derivable
+    exactly; an entry whose shape cannot be trusted is ignored rather than
+    guessed.
+    """
+    roots: Dict[str, set] = {}
+    for record in (manifest or {}).get("settings_entries", []):
+        if record.get("ownership") == "owned" and record.get("host") and record.get("settings_path"):
+            roots.setdefault(record["host"], set()).add(Path(record["settings_path"]).parent)
+    for record in (manifest or {}).get("host_file_entries", []):
+        if record.get("ownership") != "owned" or not record.get("host"):
+            continue
+        source = record.get("source") or ""
+        destination = record.get("destination")
+        if not destination or not source.startswith("resources/"):
+            continue
+        relative = Path(source[len("resources/"):])
+        root = Path(destination)
+        for _ in relative.parts:
+            if root.parent == root:
+                root = None
+                break
+            root = root.parent
+        if root is not None:
+            roots.setdefault(record["host"], set()).add(root)
+    return roots
 
 
 def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional[dict],
@@ -1516,7 +1558,9 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
     manifest["files"] = sorted(files.values(), key=lambda record: record["source"])
     settings = {record["key"]: record for record in manifest.get("settings_entries", [])}
     for entry in plan.get("settings_entries", []):
-        key = "%s:%s" % (entry["host"], entry["event"])
+        # Root-scoped identity: the same host/event hook at another host root
+        # is a different installation target and must keep its own record.
+        key = "%s:%s:%s" % (entry["host"], entry["settings_path"], entry["event"])
         if entry["action"] == "append":
             settings[key] = {
                 "key": key,
@@ -1806,6 +1850,14 @@ def _load_manifest(user_root: Path) -> Optional[dict]:
             or any(not all(key in item for key in ("source", "destination", "installed_hash")) for item in manifest["files"])
             or any(not all(key in item for key in ("key", "host", "event", "ownership")) for item in manifest["settings_entries"])):
         raise DomainError("installer_manifest_corrupt", "Malformed ownership records", {"path": str(path)})
+    # Older manifests keyed settings records by host:event, which collapsed
+    # same-host records from different host roots. The records themselves
+    # always carried settings_path, so re-keying is lossless; nothing is
+    # invented for records the old writer already overwrote.
+    for record in manifest["settings_entries"]:
+        settings_path = record.get("settings_path")
+        if isinstance(settings_path, str) and settings_path:
+            record["key"] = "%s:%s:%s" % (record["host"], settings_path, record["event"])
     return manifest
 
 
@@ -2216,6 +2268,16 @@ def _roots(args):
     return roots_from_args(args)
 
 
+def _explicit_roots(args) -> bool:
+    """Whether the user selected the host root explicitly.
+
+    An explicit --user-level or --host-root HOST=PATH is the user's own
+    decision about the target; update/uninstall must act on it instead of
+    refusing because the manifest records another root.
+    """
+    return bool(getattr(args, "user_level", False) or getattr(args, "host_root", None))
+
+
 def _handle_install(args):
     roots = _roots(args)
     if not args.dry_run:
@@ -2258,7 +2320,8 @@ def _handle_update(args):
     roots = _roots(args)
     if not args.dry_run:
         recover_pending(roots)
-    plan = plan_install(operation="update", roots=roots, conflict_policy=args.modified)
+    plan = plan_install(operation="update", roots=roots, conflict_policy=args.modified,
+                        explicit_roots=_explicit_roots(args))
     if args.dry_run:
         return {"dry_run": True, **plan}
     return {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
@@ -2268,7 +2331,8 @@ def _handle_uninstall(args):
     roots = _roots(args)
     if not args.dry_run:
         recover_pending(roots)
-    plan = plan_install(operation="uninstall", roots=roots, hosts=args.host)
+    plan = plan_install(operation="uninstall", roots=roots, hosts=args.host,
+                        explicit_roots=_explicit_roots(args))
     if args.dry_run:
         return {"dry_run": True, **plan}
     return {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}

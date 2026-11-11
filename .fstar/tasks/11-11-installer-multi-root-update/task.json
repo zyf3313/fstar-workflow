@@ -1,0 +1,56 @@
+{
+  "acceptance": null,
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": null,
+  "createdAt": "2026-11-11T14:50:09.625934Z",
+  "creator": "agent",
+  "description": "fstar update in a project whose .claude was installed earlier fails with uninstall_host_root_mismatch because the manifest keeps one settings record keyed by host:event and the mismatch check also rejects explicit --host-root. Make explicit root selection authoritative and key settings records by root.",
+  "events": [
+    {
+      "at": "2026-11-11T14:50:09.626709Z",
+      "data": {
+        "parent": null
+      },
+      "id": "cfe75981-864a-4830-a6cd-a3ee76188449",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "at": "2026-11-11T14:50:09.626701Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "277dc010-e6ff-4679-965f-30b9e029bf06",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    }
+  ],
+  "evidence": [],
+  "extensions": [],
+  "id": "668f2476-0992-435a-8141-bc197333b020",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {}
+  },
+  "name": "11-11-installer-multi-root-update",
+  "notes": "",
+  "phase": "planning",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "修复安装器多 host root 更新：显式根绕过校验 + settings 记录按根区分",
+  "worktree_path": ""
+}

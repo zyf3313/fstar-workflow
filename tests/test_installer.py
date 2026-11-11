@@ -529,6 +529,92 @@ class TestHostEntryDetails(InstallerCase):
             self.assertEqual(entry["ownership"], "owned")
 
 
+class TestMultiRootUpdate(InstallerCase):
+    """Update must work per host root, not only for the last recorded one."""
+
+    def install_at(self, root: Path):
+        roots = self.roots(host_roots={"claude": root})
+        plan = installer.plan_install(operation="install", roots=roots, hosts=["claude"])
+        return installer.apply_plan(plan, roots=roots)
+
+    def plan_update_at(self, root: Path, *, explicit: bool, policy: str = "keep"):
+        roots = self.roots(host_roots={"claude": root})
+        return installer.plan_install(operation="update", roots=roots,
+                                      conflict_policy=policy, explicit_roots=explicit)
+
+    def owned_records(self, root: Path):
+        manifest = json.loads((self.user_root / ".install-manifest.json").read_text())
+        return [record for record in manifest["settings_entries"]
+                if Path(record["settings_path"]).parent.resolve() == root.resolve()]
+
+    def test_explicit_host_root_bypasses_recorded_root_mismatch(self):
+        other = self.tmp / "host" / "other-claude"
+        other.mkdir(parents=True)
+        self.install_at(other)
+        # Implicit resolution to a root the manifest does not record still
+        # refuses: that guard protects against acting on the wrong root.
+        with self.assertRaises(installer.DomainError) as caught:
+            self.plan_update_at(self.host_root, explicit=False)
+        self.assertEqual("uninstall_host_root_mismatch", caught.exception.code)
+        # An explicit --host-root is the user's selection and is authoritative.
+        plan = self.plan_update_at(self.host_root, explicit=True)
+        self.assertEqual(16, len(plan["host_files"]))
+
+    def test_implicit_update_passes_when_host_file_records_own_the_root(self):
+        other = self.tmp / "host" / "other-claude"
+        other.mkdir(parents=True)
+        self.install_at(self.host_root)
+        self.install_at(other)
+        manifest_path = self.user_root / ".install-manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        # Simulate the older writer collapsing same-host settings records to
+        # the last root: keep only the other root's settings records while
+        # this root's host-file ownership records survive.
+        manifest["settings_entries"] = [record for record in manifest["settings_entries"]
+                                        if Path(record["settings_path"]).parent.resolve() == other.resolve()]
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        plan = self.plan_update_at(self.host_root, explicit=False)
+        self.assertEqual(16, len(plan["host_files"]))
+        self.assertTrue(all(entry["host"] == "claude" for entry in plan["host_files"]))
+
+    def test_settings_records_are_kept_per_host_root(self):
+        other = self.tmp / "host" / "other-claude"
+        other.mkdir(parents=True)
+        self.install_at(self.host_root)
+        self.install_at(other)
+        manifest = json.loads((self.user_root / ".install-manifest.json").read_text())
+        keys = [record["key"] for record in manifest["settings_entries"]]
+        self.assertEqual(8, len(keys))
+        self.assertIn("claude:%s:SessionStart" % (self.host_root / "settings.json").resolve(), keys)
+        self.assertIn("claude:%s:SessionStart" % (other / "settings.json").resolve(), keys)
+        self.assertEqual(4, len(self.owned_records(self.host_root)))
+        self.assertEqual(4, len(self.owned_records(other)))
+
+    def test_uninstall_at_one_root_keeps_the_other_roots_records(self):
+        other = self.tmp / "host" / "other-claude"
+        other.mkdir(parents=True)
+        self.install_at(self.host_root)
+        self.install_at(other)
+        roots = self.roots(host_roots={"claude": self.host_root})
+        plan = installer.plan_install(operation="uninstall", roots=roots, explicit_roots=True)
+        installer.apply_plan(plan, roots=roots)
+        self.assertEqual([], self.owned_records(self.host_root))
+        self.assertEqual(4, len(self.owned_records(other)))
+        self.assertTrue((other / "settings.json").is_file())
+
+    def test_legacy_host_event_keys_are_migrated_on_load(self):
+        self.install_at(self.host_root)
+        manifest_path = self.user_root / ".install-manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        for record in manifest["settings_entries"]:
+            record["key"] = "%s:%s" % (record["host"], record["event"])
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        loaded = installer._load_manifest(self.user_root)
+        for record in loaded["settings_entries"]:
+            self.assertEqual("%s:%s:%s" % (record["host"], record["settings_path"], record["event"]),
+                             record["key"])
+
+
 class TestHostSkillAdaptation(InstallerCase):
     """Host-side skills/agents adaptation (parent design §2.3, F5 closure)."""
 

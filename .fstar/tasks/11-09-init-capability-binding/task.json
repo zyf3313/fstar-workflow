@@ -56,9 +56,190 @@
         "validates": "68dcf00c85505ac654becc1dc2e5912f64493aaa1f1af8a4be989942d6aa02db"
       },
       "type": "started"
+    },
+    {
+      "at": "2026-11-11T14:32:33.082455Z",
+      "data": {
+        "new_holder": {
+          "id": "fstar-check-agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "a1e7bb8c-e07c-4791-8b0f-fbbeeb720bc4",
+      "source": {
+        "actor": {
+          "id": "fstar-check-agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "at": "2026-11-11T14:32:33.082451Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "f0b1da9e-e744-46c3-a56f-904605984a0d",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-11T14:32:33.085940Z",
+      "data": {
+        "evidence_id": "64ccb828-07f0-467d-b280-d3ff0673a6bc",
+        "state": "valid"
+      },
+      "id": "24428567-d251-4cc5-9604-7142f1d21cd4",
+      "source": {
+        "at": "2026-11-11T14:30:00Z",
+        "id": "fstar-check-agent",
+        "quote": "independent final check",
+        "reference": "session/s1",
+        "role": "check",
+        "session": "s1"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-11T14:32:33.087410Z",
+      "data": {
+        "reason": "final check recorded"
+      },
+      "id": "35d50926-afe5-4d4d-bda2-1122ed87a25d",
+      "source": {
+        "id": "fstar-check-agent",
+        "role": "agent",
+        "session": "s1"
+      },
+      "type": "lease_released"
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "59b60f6f0cc68af03cf79e36d766c7e8fee10bff1679240c1ee10a7e8dc1fa0c",
+        "paths": [
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "256bc1f8ab9e1c39413e0bb2abf0fecebffe9b578702a3d1f70ae1cb2378b24b"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "fab83d346df33caa554406b18a9fe9ec7b6385ae9a3b73afb5fe0e2c730df72d"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-init/SKILL.md",
+            "sha256": "8ebf01ad8d35675d67581ee4f7b1cfc59dcd2dfbd1724f37deb8b6d594171505"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "d493abdd9fb626a22f785a97cfd5d409b92f37aa5f55e39249c5465be8ae1a42"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "2ad88f57212c2ec85715acbf56720da1b7d000b79eb68c9d2cdbbe44c7a1a4a5"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "42a27f0ca37bb9002d2249ed978ebc37433ef1ca8c0c37abe5b65e4f95d28782"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "1563e1075d1681673aca60b2519606cc9868a58e21683b4a1f29f0169a03aea4"
+          }
+        ]
+      },
+      "environment": {
+        "os": "darwin 27.0",
+        "python": "3.9+",
+        "repo": "main@29a3a2e"
+      },
+      "id": "64ccb828-07f0-467d-b280-d3ff0673a6bc",
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t . (695 OK incl. test_init_skill_binds_by_agent_with_one_confirmation)",
+          "notes": "fstar-init SKILL.md carries Initial capability binding section; routing.md corrected",
+          "plan_item": "R-001",
+          "requirement_ids": [
+            "R-001"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "grep 'never create or edit the user-level' resources/skills/fstar-init/SKILL.md",
+          "notes": "project-level only enforced in skill text; test asserts the phrase",
+          "plan_item": "R-002",
+          "requirement_ids": [
+            "R-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "tests/test_content.py::test_routing_negotiation_refusal_and_minimal_loop",
+          "notes": "routing no longer claims CLI does not run the scan",
+          "plan_item": "R-003",
+          "requirement_ids": [
+            "R-003"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m pytest tests/test_hooks.py -q (80 passed incl. 4 binding-table tests)",
+          "notes": "bindings_input injected in session_context and worker_context without grant; per-layer degradation verified",
+          "plan_item": "R-004",
+          "requirement_ids": [
+            "R-004"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-11T14:32:33.084657Z",
+      "producer": {
+        "at": "2026-11-11T14:30:00Z",
+        "id": "fstar-check-agent",
+        "quote": "independent final check",
+        "reference": "session/s1",
+        "role": "check",
+        "session": "s1"
+      },
+      "run_id": "check-11-09-final-20261111",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/11-09-init-capability-binding/prd.md",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "bce2dc833cdc05ff10c4d5709d93663d19db48bec69a68bfd0deec6783e135d7"
+            },
+            {
+              "id": "R-002",
+              "sha256": "bce2dc833cdc05ff10c4d5709d93663d19db48bec69a68bfd0deec6783e135d7"
+            },
+            {
+              "id": "R-003",
+              "sha256": "bce2dc833cdc05ff10c4d5709d93663d19db48bec69a68bfd0deec6783e135d7"
+            },
+            {
+              "id": "R-004",
+              "sha256": "bce2dc833cdc05ff10c4d5709d93663d19db48bec69a68bfd0deec6783e135d7"
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "extensions": [],
   "id": "bc403651-5eaf-44e1-8157-f106617d6ca5",
   "lease": null,
@@ -66,7 +247,39 @@
     "disposition": null,
     "related_tasks": [],
     "reminders": {},
-    "templates": {}
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/11-09-init-capability-binding/prd.md": {
+          "R-001": {
+            "dependencies": [],
+            "end_marker": "### R-002",
+            "start_marker": "### R-001"
+          },
+          "R-002": {
+            "dependencies": [],
+            "end_marker": "### R-003",
+            "start_marker": "### R-002"
+          },
+          "R-003": {
+            "dependencies": [],
+            "end_marker": "### R-004",
+            "start_marker": "### R-003"
+          },
+          "R-004": {
+            "dependencies": [],
+            "end_marker": "## 不做",
+            "start_marker": "### R-004"
+          }
+        },
+        "mode": "file"
+      },
+      "artifact_map_sha256": "76a9f0c1283a9f513547ab6a1e9d557a56d5af01b0124136bdef51b305b9d2c3",
+      "artifact_map_source": {
+        "kind": "prd markers",
+        "mode": "file",
+        "ref": "agent"
+      }
+    }
   },
   "name": "11-09-init-capability-binding",
   "notes": "",
