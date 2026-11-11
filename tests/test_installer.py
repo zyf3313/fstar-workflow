@@ -718,6 +718,13 @@ class TestHostSkillAdaptation(InstallerCase):
         self.assertTrue(report["healthy"], report["diagnostics"])
         self.assertEqual([], [d for d in report["diagnostics"]
                               if d["code"] == "HOST_FILE_MODIFIED"])
+        # A later update must not reintroduce the stale baseline.
+        plan = installer.plan_install(operation="update", roots=roots, conflict_policy="overwrite")
+        installer.apply_plan(plan, roots=roots)
+        manifest = json.loads((self.user_root / ".install-manifest.json").read_text())
+        record = next(r for r in manifest["host_file_entries"]
+                      if Path(r["destination"]).resolve() == target.resolve())
+        self.assertEqual(_sha(target), record["installed_hash"])
 
     def test_dry_run_writes_nothing_to_the_host(self):
         before = _tree_snapshot(self.host_root)

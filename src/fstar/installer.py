@@ -1612,15 +1612,22 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
                 "ownership": "owned",
             }
         elif entry["action"] in ("reuse_external", "reuse_owned"):
-            host_files.setdefault(entry["destination"], {
-                "host": entry["host"],
-                "kind": entry["kind"],
-                "source": entry["source"],
-                "destination": entry["destination"],
-                "installed_hash": entry["expected_hash"],
-                "version": version,
-                "ownership": "externally_owned",
-            })
+            existing = host_files.get(entry["destination"])
+            if existing is None:
+                host_files[entry["destination"]] = {
+                    "host": entry["host"],
+                    "kind": entry["kind"],
+                    "source": entry["source"],
+                    "destination": entry["destination"],
+                    "installed_hash": entry["expected_hash"],
+                    "version": version,
+                    "ownership": "externally_owned",
+                }
+            elif existing.get("ownership") == "owned" and existing.get("installed_hash") != entry["expected_hash"]:
+                # The file on disk now carries the bundle content, so the
+                # recorded baseline must follow it; otherwise doctor keeps
+                # reporting a file the installer itself refreshed.
+                existing["installed_hash"] = entry["expected_hash"]
     manifest["host_file_entries"] = sorted(host_files.values(), key=lambda record: record["destination"])
     manifest["version"] = version
     manifest["transaction"] = {"operation_id": operation_id, "state": "committed",
