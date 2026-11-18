@@ -1,8 +1,8 @@
 {
   "schema": "fstar.package-assets.v1",
   "generated_by": "scripts/build-package.cjs",
-  "cli_version": "0.3.3",
-  "resource_version": "3",
+  "cli_version": "0.4.0",
+  "resource_version": "4",
   "supported_data_schemas": [
     1
   ],
@@ -47,7 +47,7 @@
       "source": "src/fstar/cli.py",
       "destination": "src/fstar/cli.py",
       "kind": "python",
-      "sha256": "52d1b91f1e5d6b6367410939da4ebd3848728ebbdd11723f57de98679121378b"
+      "sha256": "74961069fa65c08f01ef54440e879e6638ede1e3bc4e2aa1a4173f8e5c1b7830"
     },
     {
       "source": "src/fstar/config.py",
@@ -59,7 +59,7 @@
       "source": "src/fstar/content.py",
       "destination": "src/fstar/content.py",
       "kind": "python",
-      "sha256": "21a9c85850572ad677a9e521475b4e34776e90337b542de25e99e94bf4d0bb57"
+      "sha256": "587fe907264cc1594bc12694faaba3022496bdce4c46bca17b132b2ab06fab3b"
     },
     {
       "source": "src/fstar/dispatch.py",
@@ -77,13 +77,13 @@
       "source": "src/fstar/extensions.py",
       "destination": "src/fstar/extensions.py",
       "kind": "python",
-      "sha256": "30e5fc27db886372dc5fcb92081e5eefa76814d5f4bbcb541688b2a9ebed9630"
+      "sha256": "6fc01d9c263442945d4a4944daab59152d1b7d4f80c7fb565f8461eae744bde7"
     },
     {
       "source": "src/fstar/installer.py",
       "destination": "src/fstar/installer.py",
       "kind": "python",
-      "sha256": "5c6f609656d4ed14a619656f3bc73c28fd1c4753a0a2116164dd6fce08331b4a"
+      "sha256": "e75a17951d3d024ea748e6d6e58719cdcfabb31a19f42975e6b98aecb3c569f8"
     },
     {
       "source": "src/fstar/knowledge.py",
@@ -107,7 +107,7 @@
       "source": "src/fstar/project.py",
       "destination": "src/fstar/project.py",
       "kind": "python",
-      "sha256": "55d7f68a573e412776e7568f38a5ce78d121a6721e1f60615c6a8adb457303dd"
+      "sha256": "7a52971bbb3242876c10c6d857fcb49738029f2f930eca64251e9d9b8bfffe29"
     },
     {
       "source": "src/fstar/runtime/__init__.py",
@@ -125,13 +125,13 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "d493abdd9fb626a22f785a97cfd5d409b92f37aa5f55e39249c5465be8ae1a42"
+      "sha256": "c596d60d50a06a4459e39573b228bf3cd9daccf5ccd9ccc77ab475a248d6ac01"
     },
     {
       "source": "src/fstar/runtime/inject.py",
       "destination": "src/fstar/runtime/inject.py",
       "kind": "python",
-      "sha256": "2ad88f57212c2ec85715acbf56720da1b7d000b79eb68c9d2cdbbe44c7a1a4a5"
+      "sha256": "18eb4421eaa1531590491d3864cfc1ee6cf4a4745832a8a9a91ed48e7e57bc05"
     },
     {
       "source": "src/fstar/runtime/registration.py",
@@ -149,25 +149,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "26413de456a63dea760bd8f02b3ed0dac679e10ebe4c2409e6cfa3d82819b8ac"
-    },
-    {
-      "source": "src/fstar/tool_classifier.py",
-      "destination": "src/fstar/tool_classifier.py",
-      "kind": "python",
-      "sha256": "83e0c63616929b1bae2b14d408b6c13227a79cc3522c11a66915ba8b32434075"
-    },
-    {
-      "source": "src/fstar/tools.py",
-      "destination": "src/fstar/tools.py",
-      "kind": "python",
-      "sha256": "11a0a15f9d5fd74a268ba6f082e6c109070cfb2abcf5c1e0413d9d5a3d0cc8ba"
-    },
-    {
-      "source": "src/fstar/tools_bridge.py",
-      "destination": "src/fstar/tools_bridge.py",
-      "kind": "python",
-      "sha256": "117cadb2f7cc0ed55f3741ad2c445b4ac5ec2dbce4827a790e05c93189daaf81"
+      "sha256": "5f5ab5cc2f74614715141c602fb711f1f84f6d4a4ec8397a5cdb6f00b850d6b9"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",
@@ -203,13 +185,13 @@
       "source": "resources/skills/fstar-doc/SKILL.md",
       "destination": "resources/skills/fstar-doc/SKILL.md",
       "kind": "resource",
-      "sha256": "146512cea403afe1631316d082735c52c2691246b2f46a813376a3f409f3cbff"
+      "sha256": "1e081ec736fdf529e68ac42f25cee50a647a8926927ad072d9ea3a8f8a30fafc"
     },
     {
       "source": "resources/skills/fstar-execute/SKILL.md",
       "destination": "resources/skills/fstar-execute/SKILL.md",
       "kind": "resource",
-      "sha256": "9fa1e38b3ed17636028587b39e3832d5fb217c1726b6add41ee5137bd09fdaa6"
+      "sha256": "4013a0d952aa2531d8a5039c3e9ee18a57ede88961579f02bdaa740c8d47e985"
     },
     {
       "source": "resources/skills/fstar-help/SKILL.md",
@@ -221,7 +203,7 @@
       "source": "resources/skills/fstar-init/SKILL.md",
       "destination": "resources/skills/fstar-init/SKILL.md",
       "kind": "resource",
-      "sha256": "8ebf01ad8d35675d67581ee4f7b1cfc59dcd2dfbd1724f37deb8b6d594171505"
+      "sha256": "a8d5b808cadd5baa0b9519931eda44b0424b2ef48772787a4c1b81558f3dfd0c"
     },
     {
       "source": "resources/skills/fstar-learn/SKILL.md",
@@ -234,12 +216,6 @@
       "destination": "resources/skills/fstar-plan/SKILL.md",
       "kind": "resource",
       "sha256": "e68f01f7b242434cc38480ac3f944e7ae97181a1448f18d008fc5d8b6e425df5"
-    },
-    {
-      "source": "resources/skills/fstar-tools/SKILL.md",
-      "destination": "resources/skills/fstar-tools/SKILL.md",
-      "kind": "resource",
-      "sha256": "febefc9754dc64959a203811bd22979e2fc20f1eadbae73f2c9a2fa23b78db6c"
     },
     {
       "source": "resources/agents/fstar-check.md",
@@ -368,94 +344,16 @@
       "sha256": "d51219967f3bb9aabbee5f5a908763ff6806c84709474ec2c941850626f073d5"
     },
     {
-      "source": "resources/references/tool-bindings.md",
-      "destination": "resources/references/tool-bindings.md",
-      "kind": "resource",
-      "sha256": "ce7d9d23158fd3a507367eede300857588a6e2415b63f9d55d19a79369182266"
-    },
-    {
-      "source": "resources/capabilities/code-structure.md",
-      "destination": "resources/capabilities/code-structure.md",
-      "kind": "resource",
-      "sha256": "ed506644084fc53b85082284a7b6e8a2461b666808414567b20505d1102b7061"
-    },
-    {
-      "source": "resources/capabilities/data-access.md",
-      "destination": "resources/capabilities/data-access.md",
-      "kind": "resource",
-      "sha256": "a334ec4fac7561f45c06fff990d3b93b253886affa6e8ad2a3c2efd9ee755bd1"
-    },
-    {
-      "source": "resources/capabilities/knowledge-retrieval.md",
-      "destination": "resources/capabilities/knowledge-retrieval.md",
-      "kind": "resource",
-      "sha256": "5f591b8edb208ed1997df3da7ba348de68d7507c3c3181d426a8a61be4e44533"
-    },
-    {
-      "source": "resources/capabilities/test-execution.md",
-      "destination": "resources/capabilities/test-execution.md",
-      "kind": "resource",
-      "sha256": "6bf3cc80e0fa24dae285c7bbb06a458a722d7e24a24bc04c2264094f66cbae04"
-    },
-    {
-      "source": "resources/capabilities/web-research.md",
-      "destination": "resources/capabilities/web-research.md",
-      "kind": "resource",
-      "sha256": "3a41d84882b525ad6ece8f5b403c48290d8e619277e4d542b64cace7c1c6fea8"
-    },
-    {
-      "source": "resources/registry/codegraph.yaml",
-      "destination": "resources/registry/codegraph.yaml",
-      "kind": "resource",
-      "sha256": "f2bcc21aaa55593371fb4be7e03afa851d34782e519940d0f6dcc3c9cf205f0f"
-    },
-    {
-      "source": "resources/registry/gh.yaml",
-      "destination": "resources/registry/gh.yaml",
-      "kind": "resource",
-      "sha256": "a05d5a32dc6ca54a84b8b64ceb980013ba47e423eae08e42d7f2080fbf2b94ac"
-    },
-    {
-      "source": "resources/registry/psql.yaml",
-      "destination": "resources/registry/psql.yaml",
-      "kind": "resource",
-      "sha256": "968004476c9b33c70e61b4a332c0aa1a4038ea214b92714df5a4205eccc01f30"
-    },
-    {
-      "source": "resources/registry/pytest.yaml",
-      "destination": "resources/registry/pytest.yaml",
-      "kind": "resource",
-      "sha256": "929890a59eac6433123019f5bf5ec591e0e896d51404859781da8c2ddecb938a"
-    },
-    {
-      "source": "resources/registry/qmd.yaml",
-      "destination": "resources/registry/qmd.yaml",
-      "kind": "resource",
-      "sha256": "3b346aa2e58339d4e69da021d2fcda3bb3a2f26fa9d7aab3355a0b91c9cd4eda"
-    },
-    {
-      "source": "resources/registry/sqlite3.yaml",
-      "destination": "resources/registry/sqlite3.yaml",
-      "kind": "resource",
-      "sha256": "86901956f3aebe2359c8de9076e4cf293979b2875ca7648037fcf95bd3dffef5"
-    },
-    {
-      "source": "resources/schemas/tools.schema.json",
-      "destination": "resources/schemas/tools.schema.json",
-      "kind": "resource",
-      "sha256": "64ba9c62604e03c8a9ab3d9e702580a4a096327abc607e352797b409b4b9416a"
-    },
-    {
       "source": "resources/runtime/capabilities.md",
       "destination": "resources/runtime/capabilities.md",
       "kind": "resource",
-      "sha256": "f0bd881b5961c2ea95786feb0500c74319ad8d534793ef2ebc9b498d45bd23e2"
+      "sha256": "447cb0f5b04d07bd8a4910b77217e09d6046cf5e696ad5e6187d950d0f5f063f"
     },
     {
       "source": "resources/runtime/routing.md",
       "destination": "resources/runtime/routing.md",
       "kind": "resource",
-      "sha256": "fab83d346df33caa554406b18a9fe9ec7b6385ae9a3b73afb5fe0e2c730df72d"
+      "sha256": "07716ba1d2c8778f5c1dd707c6e7c0e350af57816f0cc70d08052fdb328d48f0"
     }
   ]
 }

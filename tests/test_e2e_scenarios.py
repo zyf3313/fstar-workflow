@@ -4,8 +4,8 @@ Every scenario drives the REAL CLI and the REAL runtime hook entrypoints as
 subprocesses (``python3 -m fstar ...`` / ``python3 -m fstar.runtime <hook>``
 with ``PYTHONPATH=src`` and explicit temporary roots), never in-process API
 shortcuts. The only exceptions are steps the child design explicitly labels
-"internal-API setup" (persist_artifact_map, record_provenance,
-resolve_bindings/apply_binding, knowledge load/prepare/apply), each marked
+"internal-API setup" (persist_artifact_map and knowledge
+load/prepare/apply), each marked
 ``setup=internal-api`` in the evidence ledger, because no CLI command exists
 for them.
 
@@ -1424,18 +1424,8 @@ class S2MinimalLoop(ScenarioCase):
 
         # S2-5 session-level extension enable/disable in an uninitialized dir
         self.step_user("S2-5a", ["extension", "list"],
-                       expected="session_only persistence listing of five packages",
+                       expected="session_only persistence listing of four packages",
                        check=self.expect_ok(lambda p: "persistence=%s n=%d" % (p["persistence"], len(p["extensions"]))),
-                       cwd=self.empty)
-        self.step_user("S2-5b", ["extension", "enable", "tool-capability",
-                                 "--confirm-user", "--invocation", "e2e-S2-5b"],
-                       expected="session-only authorization validated, zero writes",
-                       check=self.expect_ok(lambda p: "persistence=%s" % p["persistence"]),
-                       cwd=self.empty)
-        self.step_user("S2-5c", ["extension", "disable", "tool-capability",
-                                 "--confirm-user", "--invocation", "e2e-S2-5c"],
-                       expected="session-only disable",
-                       check=self.expect_ok(lambda p: "disabled=%s" % p["disabled"]),
                        cwd=self.empty)
         self.assertEqual(before, self.tree_snapshot(self.empty, self.user_root, self.runtime_root))
         self.assertFalse((self.empty / ".fstar").exists())
@@ -1443,7 +1433,7 @@ class S2MinimalLoop(ScenarioCase):
         # S2-6 routing negotiation rules are really injected (static source of truth)
         routing = self.hook("session-context", {"cwd": str(self.empty)}, cwd=self.empty).stdout
         for fragment in ("planning-review", "persistent-task", "multi-agent",
-                         "project-governance", "tool-capability",
+                         "project-governance",
                          "recommend only one highest-value package",
                          "do not ask again unless new facts",
                          # Settled lifecycle-member boundary (2026-10-31):
@@ -1453,7 +1443,7 @@ class S2MinimalLoop(ScenarioCase):
             self.assertIn(fragment, routing)
             self.assertIn(fragment, routing)
         record_step(self.scenario, "S2-6", self._command,
-                    0, "five package IDs + one-package + no-re-ask rules present",
+                    0, "four package IDs + one-package + no-re-ask rules present",
                     "all fragments present", "pass")
 
         self.assertEqual(all_before, self.tree_snapshot(self.empty, self.project, self.user_root, self.runtime_root, self.host_root))
@@ -1558,7 +1548,7 @@ class S2MinimalLoop(ScenarioCase):
 
 
 # ===========================================================================
-# S3 — extensions[] / capabilities[] separation (4 steps)
+# S3 — extension enable/disable and persisted records (2 steps)
 # ===========================================================================
 
 class S3ExtensionRecords(PersistentLifecycleCase):
@@ -1568,7 +1558,6 @@ class S3ExtensionRecords(PersistentLifecycleCase):
         self.scenario = "S3"
         self.init_project()
         self.create_main_task("ext-task")
-        self.enable_extension("S3-0", "ext-task", "tool-capability")
 
     def test_s3_extension_capability_separation(self):
         # S3-1 custom scope: included/excluded effective; overlap/unknown rejected; full completes
@@ -1604,8 +1593,7 @@ class S3ExtensionRecords(PersistentLifecycleCase):
                   expected="new process reads back extensions[] current state",
                   check=self.expect_ok(lambda p: "active=%s" % [e["id"] for e in p["active"]]))
         listing = json.loads(self.last_stdout)
-        self.assertIn("tool-capability", [e["id"] for e in listing["active"]])
-        self.assertNotIn("multi-agent", [e["id"] for e in listing["active"]])
+        self.assertEqual([], listing["active"])
         self.step("S3-2c", ["state", "show", "ext-task"],
                   expected="state show exposes extensions and events history",
                   check=self.expect_ok(lambda p: "extensions=%d" % len(p["extensions"])))
@@ -1614,428 +1602,6 @@ class S3ExtensionRecords(PersistentLifecycleCase):
         self.assertIn("extension_enabled", history)
         self.assertIn("extension_changed", history)
 
-        # S3-3 write-entry separation: cross shapes rejected on both sides
-        self.start_task_for_capabilities()
-        extension_shape = {
-            "id": "multi-agent", "enabled_at": _utc_now(),
-            "source": {"type": "command"}, "scope": "full",
-            "included": [], "excluded": [], "reason": "",
-        }
-        process = self.provenance_api("S3-3a", extension_shape)
-        command = "internal-api: tools.record_provenance(extension-shaped record)"
-        self.assertNotEqual(0, process.returncode,
-                            "record_provenance must reject an extension-shaped record")
-        record_step(self.scenario, "S3-3a", command, process.returncode,
-                    "extension record into capabilities[] rejected",
-                    _actual_of(process), "pass", setup="internal-api")
-        capability_shape = self.capability_record()
-        process = self.enable_extension_api("S3-3b", capability_shape)
-        self.assertEqual(0, process.returncode, process.stderr)
-        result = json.loads(process.stdout)
-        self.assertEqual("unknown_extension", result["code"])
-        record_step(self.scenario, "S3-3b", self._command, process.returncode,
-                    "actual capability record rejected by extension write entry with unknown_extension",
-                    process.stdout, "pass", setup="internal-api")
-        # And the legitimate provenance write lands in capabilities[] only.
-        good = self.capability_record()
-        process = self.provenance_api("S3-3c", good)
-        self.assertEqual(0, process.returncode, process.stderr)
-        record_step(self.scenario, "S3-3c", "internal-api: tools.record_provenance(valid record)",
-                    process.returncode, "provenance lands in capabilities[]",
-                    "recorded", "pass", setup="internal-api")
-        task = self.task_json("ext-task")
-        self.assertTrue(task["capabilities"])
-        self.assertTrue(all("capability" in c and "id" in c["call"] for c in task["capabilities"]))
-        self.assertFalse(any(set(c) == {"id", "enabled_at", "source", "scope", "included", "excluded", "reason"}
-                             for c in task["capabilities"]))
-
-        # S3-4 direct edits cannot mix extension authorization into provenance.
-        task = self.task_json("ext-task")
-        task["capabilities"].append(dict(extension_shape))
-        self.write_task_json("ext-task", task)
-        self.step("S3-4", ["state", "show", "ext-task"],
-                  expected="extension-shaped capability rejected on read",
-                  check=self.expect_error("invalid_capability"))
-
-    # -- S3 helpers ---------------------------------------------------------
-
-    def start_task_for_capabilities(self):
-        self.write_docs("ext-task")
-        self.persist_map("S3-start-map", "ext-task")
-        self.step("S3-start", ["start", "ext-task", "--confirm-user",
-                               "--invocation", "e2e-S3-start"],
-                  expected="task in_progress for provenance writes",
-                  check=self.expect_ok())
-        # provenance requires an active writer lease: acquire one via a dispatch
-        payload = self.build_dispatch_payload("implement", "ext-task", ["P-1"], ["src.py"],
-                                              {"artifact_items": [], "delivery": {"paths": [], "digest": ""}})
-        token, _ = self.register_dispatch("S3-lease", payload)
-        self._s3_token = token
-
-    def capability_record(self):
-        return {
-            "schema": "fstar.tool-use.v1", "id": str(uuid.uuid4()),
-            "capability": "code-structure", "tool": "fixture-tool", "kind": "cli",
-            "version": "1.0", "at": _utc_now(),
-            "binding_origin": None, "binding_digest": None,
-            "match": "weak", "basis": "e2e fixture",
-            "call": {"id": "call-1", "reference": "e2e", "operation": "lookup", "result": "passed"},
-            "availability": None, "fallback": False,
-        }
-
-    def provenance_api(self, step_id, record):
-        code = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from fstar.store import TaskStore\n"
-            "from fstar import tools\n"
-            "from pathlib import Path\n"
-            "store = TaskStore(Path(%r), user_home=Path(%r), runtime_root=Path(%r))\n"
-            "tools.record_provenance(store, %r, %r, lease_token=%r, clock=lambda: %r)\n"
-            % (str(SRC), str(self.project), str(self.user_root), str(self.runtime_root),
-               "ext-task", record, getattr(self, "_s3_token", "x"), _utc_now()))
-        env = dict(os.environ)
-        env["PYTHONPATH"] = str(SRC)
-        env["HOME"] = str(self.root / "fake-home")
-        return self.run_process([sys.executable, "-c", code], capture_output=True,
-                              text=True, env=env, cwd=str(self.root), timeout=120)
-
-    def enable_extension_api(self, step_id, record):
-        code = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from fstar.store import TaskStore\n"
-            "from fstar.tasks import TaskService\n"
-            "from pathlib import Path\n"
-            "store = TaskStore(Path(%r), user_home=Path(%r), runtime_root=Path(%r))\n"
-            "service = TaskService(store)\n"
-            "from fstar.models import DomainError\n"
-            "try:\n"
-            "    service.enable_extension('ext-task', authorization=%r, actor={'role': 'user', 'id': 'u'})\n"
-            "except DomainError as error:\n"
-            "    print(json.dumps({'code': error.code}))\n"
-            "else:\n"
-            "    raise AssertionError('capability accepted as extension')\n"
-            % (str(SRC), str(self.project), str(self.user_root), str(self.runtime_root),
-               record))
-        env = dict(os.environ)
-        env["PYTHONPATH"] = str(SRC)
-        env["HOME"] = str(self.root / "fake-home")
-        return self.run_process([sys.executable, "-c", code], capture_output=True,
-                              text=True, env=env, cwd=str(self.root), timeout=120)
-
-
-# ===========================================================================
-# S4 — tool binding and degradation (4 steps)
-# ===========================================================================
-
-class S4ToolBinding(ScenarioCase):
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.scenario = "S4"
-        self.bin = self.root / "fixture-bin"
-        self.bin.mkdir()
-        self.registry = self.user_root / "tools" / "registry.d"
-        self.registry.mkdir(parents=True)
-
-    def _stub(self, name, version="1.2.3"):
-        path = self.bin / name
-        path.write_text(
-            "#!/bin/sh\n"
-            "exec 2>/dev/null\n"
-            'if [ "$1" = "--version" ]; then echo "%s v%s"; exit 0; fi\n'
-            'if [ "$1" = "--help" ]; then echo "%s symbol lookup graph"; exit 0; fi\n'
-            "exit 0\n" % (name, version, name), encoding="utf-8")
-        path.chmod(0o755)
-        return path
-
-    def test_s4_tool_binding_degradation(self):
-        self._stub("codegraph")
-        (self.registry / "codegraph.yaml").write_text(
-            'schema: "fstar.tool.registry.v1"\n'
-            'tool: codegraph\n'
-            'kind: cli\n'
-            'capabilities: [{"id": "code-structure", "match": "strong", "basis": "symbol lookup"}]\n'
-            'version_cmd: ["--version"]\n', encoding="utf-8")
-        # A weak-probe tool: present on PATH but not in the registry.
-        self._stub("node")
-        residual = self.bin / "curl"
-        residual.write_text("#!/bin/sh\nprintf 'ordinary helper\\n'\n", encoding="utf-8")
-        residual.chmod(0o755)
-        env_extra = {"PATH": str(self.bin)}
-
-        # S4-1 tools scan: registry strong, probe weak, unclassified manual candidates
-        self.step("S4-1", ["tools", "scan"],
-                  expected="scan returns fstar.tools.scan.v1 with strong/weak/manual candidates; no tools.yaml written",
-                  check=self.expect_ok(lambda p: (
-                      "schema=%s tools=%s" % (p["schema"], [t["tool"] for t in p["tools"]]))),
-                  env_extra=env_extra)
-        scan = json.loads(self.last_stdout)
-        by_tool = {t["tool"]: t for t in scan["tools"]}
-        self.assertEqual("strong", by_tool["codegraph"]["capabilities"][0]["match"])
-        self.assertEqual("weak", by_tool["node"]["capabilities"][0]["match"])
-        self.assertTrue(scan["observations"])
-        self.assertTrue(scan["proposals"])
-        self.assertEqual(5, len(by_tool["curl"]["capabilities"]))
-        self.assertTrue(all(c["match"] == "none" and c["basis_source"]["kind"] == "unclassified"
-                            for c in by_tool["curl"]["capabilities"]))
-        self.assertFalse(any(p.get("tool") == "curl" for p in scan["proposals"]))
-        record_step(self.scenario, "S4-manual-candidate", self._command, 0,
-                    "unclassified PATH candidate has five none matches and no automatic binding proposal",
-                    json.dumps(by_tool["curl"]), "pass")
-        self.assertFalse((self.user_root / "tools.yaml").exists())
-        self.assertFalse((self.project / ".fstar" / "tools.yaml").exists())
-
-        # S4-2 resolve (project > user > default) + confirmed apply; explicit null unbind
-        self.step("S4-init", ["init", str(self.project)], expected="initialize project before project binding", check=self.expect_ok())
-        self.s4_resolve_and_apply()
-
-        # S4-3 unbound capability: gap report + FALLBACKS degradation text
-        self.s4_gap_report()
-
-        # S4-4 three availability layers + provenance
-        self.s4_availability_provenance()
-
-    def s4_resolve_and_apply(self):
-        code = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from pathlib import Path\n"
-            "from fstar import tools\n"
-            "user = tools.load_tools(Path(%r))\n"
-            "project = tools.load_tools(Path(%r))\n"
-            "resolution = tools.resolve_bindings(project=project, user=user)\n"
-            "print(json.dumps(resolution, ensure_ascii=False))\n"
-            % (str(SRC), str(self.user_root / "tools.yaml"),
-               str(self.project / ".fstar" / "tools.yaml")))
-        env = dict(os.environ)
-        env["PYTHONPATH"] = str(SRC)
-        env["HOME"] = str(self.root / "fake-home")
-        process = self.run_process([sys.executable, "-c", code], capture_output=True,
-                                 text=True, env=env, cwd=str(self.root), timeout=120)
-        self.assertEqual(0, process.returncode, process.stderr)
-        resolution = json.loads(process.stdout)
-        code_struct = next(c for c in resolution["capabilities"] if c["capability"] == "code-structure")
-        self.assertEqual("recommended", code_struct["state"])
-        record_step(self.scenario, "S4-2a", "internal-api: tools.resolve_bindings(project, user)",
-                    process.returncode, "project > user > defaults; unbound items fall to recommendation",
-                    "code-structure state=%s origin=%s" % (code_struct["state"], code_struct["origin"]["layer"]),
-                    "pass", setup="internal-api")
-
-        # Confirmed apply writes the binding; unconfirmed writes nothing.
-        code_apply = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from pathlib import Path\n"
-            "from fstar import tools\n"
-            "user_root = Path(%r)\n"
-            "loaded = tools.load_tools(user_root / 'tools.yaml')\n"
-            "snapshot = {'tool': 'codegraph', 'kind': 'cli', 'version': '1.2.3',\n"
-            "            'capabilities': [{'id': 'code-structure', 'match': 'strong',\n"
-            "                              'basis': 'e2e scan',\n"
-            "                              'basis_source': {'kind': 'registry', 'reference': 'e2e'}}]}\n"
-            "proposal = tools.build_binding_proposal(\n"
-            "    target='user', loaded=loaded, changes={'code-structure': 'codegraph'},\n"
-            "    reason='user confirmed the scanned tool', tools={'codegraph': snapshot})\n"
-            "print(json.dumps(proposal, ensure_ascii=False))\n"
-            % (str(SRC), str(self.user_root)))
-        process = self.run_process([sys.executable, "-c", code_apply], capture_output=True,
-                                 text=True, env=env, cwd=str(self.root), timeout=120)
-        self.assertEqual(0, process.returncode, process.stderr)
-        proposal = json.loads(process.stdout)
-        record_step(self.scenario, "S4-2b", "internal-api: tools.build_binding_proposal(user layer)",
-                    process.returncode, "exact proposal with digest; nothing written yet",
-                    "digest=%s" % proposal["digest"][:12], "pass", setup="internal-api")
-        self.assertFalse((self.user_root / "tools.yaml").exists())
-
-        confirmation = {
-            "source_id": "e2e-S4-2", "type": "conversation", "at": _utc_now(),
-            "actor": {"role": "user", "id": "user-1"}, "reference": "e2e/session/input-1",
-            "quote": "bind codegraph for structure",
-            "scope": {"target": "user", "path": proposal["path"],
-                      "changes": proposal["changes"], "tools": proposal["tools"]},
-            "validates": proposal["digest"],
-        }
-        code_confirm = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from pathlib import Path\n"
-            "from fstar import tools\n"
-            "proposal = json.loads(sys.stdin.read())\n"
-            "confirmation = json.loads(sys.argv[1])\n"
-            "tools.apply_binding(proposal, confirmation,\n"
-            "                    user_root=Path(%r), project_root=Path(%r),\n"
-            "                    runtime_root=Path(%r), clock=lambda: %r)\n"
-            "print('applied')\n"
-            % (str(SRC), str(self.user_root), str(self.project), str(self.runtime_root), _utc_now()))
-        process = self.run_process([sys.executable, "-c", code_confirm, json.dumps(confirmation)],
-                                 input=json.dumps(proposal), capture_output=True, text=True,
-                                 env=env, cwd=str(self.root), timeout=120)
-        self.assertEqual(0, process.returncode, process.stderr)
-        self.assertTrue((self.user_root / "tools.yaml").is_file())
-        record_step(self.scenario, "S4-2c", "internal-api: tools.apply_binding(proposal, confirmation)",
-                    process.returncode, "confirmed binding written to user tools.yaml",
-                    "tools.yaml written", "pass", setup="internal-api")
-
-        # Unconfirmed apply is rejected and writes nothing more.
-        bad_confirmation = dict(confirmation, validates="wrong-digest")
-        before = _sha256_file(self.user_root / "tools.yaml")
-        process = self.run_process([sys.executable, "-c", code_confirm, json.dumps(bad_confirmation)],
-                                 input=json.dumps(proposal), capture_output=True, text=True,
-                                 env=env, cwd=str(self.root), timeout=120)
-        self.assertNotEqual(0, process.returncode, "stale confirmation must be rejected")
-        self.assertEqual(before, _sha256_file(self.user_root / "tools.yaml"))
-        record_step(self.scenario, "S4-2d", "internal-api: apply_binding with stale confirmation",
-                    process.returncode, "rejected (tools_stale_confirmation), file untouched",
-                    _actual_of(process), "pass", setup="internal-api")
-
-        # Explicit tool: null stops fallback (project layer overrides user).
-        code_null = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from pathlib import Path\n"
-            "from fstar import tools\n"
-            "project_root = Path(%r)\n"
-            "loaded = tools.load_tools(project_root / '.fstar' / 'tools.yaml')\n"
-            "proposal = tools.build_binding_proposal(\n"
-            "    target='project', loaded=loaded, changes={'code-structure': None},\n"
-            "    reason='user explicitly unbound this capability here')\n"
-            "print(json.dumps(proposal, ensure_ascii=False))\n"
-            % (str(SRC), str(self.project)))
-        process = self.run_process([sys.executable, "-c", code_null], capture_output=True,
-                                 text=True, env=env, cwd=str(self.root), timeout=120)
-        self.assertEqual(0, process.returncode, process.stderr)
-        null_proposal = json.loads(process.stdout)
-        null_confirmation = {
-            "source_id": "e2e-S4-2e", "type": "conversation", "at": _utc_now(),
-            "actor": {"role": "user", "id": "user-1"}, "reference": "e2e/session/input-2",
-            "quote": "do not bind this capability in this project",
-            "scope": {"target": "project", "path": null_proposal["path"],
-                      "changes": null_proposal["changes"], "tools": {}},
-            "validates": null_proposal["digest"],
-        }
-        code_null_apply = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from pathlib import Path\n"
-            "from fstar import tools\n"
-            "proposal = json.loads(sys.stdin.read())\n"
-            "confirmation = json.loads(sys.argv[1])\n"
-            "tools.apply_binding(proposal, confirmation,\n"
-            "                    user_root=Path(%r), project_root=Path(%r),\n"
-            "                    runtime_root=Path(%r), clock=lambda: %r)\n"
-            "print('applied')\n"
-            % (str(SRC), str(self.user_root), str(self.project), str(self.runtime_root), _utc_now()))
-        process = self.run_process([sys.executable, "-c", code_null_apply, json.dumps(null_confirmation)],
-                                 input=json.dumps(null_proposal), capture_output=True, text=True,
-                                 env=env, cwd=str(self.root), timeout=120)
-        self.assertEqual(0, process.returncode, process.stderr)
-        record_step(self.scenario, "S4-2e", "internal-api: project-layer explicit null binding",
-                    process.returncode, "tool:null stops fallback to the user layer",
-                    "project tools.yaml written with null binding", "pass", setup="internal-api")
-        code_resolve = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from pathlib import Path\n"
-            "from fstar import tools\n"
-            "user = tools.load_tools(Path(%r))\n"
-            "project = tools.load_tools(Path(%r))\n"
-            "resolution = tools.resolve_bindings(project=project, user=user)\n"
-            "print(json.dumps(resolution, ensure_ascii=False))\n"
-            % (str(SRC), str(self.user_root / "tools.yaml"),
-               str(self.project / ".fstar" / "tools.yaml")))
-        process = self.run_process([sys.executable, "-c", code_resolve], capture_output=True,
-                                 text=True, env=env, cwd=str(self.root), timeout=120)
-        resolution = json.loads(process.stdout)
-        entry = next(c for c in resolution["capabilities"] if c["capability"] == "code-structure")
-        self.assertEqual("unbound", entry["state"])
-        record_step(self.scenario, "S4-2f", "internal-api: resolve after null binding",
-                    process.returncode, "project null shadows the user binding -> unbound",
-                    "state=%s origin=%s" % (entry["state"], entry["origin"]["layer"]), "pass",
-                    setup="internal-api")
-
-    def s4_gap_report(self):
-        code = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from pathlib import Path\n"
-            "from fstar import tools\n"
-            "user = tools.load_tools(Path(%r))\n"
-            "project = tools.load_tools(Path(%r))\n"
-            "resolution = tools.resolve_bindings(project=project, user=user)\n"
-            "availability = tools.assess_availability(resolution, [])\n"
-            "print(json.dumps(availability, ensure_ascii=False))\n"
-            % (str(SRC), str(self.user_root / "tools.yaml"),
-               str(self.project / ".fstar" / "tools.yaml")))
-        env = dict(os.environ)
-        env["PYTHONPATH"] = str(SRC)
-        env["HOME"] = str(self.root / "fake-home")
-        process = self.run_process([sys.executable, "-c", code], capture_output=True,
-                                 text=True, env=env, cwd=str(self.root), timeout=120)
-        self.assertEqual(0, process.returncode, process.stderr)
-        availability = json.loads(process.stdout)
-        self.assertTrue(availability["gaps"])
-        gap = next(g for g in availability["gaps"] if g["capability"] == "code-structure")
-        self.assertEqual(["discoverable", "client_loaded", "minimal_call"], gap["missing_layers"])
-        self.assertIn("State the gap explicitly", gap["fallback"])
-        record_step(self.scenario, "S4-3", "internal-api: assess_availability(resolution, [])",
-                    process.returncode,
-                    "unbound capability -> gap report with actual missing layers + FALLBACKS text; no auto-install",
-                    "gaps=%s fallback=%s..." % ([g["capability"] for g in availability["gaps"]],
-                                                gap["fallback"][:40]),
-                    "pass", setup="internal-api")
-
-    def s4_availability_provenance(self):
-        now = _utc_now()
-        scope = {"project": str(self.project), "host": "fixture", "session": "e2e"}
-        observations = [
-            {"tool": "codegraph", "capability": "code-structure", "layer": "discoverable",
-             "status": "verified", "at": now, "scope": scope, "evidence_ref": "e2e-path-scan"},
-            {"tool": "codegraph", "capability": "code-structure", "layer": "client_loaded",
-             "status": "failed", "at": now, "scope": scope, "reason": "client not running"},
-            {"tool": "codegraph", "capability": "code-structure", "layer": "minimal_call",
-             "status": "unknown", "at": now, "scope": scope},
-        ]
-        code = (
-            "import sys, json\n"
-            "sys.path.insert(0, %r)\n"
-            "from pathlib import Path\n"
-            "from fstar import tools\n"
-            "user = tools.load_tools(Path(%r))\n"
-            "project = tools.load_tools(Path(%r))\n"
-            "resolution = tools.resolve_bindings(user=user)\n"
-            "observations = json.loads(sys.stdin.read())\n"
-            "availability = tools.assess_availability(resolution, observations, now=%r)\n"
-            "record = tools.build_provenance(resolution, {\n"
-            "    'capability': 'code-structure', 'tool': 'codegraph', 'at': %r,\n"
-            "    'call': {'id': 'call-e2e-1', 'reference': 'e2e fixture call',\n"
-            "             'operation': 'symbol lookup', 'result': 'passed'},\n"
-            "    'result': 'passed'}, availability)\n"
-            "print(json.dumps({'availability': availability, 'record': record}, ensure_ascii=False))\n"
-            % (str(SRC), str(self.user_root / "tools.yaml"),
-               str(self.project / ".fstar" / "tools.yaml"), now, now))
-        env = dict(os.environ)
-        env["PYTHONPATH"] = str(SRC)
-        env["HOME"] = str(self.root / "fake-home")
-        process = self.run_process([sys.executable, "-c", code], input=json.dumps(observations),
-                                 capture_output=True, text=True, env=env, cwd=str(self.root),
-                                 timeout=120)
-        self.assertEqual(0, process.returncode, process.stderr)
-        payload = json.loads(process.stdout)
-        entry = next(c for c in payload["availability"]["capabilities"]
-                     if c["capability"] == "code-structure")
-        self.assertEqual("verified", entry["layers"]["discoverable"]["status"])
-        self.assertEqual("failed", entry["layers"]["client_loaded"]["status"])
-        self.assertEqual("unknown", entry["layers"]["minimal_call"]["status"])
-        self.assertEqual("fstar.tool-use.v1", payload["record"]["schema"])
-        record_step(self.scenario, "S4-4",
-                    "internal-api: assess_availability(3 layers) + build_provenance",
-                    process.returncode,
-                    "three layers reported independently; provenance fstar.tool-use.v1 with real call id",
-                    "layers=%s record=%s" % ({k: v["status"] for k, v in entry["layers"].items()},
-                                             payload["record"]["schema"]),
-                    "pass", setup="internal-api")
 
 
 # ===========================================================================
@@ -2365,12 +1931,12 @@ class S6TwoHost(ScenarioCase):
 
         # S6-3 doctor: disk-verified entries; indexed-but-uninstalled -> stale
         self.step("S6-3", ["doctor"] + self.host_args(),
-                  expected="12/4/4/11/5 counts healthy; entries disk-verified",
+                  expected="11/4/4/11 counts healthy; entries disk-verified",
                   check=self.expect_ok(lambda p: (
                       "counts=%s healthy=%s" % (p["counts"], p["healthy"]))))
         report = json.loads(self.last_stdout)
-        self.assertEqual({"skills": 12, "roles": 4, "templates": 11,
-                          "capabilities": 5, "hooks": 4}, report["counts"])
+        self.assertEqual({"skills": 11, "roles": 4, "templates": 11,
+                          "hooks": 4}, report["counts"])
         self.assertTrue(report["healthy"])
         # Stale entry index: remove an installed entry file, doctor must flag it.
         entries = report["entries"]["items"]

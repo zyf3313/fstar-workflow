@@ -15,9 +15,8 @@ recommend only the highest-value one. Do not enable anything yourself.
 - `persistent-task` — keep task state across sessions, including recovery and
   archive workflows.
 - `multi-agent` — bounded research and parallel implementation by sub-agents.
-- `tool-capability` — tool contracts, bindings, classification, validation,
-  and fallback behavior.
 
 The project index (`.fstar/index.md`) and user index (`~/.fstar/index.md`) are
 injected read-only at session start regardless of grants. Writing to those
-surfaces is not implied by reading them.
+surfaces is not implied by reading them; only `fstar init` may backfill a
+generated placeholder index without a separate approval.

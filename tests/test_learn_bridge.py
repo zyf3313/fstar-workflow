@@ -70,8 +70,6 @@ class LearnBridgeTests(unittest.TestCase):
         self.assertEqual(0, rc, result)
         self.assertIn("Fact.", (self.project / ".fstar/knowledge/context/note.md").read_text())
         self.assertFalse((self.project / ".fstar/tasks").exists())
-        self.assertFalse((self.user / "tools.yaml").exists())
-        self.assertFalse((self.project / ".fstar/tools.yaml").exists())
 
     def test_explicit_index_requires_both_destination_members(self):
         path = self.project / ".fstar/index.md"

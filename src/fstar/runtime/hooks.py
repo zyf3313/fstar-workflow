@@ -4,8 +4,8 @@ Semantic hooks (exactly four; no turn-context, no fifth hook, no custom hook
 entry points):
 
 - session-context: session start/clear/compact equivalent — inject routing
-  full text, project/user indexes, current-task summary (read-only), light
-  tool-binding checks. No archive patrol, no full tool scan, no writes.
+  full text, project/user indexes, current-task summary (read-only).
+  No archive patrol and no writes.
 - worker-context: before native dispatch — full role-applicable context with
   per-input fingerprints and budgets; overloaded inputs go to an unloaded
   manifest with a mandatory re-read instruction.
@@ -33,7 +33,6 @@ raises project_not_initialized instead of silently succeeding.
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
@@ -148,29 +147,6 @@ def _payload_str(payload: dict, *keys: str) -> Optional[str]:
 # session-context
 # ---------------------------------------------------------------------------
 
-def _light_tool_check(project_root: Path, user_root: Path) -> List[str]:
-    """Light check only: tools.yaml existence + detected_at staleness hint.
-
-    No full scan, no probing, no writes (parent design §3.6: the full scan is
-    init/tools scan only; session-context checks existing binding presence
-    and detected_at age).
-    """
-    notes = []
-    for label, path in (("project", project_root / ".fstar" / "tools.yaml"), ("user", user_root / "tools.yaml")):
-        if not path.is_file():
-            notes.append("tools.yaml (%s) not present; run fstar tools scan to establish bindings" % label)
-            continue
-        try:
-            body = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeError):
-            notes.append("tools.yaml (%s) is unreadable; run fstar tools scan" % label)
-            continue
-        match = re.search(r"detected_at\s*[:=]\s*\"?([^\s\"]+)\"?", body)
-        if not match:
-            notes.append("tools.yaml (%s) has no detected_at; run fstar tools scan" % label)
-    return notes
-
-
 def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = None,
                     user_root: Optional[Path] = None, runtime_root: Optional[Path] = None,
                     clock: Optional[Callable[[], str]] = None,
@@ -196,17 +172,10 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     capabilities = inject.capabilities_input(root)
     if capabilities:
         inputs.append(capabilities)
-    # The resolved binding table is discovery too: reading it never authorizes
-    # writing tools.yaml, so it is injected without a tool-capability grant.
-    # A binding that stays invisible would be effectively unbound.
-    bindings = inject.bindings_input(project_root, user)
-    if bindings:
-        inputs.append(bindings)
     context = {}
     persistent_context = False
 
     task_summary = None
-    tool_notes: List[str] = []
     learn_hint = ("Learn candidates attach to existing session/result/recovery/archive "
                   "nodes; a durable convention stated by the user is a session-node "
                   "candidate. No per-turn scan and no standalone candidate ledger exists.")
@@ -240,8 +209,6 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
 
     if not persistent_context:
         context = grants(payload.get("extensions", []))
-    if project_root is not None and includes(context, "tool-capability", "bindings"):
-        tool_notes = _light_tool_check(project_root, user)
 
     # Indexes are read-only context: inject them by default so user-level rules
     # and project knowledge stay visible without an extension grant. Writing to
@@ -258,7 +225,6 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
         result["project_root"] = str(project_root) if project_root else None
         result["initialized"] = project_root is not None
         result["current_task"] = task_summary
-        result["tool_notes"] = tool_notes
         result["learn_hint"] = learn_hint
         return result
     lines = [inject.render("fstar session context", inputs, budgets, footer=grant_text)]
@@ -274,8 +240,6 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     elif project_root is None:
         lines.append("No initialized fstar project found; task bookkeeping skipped (this is normal outside an initialized project).")
         lines.append("")
-    for note in tool_notes:
-        lines.append("- %s" % note)
     lines.append(learn_hint)
     return {"text": "\n".join(lines), "session_id": session_id,
             "initialized": project_root is not None, "current_task": task_summary}
@@ -378,13 +342,6 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
     card = inject.role_card(role, root)
     if card:
         inputs.append(card)
-    # Same read-only binding table as session-context: the worker must see
-    # which tool each capability resolves to without any grant, and reading
-    # it never authorizes changing it.
-    bindings = inject.bindings_input(project_root, user)
-    if bindings:
-        inputs.append(bindings)
-
     task_line = inject.session_only_reference()
     context = {}
     task_summary = None

@@ -19,7 +19,7 @@ GitHub `zyf3313/fstar-workflow`，MIT。Python 3.9+ 标准库内核 + Node 启�
   - `fstar state show <task>` / `fstar doctor`
 - 会话开始时 SessionStart hook 注入 fstar 路由与项目索引
 - 扩展包（planning-review / persistent-task / multi-agent /
-  project-governance / tool-capability）按需协商启用，不默认全开
+  project-governance）按需协商启用，不默认全开
 
 ## 分支与发布
 

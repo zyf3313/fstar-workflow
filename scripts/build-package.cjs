@@ -15,7 +15,7 @@ const ROOT = path.resolve(__dirname, '..');
 const ASSETS_PATH = path.join(ROOT, 'resources', 'package-assets.json');
 
 // The whitelist mirrors package.json "files"; keep both in sync when editing.
-const RESOURCE_DIRS = ['skills', 'agents', 'templates', 'references', 'capabilities', 'registry', 'schemas', 'runtime'];
+const RESOURCE_DIRS = ['skills', 'agents', 'templates', 'references', 'runtime'];
 const SRC_DIR = path.join(ROOT, 'src', 'fstar');
 const BIN_FILES = ['bin/fstar.cjs', 'bin/fstar-hook.cjs', 'bin/fstar-bootstrap.py'];
 

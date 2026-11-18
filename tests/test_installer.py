@@ -523,7 +523,7 @@ class TestHostEntryDetails(InstallerCase):
         hooks = [entry for entry in index["entries"] if entry["kind"] == "hook"]
         host_files = [entry for entry in index["entries"] if entry["kind"] in ("skill", "agent")]
         self.assertEqual(len(hooks), 4)
-        self.assertEqual(len(host_files), 16)
+        self.assertEqual(len(host_files), 15)
         for entry in index["entries"]:
             self.assertTrue(Path(entry["installed_path"]).is_file())
             self.assertEqual(entry["ownership"], "owned")
@@ -558,7 +558,7 @@ class TestMultiRootUpdate(InstallerCase):
         self.assertEqual("uninstall_host_root_mismatch", caught.exception.code)
         # An explicit --host-root is the user's selection and is authoritative.
         plan = self.plan_update_at(self.host_root, explicit=True)
-        self.assertEqual(16, len(plan["host_files"]))
+        self.assertEqual(15, len(plan["host_files"]))
 
     def test_implicit_update_passes_when_host_file_records_own_the_root(self):
         other = self.tmp / "host" / "other-claude"
@@ -574,7 +574,7 @@ class TestMultiRootUpdate(InstallerCase):
                                         if Path(record["settings_path"]).parent.resolve() == other.resolve()]
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
         plan = self.plan_update_at(self.host_root, explicit=False)
-        self.assertEqual(16, len(plan["host_files"]))
+        self.assertEqual(15, len(plan["host_files"]))
         self.assertTrue(all(entry["host"] == "claude" for entry in plan["host_files"]))
 
     def test_settings_records_are_kept_per_host_root(self):
@@ -622,7 +622,7 @@ class TestHostSkillAdaptation(InstallerCase):
         self.install(hosts=["claude"])
         skills = sorted(p.name for p in (self.host_root / "skills").glob("fstar-*/SKILL.md"))
         agents = sorted(p.name for p in (self.host_root / "agents").glob("fstar-*.md"))
-        self.assertEqual(len(skills), 12)
+        self.assertEqual(len(skills), 11)
         self.assertEqual(agents, ["fstar-check.md", "fstar-editor.md",
                                   "fstar-implement.md", "fstar-research.md"])
         for record in installer.plan_install(operation="install", roots=self.roots())["host_files"]:
@@ -730,7 +730,7 @@ class TestHostSkillAdaptation(InstallerCase):
         before = _tree_snapshot(self.host_root)
         plan = installer.plan_install(operation="install", roots=self.roots(), hosts=["claude"])
         self.assertEqual(_tree_snapshot(self.host_root), before)
-        self.assertEqual(len(plan["host_files"]), 16)
+        self.assertEqual(len(plan["host_files"]), 15)
 
     def test_mid_transaction_failure_rolls_back_host_files(self):
         plan = installer.plan_install(operation="install", roots=self.roots(), hosts=["claude"])
@@ -807,6 +807,179 @@ class TestHostSkillAdaptation(InstallerCase):
         removed = [r for r in result["applied"]["removed"] if r.get("host")]
         self.assertEqual(removed, [])
         self.assertTrue((self.host_root / "skills" / "fstar-init" / "SKILL.md").is_file())
+
+
+class TestStaleHostFileRetirement(InstallerCase):
+    """Resources deleted from a new package version must leave the host root.
+
+    A manifest record whose source no longer exists in the bundle (e.g. the
+    removed fstar-tools skill) is retired on update and uninstall: removed
+    when unmodified, kept when the user modified it, and dropped from the
+    manifest/entry-index when the file is already gone.
+    """
+
+    STALE_RELATIVE = "skills/fstar-tools/SKILL.md"
+    STALE_SOURCE = "resources/skills/fstar-tools/SKILL.md"
+
+    def _add_stale_record(self, *, relative=STALE_RELATIVE, host="claude",
+                          root=None, content=b"old skill content", create_file=True) -> Path:
+        """Record a host-file ownership entry whose source left the bundle."""
+        self.install(hosts=["claude"])
+        target = (root or self.host_root) / relative
+        if create_file:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+        destination = str(target.resolve())
+        manifest_path = self.user_root / ".install-manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["host_file_entries"].append({
+            "host": host,
+            "kind": "skill",
+            "source": "resources/%s" % relative,
+            "destination": destination,
+            "installed_hash": _sha_bytes(content) if create_file else "0" * 64,
+            "version": "2",
+            "operation_id": "op-stale000001",
+            "ownership": "owned",
+        })
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        index_path = self.user_root / "entry-index.json"
+        index = json.loads(index_path.read_text())
+        index["entries"].append({
+            "id": "host-file:%s" % destination,
+            "host": host,
+            "kind": "skill",
+            "source": "package",
+            "installed_path": destination,
+            "ownership": "owned",
+            "status": "active",
+            "version": "2",
+        })
+        index_path.write_text(json.dumps(index), encoding="utf-8")
+        return target
+
+    def _manifest_records(self):
+        manifest = json.loads((self.user_root / ".install-manifest.json").read_text())
+        return {record["destination"]: record for record in manifest["host_file_entries"]}
+
+    def _index_ids(self):
+        index = json.loads((self.user_root / "entry-index.json").read_text())
+        return {entry["id"] for entry in index["entries"]}
+
+    def _update(self, policy="keep"):
+        roots = self.roots()
+        plan = installer.plan_install(operation="update", roots=roots, conflict_policy=policy)
+        return plan, installer.apply_plan(plan, roots=roots)
+
+    def test_update_removes_unmodified_stale_skill_and_records(self):
+        target = self._add_stale_record()
+        destination = str(target.resolve())
+        plan, result = self._update()
+        entry = next(e for e in plan["host_files"] if e["destination"] == destination)
+        self.assertTrue(entry["stale"])
+        self.assertEqual(entry["action"], "remove_owned")
+        removed = [r for r in result["applied"]["removed"] if r.get("host")]
+        self.assertEqual([r["path"] for r in removed], [destination])
+        self.assertTrue(Path(removed[0]["backup"]).is_file())
+        self.assertFalse(target.exists())
+        self.assertFalse((self.host_root / "skills" / "fstar-tools").exists())
+        self.assertNotIn(destination, self._manifest_records())
+        self.assertNotIn("host-file:%s" % destination, self._index_ids())
+        report = installer.doctor(roots=self.roots())
+        self.assertTrue(report["healthy"], report["diagnostics"])
+
+    def test_update_keeps_user_modified_stale_file_and_reports_it(self):
+        target = self._add_stale_record()
+        target.write_text("user edited the retired skill", encoding="utf-8")
+        destination = str(target.resolve())
+        plan, result = self._update()
+        entry = next(e for e in plan["host_files"] if e["destination"] == destination)
+        self.assertTrue(entry["stale"])
+        self.assertEqual(entry["action"], "keep_modified")
+        kept = [k for k in result["applied"]["kept"] if k["path"] == destination]
+        self.assertEqual([k["action"] for k in kept], ["keep_modified"])
+        self.assertEqual(target.read_text(), "user edited the retired skill")
+        # The record stays so doctor keeps reporting the modified file.
+        self.assertIn(destination, self._manifest_records())
+        self.assertIn("host-file:%s" % destination, self._index_ids())
+        codes = [d["code"] for d in installer.doctor(roots=self.roots())["diagnostics"]]
+        self.assertIn("HOST_FILE_MODIFIED", codes)
+
+    def test_update_drops_record_for_already_missing_stale_file(self):
+        target = self._add_stale_record(create_file=False)
+        destination = str(target.resolve())
+        plan, result = self._update()
+        entry = next(e for e in plan["host_files"] if e["destination"] == destination)
+        self.assertTrue(entry["stale"])
+        self.assertEqual(entry["action"], "remove_missing")
+        self.assertNotIn(destination, self._manifest_records())
+        self.assertNotIn("host-file:%s" % destination, self._index_ids())
+        report = installer.doctor(roots=self.roots())
+        self.assertTrue(report["healthy"], report["diagnostics"])
+
+    def test_stale_record_for_another_host_root_is_untouched(self):
+        other = self.tmp / "host" / "other-claude"
+        other.mkdir(parents=True)
+        target = self._add_stale_record(root=other)
+        destination = str(target.resolve())
+        plan, result = self._update()
+        # Not planned: the record belongs to a root this update did not select.
+        self.assertEqual([e for e in plan["host_files"] if e.get("destination") == destination], [])
+        self.assertTrue(target.is_file())
+        self.assertIn(destination, self._manifest_records())
+        self.assertIn("host-file:%s" % destination, self._index_ids())
+
+    def test_uninstall_removes_stale_recorded_skill(self):
+        target = self._add_stale_record()
+        destination = str(target.resolve())
+        roots = self.roots()
+        plan = installer.plan_install(operation="uninstall", roots=roots)
+        entry = next(e for e in plan["host_files"] if e["destination"] == destination)
+        self.assertTrue(entry["stale"])
+        self.assertEqual(entry["action"], "remove_owned")
+        result = installer.apply_plan(plan, roots=roots)
+        removed = [r for r in result["applied"]["removed"] if r.get("host")]
+        self.assertIn(destination, [r["path"] for r in removed])
+        self.assertFalse(target.exists())
+
+    def test_uninstall_drops_stale_record_when_file_already_missing(self):
+        target = self._add_stale_record(create_file=False)
+        destination = str(target.resolve())
+        roots = self.roots()
+        plan = installer.plan_install(operation="uninstall", roots=roots)
+        result = installer.apply_plan(plan, roots=roots)
+        # remove_missing never writes, so it is reported as kept...
+        kept = [k for k in result["applied"]["kept"] if k["path"] == destination]
+        self.assertEqual([k["action"] for k in kept], ["remove_missing"])
+        # ...but the record is still retired, not left behind forever.
+        self.assertNotIn(destination, self._manifest_records())
+
+    def test_fresh_install_plans_no_stale_entries(self):
+        self.install(hosts=["claude"])
+        roots = self.roots()
+        plan = installer.plan_install(operation="update", roots=roots)
+        self.assertEqual(len(plan["host_files"]), 15)
+        self.assertFalse(any(entry.get("stale") for entry in plan["host_files"]))
+        self.assertTrue(all(entry["action"] == "reuse_owned" for entry in plan["host_files"]))
+        installer.apply_plan(plan, roots=roots)
+        self.assertTrue(installer.doctor(roots=roots)["healthy"])
+        # Uninstall still removes exactly the declared 15 files.
+        skills = sorted(p.name for p in (self.host_root / "skills").glob("fstar-*/SKILL.md"))
+        self.assertEqual(len(skills), 11)
+
+    def test_stale_entry_symlinked_ancestor_is_refused(self):
+        target = self._add_stale_record()
+        roots = self.roots()
+        plan = installer.plan_install(operation="update", roots=roots)
+        # After planning, redirect the skills container outside the host root;
+        # the journaled removal must not follow the symlink out.
+        outside = self.tmp / "outside-skills"
+        (self.host_root / "skills").rename(outside)
+        (self.host_root / "skills").symlink_to(outside)
+        with self.assertRaises(DomainError) as caught:
+            installer.apply_plan(plan, roots=roots)
+        self.assertEqual(caught.exception.code, "unsafe_path")
+        self.assertTrue((outside / "fstar-tools" / "SKILL.md").is_file())
 
 
 class TestResourceSelectionStrictness(InstallerCase):
@@ -1276,10 +1449,10 @@ class TestDoctor(InstallerCase):
         self.install(hosts=["claude"])
         before = _tree_snapshot(self.user_root)
         report = installer.doctor(roots=self.roots())
-        self.assertEqual(report["counts"]["skills"], 12)
+        self.assertEqual(report["counts"]["skills"], 11)
         self.assertEqual(report["counts"]["roles"], 4)
         self.assertEqual(report["counts"]["templates"], 11)
-        self.assertEqual(report["counts"]["capabilities"], 5)
+        self.assertNotIn("capabilities", report["counts"])
         self.assertEqual(report["counts"]["hooks"], 4)
         self.assertEqual(_tree_snapshot(self.user_root), before)
 

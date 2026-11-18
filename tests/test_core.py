@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fstar.evidence import EvidenceService, file_digest
+from fstar.extensions import grants
 from fstar.models import DomainError, TASK_FIELDS, new_task, validate_task
 from fstar.store import TaskStore, atomic_write_json
 from fstar.tasks import TaskService, source_snapshot
@@ -292,11 +293,27 @@ class LifecycleTests(CoreCase):
         self.assertEqual("session_only", result["persistence"])
         self.create()
         source = self.source("root")
-        saved = self.service.enable_extension("root", authorization={"id": "tool-capability", "scope": "full", "included": [], "excluded": [], "reason": "tools", "source": source}, actor=self.user)
+        saved = self.service.enable_extension("root", authorization={"id": "multi-agent", "scope": "full", "included": [], "excluded": [], "reason": "agents", "source": source}, actor=self.user)
         task = self.store.read("root")
-        self.assertEqual("tool-capability", saved["id"])
+        self.assertEqual("multi-agent", saved["id"])
         self.assertEqual([], task["capabilities"])
         self.assertEqual(1, len(task["extensions"]))
+
+    def test_retired_tool_capability_history_reads_but_cannot_be_enabled(self):
+        self.create()
+        paper = {"id": "tool-capability", "enabled_at": self.service.clock(), "source": {"type": "test"},
+                 "scope": "custom", "included": ["bindings"], "excluded": [], "reason": "historical"}
+        task = self.store.read("root")
+        task["extensions"].append(paper)
+        self.store.write(self.store.resolve("root"), task)
+        self.assertEqual(paper, self.store.read("root")["extensions"][0])
+        # Grants tolerate the retired record, but no member is authorized.
+        self.assertEqual({}, grants([paper]))
+        with self.assertRaises(DomainError) as caught:
+            self.service.enable_extension("root", authorization=dict(paper, enabled_at=None), actor=self.user)
+        self.assertEqual("unknown_extension", caught.exception.code)
+        self.assertEqual("Historical tasks keep the record; the package cannot be enabled.",
+                         caught.exception.details["retired"])
 
 
 class EvidenceArchiveTests(CoreCase):
