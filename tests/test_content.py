@@ -37,7 +37,7 @@ def artifact_text(item_id="需求一", reference=None):
 
 class InventoryTests(unittest.TestCase):
     def test_exact_inventory_and_validator(self):
-        self.assertEqual(12, len(SKILLS))
+        self.assertEqual(11, len(SKILLS))
         self.assertEqual(4, len(ROLES))
         self.assertEqual(11, len(TEMPLATES))
         self.assertEqual([], list(validate_resources(RESOURCES)))
@@ -56,7 +56,7 @@ class InventoryTests(unittest.TestCase):
 
     def test_fixed_package_ids_and_no_retired_inventory(self):
         routing = (RESOURCES / "runtime" / "routing.md").read_text()
-        ids = {"planning-review", "persistent-task", "multi-agent", "project-governance", "tool-capability"}
+        ids = {"planning-review", "persistent-task", "multi-agent", "project-governance"}
         self.assertTrue(all("`%s`" % item in routing for item in ids))
         for retired in ("fstar-finish", "fstar-recall", "fstar-ui", "test-cases.md", "review-log.md"):
             self.assertFalse((RESOURCES / "skills" / retired).exists())
@@ -214,25 +214,28 @@ class SemanticContentTests(unittest.TestCase):
         text = (RESOURCES / "runtime" / "routing.md").read_text()
         for phrase in ("only one highest-value package", "After refusal", "do not ask again", "native implement", "independent `fstar-check`", "explicit user confirmation", "`fstar-debug` is core-automatic", "at most one automatic retry"):
             self.assertIn(phrase, text)
-        # Init runs the scan; applying bindings is still gated and project-only.
-        self.assertIn("runs an initial proposal-only tool scan", text)
-        self.assertIn("written at project level only", text)
-        self.assertNotIn("does not yet run that scan", text)
+        # Init creates both roots; its initialization-only exemption is explicit.
+        self.assertIn("Project initialization and its user-root creation are exempt", text)
+        self.assertIn("later writes to specs, knowledge, rules, or memory still require", text)
+        self.assertNotIn("tool-capability", text)
+        # User-supplied planning material must be stored before implement dispatch.
+        self.assertIn("A user-supplied planning document (PRD/design/clarify content) must be stored", text)
+        self.assertIn("Never dispatch implement while user-supplied planning material is still unstored", text)
+        self.assertIn("negotiate that grant first when absent", text)
 
-    def test_init_skill_binds_by_agent_with_one_confirmation(self):
+    def test_init_skill_explores_and_backfills_without_confirmation(self):
         text = (RESOURCES / "skills/fstar-init/SKILL.md").read_text()
-        for phrase in ("Initial capability binding", "at most one tool",
-                       "30–50 entries", "project-level only",
-                       "never overwrite silently", "Present one summary",
-                       "tools_bridge"):
+        for phrase in ("Do not ask the user to confirm the discovered facts",
+                       "Create the user root first when needed",
+                       "fstar.knowledge.v1",
+                       "never overwrite a user-authored spec",
+                       "INDEX_BACKFILLED",
+                       "empty or near-empty",
+                       "Remove the temporary context file"):
             self.assertIn(phrase, text)
-        self.assertIn("never create or edit the user-level `~/.fstar/tools.yaml`", text)
-        self.assertIn("leave the capability unbound", text)
-
-    def test_routing_declares_read_only_binding_table_injection(self):
-        text = (RESOURCES / "runtime" / "routing.md").read_text()
-        self.assertIn("inject the resolved read-only binding table without any grant", text)
-        self.assertIn("reading it is discovery and never authorizes changing tools.yaml", text)
+        for retired in ("tool_proposals", "tools.yaml", "Initial capability binding",
+                        "tools_bridge", "tool-capability"):
+            self.assertNotIn(retired, text)
 
     def test_archive_only_reminders_and_continue_boundary(self):
         archive = (RESOURCES / "skills/fstar-archive/SKILL.md").read_text()
@@ -246,6 +249,12 @@ class SemanticContentTests(unittest.TestCase):
         self.assertIn("background fstar-editor", doc)
         self.assertIn("Queue edits", doc)
         self.assertIn("stale-baseline", doc)
+        # User-supplied documents are ingested with user content as authority.
+        self.assertIn("When the user supplies a planning document", doc)
+        self.assertIn("map it onto the template structure", doc)
+        self.assertIn("Mark origin as user-supplied", doc)
+        self.assertIn("never drafted-by-agent", doc)
+        self.assertIn("meta.templates", doc)
         self.assertIn("Never add/delete IDs", editor)
         self.assertIn("protocol, not a security sandbox", editor)
 
@@ -278,6 +287,10 @@ class SemanticContentTests(unittest.TestCase):
             self.assertIn("## " + heading, plan)
         skill = (RESOURCES / "skills/fstar-plan/SKILL.md").read_text()
         self.assertIn("do not request a second plan approval", skill)
+        # Execute must stop before implement dispatch on unstored user planning material.
+        execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
+        self.assertIn("stop before dispatching implement", execute)
+        self.assertIn("route through fstar-doc storage first", execute)
 
 
 if __name__ == "__main__":

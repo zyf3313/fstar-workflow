@@ -8,7 +8,7 @@ from typing import Mapping, Optional, Sequence, Tuple
 
 MAP_SCHEMA = "fstar.template-map.v1"
 REQUIRED_SLOTS = ("artifact_type", "version", "review_state", "author", "date", "reviewer")
-SKILLS = ("init", "clarify", "doc", "plan", "execute", "check", "continue", "archive", "learn", "debug", "help", "tools")
+SKILLS = ("init", "clarify", "doc", "plan", "execute", "check", "continue", "archive", "learn", "debug", "help")
 ROLES = ("research", "implement", "check", "editor")
 TEMPLATES = (
     "doc/prd.md", "doc/design.md", "task/plan.md", "task/clarify.md", "task/research.md", "task/check.md",

@@ -61,7 +61,7 @@ fstar doctor     # read-only install and host health report
 
 ```bash
 cd your-project
-fstar init                       # create .fstar/ (tasks, specs, knowledge)
+fstar init                       # create .fstar/ and a missing ~/.fstar
 fstar install --host claude      # wire hooks + skills + agents into <project>/.claude
 fstar task create "My feature" --name my-feature
 fstar start my-feature           # planning → in_progress
@@ -140,14 +140,14 @@ stale baselines instead of silently overwriting.
 
 `fstar extension enable <id> [--scope full|custom]` negotiates extra
 capability packages — `planning-review`, `persistent-task`, `multi-agent`,
-`project-governance`, `tool-capability`. Refusing one leaves the minimal loop
+`project-governance`. Refusing one leaves the minimal loop
 intact; nothing is assumed on for you.
 
 ## What lands in your project
 
 ```
 .fstar/            tasks, specs, archive, knowledge — the project's data root
-<host>/.claude/    hooks (settings.json), 12 skills, 4 agent cards   [project-level by default]
+<host>/.claude/    hooks (settings.json), 11 skills, 4 agent cards   [project-level by default]
 ~/.fstar/          user-level resource cache (shared, versioned) — never host config
 ```
 
@@ -191,7 +191,7 @@ Run `fstar <command> --help` for flags. The commands group by purpose:
 - **Install maintenance** — `install`, `update`, `uninstall`, `doctor`,
   `migrate`, `version`
 - **Agent-side** (invoked by agents, rarely by hand) — `dispatch ...`,
-  `interrupt`, `doc-edit`, `hook ...`, `tools scan`
+  `interrupt`, `doc-edit`, `hook ...`
 
 Global flags: `--project PATH`, `--session ID`, `--user-data-root`,
 `--runtime-root`, `--json`, `--actor`, `--actor-role`.
@@ -223,7 +223,7 @@ build script regenerates it and the tests verify it is truthful.
 ```
 bin/         Node launchers + Python bootstrap
 src/fstar/   the kernel (install, tasks, dispatch, evidence, hooks runtime)
-resources/   12 skills, 4 role cards, templates, routing, registries
+resources/   11 skills, 4 role cards, templates, routing
 scripts/     package build
 tests/       Python and Node suites
 ```

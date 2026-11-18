@@ -49,11 +49,10 @@ HOOK_SEMANTICS = ("session-context", "worker-context", "worker-result", "doc-cha
 CONFLICT_POLICIES = ("keep", "overwrite", "new")
 # Capability/resource invariants reported by doctor (parent design §4.4).
 EXPECTED_COUNTS = {
-    "skills": 12,
+    "skills": 11,
     "roles": 4,
     "hooks": 4,
     "templates": 11,
-    "capabilities": 5,
 }
 VERSION_PATTERN = re.compile(r"^[0-9A-Za-z][0-9A-Za-z._-]*$")
 
@@ -876,6 +875,76 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
             "owned": record_owned is not None,
             "bundle_root": str(roots.bundle_root) if roots.bundle_root else str(_package_root()),
         })
+    entries.extend(_plan_stale_host_files(host, roots, operation, manifest, bundle_hashes,
+                                          {entry["destination"] for entry in entries}))
+    return entries
+
+
+def _plan_stale_host_files(host: str, roots: Roots, operation: str, manifest: Optional[dict],
+                           bundle_hashes: Mapping, planned_destinations: Optional[set] = None) -> List[dict]:
+    """Retire recorded host files whose resource left the new package.
+
+    The declared loop above only iterates the *current* HOST_FILE_KINDS, so a
+    manifest record for a source that no longer exists in the new bundle (a
+    skill removed from the package) would survive every update and uninstall
+    silently. This pass plans the retirement of exactly those records: only
+    owned records on this host whose destination sits inside the currently
+    selected host root. Records for other hosts or other host roots are left
+    to whatever invocation resolves them; nothing here is guessed.
+
+    A missing file drops its record only (remove_missing); an unmodified
+    record is removed with the normal backup/journal/prune path
+    (remove_owned); a user-modified file is kept and reported
+    (keep_modified) — user content is never deleted.
+    """
+    if operation not in ("update", "uninstall"):
+        return []
+    entries = []
+    planned = set(planned_destinations or ())
+    host_root = roots.host_roots[host]
+    current_sources = set(bundle_hashes)
+    for record in (manifest or {}).get("host_file_entries", []):
+        if record.get("ownership") != "owned" or record.get("host") != host:
+            continue
+        source = record.get("source") or ""
+        destination = record.get("destination")
+        if not isinstance(destination, str) or destination in planned:
+            continue
+        if source in current_sources or not source.startswith("resources/"):
+            # Still bundled, or not a package resource: not stale. The
+            # declared loop above already planned it or reported a defect.
+            continue
+        target = Path(destination)
+        if not _within(target, host_root):
+            # Another root's record: it stays for whatever invocation
+            # resolves that root.
+            continue
+        planned.add(destination)
+        expected_hash = record.get("installed_hash")
+        current_hash = None
+        if target.exists() or target.is_symlink():
+            current_hash = _sha256(target) if target.is_file() and not target.is_symlink() else None
+        if not target.exists() and not target.is_symlink():
+            action = "remove_missing"
+        elif current_hash is not None and current_hash == expected_hash:
+            action = "remove_owned"
+        else:
+            # Symlinked, non-regular, or user-modified: keep and report.
+            action = "keep_modified"
+        entries.append({
+            "host": host,
+            "kind": record.get("kind") or "skill",
+            "source": source,
+            "destination": destination,
+            # The resource is gone from the bundle; the recorded baseline is
+            # the hash the installer put on disk, not a bundle expectation.
+            "expected_hash": expected_hash,
+            "current_hash": current_hash,
+            "action": action,
+            "owned": True,
+            "stale": True,
+            "bundle_root": str(roots.bundle_root) if roots.bundle_root else str(_package_root()),
+        })
     return entries
 
 
@@ -961,7 +1030,7 @@ def apply_plan(plan: dict, *, roots: Roots) -> dict:
             for entry in plan.get("host_files", []):
                 _apply_host_file(entry, resolved, backup_root, applied)
             if operation == "uninstall":
-                _commit_uninstall_manifest(resolved, applied, operation_id)
+                _commit_uninstall_manifest(resolved, applied, operation_id, plan)
             else:
                 _commit_manifest(resolved, plan, applied, operation_id, version)
             _write_entry_index(resolved, plan, applied, operation_id)
@@ -1176,6 +1245,30 @@ def _validate_plan_paths(plan: dict, roots: Roots) -> None:
     for entry in plan.get("host_files", []):
         host = entry["host"]
         expected_relative = None
+        if entry.get("stale"):
+            # A retired (no-longer-bundled) record: the source is a safe
+            # package-relative path and the destination must sit inside the
+            # selected host root, but it cannot match a current declared
+            # adaptation — the resource left the bundle.
+            if host not in roots.host_roots:
+                raise DomainError("unsafe_path", "Stale host file targets an unselected host",
+                                  {"destination": entry.get("destination")})
+            source = entry["source"]
+            if not source.startswith("resources/"):
+                raise DomainError("unsafe_path", "Stale host file source is not a package resource",
+                                  {"source": entry.get("source")})
+            relative = _safe_relative(source[len("resources/"):], "stale host file")
+            if not relative.parts or relative.parts[0] not in ("skills", "agents"):
+                raise DomainError("unsafe_path", "Stale host file source is not a declared adaptation kind",
+                                  {"source": entry.get("source")})
+            destination = Path(entry["destination"])
+            if not _within(destination, roots.host_roots[host]):
+                raise DomainError("unsafe_path", "Stale host file target is outside the selected host root",
+                                  {"destination": entry.get("destination")})
+            if entry.get("action") not in ("keep_modified", "remove_missing"):
+                # remove_owned touches the path; the symlink check applies.
+                _reject_symlink_ancestors(destination, roots.host_roots[host])
+            continue
         for kind, relative in HOST_FILE_KINDS.get(host, ()):
             if entry["source"] == "resources/%s" % relative:
                 expected_relative = relative
@@ -1597,6 +1690,13 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
     manifest["settings_entries"] = sorted(settings.values(), key=lambda record: record["key"])
     host_files = {record["destination"]: record for record in manifest.get("host_file_entries", [])}
     for entry in plan.get("host_files", []):
+        if entry.get("stale"):
+            # A retired record whose file was removed (or was already gone)
+            # leaves the manifest; a user-modified one stays recorded so
+            # doctor keeps reporting it instead of forgetting the file.
+            if entry["action"] in ("remove_owned", "remove_missing"):
+                host_files.pop(entry["destination"], None)
+            continue
         if entry["action"] in ("write", "overwrite"):
             # An overwritten file now carries the incoming content, so the
             # recorded baseline must move with it; keeping the old hash
@@ -1680,7 +1780,8 @@ def _write_cache_manifest(roots: Roots, plan: dict, version: str) -> None:
     _atomic_write_json(cache_root / "manifest.json", payload)
 
 
-def _commit_uninstall_manifest(roots: Roots, applied: dict, operation_id: str) -> None:
+def _commit_uninstall_manifest(roots: Roots, applied: dict, operation_id: str,
+                               plan: Optional[dict] = None) -> None:
     manifest = _load_manifest_safe(roots.user_root)[0]
     if not manifest:
         return
@@ -1694,8 +1795,14 @@ def _commit_uninstall_manifest(roots: Roots, applied: dict, operation_id: str) -
                 if "%s:%s" % (record.get("settings_path"), record.get("event")) not in removed_keys]
     removed_host_files = {item["path"] for item in applied.get("removed", [])
                           if item.get("host")}
+    # A stale record is dropped even when the file was already missing:
+    # remove_missing never writes anything, so it never lands in
+    # applied["removed"], but the record is just as retired.
+    stale_dropped = {entry["destination"] for entry in (plan or {}).get("host_files", [])
+                     if entry.get("stale") and entry["action"] in ("remove_owned", "remove_missing")}
     host_file_entries = [record for record in manifest.get("host_file_entries", [])
-                         if record.get("destination") not in removed_host_files]
+                         if record.get("destination") not in removed_host_files
+                         and record.get("destination") not in stale_dropped]
     manifest["files"] = files
     manifest["settings_entries"] = settings
     manifest["host_file_entries"] = host_file_entries
@@ -1743,10 +1850,20 @@ def _write_entry_index(roots: Roots, plan: dict, applied: dict, operation_id: st
             "operation_id": operation_id,
         }
     removed_host_files = {item["path"] for item in applied.get("removed", []) if item.get("host")}
+    # Update also retires stale entries: a removed (or already-missing) stale
+    # host file leaves the index on the update path, not only on uninstall.
+    retired_host_files = {entry["destination"] for entry in plan.get("host_files", [])
+                          if entry.get("stale") and entry["action"] in ("remove_owned", "remove_missing")}
     for entry in plan.get("host_files", []):
         identifier = "host-file:%s" % entry["destination"]
         if plan["operation"] == "uninstall":
-            if entry["destination"] in removed_host_files:
+            if entry["destination"] in removed_host_files or entry["destination"] in retired_host_files:
+                entries.pop(identifier, None)
+            continue
+        if entry.get("stale"):
+            # A removed stale file leaves the index; a kept user-modified one
+            # stays visible so the report keeps telling the truth.
+            if entry["destination"] in retired_host_files:
                 entries.pop(identifier, None)
             continue
         if entry["action"] not in ("write", "reuse_owned", "reuse_external"):
@@ -2098,7 +2215,6 @@ def _resource_counts(root: Path) -> Dict[str, int]:
         "skills": len(list((root / "skills").glob("*/SKILL.md"))) if (root / "skills").exists() else 0,
         "roles": len(list((root / "agents").glob("fstar-*.md"))) if (root / "agents").exists() else 0,
         "templates": len(list((root / "templates").rglob("*.md"))) if (root / "templates").exists() else 0,
-        "capabilities": len(list((root / "capabilities").glob("*.md"))) if (root / "capabilities").exists() else 0,
         "hooks": len(HOOK_SEMANTICS),
     }
 

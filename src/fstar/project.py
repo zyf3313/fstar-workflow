@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import stat
+import tempfile
 import uuid
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path, PurePosixPath
@@ -50,7 +51,6 @@ class InitResult:
     warnings: Tuple[InitWarning, ...]
     context_complete: bool
     dry_run: bool
-    tool_proposals: Optional[dict] = None
 
 
 class InitError(Exception):
@@ -225,8 +225,36 @@ def _exclusive_write(path: Path, content: str, created: list, preserved: list) -
         created.append(path)
 
 
+def _backfill_index(path: Path, content: str, *, dry_run: bool) -> bool:
+    """Replace only the exact generated skeleton, preserving edited indexes."""
+    placeholder, _ = _project_index(path.parent.parent, None)
+    if path.is_symlink() or _read_text(path, "IO_ERROR", "Cannot read existing index") != placeholder:
+        return False
+    if dry_run:
+        return True
+    temporary = None
+    mode = stat.S_IMODE(path.stat().st_mode)
+    try:
+        descriptor, temporary = tempfile.mkstemp(prefix=".index-", suffix=".tmp", dir=str(path.parent))
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(content)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.chmod(temporary, mode)
+        # Recheck after staging so an edit made during preparation is preserved.
+        if path.is_symlink() or _read_text(path, "IO_ERROR", "Cannot read existing index") != placeholder:
+            return False
+        os.replace(temporary, path)
+    except OSError as exc:
+        raise InitError("IO_ERROR", str(exc), path=path)
+    finally:
+        if temporary is not None and os.path.exists(temporary):
+            os.unlink(temporary)
+    return True
+
+
 def _initialize(root: Path, files, *, dry_run: bool, context_complete: bool,
-                project: bool) -> InitResult:
+                project: bool, index_context: bool = False) -> InitResult:
     created, preserved, warnings = [], [], []
     directory = root / ".fstar" if project else root
     if directory.exists() and (directory.is_symlink() or not directory.is_dir()):
@@ -274,10 +302,21 @@ def _initialize(root: Path, files, *, dry_run: bool, context_complete: bool,
     if project and not context_complete:
         warnings.append(InitWarning("CONTEXT_REQUIRED", directory / "index.md",
                                     "Project facts and navigation still need completion"))
-    if project and (directory / "index.md") in preserved and context_complete:
-        warnings.append(InitWarning("INDEX_PRESERVED", directory / "index.md",
-                                    "Existing index was preserved; supplied context was not applied"))
-        context_complete = False
+    if project and (directory / "index.md") in preserved and index_context:
+        index = directory / "index.md"
+        try:
+            backfilled = _backfill_index(index, dict(files)["index.md"], dry_run=dry_run)
+        except InitError as exc:
+            raise InitError(exc.code, exc.message, path=exc.path, created=created)
+        if backfilled:
+            preserved.remove(index)
+            warnings.append(InitWarning("INDEX_BACKFILLED", index,
+                                        "Generated placeholder index %s supplied context" %
+                                        ("would be backfilled with" if dry_run else "was backfilled with")))
+        else:
+            warnings.append(InitWarning("INDEX_PRESERVED", index,
+                                        "Existing index was preserved; supplied context was not applied"))
+            context_complete = False
     return InitResult(root, tuple(created), tuple(preserved), tuple(warnings), context_complete, dry_run)
 
 
@@ -292,14 +331,15 @@ def initialize_project(path: Path, user_root: Path, *, context: Optional[Project
     files = (("index.md", index),
              ("config.yaml", "schema_version: 1\nproject:\n  id: \"%s\"\n" % project_id),
              (".gitignore", _PROJECT_IGNORE), (".schema-version", "1\n"))
-    return _initialize(root, files, dry_run=dry_run, context_complete=complete, project=True)
+    return _initialize(root, files, dry_run=dry_run, context_complete=complete, project=True,
+                       index_context=context is not None and bool(context.project_summary.strip()))
 
 
 def initialize_workflow_project(path: Path, user_root: Path, *, task_ref: str,
                                 extensions: Optional[list] = None,
                                 context: Optional[ProjectContext] = None,
                                 dry_run: bool = False) -> InitResult:
-    """Initialize a project and, when granted, propose initial tool bindings."""
+    """Initialize both roots, validating and repairing a partial user layout."""
     from .extensions import grants
     from .store import TaskStore
 
@@ -311,18 +351,23 @@ def initialize_workflow_project(path: Path, user_root: Path, *, task_ref: str,
         store.require_project()
         records = store.read(task_ref)["extensions"]
     grants(records)  # Validate any supplied context; initialization needs no governance grant.
-    result = initialize_project(root, user_root, context=context, dry_run=dry_run)
-    if not dry_run:
-        from .tools import _classifier_scan, _validate_scan_result
-        try:
-            proposals = _validate_scan_result(_classifier_scan()(
-                project_root=root, user_root=Path(user_root).expanduser().resolve(), host_snapshot=None))
-            result = replace(result, tool_proposals=proposals)
-        except Exception as exc:
-            warning = InitWarning("TOOL_SCAN_FAILED", root / ".fstar",
-                                  "Project initialization completed, but the initial tool proposal scan failed: %s" % exc)
-            result = replace(result, warnings=result.warnings + (warning,))
-    return result
+    # Validate project inputs before creating either root. User initialization
+    # also validates an existing config and repairs files missing beside it.
+    preview = initialize_project(root, user_root, context=context, dry_run=True)
+    user_result = initialize_user(user_root, dry_run=dry_run)
+    try:
+        result = preview if dry_run else initialize_project(root, user_root, context=context)
+    except InitError as exc:
+        raise InitError(exc.code, exc.message, path=exc.path,
+                        created=user_result.created + exc.created)
+    warnings = user_result.warnings
+    if user_result.created:
+        warnings += (InitWarning("USER_ROOT_CREATED", user_result.root,
+                                 "User root files %s" %
+                                 ("would be created or repaired" if dry_run else "were created or repaired")),)
+    return replace(result, created=user_result.created + result.created,
+                   preserved=user_result.preserved + result.preserved,
+                   warnings=warnings + result.warnings)
 
 
 def initialize_user(user_root: Path, *, dry_run: bool = False) -> InitResult:

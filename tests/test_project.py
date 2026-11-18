@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest import mock
 
 from fstar.project import (DocumentReference, InitError, ProjectContext, TopicReference,
-                           initialize_project, initialize_user)
+                           initialize_project, initialize_user, initialize_workflow_project)
 
 
 class ProjectTests(unittest.TestCase):
@@ -62,6 +62,80 @@ class ProjectTests(unittest.TestCase):
             self.assertEqual(b"custom\r\n", index.read_bytes())
             self.assertIn("INDEX_PRESERVED", [warning.code for warning in result.warnings])
             self.assertFalse(result.context_complete)
+
+    def test_generated_placeholder_index_is_backfilled_atomically(self):
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            initialize_project(project, project / "user")
+            index = project / ".fstar" / "index.md"
+            self.assertIn("待补", index.read_text(encoding="utf-8"))
+            (project / "README.md").write_text("x", encoding="utf-8")
+            context = ProjectContext("verified", authority_refs=(DocumentReference("readme", "README.md"),))
+            result = initialize_project(project, project / "user", context=context)
+            text = index.read_text(encoding="utf-8")
+            self.assertIn("verified", text)
+            self.assertNotIn("待补", text)
+            self.assertTrue(result.context_complete)
+            self.assertIn("INDEX_BACKFILLED", [warning.code for warning in result.warnings])
+            self.assertFalse([path for path in index.parent.iterdir() if path.name.startswith(".index-")])
+
+    def test_user_authored_index_with_placeholder_text_is_preserved(self):
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            initialize_project(project, project / "user")
+            index = project / ".fstar" / "index.md"
+            authored = "# Project notes\n\n待补 details added by the user.\n"
+            index.write_text(authored, encoding="utf-8")
+            (project / "README.md").write_text("x", encoding="utf-8")
+            context = ProjectContext("verified", authority_refs=(DocumentReference("readme", "README.md"),))
+            result = initialize_project(project, project / "user", context=context)
+            self.assertEqual(authored, index.read_text(encoding="utf-8"))
+            self.assertIn("INDEX_PRESERVED", [warning.code for warning in result.warnings])
+            self.assertFalse(result.context_complete)
+
+    def test_workflow_init_creates_both_roots_once_and_reports_them(self):
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp) / "project"
+            user = Path(temp) / "user"
+            project.mkdir()
+            preview = initialize_workflow_project(project, user, task_ref="session-only", dry_run=True)
+            self.assertFalse(project.joinpath(".fstar").exists())
+            self.assertFalse(user.exists())
+            self.assertEqual({".fstar", "user"}, {path.parent.name for path in preview.created})
+            self.assertIn("USER_ROOT_CREATED", [warning.code for warning in preview.warnings])
+            first = initialize_workflow_project(project, user, task_ref="session-only")
+            self.assertTrue((project / ".fstar" / "index.md").is_file())
+            self.assertTrue((user / "config.yaml").is_file())
+            self.assertIn("USER_ROOT_CREATED", [warning.code for warning in first.warnings])
+            self.assertEqual({".fstar", "user"}, {path.parent.name for path in first.created})
+            second = initialize_workflow_project(project, user, task_ref="session-only")
+            self.assertEqual((), second.created)
+            self.assertNotIn("USER_ROOT_CREATED", [warning.code for warning in second.warnings])
+            self.assertEqual({"config.yaml", "index.md", ".gitignore"}, {path.name for path in user.iterdir()})
+            self.assertEqual(1, len(list((project / ".fstar").glob("config.yaml"))))
+
+    def test_workflow_init_repairs_partial_user_root_and_validates_existing_config(self):
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp) / "project"
+            user = Path(temp) / "user"
+            project.mkdir()
+            user.mkdir()
+            (user / "config.yaml").write_text("schema_version: 1\n", encoding="utf-8")
+            result = initialize_workflow_project(project, user, task_ref="session-only")
+            created = {path.resolve() for path in result.created}
+            self.assertTrue({(user / "index.md").resolve(), (user / ".gitignore").resolve()} <= created)
+            self.assertIn((project / ".fstar" / "index.md").resolve(), created)
+            self.assertIn((user / "config.yaml").resolve(), {path.resolve() for path in result.preserved})
+            other = Path(temp) / "other-project"
+            other.mkdir()
+            bad = Path(temp) / "bad-user"
+            bad.mkdir()
+            (bad / "config.yaml").write_text("schema_version: 2\n", encoding="utf-8")
+            with self.assertRaises(InitError) as error:
+                initialize_workflow_project(other, bad, task_ref="session-only")
+            self.assertEqual("INCOMPATIBLE_SCHEMA", error.exception.code)
+            self.assertFalse((other / ".fstar").exists())
+            self.assertEqual(b"schema_version: 2\n", (bad / "config.yaml").read_bytes())
 
     def test_symlinks_and_outside_references_rejected(self):
         if not hasattr(os, "symlink"):

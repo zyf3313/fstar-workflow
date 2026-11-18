@@ -170,11 +170,11 @@ def _static_clock():
 
 
 def _dispatch(args):
-    # Optional modules (project/runtime/tools) register their subcommands via
-    # register_commands(subparsers) and attach a handler to the parsed args
-    # with parser.set_defaults(<OPTIONAL_HANDLER_ATTR>=handler). Such handlers
-    # run before core task-service wiring so commands like `init` work on a
-    # not-yet-initialized root. Handler contract: fn(args) -> JSON-encodable
+    # Optional modules (project/runtime/dispatch/installer) register their
+    # subcommands via register_commands(subparsers) and attach a handler to
+    # the parsed args with parser.set_defaults(<OPTIONAL_HANDLER_ATTR>=handler).
+    # Such handlers run before core task-service wiring so commands like `init`
+    # work on a not-yet-initialized root. Handler contract: fn(args) -> JSON-encodable
     # result, raising DomainError (or an exception exposing .code/.message)
     # on failure.
     handler = getattr(args, OPTIONAL_HANDLER_ATTR, None)
@@ -289,7 +289,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--actor-role", choices=("user", "agent", "coordinator", "implement", "check"))
     subparsers = parser.add_subparsers(dest="command", required=True)
     register_core_commands(subparsers)
-    for module in ("project", "runtime", "tools", "dispatch", "installer"):
+    for module in ("project", "runtime", "dispatch", "installer"):
         _register_optional(subparsers, module)
     return parser
 

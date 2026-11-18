@@ -1,19 +1,17 @@
 """Coordinator-owned shared wiring tests (parent design §8 handoff rows).
 
-These prove the five consumer wirings the nine delivered children left to the
+These prove the four consumer wirings the delivered children left to the
 coordinator:
 
 1. runtime-hooks: inject.resource_root delegates to the version resolver with
    real project/user context; the registration planner references the
    installed launcher with honest evidence levels.
-2. tool-classifier: the package registry root follows the resolver; a valid
-   pin changes the registry actually consumed.
-3. workflow-content consumers: routing/role injection follows the resolved
+2. workflow-content consumers: routing/role injection follows the resolved
    root, so a pin changes consumed content (AC-04 "real consumption").
-4. help / entry-index: the entry index is read and then verified against the
+3. help / entry-index: the entry index is read and then verified against the
    actual disk; an indexed entry whose file is gone is never claimed
    installed.
-5. Honesty invariants: no silent bundle fallback while claiming a pin, and
+4. Honesty invariants: no silent bundle fallback while claiming a pin, and
    resolution creates nothing.
 
 Every test uses temporary roots only; nothing reads the real ``~/.fstar`` or
@@ -37,7 +35,6 @@ from fstar import installer  # noqa: E402
 from fstar.content import validate_resources  # noqa: E402
 from fstar.models import DomainError  # noqa: E402
 from fstar.runtime import hooks, inject, registration  # noqa: E402
-from fstar import tool_classifier as classifier  # noqa: E402
 
 BUNDLE_ROOT = REPO
 BUNDLED_RESOURCES = REPO / "resources"
@@ -70,8 +67,7 @@ class WiringCase(unittest.TestCase):
             entries.add((str(path), path.is_dir()))
         return entries
 
-    def build_cache(self, version: str, *, routing: str, role_body: str,
-                    registry_tool: str = "fixturetool") -> Path:
+    def build_cache(self, version: str, *, routing: str, role_body: str) -> Path:
         """Build a complete, correctly-baselined version cache.
 
         The cache carries the full resource inventory (validated by
@@ -90,17 +86,6 @@ class WiringCase(unittest.TestCase):
         (cache / "agents" / "fstar-implement.md").write_text(
             "---\nname: fstar-implement\ndescription: \"%s\"\n---\n\n%s\n"
             % (role_body, role_body), encoding="utf-8")
-        registry_dir = cache / "registry"
-        registry_dir.mkdir(exist_ok=True)
-        (registry_dir / ("%s.yaml" % registry_tool)).write_text(
-            'schema: "fstar.tool.registry.v1"\n'
-            'tool: %s\n'
-            'kind: cli\n'
-            'capabilities: [{"id": "code-structure", "match": "strong", "basis": "cache registry %s"}]\n'
-            % (registry_tool, version), encoding="utf-8")
-        for stale in registry_dir.glob("*.yaml"):
-            if stale.name != "%s.yaml" % registry_tool:
-                stale.unlink()
         files = []
         for path in sorted(cache.rglob("*")):
             if path.is_file() and path.name != "manifest.json":
@@ -254,54 +239,7 @@ class RegistrationPlannerTests(WiringCase):
 
 
 # ---------------------------------------------------------------------------
-# Row 2: tool-classifier — registry root follows the resolver
-# ---------------------------------------------------------------------------
-
-class ClassifierRegistryRootTests(WiringCase):
-    def _registry_tools(self, **kwargs) -> dict:
-        entries, diagnostics = classifier.load_registry(
-            project_root=self.project_root, user_root=self.user_root, **kwargs)
-        self.assertEqual([], diagnostics)
-        return entries
-
-    def test_no_pin_loads_the_bundled_registry(self):
-        # (a) unchanged behavior: the bundled registry is consumed.
-        entries = self._registry_tools()
-        self.assertEqual({"codegraph", "gh", "qmd", "psql", "sqlite3", "pytest"}, set(entries))
-
-    def test_pin_changes_the_registry_consumed(self):
-        # (b) a pinned version's registry is actually consumed (A/B differ).
-        self.build_cache("A", routing="routing A", role_body="role A", registry_tool="toolA")
-        self.build_cache("B", routing="routing B", role_body="role B", registry_tool="toolB")
-        self.pin_user_version("A")
-        self.assertEqual(set(self._registry_tools()), {"toolA"})
-        self.pin_user_version("B")
-        self.assertEqual(set(self._registry_tools()), {"toolB"})
-
-    def test_broken_pin_fails_the_scan_honestly(self):
-        # (c) no silent fallback to the bundled registry while claiming a pin.
-        cache = self.build_cache("A", routing="routing A", role_body="role A")
-        self.pin_user_version("A")
-        (cache / "registry" / "fixturetool.yaml").write_text("tampered", encoding="utf-8")
-        with self.assertRaises(DomainError) as caught:
-            self._registry_tools()
-        self.assertEqual(caught.exception.code, "resource_integrity")
-
-    def test_explicit_package_root_still_overrides_for_fixtures(self):
-        # The existing fixture parameter keeps working (tests rely on it).
-        fixture = self.tmp / "fixture-registry"
-        fixture.mkdir()
-        (fixture / "only.yaml").write_text(
-            'schema: "fstar.tool.registry.v1"\n'
-            'tool: only\nkind: cli\n'
-            'capabilities: [{"id": "code-structure", "match": "strong", "basis": "x"}]\n',
-            encoding="utf-8")
-        entries = self._registry_tools(package_root=fixture)
-        self.assertEqual(set(entries), {"only"})
-
-
-# ---------------------------------------------------------------------------
-# Row 3: content authority — the selected root must validate
+# Row 2: content authority — the selected root must validate
 # ---------------------------------------------------------------------------
 
 class ContentAuthorityTests(WiringCase):
@@ -332,7 +270,7 @@ class ContentAuthorityTests(WiringCase):
 
 
 # ---------------------------------------------------------------------------
-# Row 4: help / entry-index — read the index, then check the real files
+# Row 3: help / entry-index — read the index, then check the real files
 # ---------------------------------------------------------------------------
 
 class EntryIndexTests(WiringCase):
@@ -416,8 +354,8 @@ class EntryIndexTests(WiringCase):
         plan = installer.plan_install(operation="install", roots=roots, hosts=["claude"])
         installer.apply_plan(plan, roots=roots)
         report = installer.entry_index_report(self.user_root)
-        # 4 hook registrations plus 16 adapted host files (12 skills, 4 agents).
-        self.assertEqual(len(report["active"]), 20)
+        # 4 hook registrations plus 15 adapted host files (11 skills, 4 agents).
+        self.assertEqual(len(report["active"]), 19)
         self.assertEqual(report["missing"], [])
         settings = host_root / "settings.json"
         original = settings.read_text(encoding="utf-8")
@@ -435,7 +373,7 @@ class EntryIndexTests(WiringCase):
         settings.write_text(json.dumps(document), encoding="utf-8")
         report = installer.entry_index_report(self.user_root)
         self.assertIn("claude:SessionStart", report["missing"])
-        self.assertEqual(len(report["active"]), 19)
+        self.assertEqual(len(report["active"]), 18)
         self.assertFalse(installer.doctor(roots=roots)["healthy"])
         settings.write_text(original, encoding="utf-8")
         # Uninstall removes the settings file: the index must stop claiming
@@ -449,7 +387,7 @@ class EntryIndexTests(WiringCase):
 
 
 # ---------------------------------------------------------------------------
-# Row 5: honesty invariants across the wiring
+# Row 4: honesty invariants across the wiring
 # ---------------------------------------------------------------------------
 
 class HonestyInvariantTests(WiringCase):
@@ -469,8 +407,6 @@ class HonestyInvariantTests(WiringCase):
         (cache / "runtime" / "routing.md").write_text("tampered", encoding="utf-8")
         for call in (
             lambda: inject.resource_root(self.project_root, self.user_root),
-            lambda: classifier.load_registry(project_root=self.project_root,
-                                             user_root=self.user_root),
             lambda: hooks.session_context({"session_id": "s"}, start=self.project_root,
                                           user_root=self.user_root),
         ):

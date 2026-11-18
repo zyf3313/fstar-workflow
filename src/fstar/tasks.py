@@ -21,7 +21,6 @@ EXTENSIONS = {
     "persistent-task": {"task", "evidence", "lease", "events", "recovery", "archive"},
     "multi-agent": {"research", "parallel-implement", "version-injection", "change-propagation"},
     "project-governance": {"specs", "knowledge", "rules", "memory"},
-    "tool-capability": {"contracts", "bindings", "classification", "validation", "fallback"},
 }
 
 
@@ -498,7 +497,10 @@ class TaskService:
     def enable_extension(self, ref: Optional[str], *, authorization: dict, actor: dict) -> dict:
         extension_id = authorization.get("id")
         if extension_id not in EXTENSIONS:
-            raise DomainError("unknown_extension", "Unknown extension package", {"id": extension_id})
+            detail = {"id": extension_id}
+            if extension_id == "tool-capability":
+                detail["retired"] = "Historical tasks keep the record; the package cannot be enabled."
+            raise DomainError("unknown_extension", "Unknown extension package", detail)
         scope = authorization.get("scope", "full")
         included = sorted(set(authorization.get("included", [])))
         excluded = sorted(set(authorization.get("excluded", [])))

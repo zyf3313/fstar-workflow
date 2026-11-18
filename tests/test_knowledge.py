@@ -3,7 +3,7 @@
 The tests use isolated fixtures only: no real home directory, no live
 retrieval service and no host integration.  They prove the API contracts of
 ``fstar.knowledge``; they do not prove caller wiring in init, learn,
-runtime, tools or the installer.
+runtime or the installer.
 """
 
 import os

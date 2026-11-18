@@ -13,6 +13,9 @@ def grants(records):
         raise DomainError("invalid_extension", "extensions context must be a list")
     result = {}
     for record in records:
+        # Retired grants remain in historical tasks, but authorize no behavior.
+        if isinstance(record, dict) and record.get("id") == "tool-capability":
+            continue
         if (not isinstance(record, dict) or not isinstance(record.get("id"), str)
                 or record.get("id") not in EXTENSIONS):
             raise DomainError("invalid_extension", "Unknown extension in context")
