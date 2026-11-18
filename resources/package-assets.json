@@ -1,7 +1,7 @@
 {
   "schema": "fstar.package-assets.v1",
   "generated_by": "scripts/build-package.cjs",
-  "cli_version": "0.4.0",
+  "cli_version": "0.4.1",
   "resource_version": "4",
   "supported_data_schemas": [
     1
@@ -149,7 +149,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "5f5ab5cc2f74614715141c602fb711f1f84f6d4a4ec8397a5cdb6f00b850d6b9"
+      "sha256": "2b860d0076217f0bd7791c7a6e8181c8fc47c9e0cd0e2b988ee85a55df7a57c4"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",
