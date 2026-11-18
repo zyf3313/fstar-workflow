@@ -666,6 +666,113 @@ class EvidenceArchiveTests(CoreCase):
         self.assertIsNone(revived["meta"]["disposition"])
         self.assertEqual("planning", revived["phase"])
 
+    def test_drop_discord_disposition_archives_and_finalizes(self):
+        for disposition, pending_flag in (("discard", "pending_cleanup"), ("knowledge", "pending_knowledge")):
+            with self.subTest(disposition=disposition):
+                name = "drop-" + disposition
+                self.create(name)
+                self.start(name)
+                self.service.drop(name, actor=self.user, confirmation=self.source(name), reason="abandon", disposition=disposition)
+                # Before archive the pending flag blocks ordinary convergence paths.
+                active = self.store.read(name)
+                self.assertTrue(active["meta"]["disposition"][pending_flag])
+                archived = self.service.archive(name, actor=self.user, confirmation=self.source(name))
+                self.assertTrue(Path(archived["path"]).is_dir())
+                result = self.store.read(name, archived=True)
+                self.assertFalse(result["meta"]["disposition"]["pending_cleanup"])
+                self.assertFalse(result["meta"]["disposition"]["pending_knowledge"])
+                finalized = [e for e in result["events"] if e["type"] == "disposition_finalized"]
+                self.assertEqual(1, len(finalized))
+                self.assertEqual("archive", finalized[0]["data"]["finalized_by"])
+                self.assertTrue(finalized[0]["data"]["cleared"][pending_flag])
+
+    def test_parent_archive_finalizes_dropped_discard_child(self):
+        self.create()
+        self.create("child", parent="root")
+        self.start("root/subtasks/child")
+        self.service.drop("root/subtasks/child", actor=self.user, confirmation=self.source("root/subtasks/child"), reason="discard child", disposition="discard")
+        # The pending child still blocks parent acceptance (pre-archive gate).
+        self.start("root")
+        with self.assertRaises(DomainError) as caught:
+            self.service.accept("root", actor=self.user, confirmation=self.source("root"))
+        self.assertIn(caught.exception.code, {"children_incomplete", "acceptance_blocked"})
+        # But the parent itself may be dropped-keep and archived, finalizing
+        # the child along with the whole tree.
+        self.service.drop("root", actor=self.user, confirmation=self.source("root"), reason="wrap up", disposition="keep")
+        archived = self.service.archive("root", actor=self.user, confirmation=self.source("root"))
+        self.assertTrue(Path(archived["path"]).is_dir())
+        parent = self.store.read("root", archived=True)
+        child_dir = Path(archived["path"]) / "subtasks" / "child"
+        child = json.loads((child_dir / "task.json").read_text())
+        self.assertFalse(child["meta"]["disposition"]["pending_cleanup"])
+        self.assertEqual(1, len([e for e in child["events"] if e["type"] == "disposition_finalized"]))
+        # Keep disposition on the parent: record retained, no flags, no
+        # finalization event.
+        self.assertEqual("keep", parent["meta"]["disposition"]["action"])
+        self.assertFalse(parent["meta"]["disposition"]["pending_cleanup"])
+        self.assertFalse(parent["meta"]["disposition"]["pending_knowledge"])
+        self.assertEqual([], [e for e in parent["events"] if e["type"] == "disposition_finalized"])
+
+    def test_failed_archive_keeps_pending_flags(self):
+        self.create()
+        self.start()
+        self.service.drop("root", actor=self.user, confirmation=self.source("root"), reason="abandon", disposition="discard")
+        # A leased descendant blocks the archive; the pending flags must
+        # survive the failed attempt.
+        self.create("child", parent="root")
+        self.start("root/subtasks/child")
+        self.service.drop("root/subtasks/child", actor=self.user, confirmation=self.source("root/subtasks/child"), reason="discard child", disposition="discard")
+        # Manually re-arm a lease on the dropped child (simulating a racing
+        # writer) by using the raw task file, then archive must fail and leave
+        # both dispositions pending.
+        task = json.loads((self.project / ".fstar" / "tasks" / "root" / "subtasks" / "child" / "task.json").read_text())
+        task["lease"] = {"holder": "someone", "token": "t", "expires_at": "2999-01-01T00:00:00Z", "acquired_at": self.clock()}
+        (self.project / ".fstar" / "tasks" / "root" / "subtasks" / "child" / "task.json").write_text(json.dumps(task))
+        with self.assertRaises(DomainError) as caught:
+            self.service.archive("root", actor=self.user, confirmation=self.source("root"))
+        self.assertEqual("archive_blocked", caught.exception.code)
+        active = self.store.read("root")
+        self.assertTrue(active["meta"]["disposition"]["pending_cleanup"])
+        self.assertTrue(self.store.read("root/subtasks/child")["meta"]["disposition"]["pending_cleanup"])
+
+    def test_destination_conflict_keeps_pending_flags(self):
+        # `transaction()` is a file lock, not a rollback-capable transaction,
+        # so a destination conflict must be detected BEFORE the pending flags
+        # are cleared: otherwise a failed archive would leave an active task
+        # with a cleared flag and a false finalization event.
+        self.create()
+        self.start()
+        self.service.drop("root", actor=self.user, confirmation=self.source("root"), reason="keep", disposition="keep")
+        self.service.archive("root", actor=self.user, confirmation=self.source("root"))
+        # Reuse the name in the same archive month with a different task id.
+        self.create()
+        self.start()
+        self.service.drop("root", actor=self.user, confirmation=self.source("root"), reason="discard again", disposition="discard")
+        with self.assertRaises(DomainError) as caught:
+            self.service.archive("root", actor=self.user, confirmation=self.source("root"))
+        self.assertEqual("archive_conflict", caught.exception.code)
+        active = self.store.read("root")
+        self.assertTrue(active["meta"]["disposition"]["pending_cleanup"])
+        self.assertEqual([], [e for e in active["events"] if e["type"] == "disposition_finalized"])
+        self.assertEqual([], [e for e in active["events"] if e["type"] == "archived"])
+        self.assertTrue((self.project / ".fstar" / "tasks" / "root").is_dir())
+
+    def test_drop_keep_disposition_archive_unchanged(self):
+        self.create()
+        self.start()
+        self.service.drop("root", actor=self.user, confirmation=self.source("root"), reason="abandon", disposition="keep")
+        archived = self.service.archive("root", actor=self.user, confirmation=self.source("root"))
+        self.assertTrue(Path(archived["path"]).is_dir())
+        result = self.store.read("root", archived=True)
+        self.assertEqual("keep", result["meta"]["disposition"]["action"])
+        self.assertEqual([], [e for e in result["events"] if e["type"] == "disposition_finalized"])
+        # Revive path unchanged for an active dropped task.
+        self.create("revive-me")
+        self.start("revive-me")
+        self.service.drop("revive-me", actor=self.user, confirmation=self.source("revive-me"), reason="pause", disposition="discard")
+        revived = self.service.drop("revive-me", actor=self.user, confirmation=self.source("revive-me"), reason="resume", action="revive")
+        self.assertIsNone(revived["meta"]["disposition"])
+
 
 class LifecycleMemberBoundaryTests(EvidenceArchiveTests):
     """Settled boundary (2026-10-31, parent implement.md progress log):
