@@ -567,7 +567,9 @@ class TaskService:
     def list_reviews(self, ref: str) -> list:
         return [item for item in self.store.read(ref)["evidence"] if item.get("kind") == "review"]
 
-    def _validate_archive_tree(self, task_dir: Path) -> set:
+    def _validate_archive_tree(self, task_dir: Path, finalizations: Optional[list] = None) -> set:
+        if finalizations is None:
+            finalizations = []
         task = self.store._read_path(task_dir / "task.json")
         names = self._children_consistency(task_dir, task)
         if task.get("blocked") or task.get("lease"):
@@ -575,7 +577,13 @@ class TaskService:
         disposition = task.get("meta", {}).get("disposition")
         if disposition:
             if disposition.get("pending_cleanup") or disposition.get("pending_knowledge"):
-                raise DomainError("archive_blocked", "Dropped descendant disposition is still pending", {"task": task["name"]}, status=3)
+                # Archiving IS the cleanup: removing the tree from the active
+                # root completes a discard disposition (and finalizes the
+                # knowledge-extraction reminder for a knowledge disposition).
+                # Collect the pending node here; the flags are cleared and the
+                # event recorded only after the WHOLE tree validates, so a
+                # failed archive (any other blocker) leaves them intact.
+                finalizations.append((task_dir, task))
         else:
             if task["phase"] != "completed" or not task.get("acceptance") or task["acceptance"].get("state") != "valid":
                 raise DomainError("archive_blocked", "Every task in the tree must be completed or dispositioned", {"task": task["name"]}, status=3)
@@ -585,7 +593,7 @@ class TaskService:
                 raise DomainError("archive_blocked", "Descendant acceptance evidence is stale", {"task": task["name"]}, status=3)
         ids = {task["id"]}
         for name in names:
-            ids.update(self._validate_archive_tree(task_dir / "subtasks" / name))
+            ids.update(self._validate_archive_tree(task_dir / "subtasks" / name, finalizations))
         return ids
 
     def archive(self, ref: str, *, actor: dict, confirmation: dict, operation_id: Optional[str] = None, workflow: bool = False) -> dict:
@@ -633,7 +641,8 @@ class TaskService:
             if workflow:
                 _require_workflow_member(task, "archive")
             validate_source(confirmation, task, actor=actor)
-            tree_ids = self._validate_archive_tree(task_dir)
+            finalizations = []
+            tree_ids = self._validate_archive_tree(task_dir, finalizations)
             target = self.store.archive_root / month / task["name"]
             if target.exists() or target.is_symlink():
                 target_task = target / "task.json"
@@ -643,6 +652,25 @@ class TaskService:
                     if existing["id"] == task["id"] and matching:
                         return {"task": existing, "path": str(target), "recovered": True}
                 raise DomainError("archive_conflict", "Archive destination already exists", {"target": str(target)}, status=4)
+            # Only after every fallible pre-move check has passed do we converge
+            # pending drop dispositions. `transaction()` is a file lock, not a
+            # rollback-capable transaction, so writing these before the
+            # destination check would let a failed archive clear the pending
+            # flags (and record a false finalization) on a still-active task.
+            for pending_dir, pending_task in finalizations:
+                # Archiving IS the cleanup: removing the tree from the active
+                # root completes a discard disposition (and finalizes the
+                # knowledge-extraction reminder for a knowledge disposition).
+                disposition = pending_task["meta"]["disposition"]
+                cleared = {"pending_cleanup": bool(disposition.get("pending_cleanup")), "pending_knowledge": bool(disposition.get("pending_knowledge"))}
+                disposition["pending_cleanup"] = False
+                disposition["pending_knowledge"] = False
+                self._event(pending_task, "disposition_finalized", confirmation, {"finalized_by": "archive", "cleared": cleared, "actor": actor.get("id")})
+                self._write(pending_dir, pending_task)
+            # Re-read the root so a finalized root disposition is not
+            # overwritten by the stale pre-validation copy below.
+            if finalizations:
+                task = self.store._read_path(task_dir / "task.json")
             pending = make_event("archive_operation", confirmation, {"operation_id": operation_id, "target": str(target.relative_to(self.store.project_root)), "archived_at": now}, now)
             task["events"].append(pending)
             self._write(task_dir, task)

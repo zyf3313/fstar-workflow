@@ -1,6 +1,6 @@
 {
   "acceptance": null,
-  "archivedAt": null,
+  "archivedAt": "2026-11-18T08:12:44.387314Z",
   "assignee": null,
   "base_branch": "",
   "blocked": null,
@@ -172,6 +172,103 @@
         "session": "s1"
       },
       "type": "lease_released"
+    },
+    {
+      "at": "2026-11-18T07:17:45.195896Z",
+      "data": {
+        "disposition": "discard",
+        "reason": "Feature removed in 0.4.0: the tool-capability binding system was deleted from the product; task scope no longer exists"
+      },
+      "id": "3ba8c466-30dd-421c-bd6d-ee09414ea415",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-18T07:17:45.194565Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "drop",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "234fd5d8718ca7f8cba0d93b5ad87a6c843e08b020ebad0147d18a42883770ee"
+      },
+      "type": "dropped"
+    },
+    {
+      "at": "2026-11-18T08:12:44.388059Z",
+      "data": {
+        "actor": "user",
+        "cleared": {
+          "pending_cleanup": true,
+          "pending_knowledge": false
+        },
+        "finalized_by": "archive"
+      },
+      "id": "8e775f48-62c6-4305-9eb9-ccfe2b766dd7",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-18T08:12:44.387123Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "234fd5d8718ca7f8cba0d93b5ad87a6c843e08b020ebad0147d18a42883770ee"
+      },
+      "type": "disposition_finalized"
+    },
+    {
+      "at": "2026-11-18T08:12:44.387314Z",
+      "data": {
+        "archived_at": "2026-11-18T08:12:44.387314Z",
+        "operation_id": "2e4383dc-fa1a-4acf-89c9-b6f41d37c0f4",
+        "target": ".fstar/archive/2026-11/11-09-init-capability-binding"
+      },
+      "id": "f63ee71b-6c3f-457a-ad01-f01386942dac",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-18T08:12:44.387123Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "234fd5d8718ca7f8cba0d93b5ad87a6c843e08b020ebad0147d18a42883770ee"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-18T08:12:44.390938Z",
+      "data": {
+        "operation_id": "2e4383dc-fa1a-4acf-89c9-b6f41d37c0f4",
+        "target": ".fstar/archive/2026-11/11-09-init-capability-binding"
+      },
+      "id": "edc337f0-1e4d-403a-9972-c9ddbb362280",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-18T08:12:44.387123Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "234fd5d8718ca7f8cba0d93b5ad87a6c843e08b020ebad0147d18a42883770ee"
+      },
+      "type": "archived"
     }
   ],
   "evidence": [
@@ -420,7 +517,32 @@
   "id": "bc403651-5eaf-44e1-8157-f106617d6ca5",
   "lease": null,
   "meta": {
-    "disposition": null,
+    "disposition": {
+      "action": "discard",
+      "at": "2026-11-18T07:17:45.195891Z",
+      "by": {
+        "id": "user",
+        "role": "user",
+        "session": null
+      },
+      "confirmation": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-18T07:17:45.194565Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "drop",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "234fd5d8718ca7f8cba0d93b5ad87a6c843e08b020ebad0147d18a42883770ee"
+      },
+      "pending_cleanup": false,
+      "pending_knowledge": false,
+      "reason": "Feature removed in 0.4.0: the tool-capability binding system was deleted from the product; task scope no longer exists"
+    },
     "related_tasks": [],
     "reminders": {},
     "templates": {

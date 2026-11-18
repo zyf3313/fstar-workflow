@@ -1,0 +1,910 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-18T07:11:26.001852Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "3bdd19a1-4a25-4a95-a037-200b8427e72d"
+    ],
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user",
+        "session": null
+      },
+      "at": "2026-11-18T07:11:25.995786Z",
+      "quote": "",
+      "reference": "interactive-cli",
+      "scope": "accept",
+      "source_id": "cli",
+      "type": "command",
+      "validates": "a898c7b1713dbd441b3c24bc26cf2cd0f1acda6f960a5a3a54fbcae8be12c5e2"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "a2912f884787825b63f6c5d16913084df50ed75b5690411082b48c1e154abc60"
+      ],
+      "task": "a898c7b1713dbd441b3c24bc26cf2cd0f1acda6f960a5a3a54fbcae8be12c5e2"
+    }
+  },
+  "archivedAt": "2026-11-18T07:11:54.451057Z",
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": "2026-11-18T07:11:26.001877Z",
+  "createdAt": "2026-11-11T14:50:09.625934Z",
+  "creator": "agent",
+  "description": "fstar update in a project whose .claude was installed earlier fails with uninstall_host_root_mismatch because the manifest keeps one settings record keyed by host:event and the mismatch check also rejects explicit --host-root. Make explicit root selection authoritative and key settings records by root.",
+  "events": [
+    {
+      "at": "2026-11-11T14:50:09.626709Z",
+      "data": {
+        "parent": null
+      },
+      "id": "cfe75981-864a-4830-a6cd-a3ee76188449",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "at": "2026-11-11T14:50:09.626701Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "277dc010-e6ff-4679-965f-30b9e029bf06",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-12T14:45:14.792211Z",
+      "data": {
+        "snapshot": "662c3d381d22a59e5f5a2ae9d0ec8f03c01037d9c9f6e05c0df1955cc9f1a695"
+      },
+      "id": "f0350689-d3b4-4e02-9b24-c5ec5bb72c6f",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": "s1"
+        },
+        "at": "2026-11-12T14:52:00Z",
+        "quote": "两个任务收尾吧",
+        "reference": "session/s1/input-start-11-11",
+        "scope": {},
+        "source_id": "input-start-11-11",
+        "type": "conversation",
+        "validates": "3a5461d5166a5bb7addd53d912e9b39e996aa6a7fb3111ea974afa3853076a5e"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-12T14:45:33.846681Z",
+      "data": {
+        "new_holder": {
+          "id": "fstar-check-agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "e0358288-afbf-465f-9f61-dae88d8d48e5",
+      "source": {
+        "actor": {
+          "id": "fstar-check-agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "at": "2026-11-12T14:45:33.846678Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "f1da4a3b-f588-4fb5-8f91-78df236e6eb4",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-12T14:45:33.849731Z",
+      "data": {
+        "evidence_id": "2bbbd11d-b8bf-4c4e-91c9-4d64964c7738",
+        "state": "valid"
+      },
+      "id": "0cfeb173-6f90-4ab9-846a-6ec24718b846",
+      "source": {
+        "at": "2026-11-12T14:55:00Z",
+        "id": "fstar-check-agent",
+        "quote": "independent final check of 11-11 across two rounds",
+        "reference": "session/s1",
+        "role": "check",
+        "session": "s1"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-12T14:45:33.851021Z",
+      "data": {
+        "reason": "final check recorded"
+      },
+      "id": "6211b8a3-3f43-43a8-8846-7b1f0f302736",
+      "source": {
+        "id": "fstar-check-agent",
+        "role": "agent",
+        "session": "s1"
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-18T06:52:56.085799Z",
+      "data": {
+        "new_holder": {
+          "id": "session/main",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "92f7bf8c-9f0d-4ccb-92f2-5bdb873d0248",
+      "source": {
+        "actor": {
+          "id": "session/main",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-18T06:52:56.085796Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "6c66b34f-9b53-4bff-8779-7d9aa708aad9",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-18T06:52:56.087651Z",
+      "data": {
+        "dispatch_id": "f166ea3d-c90e-4fb4-89d3-ad1008d98961",
+        "plan_item_ids": [],
+        "role": "check"
+      },
+      "id": "59bb5ab8-ba8c-49e4-b4d6-0ebd1ac23969",
+      "source": {
+        "actor": {
+          "id": "session/main",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-18T06:52:56.087647Z",
+        "quote": "",
+        "reference": "dispatch f166ea3d-c90e-4fb4-89d3-ad1008d98961",
+        "scope": "dispatch",
+        "source_id": "ed66e013-8c1f-4ee5-b441-608e64279573",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-18T06:56:07.188918Z",
+      "data": {
+        "reason": "interrupt: redo final check against current delivery"
+      },
+      "id": "b89bbf10-8024-4a24-8611-8c02f54bba0d",
+      "source": {
+        "id": "session/main",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-18T06:57:09.257284Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "768b252a-416f-4449-a7b9-6237e72b1775",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-18T06:57:09.257281Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "26b92956-a9f5-4cba-a51a-d4076ba919a1",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-18T06:57:09.259582Z",
+      "data": {
+        "dispatch_id": "a4d7144f-ecec-4fb5-b4f1-eb3fc5d574d3",
+        "plan_item_ids": [],
+        "role": "check"
+      },
+      "id": "5730b968-d0dc-42e2-a7a5-e8306e1abf46",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-18T06:57:09.259576Z",
+        "quote": "",
+        "reference": "dispatch a4d7144f-ecec-4fb5-b4f1-eb3fc5d574d3",
+        "scope": "dispatch",
+        "source_id": "f82ae452-9360-42fe-b8ab-050acce18fda",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-18T07:04:31.667542Z",
+      "data": {
+        "dispatch_id": "557765e6-c3b8-4b39-8b48-28092778a36c",
+        "plan_item_ids": [],
+        "role": "check"
+      },
+      "id": "ff8b6de1-8fe9-4a84-bfc2-bca212f2d073",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-18T07:04:31.667538Z",
+        "quote": "",
+        "reference": "dispatch 557765e6-c3b8-4b39-8b48-28092778a36c",
+        "scope": "dispatch",
+        "source_id": "6124e780-c35a-4266-820a-ad74d48545ca",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-18T07:06:54.647226Z",
+      "data": {
+        "evidence_id": "41099dd3-e48c-488d-a0e3-340289b70782",
+        "state": "stale"
+      },
+      "id": "559249dc-fb36-4853-810e-8e6194f889c7",
+      "source": {
+        "id": "fstar-check/final-verify-11-11-5577",
+        "role": "check",
+        "session": "main"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-18T07:10:13.607842Z",
+      "data": {
+        "reason": "interrupt: redo harvest with correct delivery digest"
+      },
+      "id": "a00b7a1b-820d-4490-82c5-5b433af7a76d",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-18T07:10:52.611316Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "7483a240-1393-4068-a57a-d779aaa26fe3",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-18T07:10:52.611313Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "16fd9016-c066-46c6-8ae3-e92bff533bf6",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-18T07:10:52.613196Z",
+      "data": {
+        "dispatch_id": "0ac79a7e-dce5-4676-bdac-f5dc7a5ceb9c",
+        "plan_item_ids": [],
+        "role": "check"
+      },
+      "id": "6876c023-c42e-455f-8f61-26c8e6d31819",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-18T07:10:52.613192Z",
+        "quote": "",
+        "reference": "dispatch 0ac79a7e-dce5-4676-bdac-f5dc7a5ceb9c",
+        "scope": "dispatch",
+        "source_id": "8c975398-1370-4320-bbe1-11029e6f467b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-18T07:10:52.964324Z",
+      "data": {
+        "evidence_id": "3bdd19a1-4a25-4a95-a037-200b8427e72d",
+        "state": "valid"
+      },
+      "id": "2453160b-edf3-460c-ba75-c67508d3ce71",
+      "source": {
+        "id": "fstar-check/final-verify-11-11-5577",
+        "role": "check",
+        "session": "main"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-18T07:11:25.722715Z",
+      "data": {
+        "reason": "interrupt: check harvested and recorded; release for acceptance"
+      },
+      "id": "2392b40c-da60-4a03-be88-ecf1ff44f4e0",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-18T07:11:26.001879Z",
+      "data": {
+        "evidence_refs": [
+          "3bdd19a1-4a25-4a95-a037-200b8427e72d"
+        ]
+      },
+      "id": "d680a0ba-27a3-4b8e-ae22-1401897b010e",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-18T07:11:25.995786Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "accept",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "a898c7b1713dbd441b3c24bc26cf2cd0f1acda6f960a5a3a54fbcae8be12c5e2"
+      },
+      "type": "accepted"
+    },
+    {
+      "at": "2026-11-18T07:11:54.451057Z",
+      "data": {
+        "archived_at": "2026-11-18T07:11:54.451057Z",
+        "operation_id": "87f6699f-3efb-4b6b-aeb6-e364a2fa8909",
+        "target": ".fstar/archive/2026-11/11-11-installer-multi-root-update"
+      },
+      "id": "43a7a311-3043-496c-8ca5-9455458c682b",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-18T07:11:54.450767Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "764b8454892790fa4f73bc4416e183bc476e027d7c899d786e94b661d3cb1490"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-18T07:11:54.457633Z",
+      "data": {
+        "operation_id": "87f6699f-3efb-4b6b-aeb6-e364a2fa8909",
+        "target": ".fstar/archive/2026-11/11-11-installer-multi-root-update"
+      },
+      "id": "d7eb4e0e-e27e-40b5-a15c-aa70b6631eb1",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-18T07:11:54.450767Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "764b8454892790fa4f73bc4416e183bc476e027d7c899d786e94b661d3cb1490"
+      },
+      "type": "archived"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "f0d33573487a5d040af995d46c2a8ba191ff96dbd9fe1341b39ac7aa017dd663",
+        "paths": [
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "6ecc1516913b30bda77a331a4c4f1281574ab1f2479f345ec8dfbb2b6882ebf5"
+          },
+          {
+            "exists": true,
+            "path": "scripts/build-package.cjs",
+            "sha256": "5ca679ba3d5dd1b71228dca2cf0a76d2dccc004172e7a031b22d8744534b975e"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "5c6f609656d4ed14a619656f3bc73c28fd1c4753a0a2116164dd6fce08331b4a"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "b562d0fac2c7ff9d07ceee00aa9f977a3d2d6213330c918cc3232aaae73b934b"
+          }
+        ]
+      },
+      "environment": {
+        "os": "darwin 27.0",
+        "python": "3.9+",
+        "repo": "main@70aba49"
+      },
+      "id": "2bbbd11d-b8bf-4c4e-91c9-4d64964c7738",
+      "items": [
+        {
+          "command": "tests/test_installer.py::TestMultiRootUpdate::test_explicit_host_root_bypasses_recorded_root_mismatch",
+          "notes": "explicit --host-root bypasses mismatch; implicit unrecorded root still refuses (round-1 check 6/6 PASS)",
+          "plan_item": "R-001",
+          "requirement_ids": [
+            "R-001"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "tests/test_installer.py::TestMultiRootUpdate (per-root settings, uninstall isolation, legacy key migration)",
+          "notes": "8 records for two roots; uninstall at one root keeps the other's records and settings.json; legacy keys migrated losslessly",
+          "plan_item": "R-002",
+          "requirement_ids": [
+            "R-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "tests/test_installer.py::test_overwritten_host_file_baseline_moves_with_the_content",
+          "notes": "overwrite/reuse refresh the baseline; doctor healthy; second update plans no re-overwrite; cross-root records untouched (round-2 probes 1-3 PASS)",
+          "plan_item": "R-003",
+          "requirement_ids": [
+            "R-003"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "node scripts/build-package.cjs (guard fires on mismatched cli_version, verified in throwaway copy)",
+          "notes": "build refuses cli_version != version; shipped manifest reports 0.3.3",
+          "plan_item": "R-004",
+          "requirement_ids": [
+            "R-004"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t . (702 OK); node --test tests/test_package.cjs (16 pass)",
+          "notes": "full suite green at HEAD 70aba49; external ownership never converted to owned",
+          "plan_item": "R-005",
+          "requirement_ids": [
+            "R-005"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-12T14:45:33.848708Z",
+      "producer": {
+        "at": "2026-11-12T14:55:00Z",
+        "id": "fstar-check-agent",
+        "quote": "independent final check of 11-11 across two rounds",
+        "reference": "session/s1",
+        "role": "check",
+        "session": "s1"
+      },
+      "run_id": "check-11-11-final-20261112",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/11-11-installer-multi-root-update/prd.md",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-002",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-003",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-004",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-005",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "sha256",
+        "paths": [
+          {
+            "path": "src/fstar/installer.py",
+            "sha256": "e75a17951d3d024ea748e6d6e58719cdcfabb31a19f42975e6b98aecb3c569f8"
+          },
+          {
+            "path": "tests/test_installer.py",
+            "sha256": "a294d4484308f8983fb3d771bf3bd3d5992dd7fc7cb46c3cfb70e95d51d8474f"
+          },
+          {
+            "path": "scripts/build-package.cjs",
+            "sha256": "033de7d3fccfda2ecc7fab1466f4b5f61506d470cfdb7984da6b54948374ba90"
+          },
+          {
+            "path": "resources/package-assets.json",
+            "sha256": "1aa320f8d08e910df319bdc76d445132d2ab8bbc968b839cf4bb7be31afc1428"
+          }
+        ]
+      },
+      "dispatch_id": "557765e6-c3b8-4b39-8b48-28092778a36c",
+      "environment": {
+        "os": "darwin 27.0.0",
+        "python": "3.9.6",
+        "repo": "main@a0620d7"
+      },
+      "id": "41099dd3-e48c-488d-a0e3-340289b70782",
+      "input_files": [],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer -v",
+          "notes": "R-001 explicit --host-root bypass + owned-root attribution",
+          "plan_item": "R-001",
+          "requirement_ids": [
+            "R-001"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer -v",
+          "notes": "R-002 per-root settings keys, selective uninstall, legacy migration",
+          "plan_item": "R-002",
+          "requirement_ids": [
+            "R-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer -v",
+          "notes": "R-003 overwrite baseline follows refreshed content; doctor healthy",
+          "plan_item": "R-003",
+          "requirement_ids": [
+            "R-003"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "node scripts/build-package.cjs + negative drift run",
+          "notes": "build ok 57 files rv4 cli0.4.0; drift guard fires on mismatched cli_version",
+          "plan_item": "R-004",
+          "requirement_ids": [
+            "R-004"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer -v",
+          "notes": "R-005 regression coverage green at 0.4.0",
+          "plan_item": "R-005",
+          "requirement_ids": [
+            "R-005"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "installer suite + node package tests",
+          "notes": "134 installer tests OK; node 16 pass 0 fail",
+          "plan_item": "full-suite",
+          "requirement_ids": [
+            "R-001",
+            "R-002",
+            "R-003",
+            "R-004",
+            "R-005"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-18T07:06:54.644589Z",
+      "producer": {
+        "id": "fstar-check/final-verify-11-11-5577",
+        "role": "check",
+        "session": "main"
+      },
+      "run_id": "check-557765e6-20261118",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "actual": "a2912f884787825b63f6c5d16913084df50ed75b5690411082b48c1e154abc60",
+          "expected": "sha256",
+          "type": "delivery"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/11-11-installer-multi-root-update/prd.md",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-002",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-003",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-004",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-005",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "a2912f884787825b63f6c5d16913084df50ed75b5690411082b48c1e154abc60",
+        "paths": [
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "1aa320f8d08e910df319bdc76d445132d2ab8bbc968b839cf4bb7be31afc1428"
+          },
+          {
+            "exists": true,
+            "path": "scripts/build-package.cjs",
+            "sha256": "033de7d3fccfda2ecc7fab1466f4b5f61506d470cfdb7984da6b54948374ba90"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "e75a17951d3d024ea748e6d6e58719cdcfabb31a19f42975e6b98aecb3c569f8"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "a294d4484308f8983fb3d771bf3bd3d5992dd7fc7cb46c3cfb70e95d51d8474f"
+          }
+        ]
+      },
+      "dispatch_id": "0ac79a7e-dce5-4676-bdac-f5dc7a5ceb9c",
+      "environment": {
+        "os": "darwin 27.0.0",
+        "python": "3.9.6",
+        "repo": "main@a0620d7"
+      },
+      "id": "3bdd19a1-4a25-4a95-a037-200b8427e72d",
+      "input_files": [],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer -v",
+          "notes": "R-001 explicit --host-root bypass + owned-root attribution",
+          "plan_item": "R-001",
+          "requirement_ids": [
+            "R-001"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer -v",
+          "notes": "R-002 per-root settings keys, selective uninstall, legacy migration",
+          "plan_item": "R-002",
+          "requirement_ids": [
+            "R-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer -v",
+          "notes": "R-003 overwrite baseline follows refreshed content; doctor healthy",
+          "plan_item": "R-003",
+          "requirement_ids": [
+            "R-003"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "node scripts/build-package.cjs + negative drift run",
+          "notes": "build ok 57 files rv4 cli0.4.0; drift guard fires on mismatched cli_version",
+          "plan_item": "R-004",
+          "requirement_ids": [
+            "R-004"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer -v",
+          "notes": "R-005 regression coverage green at 0.4.0",
+          "plan_item": "R-005",
+          "requirement_ids": [
+            "R-005"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "installer suite + node package tests",
+          "notes": "134 installer tests OK; node 16 pass 0 fail",
+          "plan_item": "full-suite",
+          "requirement_ids": [
+            "R-001",
+            "R-002",
+            "R-003",
+            "R-004",
+            "R-005"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-18T07:10:52.961290Z",
+      "producer": {
+        "id": "fstar-check/final-verify-11-11-5577",
+        "role": "check",
+        "session": "main"
+      },
+      "run_id": "check-0ac79a7e-20261118",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/11-11-installer-multi-root-update/prd.md",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-002",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-003",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-004",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            },
+            {
+              "id": "R-005",
+              "sha256": "eea8e62d2fbaea05c3317e2d2013e2ac919909f703fff523dc5fcf9bfdcc0d37"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "id": "668f2476-0992-435a-8141-bc197333b020",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/11-11-installer-multi-root-update/prd.md": {
+          "R-001": {
+            "dependencies": [],
+            "end_marker": "### R-002",
+            "start_marker": "### R-001"
+          },
+          "R-002": {
+            "dependencies": [],
+            "end_marker": "### R-003",
+            "start_marker": "### R-002"
+          },
+          "R-003": {
+            "dependencies": [],
+            "end_marker": "### R-004",
+            "start_marker": "### R-003"
+          },
+          "R-004": {
+            "dependencies": [],
+            "end_marker": "### R-005",
+            "start_marker": "### R-004"
+          },
+          "R-005": {
+            "dependencies": [],
+            "end_marker": "## 不做",
+            "start_marker": "### R-005"
+          }
+        },
+        "mode": "file"
+      },
+      "artifact_map_sha256": "493f99c544fc1d7ef278eadfe288a4852433c2ecac730ac04ef80ecd7e97ad25",
+      "artifact_map_source": {
+        "kind": "prd markers",
+        "mode": "file",
+        "ref": "agent"
+      },
+      "dispatch_harvested": [
+        "0ac79a7e-dce5-4676-bdac-f5dc7a5ceb9c",
+        "557765e6-c3b8-4b39-8b48-28092778a36c"
+      ]
+    }
+  },
+  "name": "11-11-installer-multi-root-update",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "修复安装器多 host root 更新：显式根绕过校验 + settings 记录按根区分",
+  "worktree_path": ""
+}
