@@ -114,6 +114,64 @@
         "session": "s1"
       },
       "type": "lease_released"
+    },
+    {
+      "at": "2026-11-12T14:40:00.305081Z",
+      "data": {
+        "new_holder": {
+          "id": "fstar-check-agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "c4ea1183-53ee-4575-930c-13b33443fb3e",
+      "source": {
+        "actor": {
+          "id": "fstar-check-agent",
+          "role": "agent",
+          "session": "s1"
+        },
+        "at": "2026-11-12T14:40:00.305078Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "f4dc7969-9b3c-4a3d-9592-adb6c9628012",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-12T14:40:00.308957Z",
+      "data": {
+        "evidence_id": "428cdb8b-534b-4136-b55b-cf6c3d9f6646",
+        "state": "valid"
+      },
+      "id": "ab7b5c29-55dc-4cf7-8e88-829fae9addd8",
+      "source": {
+        "at": "2026-11-12T10:00:00Z",
+        "id": "fstar-check-agent",
+        "quote": "independent final check, second round after delivery digest drift",
+        "reference": "session/s1",
+        "role": "check",
+        "session": "s1"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-12T14:40:00.310356Z",
+      "data": {
+        "reason": "final check round 2 recorded"
+      },
+      "id": "669d4f92-ade1-422b-8327-ff20f5817e89",
+      "source": {
+        "id": "fstar-check-agent",
+        "role": "agent",
+        "session": "s1"
+      },
+      "type": "lease_released"
     }
   ],
   "evidence": [
@@ -213,6 +271,124 @@
         "session": "s1"
       },
       "run_id": "check-11-09-final-20261111",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/11-09-init-capability-binding/prd.md",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "bce2dc833cdc05ff10c4d5709d93663d19db48bec69a68bfd0deec6783e135d7"
+            },
+            {
+              "id": "R-002",
+              "sha256": "bce2dc833cdc05ff10c4d5709d93663d19db48bec69a68bfd0deec6783e135d7"
+            },
+            {
+              "id": "R-003",
+              "sha256": "bce2dc833cdc05ff10c4d5709d93663d19db48bec69a68bfd0deec6783e135d7"
+            },
+            {
+              "id": "R-004",
+              "sha256": "bce2dc833cdc05ff10c4d5709d93663d19db48bec69a68bfd0deec6783e135d7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "31e604053346990756256831f76f51c59e147c749a368e09c49bb4cba6d87fe5",
+        "paths": [
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "fab83d346df33caa554406b18a9fe9ec7b6385ae9a3b73afb5fe0e2c730df72d"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-init/SKILL.md",
+            "sha256": "8ebf01ad8d35675d67581ee4f7b1cfc59dcd2dfbd1724f37deb8b6d594171505"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "d493abdd9fb626a22f785a97cfd5d409b92f37aa5f55e39249c5465be8ae1a42"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "2ad88f57212c2ec85715acbf56720da1b7d000b79eb68c9d2cdbbe44c7a1a4a5"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "42a27f0ca37bb9002d2249ed978ebc37433ef1ca8c0c37abe5b65e4f95d28782"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "1563e1075d1681673aca60b2519606cc9868a58e21683b4a1f29f0169a03aea4"
+          }
+        ]
+      },
+      "environment": {
+        "note": "prior check 64ccb828 went stale: package.json changed by 0.3.1+ releases, unrelated to this task; revalidated at HEAD",
+        "os": "darwin 27.0",
+        "python": "3.9+",
+        "repo": "main@70aba49"
+      },
+      "id": "428cdb8b-534b-4136-b55b-cf6c3d9f6646",
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_content (incl. test_init_skill_binds_by_agent_with_one_confirmation)",
+          "notes": "SKILL.md binding section: batches 30-50, at most one tool per capability, one summary + one confirmation",
+          "plan_item": "R-001",
+          "requirement_ids": [
+            "R-001"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "grep 'never create or edit the user-level' resources/skills/fstar-init/SKILL.md",
+          "notes": "project-level only; refusal leaves no tools.yaml",
+          "plan_item": "R-002",
+          "requirement_ids": [
+            "R-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "tests/test_content.py::test_routing_negotiation_refusal_and_minimal_loop",
+          "notes": "routing no longer claims the CLI does not run the scan",
+          "plan_item": "R-003",
+          "requirement_ids": [
+            "R-003"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_hooks (80 passed incl. 4 binding-table tests)",
+          "notes": "bindings_input injected in session_context/worker_context without grant; per-layer degradation verified on live AgentWorkspace",
+          "plan_item": "R-004",
+          "requirement_ids": [
+            "R-004"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-12T14:40:00.307787Z",
+      "producer": {
+        "at": "2026-11-12T10:00:00Z",
+        "id": "fstar-check-agent",
+        "quote": "independent final check, second round after delivery digest drift",
+        "reference": "session/s1",
+        "role": "check",
+        "session": "s1"
+      },
+      "run_id": "check-11-09-final-20261112",
       "scope": "final",
       "state": "valid",
       "validates": [
