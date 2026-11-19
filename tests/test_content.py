@@ -237,6 +237,34 @@ class SemanticContentTests(unittest.TestCase):
         self.assertIn("决策树与前沿", template)
         self.assertIn("前沿为空才交付 plan", template)
 
+    def test_every_skill_declares_do_not_use_when(self):
+        for skill_dir in sorted((RESOURCES / "skills").iterdir()):
+            text = (skill_dir / "SKILL.md").read_text()
+            self.assertIn("## Do NOT use when", text, skill_dir.name)
+
+    def test_learning_loop_rules_present(self):
+        routing = (RESOURCES / "runtime" / "routing.md").read_text()
+        for phrase in ("rejected ledger", "do not re-propose", "correction record",
+                       "user's exact words as `user_signal`",
+                       "accepted_via_rule", "priority or risk level alone never waives acceptance"):
+            self.assertIn(phrase, routing)
+        learn = (RESOURCES / "skills/fstar-learn/SKILL.md").read_text()
+        self.assertIn("## Rejected-proposals ledger", learn)
+        self.assertIn("## Procedure format", learn)
+        self.assertIn("read live", learn)
+        execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
+        self.assertIn("accepted_via_rule", execute)
+        self.assertIn("correction record", execute)
+        clarify = (RESOURCES / "skills/fstar-clarify/SKILL.md").read_text()
+        self.assertIn("rejected-proposals ledger", clarify)
+        self.assertIn("not asked again", clarify)
+        capabilities = (RESOURCES / "runtime/capabilities.md").read_text()
+        for phrase in ("Needed when the user states a durable convention",
+                       "the user hands over a planning document",
+                       "survive context\n  compaction or machine changes",
+                       "independent write scopes"):
+            self.assertIn(phrase, capabilities)
+
     def test_init_skill_explores_and_backfills_without_confirmation(self):
         text = (RESOURCES / "skills/fstar-init/SKILL.md").read_text()
         for phrase in ("Do not ask the user to confirm the discovered facts",

@@ -189,6 +189,27 @@ def _replan_revisit(service, task_ref: str) -> Optional[dict]:
             "baseline_commit": replan.get("baseline_commit")}
 
 
+def _rejected_ledger_hint(project_root: Optional[Path]) -> Optional[str]:
+    """One index line for the rejected-proposals ledger, or None.
+
+    The ledger lives at .fstar/knowledge/references/rejected.md (the normal
+    knowledge category for project reference material, written only through
+    fstar-learn). Only the hint line is injected; the body is read on demand.
+    """
+    if project_root is None:
+        return None
+    path = project_root / ".fstar" / "knowledge" / "references" / "rejected.md"
+    if not path.is_file():
+        return None
+    try:
+        entries = [line for line in path.read_text(encoding="utf-8").splitlines()
+                   if line.startswith("## ")]
+    except OSError:
+        return None
+    return ("Rejected proposals: %d entries at .fstar/knowledge/references/rejected.md — "
+            "read it before proposing an approach; a hit means do not re-propose." % len(entries))
+
+
 def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = None,
                     user_root: Optional[Path] = None, runtime_root: Optional[Path] = None,
                     clock: Optional[Callable[[], str]] = None,
@@ -257,6 +278,7 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     # and project knowledge stay visible without an extension grant. Writing to
     # these surfaces still requires project-governance and explicit confirmation.
     inputs.extend(inject.index_inputs(project_root, user))
+    rejected_hint = _rejected_ledger_hint(project_root)
 
     grant_text = "Extension members in this context: %s" % json.dumps(
         {key: sorted(value) for key, value in context.items()}, sort_keys=True)
@@ -269,8 +291,17 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
         result["initialized"] = project_root is not None
         result["current_task"] = task_summary
         result["learn_hint"] = learn_hint
+        result["rejected_ledger"] = rejected_hint
         return result
     lines = [inject.render("fstar session context", inputs, budgets, footer=grant_text)]
+    if rejected_hint:
+        # One index line, not the full body: the ledger grows unboundedly and
+        # full-body injection would inflate every session. The routing rule
+        # makes the agent read the file before proposing approaches.
+        lines.append("## Rejected proposals ledger")
+        lines.append("")
+        lines.append(rejected_hint)
+        lines.append("")
     if task_summary is not None:
         lines.append("## Current task")
         lines.append("")

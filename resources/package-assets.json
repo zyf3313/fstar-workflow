@@ -47,7 +47,7 @@
       "source": "src/fstar/cli.py",
       "destination": "src/fstar/cli.py",
       "kind": "python",
-      "sha256": "dcf9fb599d84c9766fdfcc7391f0addc07eb39a5a5ea23e60329c98737d9fc6c"
+      "sha256": "df4a81d62da85d3ce91b98c140e9d7b4fc9af65873fac3b4ff79f0984fa8d31a"
     },
     {
       "source": "src/fstar/config.py",
@@ -125,7 +125,7 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "377ecf0927a79d1c5704ef987c3aac7cb36b677709e9cee80faedc106ac47340"
+      "sha256": "a00fdb5f2d5fcfa9d73b60db668475e951ebd99cd9aa610a57489e0f64f120bc"
     },
     {
       "source": "src/fstar/runtime/inject.py",
@@ -149,73 +149,73 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "60287130cdaade8664ace35a0ecef48c8f2a7204afe7996bd539ee320676b2c5"
+      "sha256": "39846a63ea591741e119b3a3dbf1bb0bde2637c89d45d5ecc7176641fe74d17e"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",
       "destination": "resources/skills/fstar-archive/SKILL.md",
       "kind": "resource",
-      "sha256": "2b5715c465bf782a6e62dac8e71ac546c64d2c607b98b0e4f6b28734df89a06c"
+      "sha256": "49db4430a6e11a4aa3a349301a249a76414ded74c7be0a1d73366605549ec9f2"
     },
     {
       "source": "resources/skills/fstar-check/SKILL.md",
       "destination": "resources/skills/fstar-check/SKILL.md",
       "kind": "resource",
-      "sha256": "5ca446be859a6bdcd504659245de44837822e43c58e9c3aab526b05ee8e7272d"
+      "sha256": "45568ce2afc37ce87e12a1a7999883f94b417ebcaff19cf8d594735f093b068a"
     },
     {
       "source": "resources/skills/fstar-clarify/SKILL.md",
       "destination": "resources/skills/fstar-clarify/SKILL.md",
       "kind": "resource",
-      "sha256": "1f14ca3e47e7142c1f86f5cc4a095288cd601478d4f0efab19b7f5be2357b068"
+      "sha256": "d57d0456b8807e8776cf046bd1fa00cd420faf75a60167be5f42075ecb223de9"
     },
     {
       "source": "resources/skills/fstar-continue/SKILL.md",
       "destination": "resources/skills/fstar-continue/SKILL.md",
       "kind": "resource",
-      "sha256": "539d7ff744241bc9c70f378d0631b9bc09b9c6081b39b6c64f023aa6a7778878"
+      "sha256": "e52b8bab1658f0de28d5eb47b325f190c7a33d893e66fb40f4e341cbad898247"
     },
     {
       "source": "resources/skills/fstar-debug/SKILL.md",
       "destination": "resources/skills/fstar-debug/SKILL.md",
       "kind": "resource",
-      "sha256": "72531e3035c089bdc384af97bbfc6024398f8ea80de3113e111d420e286948b0"
+      "sha256": "50478b3e6fcf54369edee772da50cf89a1fdc127ef6fb2e2ec4846433c3ed1a3"
     },
     {
       "source": "resources/skills/fstar-doc/SKILL.md",
       "destination": "resources/skills/fstar-doc/SKILL.md",
       "kind": "resource",
-      "sha256": "1e081ec736fdf529e68ac42f25cee50a647a8926927ad072d9ea3a8f8a30fafc"
+      "sha256": "863bd024c7d54d9f7bce0c5ae9c26e3765e7e62202af9e641d851db6a8e10298"
     },
     {
       "source": "resources/skills/fstar-execute/SKILL.md",
       "destination": "resources/skills/fstar-execute/SKILL.md",
       "kind": "resource",
-      "sha256": "4013a0d952aa2531d8a5039c3e9ee18a57ede88961579f02bdaa740c8d47e985"
+      "sha256": "105631ebf09642367efd48c8183a03a55e6fed1ccb9af3163c58eaa693057811"
     },
     {
       "source": "resources/skills/fstar-help/SKILL.md",
       "destination": "resources/skills/fstar-help/SKILL.md",
       "kind": "resource",
-      "sha256": "06e6444306e58fb6c2ef07a461c30bd23ae295ef1058fc67c2de18d0a67b1848"
+      "sha256": "ee7191da0c4bc9e21887c82ddf5b1ebd312229c484d9970d37abb3645d3d19ca"
     },
     {
       "source": "resources/skills/fstar-init/SKILL.md",
       "destination": "resources/skills/fstar-init/SKILL.md",
       "kind": "resource",
-      "sha256": "7af5b93d895173e67077149671f741ea7d6b0dbf9f06f51301ac00c3e503b5d6"
+      "sha256": "ad3b8f5f7c4f0255398b4b89aa71e07cb047ff390224f858e834e41cb0b14cff"
     },
     {
       "source": "resources/skills/fstar-learn/SKILL.md",
       "destination": "resources/skills/fstar-learn/SKILL.md",
       "kind": "resource",
-      "sha256": "5a959df431ad4c7bffeb758ffb6612db563e636984cd3e91575e5657182ab1a1"
+      "sha256": "c45a3a5fd78a2355d373cc6e82840171abaa6f8e9dc61b2ee45e8427f9a858ce"
     },
     {
       "source": "resources/skills/fstar-plan/SKILL.md",
       "destination": "resources/skills/fstar-plan/SKILL.md",
       "kind": "resource",
-      "sha256": "e68f01f7b242434cc38480ac3f944e7ae97181a1448f18d008fc5d8b6e425df5"
+      "sha256": "22b06fb1ce05a439fd884cd30a0f7ffbc8b031efa71b05ec237340062c2c98fb"
     },
     {
       "source": "resources/agents/fstar-check.md",
@@ -347,13 +347,13 @@
       "source": "resources/runtime/capabilities.md",
       "destination": "resources/runtime/capabilities.md",
       "kind": "resource",
-      "sha256": "447cb0f5b04d07bd8a4910b77217e09d6046cf5e696ad5e6187d950d0f5f063f"
+      "sha256": "45e515de8a984c2d1d268607dfd7aad544ac16465337383ebdb406a60a18128e"
     },
     {
       "source": "resources/runtime/routing.md",
       "destination": "resources/runtime/routing.md",
       "kind": "resource",
-      "sha256": "ac9e98eee6bcc34797310128e369ac567808761fb76788b5720c1c9cb68bea30"
+      "sha256": "608364bcf267259a6f9c32d657f4019d314998c57304d688fbade328139466e0"
     }
   ]
 }

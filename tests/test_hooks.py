@@ -192,6 +192,25 @@ class SessionContextTests(HookCase):
                                        clock=self.clock)
         self.assertNotIn("replanned", result["text"])
 
+    def test_rejected_ledger_injects_index_line_only(self):
+        ledger = self.project / ".fstar" / "knowledge" / "references" / "rejected.md"
+        ledger.parent.mkdir(parents=True, exist_ok=True)
+        ledger.write_text("# Rejected\n\n## Use Redux\n- user quote: \"不用 Redux\"\n\n## Use class components\n- user quote: \"不要\"\n", encoding="utf-8")
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        hint = result["rejected_ledger"]
+        self.assertIn("2 entries", hint)
+        self.assertIn("rejected.md", hint)
+        # Index line only: the ledger body itself is never injected.
+        self.assertNotIn("Use Redux", "\n".join(item["text"] for item in result["loaded"]))
+
+    def test_rejected_ledger_absent_without_file(self):
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        self.assertIsNone(result["rejected_ledger"])
+
 
 
 class ExtensionConsumerTests(HookCase):

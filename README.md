@@ -156,6 +156,25 @@ capability packages — `planning-review`, `persistent-task`, `multi-agent`,
 `project-governance`. Refusing one leaves the minimal loop
 intact; nothing is assumed on for you.
 
+### Learning loop (corrections, rejections, rule-delegated acceptance)
+
+User corrections mid-task are captured as append-only `correction` events
+(`fstar correction record/list`) carrying the user's exact words — pure
+capture, no knowledge write, no behavior change. Rejected proposals are
+offered a slot in the rejected ledger
+(`.fstar/knowledge/references/rejected.md`, written through the authorized
+learn pipeline); its index line is injected at session start so agents stop
+re-proposing what you already refused. Requirement clarification checks that
+ledger and your rules before asking, so settled questions are not re-asked.
+Acceptance stays user-only, with one traceable exemption: an active user rule
+may delegate acceptance for a class of work — `fstar accept --rule FILE`
+records the citation (`accepted_via_rule` with the rule's reference and your
+exact quote) in the event log; priority or risk level alone never waives
+acceptance. Procedural knowledge ("how to do X") lives in
+`.fstar/knowledge/references/procedures/` and is read live through dispatch
+`read_context` — never exported into host skills, so the knowledge base stays
+the single authority.
+
 ## What lands in your project
 
 ```
