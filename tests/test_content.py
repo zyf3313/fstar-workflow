@@ -222,6 +222,20 @@ class SemanticContentTests(unittest.TestCase):
         self.assertIn("A user-supplied planning document (PRD/design/clarify content) must be stored", text)
         self.assertIn("Never dispatch implement while user-supplied planning material is still unstored", text)
         self.assertIn("negotiate that grant first when absent", text)
+        # Clarify gates handoff on an empty design-tree frontier.
+        self.assertIn("design-tree frontier is empty", text)
+
+    def test_clarify_uses_frontier_rounds_and_fact_ownership(self):
+        text = (RESOURCES / "skills/fstar-clarify/SKILL.md").read_text()
+        for phrase in ("design tree", "frontier", "Ask the whole frontier in one round",
+                       "Never ask the user for something you can look up yourself",
+                       "Stop when the frontier is empty", "nothing silently assumed",
+                       "word the question so \"yes\" accepts the recommendation",
+                       "recommended answer", "exact quote"):
+            self.assertIn(phrase, text)
+        template = (RESOURCES / "templates/task/clarify.md").read_text()
+        self.assertIn("决策树与前沿", template)
+        self.assertIn("前沿为空才交付 plan", template)
 
     def test_init_skill_explores_and_backfills_without_confirmation(self):
         text = (RESOURCES / "skills/fstar-init/SKILL.md").read_text()
@@ -236,6 +250,17 @@ class SemanticContentTests(unittest.TestCase):
         for retired in ("tool_proposals", "tools.yaml", "Initial capability binding",
                         "tools_bridge", "tool-capability"):
             self.assertNotIn(retired, text)
+        # Per-dimension detail skeletons (Trellis-style), exploration-driven.
+        for phrase in ("per-dimension detail files",
+                       "The detail set follows the topic's nature",
+                       "no fixed global dimension list",
+                       "Never overwrite a user-authored detail file",
+                       "待补",
+                       "database-guidelines.md` only when a data layer exists"):
+            self.assertIn(phrase, text)
+        self.assertIn("component-guidelines.md", text)
+        self.assertIn("state-management.md", text)
+        self.assertIn("type-safety.md", text)
 
     def test_archive_only_reminders_and_continue_boundary(self):
         archive = (RESOURCES / "skills/fstar-archive/SKILL.md").read_text()

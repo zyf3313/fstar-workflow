@@ -89,6 +89,34 @@ class SessionContextTests(HookCase):
         # No fstar metadata was created anywhere in the empty dir.
         self.assertFalse((empty / ".fstar").exists())
 
+    def test_git_project_without_fstar_gets_ask_once_init_prompt(self):
+        repo = Path(self.tmp.name) / "repo"
+        (repo / "sub").mkdir(parents=True)
+        (repo / ".git").mkdir()
+        for start in (repo, repo / "sub"):
+            result = hooks.session_context({"session_id": "s1"}, start=start, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock)
+            self.assertFalse(result["initialized"])
+            self.assertIn("No initialized fstar project found", result["text"])
+            self.assertIn("not yet an initialized fstar project", result["text"])
+            self.assertIn("Ask the user once", result["text"])
+            self.assertIn("do not ask again this session", result["text"])
+        # Read-only: no metadata written by the hook.
+        self.assertFalse((repo / ".fstar").exists())
+
+    def test_plain_dir_without_git_has_no_init_prompt(self):
+        empty = Path(self.tmp.name) / "empty"
+        empty.mkdir()
+        result = hooks.session_context({"session_id": "s1"}, start=empty, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock)
+        self.assertIn("No initialized fstar project found", result["text"])
+        self.assertNotIn("not yet an initialized fstar project", result["text"])
+
+    def test_initialized_project_has_no_init_prompt(self):
+        self.create()
+        self.start()
+        result = hooks.session_context({"session_id": "s1"}, start=self.project, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock)
+        self.assertTrue(result["initialized"])
+        self.assertNotIn("not yet an initialized fstar project", result["text"])
+
     def test_initialized_current_task_summary_read_only(self):
         self.create()
         self.start()
@@ -137,6 +165,32 @@ class SessionContextTests(HookCase):
         loaded = {item["path"]: item["text"] for item in result["loaded"]}
         self.assertIn("PROJECT INDEX DEFAULT", loaded.get(".fstar/index.md", ""))
         self.assertIn("USER INDEX DEFAULT", loaded.get("~/.fstar/index.md", ""))
+
+    def test_replan_hint_surfaces_in_session_context(self):
+        self.create()
+        self.start()
+        task_dir = self.store.resolve("root")
+        (task_dir / "plan.md").write_text("# plan v1\n", encoding="utf-8")
+        self.service.continue_task("root", action="replan", actor=self.user,
+                                   confirmation=self.source("root"), reason="rework")
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock)
+        self.assertIn("replanned", result["text"])
+        self.assertIn("plan.md", result["text"])
+        self.assertIn("baseline git commit", result["text"])
+        as_json = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                        user_root=self.user_root, runtime_root=self.runtime_root,
+                                        clock=self.clock, as_json=True)
+        self.assertEqual(["plan.md"], as_json["current_task"]["replan"]["docs_to_revisit"])
+
+    def test_no_replan_hint_without_replan(self):
+        self.create()
+        self.start()
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock)
+        self.assertNotIn("replanned", result["text"])
 
 
 

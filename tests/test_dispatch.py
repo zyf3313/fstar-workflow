@@ -272,6 +272,22 @@ class RegisterTests(DispatchCase):
             self.dispatch.register(self.payload(), coordinator_id="coordinator", actor=self.agent)
         self.assertEqual("dispatch_not_allowed", caught.exception.code)
 
+    def test_replan_blocks_stale_plan_dispatch_until_rewritten(self):
+        self.create_started()
+        self.prepare_artifacts()
+        (self.store.resolve("root") / "plan.md").write_text("# plan v1\n", encoding="utf-8")
+        self.service.continue_task("root", action="replan", actor=self.user, confirmation=self.source("root"), reason="rework")
+        # Back to in-progress with the SAME plan.md: dispatch must refuse.
+        self.service.start("root", actor=self.user, confirmation=self.source("root"), session_id="s1")
+        with self.assertRaises(DomainError) as caught:
+            self.dispatch.register(self.payload(), coordinator_id="coordinator", actor=self.agent)
+        self.assertEqual("stale_plan_dispatch", caught.exception.code)
+        # Rewriting plan.md lifts the gate.
+        (self.store.resolve("root") / "plan.md").write_text("# plan v2 (re-derived)\n", encoding="utf-8")
+        registered = self.dispatch.register(self.payload(), coordinator_id="coordinator", actor=self.agent)
+        self.assertTrue(registered["registered"])
+        self.assertIsNone(self.store.read("root")["meta"].get("replan"))
+
     def test_session_only_register_writes_nothing(self):
         before = sorted(str(p.relative_to(self.project)) for p in self.project.rglob("*"))
         payload = self.payload(task_ref="session-only")

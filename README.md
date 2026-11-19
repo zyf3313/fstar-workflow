@@ -131,7 +131,7 @@ can be routed into `.fstar/knowledge/` instead of vanishing.
 ### 7. Resume & interrupts (`continue`, `interrupt`, `doc-edit`)
 
 `fstar continue` resumes an interrupted task from verified on-disk state
-(takeover / replan / revise / reopen / unblock). Long-running dispatches can
+(takeover / replan / reopen / unblock). Long-running dispatches can
 be steered with `fstar interrupt` (change propagation, cancel, checkpoint
 stop). Concurrent document edits go through `fstar doc-edit`, which rejects
 stale baselines instead of silently overwriting.

@@ -147,6 +147,48 @@ def _payload_str(payload: dict, *keys: str) -> Optional[str]:
 # session-context
 # ---------------------------------------------------------------------------
 
+def _git_worktree_root(start: Optional[Path]) -> Optional[Path]:
+    """Nearest ancestor containing ``.git`` (worktree file or directory).
+
+    Read-only filesystem walk with no git subprocess and no depth cap issue
+    beyond the filesystem root; ``.git`` is checked as dir OR file (linked
+    worktrees keep a ``.git`` file pointing at the real gitdir).
+    """
+    current = (start or Path.cwd()).resolve()
+    if current.is_file():
+        current = current.parent
+    for candidate in (current,) + tuple(current.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    return None
+
+
+INIT_PROMPT = ("This directory is inside a git project but is not yet an initialized fstar "
+               "project. Ask the user once whether to run the fstar-init flow now "
+               "(explore → dimension topics → detail skeletons → fstar init --context). "
+               "Do not auto-execute the init; if the user declines, do not ask again this session.")
+
+REPLAN_HINT = ("This task was replanned and the following planning documents were produced "
+               "BEFORE the replan: %s. Before any implement dispatch, reconcile them against "
+               "the new clarification: update each via fstar-doc (editor dispatches) or "
+               "re-confirm it explicitly as still valid; never dispatch on unreviewed "
+               "pre-replan conclusions. The replan event records the baseline git commit.")
+
+
+def _replan_revisit(service, task_ref: str) -> Optional[dict]:
+    """Return the task's pending replan-revisit info, or None when absent."""
+    try:
+        task = service.store.read(task_ref)
+    except Exception:
+        return None
+    replan = (task.get("meta") or {}).get("replan")
+    if not isinstance(replan, dict) or not replan.get("docs_to_revisit"):
+        return None
+    return {"at": replan.get("at"), "reason": replan.get("reason"),
+            "docs_to_revisit": replan.get("docs_to_revisit"),
+            "baseline_commit": replan.get("baseline_commit")}
+
+
 def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = None,
                     user_root: Optional[Path] = None, runtime_root: Optional[Path] = None,
                     clock: Optional[Callable[[], str]] = None,
@@ -200,6 +242,7 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
                     "lease": bool(state["lease"]),
                     "awaiting_acceptance": state["acceptance"]["awaiting_acceptance"],
                     "path": current.get("path"),
+                    "replan": _replan_revisit(service, task["id"]),
                 }
             except DomainError:
                 # A stale pointer or inconsistent tree is not session-start
@@ -237,9 +280,18 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
             "yes" if task_summary["lease"] else "no",
             "yes" if task_summary["awaiting_acceptance"] else "no"))
         lines.append("")
+        replan = task_summary.get("replan")
+        if replan:
+            lines.append(REPLAN_HINT % ", ".join(replan.get("docs_to_revisit", [])))
+            lines.append("")
     elif project_root is None:
         lines.append("No initialized fstar project found; task bookkeeping skipped (this is normal outside an initialized project).")
         lines.append("")
+        if _git_worktree_root(start) is not None:
+            # Read-only prompt injection: the hook never runs init itself; the
+            # session agent asks the user once and never nags after refusal.
+            lines.append(INIT_PROMPT)
+            lines.append("")
     lines.append(learn_hint)
     return {"text": "\n".join(lines), "session_id": session_id,
             "initialized": project_root is not None, "current_task": task_summary}

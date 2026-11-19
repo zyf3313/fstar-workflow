@@ -256,6 +256,48 @@ class LifecycleTests(CoreCase):
             self.service.continue_task("root", action="replan", actor=self.agent, reason="no user decision")
         self.assertEqual("confirmation_required", caught.exception.code)
 
+    def test_replan_records_revisit_and_baseline(self):
+        self.create()
+        self.start()
+        task_dir = self.store.resolve("root")
+        (task_dir / "doc").mkdir(exist_ok=True)
+        (task_dir / "doc" / "design.md").write_text("# design\n", encoding="utf-8")
+        (task_dir / "plan.md").write_text("# plan v1\n", encoding="utf-8")
+        replanned = self.service.continue_task("root", action="replan", actor=self.user, confirmation=self.source("root"), reason="big rework")
+        replan = replanned["meta"]["replan"]
+        self.assertEqual(["doc/design.md", "plan.md"], replan["docs_to_revisit"])
+        self.assertEqual("big rework", replan["reason"])
+        self.assertTrue(replan["plan_sha256"])
+        event = next(event for event in replanned["events"] if event["type"] == "replanned")
+        self.assertEqual(replan["docs_to_revisit"], event["data"]["docs_to_revisit"])
+
+    def test_reopen_stales_final_check_evidence(self):
+        self.create()
+        self.start()
+        with self.store.transaction():
+            task = self.store.read("root")
+            task["phase"] = "completed"
+            task["acceptance"] = {"state": "valid", "evidence_refs": ["ck1"]}
+            task["evidence"] = [
+                {"id": "ck1", "kind": "check", "scope": "final", "producer": {"id": "checker"}, "produced_at": self.clock(), "state": "valid", "validates": []},
+                {"id": "d1", "kind": "delivery", "producer": {"id": "impl"}, "produced_at": self.clock(), "state": "valid", "validates": []},
+            ]
+            self.store.write(self.store.resolve("root"), task)
+        reopened = self.service.continue_task("root", action="reopen", actor=self.user, confirmation=self.source("root"), reason="found defect")
+        self.assertEqual("in_progress", reopened["phase"])
+        by_id = {item["id"]: item for item in reopened["evidence"]}
+        self.assertEqual("stale", by_id["ck1"]["state"])
+        self.assertEqual([{"type": "reopened", "reason": "found defect"}], by_id["ck1"]["stale_reasons"])
+        self.assertEqual("valid", by_id["d1"]["state"])
+        self.assertEqual("historical", reopened["acceptance"]["state"])
+
+    def test_revise_action_removed(self):
+        self.create()
+        self.start()
+        with self.assertRaises(DomainError) as caught:
+            self.service.continue_task("root", action="revise", actor=self.user, confirmation=self.source("root"), reason="x")
+        self.assertEqual("invalid_action", caught.exception.code)
+
     def test_events_keep_milestones_beyond_soft_limit(self):
         self.create()
         with self.store.transaction():
