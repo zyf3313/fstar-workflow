@@ -236,6 +236,17 @@ class SemanticContentTests(unittest.TestCase):
         for retired in ("tool_proposals", "tools.yaml", "Initial capability binding",
                         "tools_bridge", "tool-capability"):
             self.assertNotIn(retired, text)
+        # Per-dimension detail skeletons (Trellis-style), exploration-driven.
+        for phrase in ("per-dimension detail files",
+                       "The detail set follows the topic's nature",
+                       "no fixed global dimension list",
+                       "Never overwrite a user-authored detail file",
+                       "待补",
+                       "database-guidelines.md` only when a data layer exists"):
+            self.assertIn(phrase, text)
+        self.assertIn("component-guidelines.md", text)
+        self.assertIn("state-management.md", text)
+        self.assertIn("type-safety.md", text)
 
     def test_archive_only_reminders_and_continue_boundary(self):
         archive = (RESOURCES / "skills/fstar-archive/SKILL.md").read_text()

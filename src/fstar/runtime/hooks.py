@@ -147,6 +147,28 @@ def _payload_str(payload: dict, *keys: str) -> Optional[str]:
 # session-context
 # ---------------------------------------------------------------------------
 
+def _git_worktree_root(start: Optional[Path]) -> Optional[Path]:
+    """Nearest ancestor containing ``.git`` (worktree file or directory).
+
+    Read-only filesystem walk with no git subprocess and no depth cap issue
+    beyond the filesystem root; ``.git`` is checked as dir OR file (linked
+    worktrees keep a ``.git`` file pointing at the real gitdir).
+    """
+    current = (start or Path.cwd()).resolve()
+    if current.is_file():
+        current = current.parent
+    for candidate in (current,) + tuple(current.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    return None
+
+
+INIT_PROMPT = ("This directory is inside a git project but is not yet an initialized fstar "
+               "project. Ask the user once whether to run the fstar-init flow now "
+               "(explore → dimension topics → detail skeletons → fstar init --context). "
+               "Do not auto-execute the init; if the user declines, do not ask again this session.")
+
+
 def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = None,
                     user_root: Optional[Path] = None, runtime_root: Optional[Path] = None,
                     clock: Optional[Callable[[], str]] = None,
@@ -240,6 +262,11 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     elif project_root is None:
         lines.append("No initialized fstar project found; task bookkeeping skipped (this is normal outside an initialized project).")
         lines.append("")
+        if _git_worktree_root(start) is not None:
+            # Read-only prompt injection: the hook never runs init itself; the
+            # session agent asks the user once and never nags after refusal.
+            lines.append(INIT_PROMPT)
+            lines.append("")
     lines.append(learn_hint)
     return {"text": "\n".join(lines), "session_id": session_id,
             "initialized": project_root is not None, "current_task": task_summary}

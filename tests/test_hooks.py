@@ -89,6 +89,34 @@ class SessionContextTests(HookCase):
         # No fstar metadata was created anywhere in the empty dir.
         self.assertFalse((empty / ".fstar").exists())
 
+    def test_git_project_without_fstar_gets_ask_once_init_prompt(self):
+        repo = Path(self.tmp.name) / "repo"
+        (repo / "sub").mkdir(parents=True)
+        (repo / ".git").mkdir()
+        for start in (repo, repo / "sub"):
+            result = hooks.session_context({"session_id": "s1"}, start=start, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock)
+            self.assertFalse(result["initialized"])
+            self.assertIn("No initialized fstar project found", result["text"])
+            self.assertIn("not yet an initialized fstar project", result["text"])
+            self.assertIn("Ask the user once", result["text"])
+            self.assertIn("do not ask again this session", result["text"])
+        # Read-only: no metadata written by the hook.
+        self.assertFalse((repo / ".fstar").exists())
+
+    def test_plain_dir_without_git_has_no_init_prompt(self):
+        empty = Path(self.tmp.name) / "empty"
+        empty.mkdir()
+        result = hooks.session_context({"session_id": "s1"}, start=empty, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock)
+        self.assertIn("No initialized fstar project found", result["text"])
+        self.assertNotIn("not yet an initialized fstar project", result["text"])
+
+    def test_initialized_project_has_no_init_prompt(self):
+        self.create()
+        self.start()
+        result = hooks.session_context({"session_id": "s1"}, start=self.project, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock)
+        self.assertTrue(result["initialized"])
+        self.assertNotIn("not yet an initialized fstar project", result["text"])
+
     def test_initialized_current_task_summary_read_only(self):
         self.create()
         self.start()

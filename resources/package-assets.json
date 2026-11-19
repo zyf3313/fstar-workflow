@@ -125,7 +125,7 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "c596d60d50a06a4459e39573b228bf3cd9daccf5ccd9ccc77ab475a248d6ac01"
+      "sha256": "043756cef9ce7acebdcf82d779d7ebeb86b683af2b4508b319fd9ffd311c51ad"
     },
     {
       "source": "src/fstar/runtime/inject.py",
@@ -203,7 +203,7 @@
       "source": "resources/skills/fstar-init/SKILL.md",
       "destination": "resources/skills/fstar-init/SKILL.md",
       "kind": "resource",
-      "sha256": "a8d5b808cadd5baa0b9519931eda44b0424b2ef48772787a4c1b81558f3dfd0c"
+      "sha256": "7af5b93d895173e67077149671f741ea7d6b0dbf9f06f51301ac00c3e503b5d6"
     },
     {
       "source": "resources/skills/fstar-learn/SKILL.md",
