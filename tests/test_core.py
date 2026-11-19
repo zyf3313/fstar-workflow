@@ -336,6 +336,20 @@ class LifecycleTests(CoreCase):
         self.assertEqual(205, sum(x["type"] == "accepted" for x in task["events"]))
         self.assertTrue(any(x["type"] == "summary" for x in task["events"]))
 
+    def test_corrections_survive_event_compaction(self):
+        self.create()
+        self.start()
+        with self.store.transaction():
+            task = self.store.read("root")
+            task["events"] = [{"id": str(i), "at": self.clock(), "source": {}, "type": "correction", "data": {"user_signal": "fix %d" % i}} for i in range(205)]
+            self.service._write(self.store.resolve("root"), task)
+        with self.store.transaction():
+            task = self.store.read("root")
+            task["events"].extend({"id": "n%s" % i, "at": self.clock(), "source": {}, "type": "lease_renewed", "data": {}} for i in range(20))
+            self.service._write(self.store.resolve("root"), task)
+        task = self.store.read("root")
+        self.assertEqual(205, sum(x["type"] == "correction" for x in task["events"]))
+
     def test_custom_planning_artifacts_control_start_gate(self):
         self.create()
         self.service.enable_extension("root", authorization={

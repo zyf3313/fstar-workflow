@@ -199,7 +199,9 @@ def _rejected_ledger_hint(project_root: Optional[Path]) -> Optional[str]:
     if project_root is None:
         return None
     path = project_root / ".fstar" / "knowledge" / "references" / "rejected.md"
-    if not path.is_file():
+    # Same alias/escape rejection as index injection: a symlinked ledger must
+    # not influence the session, even though only the count is injected.
+    if not inject._safe_context_path(project_root, path) or not path.is_file():
         return None
     try:
         entries = [line for line in path.read_text(encoding="utf-8").splitlines()

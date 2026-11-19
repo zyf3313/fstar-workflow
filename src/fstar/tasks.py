@@ -15,7 +15,9 @@ from .store import TaskStore, content_hash
 
 LEASE_MINUTES = 30
 EVENT_LIMIT = 200
-MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "accepted", "dropped", "revived", "archived", "extension_enabled", "extension_changed"}
+# correction stays out of compaction: retro analysis quotes the user's exact
+# words from these events, so they are load-bearing records, not noise.
+MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "accepted", "dropped", "revived", "archived", "extension_enabled", "extension_changed", "correction"}
 EXTENSIONS = {
     "planning-review": {"clarify", "prd", "design", "plan", "editor", "doc-check"},
     "persistent-task": {"task", "evidence", "lease", "events", "recovery", "archive"},
