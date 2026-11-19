@@ -166,6 +166,32 @@ class SessionContextTests(HookCase):
         self.assertIn("PROJECT INDEX DEFAULT", loaded.get(".fstar/index.md", ""))
         self.assertIn("USER INDEX DEFAULT", loaded.get("~/.fstar/index.md", ""))
 
+    def test_replan_hint_surfaces_in_session_context(self):
+        self.create()
+        self.start()
+        task_dir = self.store.resolve("root")
+        (task_dir / "plan.md").write_text("# plan v1\n", encoding="utf-8")
+        self.service.continue_task("root", action="replan", actor=self.user,
+                                   confirmation=self.source("root"), reason="rework")
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock)
+        self.assertIn("replanned", result["text"])
+        self.assertIn("plan.md", result["text"])
+        self.assertIn("baseline git commit", result["text"])
+        as_json = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                        user_root=self.user_root, runtime_root=self.runtime_root,
+                                        clock=self.clock, as_json=True)
+        self.assertEqual(["plan.md"], as_json["current_task"]["replan"]["docs_to_revisit"])
+
+    def test_no_replan_hint_without_replan(self):
+        self.create()
+        self.start()
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock)
+        self.assertNotIn("replanned", result["text"])
+
 
 
 class ExtensionConsumerTests(HookCase):

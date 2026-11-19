@@ -475,6 +475,18 @@ class DispatchService:
         task = self.store.read(task_ref)
         if task["phase"] != "in_progress":
             raise DomainError("dispatch_not_allowed", "Dispatch registration requires an in-progress task", {"phase": task["phase"]}, status=3)
+        # Post-replan gate: a plan that predates a replan must be re-derived
+        # from the reconciled documents, not carried over. The replan records
+        # plan.md's digest; dispatching while plan.md still matches that
+        # digest means the plan was not rewritten after the replan.
+        replan = (task.get("meta") or {}).get("replan")
+        plan_before = replan.get("plan_sha256") if isinstance(replan, dict) else None
+        if plan_before:
+            from .evidence import file_digest
+            task_dir = self.store.resolve(task_ref)
+            plan_path = task_dir / "plan.md"
+            if plan_path.is_file() and file_digest(plan_path) == plan_before:
+                raise DomainError("stale_plan_dispatch", "plan.md predates the latest replan; re-derive it from the reconciled documents before dispatching", {"replanned_at": replan.get("at")}, status=3)
         lease = task.get("lease")
         token = None
         if lease and lease.get("expires_at", "") > self.clock():
@@ -487,6 +499,11 @@ class DispatchService:
         with self.store.transaction():
             task_dir = self.store.resolve(task_ref)
             current = self.store._read_path(task_dir / "task.json")
+            # The rewritten plan has now entered a dispatch: the replan
+            # revisit block is consumed and stops surfacing in session
+            # context or gating later registrations.
+            if (current.get("meta") or {}).get("replan"):
+                current["meta"]["replan"] = None
             current["events"].append(make_event(
                 "dispatch_registered",
                 {"source_id": str(uuid.uuid4()), "type": "system", "at": self.clock(),

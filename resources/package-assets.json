@@ -47,7 +47,7 @@
       "source": "src/fstar/cli.py",
       "destination": "src/fstar/cli.py",
       "kind": "python",
-      "sha256": "74961069fa65c08f01ef54440e879e6638ede1e3bc4e2aa1a4173f8e5c1b7830"
+      "sha256": "dcf9fb599d84c9766fdfcc7391f0addc07eb39a5a5ea23e60329c98737d9fc6c"
     },
     {
       "source": "src/fstar/config.py",
@@ -65,7 +65,7 @@
       "source": "src/fstar/dispatch.py",
       "destination": "src/fstar/dispatch.py",
       "kind": "python",
-      "sha256": "120cc75414b297611869f1d4d9913082b544ab4df9609d53520b361a9c397211"
+      "sha256": "decdfb2d7ef88b64db77519f3ac36f4abd3ef86eab7c973abad0b9b8bc2d76c9"
     },
     {
       "source": "src/fstar/evidence.py",
@@ -125,7 +125,7 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "043756cef9ce7acebdcf82d779d7ebeb86b683af2b4508b319fd9ffd311c51ad"
+      "sha256": "377ecf0927a79d1c5704ef987c3aac7cb36b677709e9cee80faedc106ac47340"
     },
     {
       "source": "src/fstar/runtime/inject.py",
@@ -149,7 +149,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "2b860d0076217f0bd7791c7a6e8181c8fc47c9e0cd0e2b988ee85a55df7a57c4"
+      "sha256": "60287130cdaade8664ace35a0ecef48c8f2a7204afe7996bd539ee320676b2c5"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",

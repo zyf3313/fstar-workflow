@@ -102,7 +102,7 @@ def register_core_commands(subparsers) -> None:
 
     continuation = subparsers.add_parser("continue")
     _add_target(continuation)
-    continuation.add_argument("--action", choices=("takeover", "replan", "revise", "reopen", "unblock"))
+    continuation.add_argument("--action", choices=("takeover", "replan", "reopen", "unblock"))
     continuation.add_argument("--reason")
     continuation.add_argument("--workflow", action="store_true")
     _add_confirmation(continuation)
@@ -229,7 +229,7 @@ def _dispatch(args):
     if args.command == "state":
         return service.state(ref)
     if args.command == "continue":
-        confirmation = _confirmation(args, service, ref) if args.action in {"replan", "revise", "reopen"} else None
+        confirmation = _confirmation(args, service, ref) if args.action in {"replan", "reopen"} else None
         if args.action == "unblock":
             return service.set_blocked(ref, actor=_actor(args), reason=None, workflow_recovery=args.workflow)
         return service.continue_task(ref, session_id=args.session, action=args.action, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, reason=args.reason, workflow=args.workflow)

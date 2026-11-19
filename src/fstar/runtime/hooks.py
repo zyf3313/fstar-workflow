@@ -168,6 +168,26 @@ INIT_PROMPT = ("This directory is inside a git project but is not yet an initial
                "(explore → dimension topics → detail skeletons → fstar init --context). "
                "Do not auto-execute the init; if the user declines, do not ask again this session.")
 
+REPLAN_HINT = ("This task was replanned and the following planning documents were produced "
+               "BEFORE the replan: %s. Before any implement dispatch, reconcile them against "
+               "the new clarification: update each via fstar-doc (editor dispatches) or "
+               "re-confirm it explicitly as still valid; never dispatch on unreviewed "
+               "pre-replan conclusions. The replan event records the baseline git commit.")
+
+
+def _replan_revisit(service, task_ref: str) -> Optional[dict]:
+    """Return the task's pending replan-revisit info, or None when absent."""
+    try:
+        task = service.store.read(task_ref)
+    except Exception:
+        return None
+    replan = (task.get("meta") or {}).get("replan")
+    if not isinstance(replan, dict) or not replan.get("docs_to_revisit"):
+        return None
+    return {"at": replan.get("at"), "reason": replan.get("reason"),
+            "docs_to_revisit": replan.get("docs_to_revisit"),
+            "baseline_commit": replan.get("baseline_commit")}
+
 
 def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = None,
                     user_root: Optional[Path] = None, runtime_root: Optional[Path] = None,
@@ -222,6 +242,7 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
                     "lease": bool(state["lease"]),
                     "awaiting_acceptance": state["acceptance"]["awaiting_acceptance"],
                     "path": current.get("path"),
+                    "replan": _replan_revisit(service, task["id"]),
                 }
             except DomainError:
                 # A stale pointer or inconsistent tree is not session-start
@@ -259,6 +280,10 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
             "yes" if task_summary["lease"] else "no",
             "yes" if task_summary["awaiting_acceptance"] else "no"))
         lines.append("")
+        replan = task_summary.get("replan")
+        if replan:
+            lines.append(REPLAN_HINT % ", ".join(replan.get("docs_to_revisit", [])))
+            lines.append("")
     elif project_root is None:
         lines.append("No initialized fstar project found; task bookkeeping skipped (this is normal outside an initialized project).")
         lines.append("")

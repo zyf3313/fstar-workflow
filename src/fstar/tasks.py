@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Callable, Optional
 
-from .evidence import EvidenceService
+from .evidence import EvidenceService, file_digest
 from .models import DomainError, new_task, valid_name
 from .store import TaskStore, content_hash
 
@@ -29,6 +29,38 @@ def _require_workflow_member(task: dict, member: str) -> None:
     if not includes(grants(task["extensions"]), "persistent-task", member):
         raise DomainError("extension_not_authorized", "Workflow operation requires an included extension member",
                           {"package": "persistent-task", "member": member}, status=3)
+
+
+_REVISIT_DOCS = ("doc/prd.md", "doc/design.md", "plan.md", "clarify.md")
+
+
+def _docs_to_revisit(task_dir: Path) -> list:
+    """Planning documents present at replan time, for revisit surfacing."""
+    return [relative for relative in _REVISIT_DOCS if (task_dir / relative).is_file()]
+
+
+def _git_head_commit(task_dir: Path) -> Optional[str]:
+    """Record the working-tree HEAD at replan time as a revert anchor."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=task_dir,
+            capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    commit = (result.stdout or "").strip()
+    return commit if result.returncode == 0 and commit else None
+
+
+def _plan_digest(task_dir: Path) -> Optional[str]:
+    """plan.md's digest at replan time; None when the task has no plan yet."""
+    path = task_dir / "plan.md"
+    if not path.is_file():
+        return None
+    try:
+        return file_digest(path)
+    except OSError:
+        return None
 
 
 def utc_now() -> str:
@@ -386,7 +418,7 @@ class TaskService:
             task = self.store._read_path(task_dir / "task.json")
             if workflow:
                 _require_workflow_member(task, "recovery")
-            if action in {"replan", "reopen", "revise"}:
+            if action in {"replan", "reopen"}:
                 if task.get("meta", {}).get("disposition"):
                     raise DomainError("task_dropped", "Revive the dropped task before changing its phase", status=3)
                 if not reason:
@@ -406,7 +438,20 @@ class TaskService:
                     task["phase"] = "planning"
                     task["completedAt"] = None
                     task["lease"] = None
-                    self._event(task, "replanned", confirmation or self._actor_source(actor, "continue replan"), {"reason": reason})
+                    # Revisit markers: documents produced before this replan
+                    # are logically unconfirmed against the new direction.
+                    # session-context injection surfaces them while the task
+                    # is in planning, and plan source-fingerprint validation
+                    # refuses to dispatch a plan that cites a since-changed
+                    # document, so stale docs cannot silently flow to work.
+                    task["meta"]["replan"] = {
+                        "at": self.clock(),
+                        "reason": reason,
+                        "docs_to_revisit": _docs_to_revisit(task_dir),
+                        "baseline_commit": _git_head_commit(task_dir),
+                        "plan_sha256": _plan_digest(task_dir),
+                    }
+                    self._event(task, "replanned", confirmation or self._actor_source(actor, "continue replan"), {"reason": reason, "docs_to_revisit": task["meta"]["replan"]["docs_to_revisit"], "baseline_commit": task["meta"]["replan"]["baseline_commit"]})
                 elif action == "reopen":
                     if actor.get("role") != "user" or task["phase"] != "completed":
                         raise DomainError("reopen_forbidden", "Only a user may reopen an unarchived completed task", status=3)
@@ -414,11 +459,15 @@ class TaskService:
                     task["completedAt"] = None
                     if task.get("acceptance"):
                         task["acceptance"]["state"] = "historical"
+                    # A reopen means the user found a real problem with the
+                    # accepted result; the previous final check no longer
+                    # qualifies as fresh acceptance evidence, so a new
+                    # independent final check is required before accept.
+                    for evidence in task["evidence"]:
+                        if evidence.get("kind") == "check" and evidence.get("scope") == "final" and evidence.get("state") == "valid":
+                            evidence["state"] = "stale"
+                            evidence["stale_reasons"] = [{"type": "reopened", "reason": reason}]
                     self._event(task, "reopened", confirmation or self._actor_source(actor, "continue reopen"), {"reason": reason})
-                elif action == "revise":
-                    if task["phase"] != "in_progress":
-                        raise DomainError("revise_forbidden", "Revision requires an in-progress task", status=3)
-                    self._event(task, "revision_requested", confirmation or self._actor_source(actor, "continue revise"), {"reason": reason})
             elif action == "unblock":
                 raise DomainError("use_service", "Unblock requires set_blocked so source rules are enforced")
             else:
