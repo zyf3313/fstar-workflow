@@ -61,7 +61,7 @@ fstar doctor     # read-only install and host health report
 
 ```bash
 cd your-project
-fstar init                       # create .fstar/ and a missing ~/.fstar; backfill index + spec skeletons from exploration
+fstar init                       # create .fstar/ and a missing ~/.fstar; create/backfill the project index from supplied context
 fstar install --host claude      # wire hooks + skills + agents into <project>/.claude
 fstar task create "My feature" --name my-feature
 fstar start my-feature           # planning → in_progress
@@ -156,6 +156,43 @@ capability packages — `planning-review`, `persistent-task`, `multi-agent`,
 `project-governance`. Refusing one leaves the minimal loop
 intact; nothing is assumed on for you.
 
+### Prompt-context breadcrumbs (per user prompt)
+
+In an initialized fstar project, a `UserPromptSubmit` hook
+(`prompt-context`, 15 s timeout) injects exactly one short state reminder
+per user prompt, selected from `resources/runtime/prompt-states.md` by the
+current task state — e.g. with no active task the agent is reminded to
+state a one-line workflow decision (`large | small | discussion |
+read-only`) before substantive work; `large` must create or reuse a
+persistent task and run the full loop. The hook never creates a task
+itself — classification is the agent's job. If the state file or the
+needed tag is missing, the hook degrades to a single fixed line instead
+of staying silent. Outside an initialized project the hook emits nothing.
+
+`fstar init` clarification: the `fstar-init` **skill** (not the bare CLI)
+explores the project and writes the spec content — the CLI's `init`
+command creates the project/user data roots and creates/backfills the
+project index from supplied context.
+
+### Learning loop (corrections, rejections, rule-delegated acceptance)
+
+User corrections mid-task are captured as append-only `correction` events
+(`fstar correction record/list`) carrying the user's exact words — pure
+capture, no knowledge write, no behavior change. Rejected proposals are
+offered a slot in the rejected ledger
+(`.fstar/knowledge/references/rejected.md`, written through the authorized
+learn pipeline); its index line is injected at session start so agents stop
+re-proposing what you already refused. Requirement clarification checks that
+ledger and your rules before asking, so settled questions are not re-asked.
+Acceptance stays user-only, with one traceable exemption: an active user rule
+may delegate acceptance for a class of work — `fstar accept --rule FILE`
+records the citation (`accepted_via_rule` with the rule's reference and your
+exact quote) in the event log; priority or risk level alone never waives
+acceptance. Procedural knowledge ("how to do X") lives in
+`.fstar/knowledge/references/procedures/` and is read live through dispatch
+`read_context` — never exported into host skills, so the knowledge base stays
+the single authority.
+
 ## What lands in your project
 
 ```
@@ -177,8 +214,8 @@ touched are never removed.
 
 | Host | Hooks | Skills | Agents |
 |---|---|---|---|
-| Claude Code | verified live | verified live | verified live |
-| Codex CLI | four hook events verified live (SessionStart / SubagentStart / SubagentStop / PostToolUse fired with exit code 0 on 2026-11-05); installer still requires manual trust approval in the TUI before any `.codex/hooks.json` is written, and remains read-only when run headless | not adapted | not adapted |
+| Claude Code | four existing events verified live; the newer `UserPromptSubmit` prompt-context hook has unit/CLI verification only — no live host firing observed yet | verified live | verified live |
+| Codex CLI | four hook events verified live (SessionStart / SubagentStart / SubagentStop / PostToolUse fired with exit code 0 on 2026-11-05); the newer `userPromptSubmit` prompt-context registration is unverified live (event/schema casing not observed in the Codex schema); installer still requires manual trust approval in the TUI before any `.codex/hooks.json` is written, and remains read-only when run headless | not adapted | not adapted |
 
 Codex trust is a deliberate gap, not a bug: the host requires a human to
 approve each hook the first time, and no installer can consent on your behalf.
@@ -225,7 +262,7 @@ fstar doctor                     # confirm everything is healthy
 ## Development
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -t .   # 687 tests
+PYTHONPATH=src python3 -m unittest discover -s tests -t .
 node --test tests/test_package.cjs                          # 16 tests
 node scripts/build-package.cjs                              # rebuild manifest
 ```

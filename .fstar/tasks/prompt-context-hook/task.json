@@ -1,0 +1,974 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-19T12:25:38.227171Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "3986447c-478f-4494-9d58-34aa5a229743"
+    ],
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user"
+      },
+      "at": "2026-11-19T12:25:38.219378Z",
+      "quote": "那已完成的任务验收然后合并到 main中",
+      "reference": "conversation: user request to accept completed work and merge main",
+      "scope": "accept prompt-context-hook",
+      "source_id": "conversation-accept-prompt-context-20261119",
+      "type": "conversation",
+      "validates": "a97fd6b694d367fe99a9d58df8d9407cf2981eba7ec20f68cd9f2ef7e3c8e3ed"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "52850f033a3d0accfd7ed7c521117e7bc8af9517320aed95349df3492f57988d"
+      ],
+      "task": "a97fd6b694d367fe99a9d58df8d9407cf2981eba7ec20f68cd9f2ef7e3c8e3ed"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": "2026-11-19T12:25:38.227189Z",
+  "createdAt": "2026-11-19T11:13:26.598311Z",
+  "creator": "agent",
+  "description": "",
+  "events": [
+    {
+      "at": "2026-11-19T11:13:26.598848Z",
+      "data": {
+        "parent": null
+      },
+      "id": "772db8d0-0a0b-412f-83bc-cae4a3e5d297",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-19T11:13:26.598845Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "2725c4ad-dc3d-4a58-9d7a-fc0dbe34dfac",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-19T11:13:51.755058Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-19T11:13:51.754679Z",
+          "excluded": [],
+          "id": "planning-review",
+          "included": [
+            "clarify",
+            "design",
+            "doc-check",
+            "editor",
+            "plan",
+            "prd"
+          ],
+          "reason": "",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-19T11:13:51.754489Z",
+            "quote": "",
+            "reference": "interactive-cli",
+            "scope": "extension",
+            "source_id": "cli",
+            "type": "command",
+            "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+          }
+        },
+        "old": null
+      },
+      "id": "1f8a8008-7928-4b3c-b5de-98a574d07334",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-19T11:13:51.754489Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-19T11:13:52.031131Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-19T11:13:52.030743Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "archive",
+            "events",
+            "evidence",
+            "lease",
+            "recovery",
+            "task"
+          ],
+          "reason": "",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-19T11:13:52.030533Z",
+            "quote": "",
+            "reference": "interactive-cli",
+            "scope": "extension",
+            "source_id": "cli",
+            "type": "command",
+            "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+          }
+        },
+        "old": null
+      },
+      "id": "9e9ac19d-22d5-46f9-b311-65347ba6137f",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-19T11:13:52.030533Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-19T11:13:52.311740Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-19T11:13:52.311352Z",
+          "excluded": [],
+          "id": "multi-agent",
+          "included": [
+            "change-propagation",
+            "parallel-implement",
+            "research",
+            "version-injection"
+          ],
+          "reason": "",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-19T11:13:52.311145Z",
+            "quote": "",
+            "reference": "interactive-cli",
+            "scope": "extension",
+            "source_id": "cli",
+            "type": "command",
+            "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+          }
+        },
+        "old": null
+      },
+      "id": "8c8d49c2-7039-456d-b1f1-d9b3bc955dea",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-19T11:13:52.311145Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-19T11:20:01.948055Z",
+      "data": {
+        "snapshot": "aa686cfd511766fc8e1c6ac7c6612204fe6aadd29901bad034096dae8c761cf2"
+      },
+      "id": "0d1c6097-c54f-41f1-9286-888522ad5a93",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": "s-promptctx"
+        },
+        "at": "2026-11-19T11:20:01.947268Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "start",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "5d2d538d651df390c8daea9e978e6cac3148c6fb6d3893b7be597217989a257c"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-19T11:21:27.219043Z",
+      "data": {
+        "new_holder": {
+          "id": "main-session",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "55ce57ce-46e3-4008-8448-42bcbd2cc7ee",
+      "source": {
+        "actor": {
+          "id": "main-session",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T11:21:27.219040Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "39195c4f-12bf-4b90-a378-c07ab1e98b0c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-19T11:21:27.220409Z",
+      "data": {
+        "dispatch_id": "d-promptctx-impl-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "implement"
+      },
+      "id": "a192ac58-fb96-4520-9b26-69de757aef40",
+      "source": {
+        "actor": {
+          "id": "main-session",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T11:21:27.220405Z",
+        "quote": "",
+        "reference": "dispatch d-promptctx-impl-1",
+        "scope": "dispatch",
+        "source_id": "6b417573-0767-4e94-966a-fecb993f6ae0",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T11:41:54.944720Z",
+      "data": {
+        "dispatch_id": "d-promptctx-impl-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "implement"
+      },
+      "id": "6b824628-cf02-4d76-992f-93d1d3c82da2",
+      "source": {
+        "actor": {
+          "id": "main-session",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T11:41:54.944716Z",
+        "quote": "",
+        "reference": "dispatch d-promptctx-impl-1",
+        "scope": "dispatch",
+        "source_id": "c8a742f5-5e82-48ac-af9b-c7503866661e",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T11:42:08.480402Z",
+      "data": {
+        "evidence_id": "3e4409c9-5a09-4b69-bf04-315dcd1bb95d",
+        "state": "valid"
+      },
+      "id": "1e690045-b90f-4c21-99cb-a6ecc90ca1b4",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T11:58:00.243229Z",
+      "data": {
+        "dispatch_id": "d-promptctx-check-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "check"
+      },
+      "id": "420c56f6-9450-48eb-b2fb-44528473053e",
+      "source": {
+        "actor": {
+          "id": "main-session",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T11:58:00.243223Z",
+        "quote": "",
+        "reference": "dispatch d-promptctx-check-1",
+        "scope": "dispatch",
+        "source_id": "c999c854-7d38-4bb1-8452-f0227c310c60",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T11:58:50.857879Z",
+      "data": {
+        "evidence_id": "f6c3212e-0f12-492f-9e97-c8656a687693",
+        "state": "stale"
+      },
+      "id": "0394180f-49ac-41b7-8895-b9c6f7b9b189",
+      "source": {
+        "id": "fstar-check-agent",
+        "role": "check",
+        "session_id": "check-probe"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T12:02:44.212132Z",
+      "data": {
+        "reason": "check complete"
+      },
+      "id": "55b806d1-9747-4783-8965-77c218157ebe",
+      "source": {
+        "id": "main-session",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-19T12:05:43.401291Z",
+      "data": {
+        "new_holder": {
+          "id": "main-session",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "bbedbfb6-4676-4472-8c3f-56b88350f3f9",
+      "source": {
+        "actor": {
+          "id": "main-session",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T12:05:43.401287Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "afe46d07-7e39-4283-ab0c-56d55d533e0b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-19T12:05:43.403175Z",
+      "data": {
+        "dispatch_id": "d-promptctx-check-2",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "check"
+      },
+      "id": "94c6c94a-c37e-41bf-b2a5-183571e0534d",
+      "source": {
+        "actor": {
+          "id": "main-session",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T12:05:43.403169Z",
+        "quote": "",
+        "reference": "dispatch d-promptctx-check-2",
+        "scope": "dispatch",
+        "source_id": "821c1ca3-40eb-48d7-a9c9-7acfbe8f3047",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T12:06:21.577389Z",
+      "data": {
+        "evidence_id": "3986447c-478f-4494-9d58-34aa5a229743",
+        "state": "valid"
+      },
+      "id": "d9d8024f-2214-4b7a-8672-0bc02520648d",
+      "source": {
+        "id": "fstar-check-agent",
+        "role": "check",
+        "session_id": "check-probe"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T12:07:05.414694Z",
+      "data": {
+        "reason": "check-2 harvested"
+      },
+      "id": "1b37b305-2a1e-4168-96ea-0bd578bb2bc2",
+      "source": {
+        "id": "main-session",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-19T12:25:38.227191Z",
+      "data": {
+        "evidence_refs": [
+          "3986447c-478f-4494-9d58-34aa5a229743"
+        ]
+      },
+      "id": "861c7855-0301-482e-af3d-d89e51e20304",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-19T12:25:38.219378Z",
+        "quote": "那已完成的任务验收然后合并到 main中",
+        "reference": "conversation: user request to accept completed work and merge main",
+        "scope": "accept prompt-context-hook",
+        "source_id": "conversation-accept-prompt-context-20261119",
+        "type": "conversation",
+        "validates": "a97fd6b694d367fe99a9d58df8d9407cf2981eba7ec20f68cd9f2ef7e3c8e3ed"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "f38fe05871abde921e62c3b9e32955b3e7466821d9e707f96376eecae7fa0f1b",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/prompt-context-hook/implement.jsonl",
+            "sha256": "2693924b3c858a16e42956635676b0f0350d312d3a56f5e7ec15db23f62c2fe3"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/prompt-context-hook/plan.md",
+            "sha256": "2e4f05af589b48967d86498b7461b2835686332e5f183f25a8393c666124947e"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "8e42868e43e5309f782a4ec81b9fc1a02c9ee53809269ae550b5cbac38eeb9bc"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "1d787e841d10b967407771be9f5812028d0fa69e2060c3097c26283c71e7fa23"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "a1b4bdf95cd98f3d2ca20a8dc5d735511189e9fc57c6293bbc1beaaa43ecddd9"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/__main__.py",
+            "sha256": "69adba8ee99cecbe32bd7fa058da497b154db9e0c015ec8213371202530686b9"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "e69ef326d4a1c27ff23e57e063f1748d896975904ee7224b012306ce6d49be6f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/registration.py",
+            "sha256": "bfd803f40077c358b2c28fd57292522b8e87f2114119c663fbfa249c78b28a8e"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "032ecf9879b546e9d8a405948aa3db8823d42c3135bfd7295235fc02aaf2d35d"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "79691c499671bdcfcbed5bd10d9e8e0f30a8b324d54269d80603583cc0b55bb4"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "6dcdd73789f4ce88c77ce36054adff24d45e3d8f69a14a487f6a424fc5347938"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "2040f66f16af640f976e8a61ccf0525f9103547ed0ed9b03cafe220fc74127dd"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_integration_wiring.py",
+            "sha256": "d58c0fc4e791ffb0be27ec4779e367838f004c1c5f75e4277a8f465ae86b9a42"
+          }
+        ]
+      },
+      "dispatch_id": "d-promptctx-impl-1",
+      "id": "3e4409c9-5a09-4b69-bf04-315dcd1bb95d",
+      "input_files": [],
+      "kind": "delivery",
+      "produced_at": "2026-11-19T11:42:08.478512Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "state": "valid",
+      "unverified_inputs": [],
+      "validates": [],
+      "validation_facts": [
+        {
+          "command": "node scripts/build-package.cjs",
+          "result": "ok true, file_count 58, resource_version 5"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 594 tests, OK"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "16 pass 0 fail"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "52850f033a3d0accfd7ed7c521117e7bc8af9517320aed95349df3492f57988d",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/prompt-context-hook/check-1.md",
+            "sha256": "2bb2a60c6f893837f28661706b2f89129a00c290605ff9b9f5e8caf1bfdb30a4"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "8e42868e43e5309f782a4ec81b9fc1a02c9ee53809269ae550b5cbac38eeb9bc"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "1d787e841d10b967407771be9f5812028d0fa69e2060c3097c26283c71e7fa23"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "a1b4bdf95cd98f3d2ca20a8dc5d735511189e9fc57c6293bbc1beaaa43ecddd9"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/__main__.py",
+            "sha256": "69adba8ee99cecbe32bd7fa058da497b154db9e0c015ec8213371202530686b9"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "e69ef326d4a1c27ff23e57e063f1748d896975904ee7224b012306ce6d49be6f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/registration.py",
+            "sha256": "bfd803f40077c358b2c28fd57292522b8e87f2114119c663fbfa249c78b28a8e"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "032ecf9879b546e9d8a405948aa3db8823d42c3135bfd7295235fc02aaf2d35d"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "30cfcb808e9a6d0885ade70179284a89c2f49a9bf50aa4d3adb750be6f348b54"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "6dcdd73789f4ce88c77ce36054adff24d45e3d8f69a14a487f6a424fc5347938"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "2040f66f16af640f976e8a61ccf0525f9103547ed0ed9b03cafe220fc74127dd"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_integration_wiring.py",
+            "sha256": "6db2b5d2f5144f4549a752be2857110195da16182ad8805837410be151ace00a"
+          }
+        ]
+      },
+      "dispatch_id": "d-promptctx-check-1",
+      "environment": {
+        "host": "darwin",
+        "python": "3.9.6"
+      },
+      "id": "f6c3212e-0f12-492f-9e97-c8656a687693",
+      "input_files": [],
+      "items": [
+        {
+          "command": "full python + node suites",
+          "duration": 137.5,
+          "exit_code": 0,
+          "log_refs": [
+            ".fstar/tasks/prompt-context-hook/check-1.md"
+          ],
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-001"
+          ],
+          "result": "passed",
+          "retries": 1,
+          "test_refs": [
+            "tests/test_hooks.py",
+            "tests/test_installer.py",
+            "tests/test_integration_wiring.py",
+            "tests/test_e2e_scenarios.py"
+          ]
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-19T11:58:50.853035Z",
+      "producer": {
+        "id": "fstar-check-agent",
+        "role": "check",
+        "session_id": "check-probe"
+      },
+      "report": {
+        "path": ".fstar/tasks/prompt-context-hook/check-1.md",
+        "sha256": "2bb2a60c6f893837f28661706b2f89129a00c290605ff9b9f5e8caf1bfdb30a4"
+      },
+      "run_id": "d-promptctx-check-1",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "artifact": "doc/prd.md",
+          "reason": "artifact_missing",
+          "type": "artifact"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/prompt-context-hook/doc/prd.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "59cf3fdbdf20859aa4161d3021f2cb3024d5322e36655e7c6003e2903f59bf4c"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "52850f033a3d0accfd7ed7c521117e7bc8af9517320aed95349df3492f57988d",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/prompt-context-hook/check-1.md",
+            "sha256": "2bb2a60c6f893837f28661706b2f89129a00c290605ff9b9f5e8caf1bfdb30a4"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "8e42868e43e5309f782a4ec81b9fc1a02c9ee53809269ae550b5cbac38eeb9bc"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "1d787e841d10b967407771be9f5812028d0fa69e2060c3097c26283c71e7fa23"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "a1b4bdf95cd98f3d2ca20a8dc5d735511189e9fc57c6293bbc1beaaa43ecddd9"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/__main__.py",
+            "sha256": "69adba8ee99cecbe32bd7fa058da497b154db9e0c015ec8213371202530686b9"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "e69ef326d4a1c27ff23e57e063f1748d896975904ee7224b012306ce6d49be6f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/registration.py",
+            "sha256": "bfd803f40077c358b2c28fd57292522b8e87f2114119c663fbfa249c78b28a8e"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "032ecf9879b546e9d8a405948aa3db8823d42c3135bfd7295235fc02aaf2d35d"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "30cfcb808e9a6d0885ade70179284a89c2f49a9bf50aa4d3adb750be6f348b54"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "6dcdd73789f4ce88c77ce36054adff24d45e3d8f69a14a487f6a424fc5347938"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "2040f66f16af640f976e8a61ccf0525f9103547ed0ed9b03cafe220fc74127dd"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_integration_wiring.py",
+            "sha256": "6db2b5d2f5144f4549a752be2857110195da16182ad8805837410be151ace00a"
+          }
+        ]
+      },
+      "dispatch_id": "d-promptctx-check-2",
+      "environment": {
+        "host": "darwin",
+        "python": "3.9.6"
+      },
+      "id": "3986447c-478f-4494-9d58-34aa5a229743",
+      "input_files": [],
+      "items": [
+        {
+          "command": "full python + node suites",
+          "duration": 137.5,
+          "exit_code": 0,
+          "log_refs": [
+            ".fstar/tasks/prompt-context-hook/check-1.md"
+          ],
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-001"
+          ],
+          "result": "passed",
+          "retries": 1,
+          "test_refs": [
+            "tests/test_hooks.py",
+            "tests/test_installer.py",
+            "tests/test_integration_wiring.py",
+            "tests/test_e2e_scenarios.py"
+          ]
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-19T12:06:21.572458Z",
+      "producer": {
+        "id": "fstar-check-agent",
+        "role": "check",
+        "session_id": "check-probe"
+      },
+      "report": {
+        "path": ".fstar/tasks/prompt-context-hook/check-1.md",
+        "sha256": "2bb2a60c6f893837f28661706b2f89129a00c290605ff9b9f5e8caf1bfdb30a4"
+      },
+      "run_id": "d-promptctx-check-1",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/prompt-context-hook/doc/prd.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "3c36b4d00dfdf90244b7f77cc720a8636035c61674da74574cb55863739fcd25"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-19T11:13:51.754679Z",
+      "excluded": [],
+      "id": "planning-review",
+      "included": [
+        "clarify",
+        "design",
+        "doc-check",
+        "editor",
+        "plan",
+        "prd"
+      ],
+      "reason": "",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-19T11:13:51.754489Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+      }
+    },
+    {
+      "enabled_at": "2026-11-19T11:13:52.030743Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "archive",
+        "events",
+        "evidence",
+        "lease",
+        "recovery",
+        "task"
+      ],
+      "reason": "",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-19T11:13:52.030533Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+      }
+    },
+    {
+      "enabled_at": "2026-11-19T11:13:52.311352Z",
+      "excluded": [],
+      "id": "multi-agent",
+      "included": [
+        "change-propagation",
+        "parallel-implement",
+        "research",
+        "version-injection"
+      ],
+      "reason": "",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-19T11:13:52.311145Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "4a7c320b224722e27cc707357b3300cf56fc115b335aa3ddaf879ebdab957faf"
+      }
+    }
+  ],
+  "id": "2d2f08e4-88ec-4862-abac-463d793c1bff",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/prompt-context-hook/doc/prd.md": {
+          "R-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-001:end -->",
+            "start_marker": "<!-- fstar:item:R-001:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "1cb3374f8410da298de377811fbfc9d91791421c06be8808df37028a999d351c",
+      "artifact_map_source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-19T11:20:01.655863Z",
+        "quote": "",
+        "reference": "manual seed",
+        "scope": "planning",
+        "source_id": "prd-seed",
+        "type": "command",
+        "validates": ""
+      },
+      "dispatch_harvested": [
+        "d-promptctx-check-1",
+        "d-promptctx-check-2",
+        "d-promptctx-impl-1"
+      ]
+    }
+  },
+  "name": "prompt-context-hook",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "Per-prompt workflow decision hook (prompt-context)",
+  "worktree_path": ""
+}

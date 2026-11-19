@@ -504,7 +504,7 @@ class TestHostEntryDetails(InstallerCase):
                     for groups in document["hooks"].values()
                     for group in groups
                     for hook in group.get("hooks", [])]
-        self.assertEqual(len(commands), 4)
+        self.assertEqual(len(commands), 5)
         for command in commands:
             self.assertIn("fstar-hook.cjs", command)
             self.assertTrue(command.split(" ")[0].startswith("/"), command)
@@ -522,7 +522,7 @@ class TestHostEntryDetails(InstallerCase):
         self.assertEqual(index["schema"], "fstar.entries.v1")
         hooks = [entry for entry in index["entries"] if entry["kind"] == "hook"]
         host_files = [entry for entry in index["entries"] if entry["kind"] in ("skill", "agent")]
-        self.assertEqual(len(hooks), 4)
+        self.assertEqual(len(hooks), 5)
         self.assertEqual(len(host_files), 15)
         for entry in index["entries"]:
             self.assertTrue(Path(entry["installed_path"]).is_file())
@@ -584,11 +584,11 @@ class TestMultiRootUpdate(InstallerCase):
         self.install_at(other)
         manifest = json.loads((self.user_root / ".install-manifest.json").read_text())
         keys = [record["key"] for record in manifest["settings_entries"]]
-        self.assertEqual(8, len(keys))
+        self.assertEqual(10, len(keys))
         self.assertIn("claude:%s:SessionStart" % (self.host_root / "settings.json").resolve(), keys)
         self.assertIn("claude:%s:SessionStart" % (other / "settings.json").resolve(), keys)
-        self.assertEqual(4, len(self.owned_records(self.host_root)))
-        self.assertEqual(4, len(self.owned_records(other)))
+        self.assertEqual(5, len(self.owned_records(self.host_root)))
+        self.assertEqual(5, len(self.owned_records(other)))
 
     def test_uninstall_at_one_root_keeps_the_other_roots_records(self):
         other = self.tmp / "host" / "other-claude"
@@ -599,7 +599,7 @@ class TestMultiRootUpdate(InstallerCase):
         plan = installer.plan_install(operation="uninstall", roots=roots, explicit_roots=True)
         installer.apply_plan(plan, roots=roots)
         self.assertEqual([], self.owned_records(self.host_root))
-        self.assertEqual(4, len(self.owned_records(other)))
+        self.assertEqual(5, len(self.owned_records(other)))
         self.assertTrue((other / "settings.json").is_file())
 
     def test_legacy_host_event_keys_are_migrated_on_load(self):
@@ -1453,7 +1453,7 @@ class TestDoctor(InstallerCase):
         self.assertEqual(report["counts"]["roles"], 4)
         self.assertEqual(report["counts"]["templates"], 11)
         self.assertNotIn("capabilities", report["counts"])
-        self.assertEqual(report["counts"]["hooks"], 4)
+        self.assertEqual(report["counts"]["hooks"], 5)
         self.assertEqual(_tree_snapshot(self.user_root), before)
 
     def test_listing_is_estimated_when_no_host_observation(self):

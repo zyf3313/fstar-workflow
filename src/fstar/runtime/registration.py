@@ -18,7 +18,7 @@ from typing import Dict, Tuple
 
 from ..models import DomainError
 
-HOOK_SEMANTICS = ("session-context", "worker-context", "worker-result", "doc-change")
+HOOK_SEMANTICS = ("session-context", "worker-context", "worker-result", "doc-change", "prompt-context")
 
 # The command line the host would execute for each semantic hook. The
 # installed launcher (bin/fstar-hook.cjs) is what package-install actually
@@ -115,6 +115,19 @@ CLAUDE_PLAN = [
         "verified": True,
         "to_verify": [],
     },
+    {
+        "host": "claude",
+        "settings_path": "~/.claude/settings.json",
+        "location": "hooks.<EventName>[] (append, never overwrite other entries)",
+        "dedup_key": "event + command",
+        "event": "UserPromptSubmit",
+        "semantic": "prompt-context",
+        "matchers": [],
+        "hooks": [{"type": "command", "command": "@@prompt-context@@", "timeout": 15}],
+        "owned_by": "fstar",
+        "verified": True,
+        "to_verify": [],
+    },
 ]
 
 # Codex shape (verified live 2026-11-05 against a real Codex session with
@@ -191,6 +204,24 @@ CODEX_PLAN = [
         "verified": True,
         "to_verify": [],
         "fallback": "fstar evidence invalidate plus core read-boundary recalculation (already implemented in core)",
+    },
+    {
+        "host": "codex",
+        "settings_path": "<project>/.codex/hooks.json",
+        "location": "hooks.<EventName>[] (append, never overwrite other entries)",
+        "dedup_key": "event + command",
+        "event": "UserPromptSubmit",
+        "semantic": "prompt-context",
+        "schema_event": "userPromptSubmit",
+        "matchers": [],
+        "hooks": [{"type": "command", "command": "@@prompt-context@@", "timeout": 15}],
+        "owned_by": "fstar",
+        "verified": False,
+        "to_verify": [
+            "codex userPromptSubmit event/schema_event casing not observed in the generated "
+            "app-server schema; verify live before trusting host registration",
+        ],
+        "fallback": "fstar hook prompt-context invoked manually",
     },
 ]
 

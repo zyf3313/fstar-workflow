@@ -898,11 +898,11 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
                         for group in groups
                         for hook in group.get("hooks", [])
                         if "fstar-hook" in hook["command"]]
-        self.assertEqual(4, len(claude_hooks))
+        self.assertEqual(5, len(claude_hooks))
         self.step("S1-12b", ["doctor"] + host_args,
                   expected="installed resources and Claude entries stay healthy",
                   check=self.expect_ok(lambda payload: self.require(
-                      payload["healthy"] and payload["counts"]["hooks"] == 4,
+                      payload["healthy"] and payload["counts"]["hooks"] == 5,
                       "healthy=%s counts=%s" % (payload["healthy"], payload["counts"]))))
 
         # S1-11 archive reminders: 30-day-old unarchived task, defer + dedupe
@@ -1894,7 +1894,7 @@ class S6TwoHost(ScenarioCase):
                           "entries=%d evidence=%s" % (len(p["entries"]),
                                                       [e["hooks"][0]["evidence"] for e in p["entries"]]))))
             plan = json.loads(self.last_stdout)
-            self.assertEqual(4, len(plan["entries"]))
+            self.assertEqual(5, len(plan["entries"]))
             self.assertTrue(plan["read_only"])
             for entry in plan["entries"]:
                 self.assertIn("command", entry["hooks"][0])
@@ -1927,16 +1927,16 @@ class S6TwoHost(ScenarioCase):
         self.assertEqual(1, len(user_entries))
         fstar_commands = [h["command"] for groups in document["hooks"].values() for group in groups
                           for h in group["hooks"] if "fstar" in h["command"]]
-        self.assertEqual(4, len(fstar_commands), "dedup must keep exactly 4 fstar hooks")
+        self.assertEqual(5, len(fstar_commands), "dedup must keep exactly 5 fstar hooks")
 
         # S6-3 doctor: disk-verified entries; indexed-but-uninstalled -> stale
         self.step("S6-3", ["doctor"] + self.host_args(),
-                  expected="11/4/4/11 counts healthy; entries disk-verified",
+                  expected="11/4/5/11 counts healthy; entries disk-verified",
                   check=self.expect_ok(lambda p: (
                       "counts=%s healthy=%s" % (p["counts"], p["healthy"]))))
         report = json.loads(self.last_stdout)
         self.assertEqual({"skills": 11, "roles": 4, "templates": 11,
-                          "hooks": 4}, report["counts"])
+                          "hooks": 5}, report["counts"])
         self.assertTrue(report["healthy"])
         # Stale entry index: remove an installed entry file, doctor must flag it.
         entries = report["entries"]["items"]
@@ -1957,9 +1957,9 @@ class S6TwoHost(ScenarioCase):
 
         victim.write_bytes(victim_bytes)
 
-        # S6-4 uninstall: precise removal of own 4 hooks + owned files
+        # S6-4 uninstall: precise removal of own 5 hooks + owned files
         self.step("S6-4", ["uninstall", "--host", "claude", "--host", "codex"] + self.host_args(),
-                  expected="only fstar's own 4 hooks and installer-owned files removed; user content kept",
+                  expected="only fstar's own 5 hooks and installer-owned files removed; user content kept",
                   check=self.expect_ok())
         if claude_settings.exists():
             document = json.loads(claude_settings.read_text(encoding="utf-8"))

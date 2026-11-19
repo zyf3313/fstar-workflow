@@ -86,10 +86,16 @@ def main(argv: Optional[List[str]] = None) -> int:
             # runtime-dispatch recovery boundary owns the real call.
             return 0
         # doc-change: emit exactly one propagation line, only when changed.
-        result = hooks.doc_change(payload, start=start, user_root=user_root, runtime_root=runtime_root, passive=True)
-        hint = result.get("hint")
-        if hint:
-            print(hint)
+        if name == "doc-change":
+            result = hooks.doc_change(payload, start=start, user_root=user_root, runtime_root=runtime_root, passive=True)
+            hint = result.get("hint")
+            if hint:
+                print(hint)
+            return 0
+        # prompt-context: one state-selected breadcrumb per user prompt.
+        result = hooks.prompt_context(payload, start=start, user_root=user_root, runtime_root=runtime_root)
+        if result.get("text"):
+            print(result["text"])
         return 0
     except DomainError as exc:
         print("fstar: %s: %s" % (exc.code, exc.message), file=sys.stderr)

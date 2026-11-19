@@ -298,6 +298,28 @@ class LifecycleTests(CoreCase):
             self.service.continue_task("root", action="revise", actor=self.user, confirmation=self.source("root"), reason="x")
         self.assertEqual("invalid_action", caught.exception.code)
 
+    def test_correction_record_captures_user_words(self):
+        self.create()
+        self.start()
+        record = {"source": self.source("root", source_type="conversation"), "user_signal": "不对，应该先查订单号", "target": "fstar-implement", "note": ""}
+        result = self.service.record_correction("root", record=record, actor=self.user)
+        self.assertTrue(result["recorded"])
+        events = self.service.list_corrections("root")
+        self.assertEqual(1, len(events))
+        self.assertEqual("不对，应该先查订单号", events[0]["data"]["user_signal"])
+        self.assertEqual("fstar-implement", events[0]["data"]["target"])
+        # Pure capture: phase and evidence untouched.
+        task = self.store.read("root")
+        self.assertEqual("in_progress", task["phase"])
+
+    def test_correction_requires_user_words(self):
+        self.create()
+        self.start()
+        record = {"source": self.source("root"), "user_signal": "  "}
+        with self.assertRaises(DomainError) as caught:
+            self.service.record_correction("root", record=record, actor=self.user)
+        self.assertEqual("invalid_correction", caught.exception.code)
+
     def test_events_keep_milestones_beyond_soft_limit(self):
         self.create()
         with self.store.transaction():
@@ -313,6 +335,20 @@ class LifecycleTests(CoreCase):
         task = self.store.read("root")
         self.assertEqual(205, sum(x["type"] == "accepted" for x in task["events"]))
         self.assertTrue(any(x["type"] == "summary" for x in task["events"]))
+
+    def test_corrections_survive_event_compaction(self):
+        self.create()
+        self.start()
+        with self.store.transaction():
+            task = self.store.read("root")
+            task["events"] = [{"id": str(i), "at": self.clock(), "source": {}, "type": "correction", "data": {"user_signal": "fix %d" % i}} for i in range(205)]
+            self.service._write(self.store.resolve("root"), task)
+        with self.store.transaction():
+            task = self.store.read("root")
+            task["events"].extend({"id": "n%s" % i, "at": self.clock(), "source": {}, "type": "lease_renewed", "data": {}} for i in range(20))
+            self.service._write(self.store.resolve("root"), task)
+        task = self.store.read("root")
+        self.assertEqual(205, sum(x["type"] == "correction" for x in task["events"]))
 
     def test_custom_planning_artifacts_control_start_gate(self):
         self.create()
@@ -393,6 +429,34 @@ class EvidenceArchiveTests(CoreCase):
         self.assertFalse(fresh["evidence"][0]["fresh"])
         invalidated = self.service.evidence.invalidate("root", file="config.ini", actor=self.agent)
         self.assertEqual([evidence["id"]], invalidated["invalidated"])
+
+    def test_accept_with_rule_citation_traces_to_user_words(self):
+        self.create()
+        self.start()
+        self.prepare_artifacts()
+        lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
+        self.check_record(lease)
+        self.service.release_lease("root", token=lease["token"], reason="check complete")
+        rule = {"rule_ref": "~/.fstar/rules/docs-only.md", "quote": "以后纯文档改动、check 全绿的，不用再问我"}
+        accepted = self.service.accept("root", actor=self.user, confirmation=self.source("root"), rule=rule)
+        self.assertEqual("completed", accepted["phase"])
+        event = next(event for event in accepted["events"] if event["type"] == "accepted")
+        self.assertEqual(rule["rule_ref"], event["data"]["accepted_via_rule"]["rule_ref"])
+        self.assertEqual(rule["quote"], event["data"]["accepted_via_rule"]["quote"])
+
+    def test_accept_rule_requires_reference_and_quote(self):
+        self.create()
+        self.start()
+        self.prepare_artifacts()
+        lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
+        self.check_record(lease)
+        self.service.release_lease("root", token=lease["token"], reason="check complete")
+        with self.assertRaises(DomainError) as caught:
+            self.service.accept("root", actor=self.user, confirmation=self.source("root"), rule={"rule_ref": "x"})
+        self.assertEqual("invalid_acceptance_rule", caught.exception.code)
+        # Without a rule the flow is unchanged (user-only acceptance).
+        task = self.store.read("root")
+        self.assertEqual("in_progress", task["phase"])
 
     def test_wrong_producer_and_old_result_rejected(self):
         self.create()

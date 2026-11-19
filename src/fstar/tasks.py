@@ -15,7 +15,9 @@ from .store import TaskStore, content_hash
 
 LEASE_MINUTES = 30
 EVENT_LIMIT = 200
-MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "accepted", "dropped", "revived", "archived", "extension_enabled", "extension_changed"}
+# correction stays out of compaction: retro analysis quotes the user's exact
+# words from these events, so they are load-bearing records, not noise.
+MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "accepted", "dropped", "revived", "archived", "extension_enabled", "extension_changed", "correction"}
 EXTENSIONS = {
     "planning-review": {"clarify", "prd", "design", "plan", "editor", "doc-check"},
     "persistent-task": {"task", "evidence", "lease", "events", "recovery", "archive"},
@@ -492,7 +494,7 @@ class TaskService:
                     raise DomainError("children_incomplete", "Child acceptance evidence is stale", {"child": name}, status=3)
             self._require_children_ready(child_dir, child)
 
-    def accept(self, ref: str, *, actor: dict, confirmation: dict) -> dict:
+    def accept(self, ref: str, *, actor: dict, confirmation: dict, rule: Optional[dict] = None) -> dict:
         with self.store.transaction():
             task_dir = self.store.resolve(ref)
             task = self.store._read_path(task_dir / "task.json")
@@ -516,7 +518,17 @@ class TaskService:
             task["acceptance"] = {"confirmed_at": self.clock(), "confirmed_by": "user", "source": confirmation, "evidence_refs": status["evidence_refs"], "validates": {"task": source_snapshot(task), "delivery": delivery_digests}, "state": "valid"}
             task["phase"] = "completed"
             task["completedAt"] = self.clock()
-            self._event(task, "accepted", confirmation, {"evidence_refs": status["evidence_refs"]})
+            accepted_data = {"evidence_refs": status["evidence_refs"]}
+            if rule is not None:
+                # Rule-driven acceptance exemption: the user's recorded rule
+                # delegates acceptance for this class of work. The citation
+                # (rule source + exact quote) lands in the event data so the
+                # exemption always traces to the user's own words.
+                for key in ("rule_ref", "quote"):
+                    if not isinstance(rule.get(key), str) or not rule[key].strip():
+                        raise DomainError("invalid_acceptance_rule", "A rule-driven acceptance requires the rule reference and the user's exact quote")
+                accepted_data["accepted_via_rule"] = {"rule_ref": rule["rule_ref"], "quote": rule["quote"]}
+            self._event(task, "accepted", confirmation, accepted_data)
             self._write(task_dir, task)
             return task
 
@@ -615,6 +627,32 @@ class TaskService:
 
     def list_reviews(self, ref: str) -> list:
         return [item for item in self.store.read(ref)["evidence"] if item.get("kind") == "review"]
+
+    def record_correction(self, ref: str, *, record: dict, actor: dict) -> dict:
+        """Record a user correction as an append-only event. Pure capture.
+
+        Learning-loop candidate capture. This writes ONLY an event: no
+        knowledge write, no behavior change, no extension grant — the
+        three-layer rule (capture automatic, write authorized) keeps this
+        outside the learn pipeline. ``user_signal`` must be the user's actual
+        words, never an agent summary, so a later retro can quote it verbatim.
+        """
+        source = record.get("source")
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            self._require_active(task, "correction record")
+            validate_source(source, task, actor=actor)
+            user_signal = record.get("user_signal")
+            if not isinstance(user_signal, str) or not user_signal.strip():
+                raise DomainError("invalid_correction", "A correction requires the user's exact words as user_signal")
+            data = {"user_signal": user_signal, "target": record.get("target", ""), "note": record.get("note", "")}
+            self._event(task, "correction", source, data)
+            self._write(task_dir, task)
+            return {"recorded": True, "type": "correction", "user_signal": user_signal}
+
+    def list_corrections(self, ref: str) -> list:
+        return [event for event in self.store.read(ref)["events"] if event.get("type") == "correction"]
 
     def _validate_archive_tree(self, task_dir: Path, finalizations: Optional[list] = None) -> set:
         if finalizations is None:

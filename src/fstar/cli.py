@@ -85,6 +85,8 @@ def register_core_commands(subparsers) -> None:
         parser = subparsers.add_parser(name)
         _add_target(parser)
         _add_confirmation(parser)
+        if name == "accept":
+            parser.add_argument("--rule", help="JSON file citing the user rule that delegates acceptance for this class of work")
         if name == "archive":
             parser.add_argument("--operation-id")
             parser.add_argument("--workflow", action="store_true")
@@ -136,6 +138,13 @@ def register_core_commands(subparsers) -> None:
     invalidate = evidence_sub.add_parser("invalidate")
     _add_target(invalidate)
     invalidate.add_argument("--file", required=True)
+
+    correction = subparsers.add_parser("correction")
+    correction_sub = correction.add_subparsers(dest="correction_command", required=True)
+    correction_record = correction_sub.add_parser("record")
+    _add_target(correction_record)
+    correction_record.add_argument("--record", required=True)
+    _add_target(correction_sub.add_parser("list"))
 
     acceptance = subparsers.add_parser("acceptance")
     acceptance_sub = acceptance.add_subparsers(dest="acceptance_command", required=True)
@@ -219,7 +228,8 @@ def _dispatch(args):
         return service.start(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, session_id=args.session)
     if args.command == "accept":
         confirmation = _confirmation(args, service, ref)
-        return service.accept(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation)
+        rule = _json_file(args.rule, "acceptance rule") if args.rule else None
+        return service.accept(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, rule=rule)
     if args.command == "archive":
         confirmation = _confirmation(args, service, ref)
         return service.archive(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, operation_id=args.operation_id, workflow=args.workflow)
@@ -247,6 +257,11 @@ def _dispatch(args):
         return service.list_reviews(ref)
     if args.command == "evidence":
         return evidence.invalidate(ref, file=args.file, actor=_actor(args))
+    if args.command == "correction":
+        if args.correction_command == "record":
+            record = _json_file(args.record, "correction record")
+            return service.record_correction(ref, record=record, actor=_confirmation_actor(args, record.get("source")))
+        return service.list_corrections(ref)
     if args.command == "acceptance":
         return evidence.acceptance_status(ref)
     raise DomainError("unknown_command", "Unknown command")

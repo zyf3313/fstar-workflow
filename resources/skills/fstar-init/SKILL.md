@@ -5,6 +5,10 @@ description: "Initialize from verified project facts; preserve authority. 基于
 
 # Init
 
+## Do NOT use when
+- The project is already initialized and the user wants governance content: use `fstar-learn` (init backfills only its own generated placeholders).
+- The directory is not a project (no code or docs at all): ask the user what they intend to build first (step 8).
+
 Initialize from facts you can verify, without asking the user to confirm what exploration already proved.
 
 1. Explore the project: directory structure, frameworks, build and test files, package manifests, and existing authoritative documents. Do not ask the user to confirm the discovered facts.

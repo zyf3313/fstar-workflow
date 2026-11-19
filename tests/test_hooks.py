@@ -192,6 +192,25 @@ class SessionContextTests(HookCase):
                                        clock=self.clock)
         self.assertNotIn("replanned", result["text"])
 
+    def test_rejected_ledger_injects_index_line_only(self):
+        ledger = self.project / ".fstar" / "knowledge" / "references" / "rejected.md"
+        ledger.parent.mkdir(parents=True, exist_ok=True)
+        ledger.write_text("# Rejected\n\n## Use Redux\n- user quote: \"不用 Redux\"\n\n## Use class components\n- user quote: \"不要\"\n", encoding="utf-8")
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        hint = result["rejected_ledger"]
+        self.assertIn("2 entries", hint)
+        self.assertIn("rejected.md", hint)
+        # Index line only: the ledger body itself is never injected.
+        self.assertNotIn("Use Redux", "\n".join(item["text"] for item in result["loaded"]))
+
+    def test_rejected_ledger_absent_without_file(self):
+        result = hooks.session_context({"session_id": "s1"}, start=self.project,
+                                       user_root=self.user_root, runtime_root=self.runtime_root,
+                                       clock=self.clock, as_json=True)
+        self.assertIsNone(result["rejected_ledger"])
+
 
 
 class ExtensionConsumerTests(HookCase):
@@ -888,13 +907,99 @@ class DocChangeTests(HookCase):
             hooks.doc_change({}, start=self.project, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock, passive=False)
 
 
+class PromptContextTests(HookCase):
+    def run_prompt(self, payload=None):
+        return hooks.prompt_context(payload or {}, start=self.project, user_root=self.user_root,
+                                    runtime_root=self.runtime_root, clock=self.clock)
+
+    def test_not_initialized_emits_nothing(self):
+        plain = Path(self.tmp.name) / "plain"
+        plain.mkdir()
+        result = hooks.prompt_context({}, start=plain, user_root=self.user_root,
+                                      runtime_root=self.runtime_root, clock=self.clock)
+        self.assertIsNone(result["text"])
+        self.assertFalse(result["initialized"])
+        self.assertFalse(result["degraded"])
+
+    def test_no_task_breadcrumb_has_decision_rules(self):
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertTrue(result["initialized"])
+        self.assertEqual(result["state"], "no_task")
+        self.assertFalse(result["degraded"])
+        text = result["text"]
+        self.assertIn("fstar prompt state: no_task", text)
+        self.assertIn("<prompt-state>", text)
+        self.assertIn("</prompt-state>", text)
+        for keyword in ("large", "small", "discussion", "read-only", "treat as large"):
+            self.assertIn(keyword, text, keyword)
+        # Exactly one block: no other state tags leak into the output.
+        self.assertNotIn("frontier", text)
+
+    def test_planning_state_for_created_task(self):
+        self.create()
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertEqual(result["state"], "planning")
+        self.assertIn("fstar-clarify", result["text"])
+        self.assertIn("frontier", result["text"])
+        self.assertIn("fstar-plan", result["text"])
+
+    def test_in_progress_state_for_started_task(self):
+        self.create()
+        self.start()
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertEqual(result["state"], "in_progress")
+        self.assertIn("independent check", result["text"])
+        self.assertIn("correction", result["text"])
+
+    def test_awaiting_acceptance_for_completed_task(self):
+        self.create()
+        self.start()
+        task_dir = self.store.resolve("root")
+        task = self.store.read("root")
+        task["phase"] = "completed"
+        self.store.write(task_dir, task)
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertEqual(result["state"], "awaiting_acceptance")
+        self.assertIn("fresh final check", result["text"])
+        self.assertIn("user", result["text"])
+
+    def test_degraded_line_when_resource_missing(self):
+        from unittest import mock
+        missing = Path(self.tmp.name) / "no-resources"
+        missing.mkdir()
+        with mock.patch.object(hooks.inject, "resource_root", return_value=missing):
+            result = self.run_prompt({"session_id": "s1"})
+        self.assertTrue(result["initialized"])
+        self.assertTrue(result["degraded"])
+        self.assertEqual(result["text"], hooks.PROMPT_STATE_DEGRADED)
+        self.assertIn("workflow decision", result["text"])
+
+    def test_payload_session_isolation(self):
+        self.create()
+        self.start()
+        active = self.run_prompt({"session_id": "s1"})
+        self.assertEqual(active["state"], "in_progress")
+        other = self.run_prompt({"session_id": "s2"})
+        self.assertEqual(other["state"], "no_task")
+        self.assertIn("No active task", other["text"])
+
+    def test_read_only_no_writes(self):
+        self.create()
+        self.start()
+        before = {path: file_digest(path) for path in self.project.rglob("*") if path.is_file()}
+        self.run_prompt({"session_id": "s1"})
+        after = {path: file_digest(path) for path in self.project.rglob("*") if path.is_file()}
+        self.assertEqual(before, after)
+
+
 class RegistrationPlanTests(HookCase):
     def test_claude_plan_shape(self):
         result = registration.plan("claude")
         self.assertTrue(result["read_only"])
-        self.assertEqual(len(result["entries"]), 4)
+        self.assertEqual(len(result["entries"]), 5)
         events = {entry["event"] for entry in result["entries"]}
-        self.assertEqual(events, {"SessionStart", "PreToolUse", "SubagentStop", "PostToolUse"})
+        self.assertEqual(events, {"SessionStart", "PreToolUse", "SubagentStop",
+                                  "PostToolUse", "UserPromptSubmit"})
         for entry in result["entries"]:
             self.assertEqual(entry["dedup_key"], "event + command")
             command = entry["hooks"][0]["command"]
@@ -910,21 +1015,42 @@ class RegistrationPlanTests(HookCase):
 
     def test_codex_plan_shape_verified_live_2026_11_05(self):
         result = registration.plan("codex")
-        self.assertEqual(len(result["entries"]), 4)
-        # All four codex hook events fired live with exit code 0 on 2026-11-05
+        self.assertEqual(len(result["entries"]), 5)
+        # The four codex hook events fired live with exit code 0 on 2026-11-05
         # (SessionStart / SubagentStart / SubagentStop / PostToolUse); evidence
-        # is observed-schema, no residual to_verify gaps remain.
-        self.assertTrue(all(entry["verified"] for entry in result["entries"]))
-        self.assertTrue(all(not entry["to_verify"] for entry in result["entries"]))
-        self.assertTrue(all(entry["hooks"][0]["evidence"] == "observed-schema" for entry in result["entries"]))
+        # is observed-schema for those. UserPromptSubmit has not been observed
+        # and must stay honestly unverified with a to_verify note.
+        observed = [entry for entry in result["entries"] if entry["semantic"] != "prompt-context"]
+        self.assertEqual(len(observed), 4)
+        self.assertTrue(all(entry["verified"] for entry in observed))
+        self.assertTrue(all(not entry["to_verify"] for entry in observed))
+        self.assertTrue(all(entry["hooks"][0]["evidence"] == "observed-schema" for entry in observed))
+        prompt = [entry for entry in result["entries"] if entry["semantic"] == "prompt-context"][0]
+        self.assertFalse(prompt["verified"])
+        self.assertTrue(prompt["to_verify"])
+        self.assertEqual(prompt["hooks"][0]["evidence"], "unverified-schema")
+        self.assertEqual(prompt["schema_event"], "userPromptSubmit")
+        self.assertEqual(prompt["fallback"], "fstar hook prompt-context invoked manually")
 
     def test_unknown_host_rejected(self):
         with self.assertRaises(DomainError):
             registration.plan("vscode")
 
+    def test_prompt_context_registered_on_both_hosts(self):
+        for host in ("claude", "codex"):
+            entries = registration.plan(host)["entries"]
+            prompt = [entry for entry in entries if entry["semantic"] == "prompt-context"]
+            self.assertEqual(len(prompt), 1, host)
+            entry = prompt[0]
+            self.assertEqual(entry["event"], "UserPromptSubmit")
+            self.assertEqual(entry["dedup_key"], "event + command")
+            self.assertEqual(entry["hooks"][0]["timeout"], 15)
+            self.assertEqual(entry["owned_by"], "fstar")
+            self.assertTrue(entry["hooks"][0]["command"].endswith("prompt-context"))
+
 
 class HostEventMapTests(HookCase):
-    def test_exactly_four_semantic_hooks_both_hosts(self):
+    def test_every_semantic_hook_mapped_both_hosts(self):
         for host in ("claude", "codex"):
             self.assertEqual(sorted(hooks.HOST_EVENT_MAP[host]), sorted(hooks.HOOK_NAMES))
 

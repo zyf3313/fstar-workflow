@@ -23,6 +23,7 @@ These guides help you **ask the right questions before coding**.
 |-------|---------|-------------|
 | [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md) | Identify patterns and reduce duplication | When you notice repeated patterns |
 | [Cross-Layer Thinking Guide](./cross-layer-thinking-guide.md) | Think through data flow across layers | Features spanning multiple layers |
+| [Impact Check Guide](./impact-check-guide.md) | 两层影响面检查(调用方 + 机制间交互) | 每次修复/功能开发完成之后,报告完成之前;发版合并时附加 README 检查 |
 
 ---
 
