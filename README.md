@@ -61,7 +61,7 @@ fstar doctor     # read-only install and host health report
 
 ```bash
 cd your-project
-fstar init                       # create .fstar/ and a missing ~/.fstar
+fstar init                       # create .fstar/ and a missing ~/.fstar; backfill index + spec skeletons from exploration
 fstar install --host claude      # wire hooks + skills + agents into <project>/.claude
 fstar task create "My feature" --name my-feature
 fstar start my-feature           # planning → in_progress
@@ -131,10 +131,23 @@ can be routed into `.fstar/knowledge/` instead of vanishing.
 ### 7. Resume & interrupts (`continue`, `interrupt`, `doc-edit`)
 
 `fstar continue` resumes an interrupted task from verified on-disk state
-(takeover / replan / reopen / unblock). Long-running dispatches can
+(takeover / replan / reopen / unblock). **Replan** stales all evidence,
+returns the task to `planning`, and records the pre-replan documents plus
+the baseline git commit — the session context then surfaces those documents
+for re-clarification, and dispatch is refused until `plan.md` has actually
+been rewritten (`stale_plan_dispatch`), so a pre-replan plan can never
+silently flow to implementation. **Reopen** stales the final-check evidence
+so re-acceptance requires a fresh independent check (deliveries stay
+valid). Long-running dispatches can
 be steered with `fstar interrupt` (change propagation, cancel, checkpoint
 stop). Concurrent document edits go through `fstar doc-edit`, which rejects
 stale baselines instead of silently overwriting.
+
+Requirement clarification runs as a design-tree interview: questions whose
+prerequisites are settled are asked in numbered rounds, each with a
+recommended answer, and the requirements only hand off to planning when the
+frontier is empty — an unanswered question is an unresolved requirement,
+not optional context.
 
 ### Extensions (opt-in, never default-on)
 
@@ -147,6 +160,11 @@ intact; nothing is assumed on for you.
 
 ```
 .fstar/            tasks, specs, archive, knowledge — the project's data root
+                   init writes exploration-driven spec skeletons: a topic
+                   index plus per-dimension detail files (directory
+                   structure, error handling, quality/logging guidelines;
+                   UI topics get component/state/type-safety) — user-authored
+                   specs are never overwritten
 <host>/.claude/    hooks (settings.json), 11 skills, 4 agent cards   [project-level by default]
 ~/.fstar/          user-level resource cache (shared, versioned) — never host config
 ```
