@@ -2,11 +2,11 @@
   "schema": "fstar.package-assets.v1",
   "generated_by": "scripts/build-package.cjs",
   "cli_version": "0.4.1",
-  "resource_version": "4",
+  "resource_version": "5",
   "supported_data_schemas": [
     1
   ],
-  "source_ref": "zyf3313/fstar-trellis-ext@674bea37cf2f6f25cd20dab93e1a54ae1f13ce66 (verified reachable 2026-11-01; templates are structural adaptations with provenance notes, never verbatim copies)",
+  "source_ref": "zyf3313/fstar-trellis-ext@674bea37cf2f6f25cd20dab93e1a54ae1f13ce66 (verified reachable 2026-11-01; templates are structural adaptations with provenance notes, never verbatim copies); mattpocock/skills@49dd158d1076134a641b33efb035946536778336 grilling (MIT; the fstar-clarify interview protocol is a structural adaptation, not a verbatim copy)",
   "license_status": "source-pending-adaptation-only",
   "notes": [
     "Source fixed-commit originals verified 2026-11-01: prd.zh-CN.md / technical-design.zh-CN.md / technical-design-profiles.zh-CN.md exist at the pinned commit; fstar templates differ from them (slot markers, restructured sections) and each carries a provenance note. Upstream license remains pending; verbatim copying stays disallowed.",
@@ -167,7 +167,7 @@
       "source": "resources/skills/fstar-clarify/SKILL.md",
       "destination": "resources/skills/fstar-clarify/SKILL.md",
       "kind": "resource",
-      "sha256": "94c5fffc732ecdbb000a2a5e024e6517d6a31d8db0b1b891bf30a7509de34ed0"
+      "sha256": "1f14ca3e47e7142c1f86f5cc4a095288cd601478d4f0efab19b7f5be2357b068"
     },
     {
       "source": "resources/skills/fstar-continue/SKILL.md",
@@ -305,7 +305,7 @@
       "source": "resources/templates/task/clarify.md",
       "destination": "resources/templates/task/clarify.md",
       "kind": "resource",
-      "sha256": "4ad62cb773e92d0831d61f90e93a1c55a81d5d0e81dd96a1b575b929ac6e887a"
+      "sha256": "d6e9d1c6843b945038efba3525db58895011809c6ce255acbfda2e015e6de06a"
     },
     {
       "source": "resources/templates/task/plan.mapping.yaml",
@@ -353,7 +353,7 @@
       "source": "resources/runtime/routing.md",
       "destination": "resources/runtime/routing.md",
       "kind": "resource",
-      "sha256": "07716ba1d2c8778f5c1dd707c6e7c0e350af57816f0cc70d08052fdb328d48f0"
+      "sha256": "ac9e98eee6bcc34797310128e369ac567808761fb76788b5720c1c9cb68bea30"
     }
   ]
 }

@@ -27,11 +27,11 @@
   },
   "fstar": {
     "cli_version": "0.4.1",
-    "resource_version": "4",
+    "resource_version": "5",
     "supported_data_schemas": [
       1
     ],
-    "source_ref": "zyf3313/fstar-trellis-ext@674bea37cf2f6f25cd20dab93e1a54ae1f13ce66 (verified reachable 2026-11-01; templates are structural adaptations with provenance notes, never verbatim copies)",
+    "source_ref": "zyf3313/fstar-trellis-ext@674bea37cf2f6f25cd20dab93e1a54ae1f13ce66 (verified reachable 2026-11-01; templates are structural adaptations with provenance notes, never verbatim copies); mattpocock/skills@49dd158d1076134a641b33efb035946536778336 grilling (MIT; the fstar-clarify interview protocol is a structural adaptation, not a verbatim copy)",
     "license_status": "source-pending-adaptation-only"
   }
 }
