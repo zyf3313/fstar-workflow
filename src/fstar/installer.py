@@ -45,13 +45,13 @@ MANIFEST_SCHEMA = "fstar.install.v1"
 ENTRY_INDEX_SCHEMA = "fstar.entries.v1"
 BUNDLE_SCHEMA = "fstar.package-assets.v1"
 SUPPORTED_HOSTS = ("claude", "codex")
-HOOK_SEMANTICS = ("session-context", "worker-context", "worker-result", "doc-change")
+HOOK_SEMANTICS = ("session-context", "worker-context", "worker-result", "doc-change", "prompt-context")
 CONFLICT_POLICIES = ("keep", "overwrite", "new")
 # Capability/resource invariants reported by doctor (parent design §4.4).
 EXPECTED_COUNTS = {
     "skills": 11,
     "roles": 4,
-    "hooks": 4,
+    "hooks": 5,
     "templates": 11,
 }
 VERSION_PATTERN = re.compile(r"^[0-9A-Za-z][0-9A-Za-z._-]*$")

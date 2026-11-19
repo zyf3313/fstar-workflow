@@ -83,7 +83,7 @@
       "source": "src/fstar/installer.py",
       "destination": "src/fstar/installer.py",
       "kind": "python",
-      "sha256": "e75a17951d3d024ea748e6d6e58719cdcfabb31a19f42975e6b98aecb3c569f8"
+      "sha256": "a1b4bdf95cd98f3d2ca20a8dc5d735511189e9fc57c6293bbc1beaaa43ecddd9"
     },
     {
       "source": "src/fstar/knowledge.py",
@@ -119,13 +119,13 @@
       "source": "src/fstar/runtime/__main__.py",
       "destination": "src/fstar/runtime/__main__.py",
       "kind": "python",
-      "sha256": "8e612672460d4889c1c7e19aca585acce4dfc6afa49bea8faff58119d651cbb3"
+      "sha256": "69adba8ee99cecbe32bd7fa058da497b154db9e0c015ec8213371202530686b9"
     },
     {
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "7efbba3d77bdd53fd9a12fd30457582a05f25a39c804ce33b678a24b2a49ce6d"
+      "sha256": "e69ef326d4a1c27ff23e57e063f1748d896975904ee7224b012306ce6d49be6f"
     },
     {
       "source": "src/fstar/runtime/inject.py",
@@ -137,7 +137,7 @@
       "source": "src/fstar/runtime/registration.py",
       "destination": "src/fstar/runtime/registration.py",
       "kind": "python",
-      "sha256": "0807fbf0c38ae6e0eebf4ed640032bcad3a34cc3169b60c0ddd546d599976891"
+      "sha256": "bfd803f40077c358b2c28fd57292522b8e87f2114119c663fbfa249c78b28a8e"
     },
     {
       "source": "src/fstar/store.py",
@@ -348,6 +348,12 @@
       "destination": "resources/runtime/capabilities.md",
       "kind": "resource",
       "sha256": "45e515de8a984c2d1d268607dfd7aad544ac16465337383ebdb406a60a18128e"
+    },
+    {
+      "source": "resources/runtime/prompt-states.md",
+      "destination": "resources/runtime/prompt-states.md",
+      "kind": "resource",
+      "sha256": "1d787e841d10b967407771be9f5812028d0fa69e2060c3097c26283c71e7fa23"
     },
     {
       "source": "resources/runtime/routing.md",

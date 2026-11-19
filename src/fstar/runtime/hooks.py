@@ -33,6 +33,7 @@ raises project_not_initialized instead of silently succeeding.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
@@ -43,7 +44,7 @@ from ..store import TaskStore
 from ..tasks import TaskService
 from . import inject, registration
 
-HOOK_NAMES = ("session-context", "worker-context", "worker-result", "doc-change")
+HOOK_NAMES = ("session-context", "worker-context", "worker-result", "doc-change", "prompt-context")
 HOOK_MARKER = inject.HOOK_MARKER
 
 # Data-driven host event mapping (child design §3). "verified" reflects
@@ -85,6 +86,14 @@ HOST_EVENT_MAP: Dict[str, Dict[str, dict]] = {
             "to_verify": ["tool_input.file_path is the observed Edit/Write payload key"],
             "fallback": "fstar evidence invalidate plus core read-boundary recalculation",
         },
+        "prompt-context": {
+            "events": ["UserPromptSubmit"],
+            "matchers": [],
+            "payload_keys": ["session_id", "cwd", "prompt", "hook_event_name"],
+            "verified": True,
+            "to_verify": ["prompt field name is adapter-level; state selection only needs session_id"],
+            "fallback": "fstar hook prompt-context invoked manually",
+        },
     },
     "codex": {
         "session-context": {
@@ -121,6 +130,17 @@ HOST_EVENT_MAP: Dict[str, Dict[str, dict]] = {
             "verified": False,
             "to_verify": ["postToolUse file-path payload key not exposed by generated schema"],
             "fallback": "fstar evidence invalidate plus core read-boundary recalculation",
+        },
+        "prompt-context": {
+            "events": ["UserPromptSubmit"],
+            "matchers": [],
+            "payload_keys": ["session_id", "cwd", "prompt", "hook_event_name"],
+            "verified": False,
+            "to_verify": [
+                "codex UserPromptSubmit event name and schema_event casing not observed in the "
+                "generated app-server schema; verify live before trusting host registration",
+            ],
+            "fallback": "fstar hook prompt-context invoked manually",
         },
     },
 }
@@ -788,6 +808,91 @@ def doc_change(payload: Optional[dict] = None, *, file_path: Optional[str] = Non
 
 
 # ---------------------------------------------------------------------------
+# prompt-context
+# ---------------------------------------------------------------------------
+
+PROMPT_STATE_TAG = re.compile(r"\[prompt-state:(?P<tag>[a-z_]+)\](?P<body>.*?)\[/prompt-state:\1\]",
+                              re.DOTALL)
+PROMPT_STATE_NAMES = ("no_task", "planning", "in_progress", "awaiting_acceptance")
+PROMPT_STATE_DEGRADED = ("fstar: prompt-states unavailable; make a workflow decision "
+                         "before acting and refer to routing.")
+
+
+def _prompt_state_name(service: TaskService, session_id: Optional[str]) -> str:
+    """Derive the current prompt state from the session's current task."""
+    current = service.current(session_id)
+    task = current.get("current")
+    if task is None:
+        return "no_task"
+    if task.get("meta", {}).get("disposition"):
+        # Dropped/archived pointer: no active work in this session.
+        return "no_task"
+    phase = task.get("phase")
+    if phase == "planning":
+        return "planning"
+    if phase == "in_progress":
+        try:
+            state = service.state(task["id"])
+        except DomainError:
+            return "in_progress"
+        if state["acceptance"].get("awaiting_acceptance"):
+            return "awaiting_acceptance"
+        return "in_progress"
+    # completed (or any other phase) without recorded acceptance: the closest
+    # actionable reminder is the acceptance boundary.
+    return "awaiting_acceptance"
+
+
+def prompt_context(payload: Optional[dict] = None, *, start: Optional[Path] = None,
+                   user_root: Optional[Path] = None, runtime_root: Optional[Path] = None,
+                   clock: Optional[Callable[[], str]] = None, passive: bool = True) -> dict:
+    """Per-prompt breadcrumb injection (UserPromptSubmit). Read-only.
+
+    Emits one short state-selected block from resources/runtime/prompt-states.md
+    reminding the agent to make a workflow-size decision before acting. Outside
+    an initialized project nothing is emitted (unlike session-context there is
+    no routing full text here; the session-start hook already carried it). A
+    missing resource or missing state tag degrades to one fixed line — the
+    hook is never silent inside an initialized project.
+    """
+    payload = payload or {}
+    session_id = _payload_str(payload, "session_id", "sessionId")
+    located = inject.locate(start, user_root=user_root, runtime_root=runtime_root)
+    project_root = located["project_root"]
+    if project_root is None:
+        # Outside an initialized project there is nothing to remind about:
+        # routing was injected at session start and no task state exists.
+        return {"text": None, "initialized": False, "state": None,
+                "degraded": False, "session_id": session_id}
+    store = located["store"]
+    service = _service_for(store, clock)
+    state = _prompt_state_name(service, session_id)
+    root = inject.resource_root(project_root, located["user_root"])
+    body = None
+    try:
+        text = (root / "runtime" / "prompt-states.md").read_text(encoding="utf-8")
+    except OSError:
+        text = None
+    if text is not None:
+        for match in PROMPT_STATE_TAG.finditer(text):
+            if match.group("tag") == state:
+                body = match.group("body").strip()
+                break
+    if body is None:
+        # Degraded single line, never silent (PRD acceptance condition).
+        return {"text": PROMPT_STATE_DEGRADED, "initialized": True, "state": state,
+                "degraded": True, "session_id": session_id}
+    text_out = "\n".join([
+        "fstar prompt state: %s" % state,
+        "<prompt-state>",
+        body,
+        "</prompt-state>",
+    ])
+    return {"text": text_out, "initialized": True, "state": state,
+            "degraded": False, "session_id": session_id}
+
+
+# ---------------------------------------------------------------------------
 # CLI registration (register_commands + _fstar_module_handler convention)
 # ---------------------------------------------------------------------------
 
@@ -853,6 +958,12 @@ def _handle_doc_change(args):
     return doc_change(payload, file_path=args.file, start=start, user_root=user_root, runtime_root=runtime_root, passive=False)
 
 
+def _handle_prompt_context(args):
+    start, user_root, runtime_root = _roots(args)
+    payload = _json_file(args.payload, "payload") if args.payload else {}
+    return prompt_context(payload, start=start, user_root=user_root, runtime_root=runtime_root)
+
+
 def _handle_plan(args):
     return registration.plan(args.host)
 
@@ -862,6 +973,7 @@ _HANDLERS = {
     "worker-context": _handle_worker_context,
     "worker-result": _handle_worker_result,
     "doc-change": _handle_doc_change,
+    "prompt-context": _handle_prompt_context,
     "plan": _handle_plan,
 }
 
@@ -903,6 +1015,9 @@ def register_commands(subparsers) -> None:
     doc.add_argument("--file")
     doc.add_argument("--payload")
 
+    prompt = hook_sub.add_parser("prompt-context")
+    prompt.add_argument("--payload")
+
     plan = hook_sub.add_parser("plan")
     plan.add_argument("--host", choices=("claude", "codex"), required=True)
 
@@ -921,4 +1036,6 @@ def run_hook(name: str, payload: Optional[dict] = None, **kwargs) -> dict:
         return worker_result(payload, **kwargs)
     if name == "doc-change":
         return doc_change(payload, **kwargs)
+    if name == "prompt-context":
+        return prompt_context(payload, **kwargs)
     raise DomainError("unknown_hook", "Unknown hook name", {"name": name, "hooks": list(HOOK_NAMES)})

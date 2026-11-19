@@ -242,6 +242,14 @@ class SemanticContentTests(unittest.TestCase):
             text = (skill_dir / "SKILL.md").read_text()
             self.assertIn("## Do NOT use when", text, skill_dir.name)
 
+    def test_prompt_states_resource_covers_all_states(self):
+        text = (RESOURCES / "runtime" / "prompt-states.md").read_text()
+        for state in ("no_task", "planning", "in_progress", "awaiting_acceptance"):
+            self.assertIn("[prompt-state:%s]" % state, text)
+            self.assertIn("[/prompt-state:%s]" % state, text)
+        for keyword in ("large", "small", "discussion", "read-only", "treat as large"):
+            self.assertIn(keyword, text)
+
     def test_learning_loop_rules_present(self):
         routing = (RESOURCES / "runtime" / "routing.md").read_text()
         for phrase in ("rejected ledger", "do not re-propose", "correction record",
