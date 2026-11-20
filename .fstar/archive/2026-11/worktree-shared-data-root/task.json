@@ -26,7 +26,7 @@
       "task": "8256698dfe8bccd8b7819dc4bbcfda59022597b28e18430e12bfeeb1f9cfd13e"
     }
   },
-  "archivedAt": null,
+  "archivedAt": "2026-11-20T13:48:28.123155Z",
   "assignee": null,
   "base_branch": "",
   "blocked": null,
@@ -583,6 +583,100 @@
         "validates": "8256698dfe8bccd8b7819dc4bbcfda59022597b28e18430e12bfeeb1f9cfd13e"
       },
       "type": "accepted"
+    },
+    {
+      "at": "2026-11-20T13:48:28.016937Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-20T13:48:28.013039Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "archive",
+            "events",
+            "evidence",
+            "lease",
+            "recovery",
+            "task"
+          ],
+          "reason": "归档工作流",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user"
+            },
+            "at": "2026-11-20T00:00:00Z",
+            "quote": "需要动代码吗 如果不需要 合并到main分支 任务归档吧",
+            "reference": "会话用户验收：确认合并归档",
+            "scope": "worktree-shared-data-root",
+            "source_id": "2e98fccf-8dc0-43b8-850f-f906d76efddc",
+            "type": "conversation",
+            "validates": "86cfbe7f3d0a607141e5a54bff5f9bcb04cc9cb3f1f36c3a9a249bf76c47270a"
+          }
+        },
+        "old": null
+      },
+      "id": "8ceec83a-bb77-4c9d-b86f-ef03d8e8a50e",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "需要动代码吗 如果不需要 合并到main分支 任务归档吧",
+        "reference": "会话用户验收：确认合并归档",
+        "scope": "worktree-shared-data-root",
+        "source_id": "2e98fccf-8dc0-43b8-850f-f906d76efddc",
+        "type": "conversation",
+        "validates": "86cfbe7f3d0a607141e5a54bff5f9bcb04cc9cb3f1f36c3a9a249bf76c47270a"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-20T13:48:28.123155Z",
+      "data": {
+        "archived_at": "2026-11-20T13:48:28.123155Z",
+        "operation_id": "72ab1081-7639-454c-90ee-6cfffcf8d791",
+        "target": ".fstar/archive/2026-11/worktree-shared-data-root"
+      },
+      "id": "0262e5ab-6ae6-4b6d-ade7-d44cb46a22e8",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "需要动代码吗 如果不需要 合并到main分支 任务归档吧",
+        "reference": "会话用户验收：确认合并归档",
+        "scope": "worktree-shared-data-root",
+        "source_id": "2e98fccf-8dc0-43b8-850f-f906d76efddc",
+        "type": "conversation",
+        "validates": "86cfbe7f3d0a607141e5a54bff5f9bcb04cc9cb3f1f36c3a9a249bf76c47270a"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-20T13:48:28.137249Z",
+      "data": {
+        "operation_id": "72ab1081-7639-454c-90ee-6cfffcf8d791",
+        "target": ".fstar/archive/2026-11/worktree-shared-data-root"
+      },
+      "id": "5c8ef026-7fca-4aa8-9d33-5fe091e5df9e",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "需要动代码吗 如果不需要 合并到main分支 任务归档吧",
+        "reference": "会话用户验收：确认合并归档",
+        "scope": "worktree-shared-data-root",
+        "source_id": "2e98fccf-8dc0-43b8-850f-f906d76efddc",
+        "type": "conversation",
+        "validates": "86cfbe7f3d0a607141e5a54bff5f9bcb04cc9cb3f1f36c3a9a249bf76c47270a"
+      },
+      "type": "archived"
     }
   ],
   "evidence": [
@@ -1230,6 +1324,34 @@
         "source_id": "32c885ed-78d8-43a3-85a2-9228c99eeb49",
         "type": "conversation",
         "validates": "03fb2b66d6b9426c3b88e9daeda53b4263a8a8a3875a0b7a48ba76b5af75e5e4"
+      }
+    },
+    {
+      "enabled_at": "2026-11-20T13:48:28.013039Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "archive",
+        "events",
+        "evidence",
+        "lease",
+        "recovery",
+        "task"
+      ],
+      "reason": "归档工作流",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "需要动代码吗 如果不需要 合并到main分支 任务归档吧",
+        "reference": "会话用户验收：确认合并归档",
+        "scope": "worktree-shared-data-root",
+        "source_id": "2e98fccf-8dc0-43b8-850f-f906d76efddc",
+        "type": "conversation",
+        "validates": "86cfbe7f3d0a607141e5a54bff5f9bcb04cc9cb3f1f36c3a9a249bf76c47270a"
       }
     }
   ],
