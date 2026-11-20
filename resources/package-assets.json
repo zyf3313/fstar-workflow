@@ -1,8 +1,8 @@
 {
   "schema": "fstar.package-assets.v1",
   "generated_by": "scripts/build-package.cjs",
-  "cli_version": "0.7.0",
-  "resource_version": "7",
+  "cli_version": "0.8.0",
+  "resource_version": "8",
   "supported_data_schemas": [
     1
   ],
@@ -95,7 +95,7 @@
       "source": "src/fstar/installer.py",
       "destination": "src/fstar/installer.py",
       "kind": "python",
-      "sha256": "901bfa1ab5c0a16c914a10e2b6ae2d443f757ac2f26732f0a3a0a5c3c12196ff"
+      "sha256": "9f6dd356605f54bc28efd1ac2bb4282e7c4084a1ea652d2973f2fbb1427f57da"
     },
     {
       "source": "src/fstar/knowledge.py",
@@ -113,7 +113,7 @@
       "source": "src/fstar/magpie.py",
       "destination": "src/fstar/magpie.py",
       "kind": "python",
-      "sha256": "2b00cdaf61196a8fbb89e0f0ea3e55add7cb59a9dd17a1715c6cbfe452203056"
+      "sha256": "0eda775fdc210b431c9560f9d5c483ec7e6106bf454a2d934a949ecee64d8fac"
     },
     {
       "source": "src/fstar/models.py",
@@ -143,7 +143,7 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "e49c2577d94ae4f4d1957b2dbb5a76853574e96d1665d0307b78d246b0bdda98"
+      "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
     },
     {
       "source": "src/fstar/runtime/inject.py",
@@ -155,7 +155,7 @@
       "source": "src/fstar/runtime/registration.py",
       "destination": "src/fstar/runtime/registration.py",
       "kind": "python",
-      "sha256": "bfd803f40077c358b2c28fd57292522b8e87f2114119c663fbfa249c78b28a8e"
+      "sha256": "71ca52af5d2ee42cd697586a140eb2dc9b25d2a70763e42c0cffe37c762c4991"
     },
     {
       "source": "src/fstar/store.py",

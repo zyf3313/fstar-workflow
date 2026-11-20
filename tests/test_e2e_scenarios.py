@@ -892,14 +892,20 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
         host_args = ["--host-root", "claude=%s" % claude_root,
                      "--host-root", "codex=%s" % codex_root]
         self.step("S1-12a", ["install", "--host", "claude", "--host", "codex"] + host_args,
-                  expected="Claude installs in the fixture while Codex stays read-only and unsupported",
+                  expected="Claude and Codex both install in the fixture at their declared "
+                           "user-level locations",
                   check=self.expect_ok(lambda payload: self.require(
                       (claude_root / "settings.json").is_file()
-                      and any(c["kind"] == "host_unsupported" for c in payload["conflicts"]),
-                      "claude_settings=%s codex_unsupported=%s" % (
+                      and (codex_root / "hooks.json").is_file()
+                      and not any(c["kind"] == "host_unsupported" for c in payload["conflicts"]),
+                      "claude_settings=%s codex_hooks=%s codex_unsupported=%s" % (
                           (claude_root / "settings.json").is_file(),
+                          (codex_root / "hooks.json").is_file(),
                           any(c["kind"] == "host_unsupported" for c in payload["conflicts"])))))
-        self.assertFalse(list(codex_root.rglob("*")))
+        # Codex carries skills and hooks, but no fstar role cards (the matrix
+        # marks Codex agents as not applicable).
+        self.assertTrue((codex_root / "skills" / "fstar-init" / "SKILL.md").is_file())
+        self.assertFalse((codex_root / "agents").exists())
         document = json.loads((claude_root / "settings.json").read_text(encoding="utf-8"))
         claude_hooks = [hook["command"]
                         for groups in document["hooks"].values()
