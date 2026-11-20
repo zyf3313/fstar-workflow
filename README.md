@@ -343,13 +343,54 @@ explicit, one-time, user-initiated, and traceable in the event log.
                    structure, error handling, quality/logging guidelines;
                    UI topics get component/state/type-safety) — user-authored
                    specs are never overwritten
-<host>/.claude/    hooks (settings.json), 11 skills, 4 agent cards   [project-level by default]
+~/.claude/         hooks (settings.json), 11 skills, 4 agent cards   [global by default]
 ~/.fstar/          user-level resource cache (shared, versioned) — never host config
 ```
 
+Resources are installed and updated **globally by default** (since 0.7.0):
+`fstar install` and `fstar update` target the user-level `~/.claude` skills,
+agents, and hooks, so one global update serves every project. Your project
+keeps only its own data (tasks, specs, identity). An explicit
+`--host-root claude=PATH` still selects a specific project-level host root
+when you want one.
+
+Projects created before the global default may still carry their own
+per-project copies or a `resources.version` pin. Nothing migrates silently:
+
+- On session start, fstar compares the project's legacy resources against the
+  global target (read-only) and points out the per-project copies/pin that
+  still shadow the global delivery. The comparison writes nothing — not to the
+  project, not to the tasks, not to the runtime.
+- `fstar resource-inspect` prints the same comparison on demand.
+- Showing the question is an explicit operation:
+  `fstar resource-remind --session ID` decides and records whether the
+  migration question may be shown in this session, so the same question is
+  not asked twice in one session (a clear/compact keeps the same session).
+  A record that cannot be written is reported, never claimed.
+  The comparison, reminder, and migration commands accept
+  `--host-root claude=PATH` when the host entry does not live in the global
+  default location.
+- Migration runs only with an explicit approval file:
+  `fstar resource-migrate --confirmation FILE` (the file records the user's
+  conversation approval). It moves only copies the installer provably owns
+  and that were not modified since install (backed up first under
+  `~/.fstar/install-backups/`), drops the project pin while preserving
+  identity/other config keys, and reports every kept or conflicting file.
+  Re-running on a migrated project is a no-op.
+- `fstar resource-defer` records the explicit deferral (per project and target
+  version; a new global version makes the project eligible again).
+
+Resource migration never touches data schemas: `fstar migrate` remains the
+only schema-migration path (schema 1 → 1 is a no-op; anything else is
+`unsupported`).
+
 `fstar uninstall` removes only what the installer itself owns (verified by
 content hashes recorded at install time); your specs, tasks, and any file you
-touched are never removed.
+touched are never removed. Because the global entry is the default target,
+`fstar uninstall` acts on the global `~/.claude` entry; when the recorded
+install lives in another host root the command refuses
+(`uninstall_host_root_mismatch`) and asks for `--host-root claude=PATH` (or
+`--user-level`) instead of touching the wrong root.
 
 ## Host support
 
@@ -386,7 +427,10 @@ Run `fstar <command> --help` for flags. The commands group by purpose:
 - **Project** — `init`, `rebind`
 - **Cross-project** — `cross create-child|link|links|dispatch`
 - **Install maintenance** — `install`, `update`, `uninstall`, `doctor`,
-  `migrate`, `version`
+  `migrate`, `version`, `resource-inspect`, `resource-remind`,
+  `resource-migrate`, `resource-defer`
+- **Optional Magpie integration** — `scripts/integrate-magpie.cjs` (see
+  "Optional Magpie skills integration" below)
 - **Agent-side** (invoked by agents, rarely by hand) — `dispatch ...`,
   `interrupt`, `doc-edit`, `hook ...`
 
@@ -397,9 +441,48 @@ Global flags: `--project PATH`, `--session ID`, `--user-data-root`,
 
 ```bash
 npm update -g fstar-workflow     # or: npm install -g fstar-workflow@latest
-fstar update                     # refresh the installed resources in your projects
+fstar update                     # refresh the shared global resources once, for all projects
 fstar doctor                     # confirm everything is healthy
 ```
+
+A running session may have the previous resource version cached; restart the
+session (or clear/compact it) for the new version to take effect.
+
+## Optional Magpie skills integration
+
+If you use [Magpie](https://magpie.dev), install-time integration can hand
+fstar's named skills over to Magpie's library through its public CLI:
+
+```bash
+node scripts/integrate-magpie.cjs                # installs globally, then offers the hand-over
+node scripts/integrate-magpie.cjs --dry-run      # never writes anything
+fstar install --host claude --magpie             # opt-in hand-over as part of an install
+```
+
+Facts and boundaries (verified against magpie 0.1.4380 on 2026-11-20):
+
+- The hand-over is opt-in (`fstar install --magpie`) or run through the
+  script; a plain `fstar install` never touches Magpie.
+- Discovery checks `PATH` first, then the standard app location
+  (`/Applications/magpie.app/Contents/MacOS/magpie`). No Magpie found → the
+  step is skipped and the base fstar install is unaffected.
+- `FSTAR_MAGPIE_BINARY` and `FSTAR_MAGPIE_AGENTS_SOURCE` redirect the binary
+  and the staging directory, so an isolated run never reaches the real app.
+- Only the public `magpie library skill hand-over <name>` command is used,
+  with a bounded timeout and argv (never a shell string). fstar stages its
+  skills into `~/.agents/skills` first; a user's same-named skill is never
+  overwritten (reported as a conflict).
+- Re-running is idempotent: skills already handed over with the same content
+  fingerprint are skipped.
+- fstar does NOT edit Magpie-private files (`library.json`,
+  `providers.json`), never changes models, accounts, providers, or other
+  skills' routing, and does not import hooks or sub-agent definitions —
+  Magpie's `agents` are coding tools, not fstar roles. Hooks and agent cards
+  stay in the tool-native global host entry described above.
+- Updating or removing Magpie-managed skills has no verified public CLI
+  path: manage those through Magpie itself. `fstar` only removes local
+  staged entries it still owns and that still match the recorded
+  fingerprint.
 
 ## Development
 

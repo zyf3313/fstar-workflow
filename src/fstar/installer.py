@@ -145,23 +145,7 @@ def roots_from_args(args, *, bundle_root: Optional[Path] = None) -> Roots:
     # .fstar/.schema-version lives, not the --project override alone.
     project_root = Path(project).expanduser() if project else find_project_root(Path.cwd())
     if "claude" not in host_roots:
-        user_level = bool(getattr(args, "user_level", False))
-        # Read-only commands (doctor/version/...) must resolve without
-        # failing outside a project; they never act on the host root.
-        writes_host = getattr(args, "command", None) in ("install", "update", "uninstall")
-        if not user_level and project_root is not None:
-            host_roots["claude"] = project_root / ".claude"
-        elif user_level or not writes_host:
-            host_roots["claude"] = Path.home() / ".claude"
-        else:
-            raise DomainError(
-                "host_root_required",
-                "No fstar project in the current directory and no host root was given; "
-                "run inside an fstar project, pass --user-level to install to ~/.claude, "
-                "or run fstar init first",
-                {"hint_user_level": "--user-level", "hint_init": "fstar init",
-                 "searched_from": str(Path.cwd())},
-            )
+        host_roots["claude"] = default_host_root(user_root)
     return Roots(
         user_root=user_root,
         runtime_root=runtime_root,
@@ -173,6 +157,18 @@ def roots_from_args(args, *, bundle_root: Optional[Path] = None) -> Roots:
 
 def _package_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def default_host_root(user_root: Optional[Path] = None) -> Path:
+    """The host root a default install/update targets (PI-I3 global default).
+
+    Global is the default delivery target (R-001/D-001): the user-level
+    ``~/.claude`` skills/agents/hooks entry, explicitly derived from the same
+    user root the cache lives under so tests and tools can redirect it as one
+    unit. ``~`` still expands through ``Path.home()``, so a redirected HOME in
+    tests isolates the real host settings.
+    """
+    return Path.home() / ".claude"
 
 
 def load_bundle_manifest(bundle_root: Optional[Path] = None) -> dict:
@@ -2196,6 +2192,17 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None) -> dict
                             "line": 1,
                             "message": "An installer transaction did not finish; the next install/update recovers it",
                             "details": {"operation_id": operation_id}} for operation_id in pending]
+    # A resource migration writes its own journal (the installer's recovery
+    # pass only replays its own transactions inside the roots it resolves),
+    # so an interrupted migration is reported here instead of staying silent.
+    migration_diagnostics = [{"code": "resource_migration_pending",
+                              "path": str(resolved.user_root / "install-backups" / operation_id),
+                              "line": 1,
+                              "message": "A resource migration did not finish; the next fstar resource-migrate restores what it removed",
+                              "details": {"operation_id": operation_id}}
+                             for operation_id in sorted(
+                                 journal.parent.name for journal in
+                                 (resolved.user_root / "install-backups").glob("mig-res-*/journal.jsonl"))]
     host_file_diagnostics = _doctor_host_files(resolved)
     return {
         "schema": "fstar.doctor.v1",
@@ -2214,6 +2221,7 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None) -> dict
                            if manifest_problem else [])
                         + missing_entries
                         + pending_diagnostics
+                        + migration_diagnostics
                         + host_file_diagnostics),
         "entries": {"total": len(entry_index.get("entries", [])),
                     "by_host": _entries_by_host(entry_index),
@@ -2225,9 +2233,12 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None) -> dict
         "schema_report": _schema_report(resolved),
         "auto_commit": _auto_commit_report(resolved),
         "pending_transactions": pending,
+        "pending_resource_migrations": [item["details"]["operation_id"]
+                                        for item in migration_diagnostics],
         "healthy": (not diagnostics and not selection.problems and not manifest_problem
                     and not missing_entries
                     and not pending_diagnostics
+                    and not migration_diagnostics
                     and not host_file_diagnostics),
         "read_only": True,
     }
@@ -2419,6 +2430,9 @@ def register_commands(subparsers) -> None:
     install.add_argument("--dry-run", action="store_true", help="print the plan without writing")
     install.add_argument("--conflict", choices=list(CONFLICT_POLICIES), default="keep",
                          help="treatment for installer-owned files modified by the user")
+    install.add_argument("--magpie", action="store_true",
+                         help="optional: hand fstar's named skills over to Magpie "
+                              "(skipped when Magpie is absent; never fails the install)")
     install.add_argument("--user-level", action="store_true",
                          help="target ~/.claude instead of the current fstar project's .claude")
     install.add_argument("--storage", choices=list(STORAGE_MODES), default=None,
@@ -2498,7 +2512,31 @@ def _handle_install(args):
     if _declines_confirmation(args, plan):
         return {"dry_run": False, "aborted": True, "reason": "user_declined",
                 "host_roots": plan["roots"]["host_roots"], "warnings": plan["warnings"]}
-    return {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
+    result = {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
+    if getattr(args, "magpie", False):
+        # Optional, opt-in integration: a missing or failing Magpie degrades
+        # the report and never fails the base install.
+        result["magpie"] = _optional_magpie_integration(roots)
+    return result
+
+
+def _optional_magpie_integration(roots: Roots) -> dict:
+    """Hand fstar's named skills over to Magpie, best effort.
+
+    Never raises: the base fstar install already succeeded, and an absent or
+    broken Magpie must not turn a successful install into a failure. Only the
+    public Magpie CLI is used; Magpie-private files are never touched.
+    """
+    try:
+        from .magpie import default_agents_source, integrate
+
+        skills_root = _package_root() / "resources" / "skills"
+        return integrate(skills_root=skills_root,
+                         agents_source=default_agents_source(),
+                         user_root=roots.user_root)
+    except Exception as exc:
+        return {"schema": "fstar.magpie-integration.v1", "status": "degraded",
+                "reason": "magpie integration failed: %s" % exc, "skills": []}
 
 
 def _initialize_storage_for_install(args, storage: str) -> None:

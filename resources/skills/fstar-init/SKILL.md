@@ -21,6 +21,8 @@ Ask the user only when they raise it; otherwise use the default. When the storag
 
 Record the choice with `fstar init <project-path> --storage <mode>` (or `fstar install --storage <mode>` when installing). The mode is chosen once: an already-initialized project keeps it, and data is never moved silently.
 
+Initialization does not create per-project workflow resources: skills, agent cards, and hooks are installed and updated once in the shared global entry, so a freshly initialized project follows the global version instead of getting its own copy. If the user asks about project-local resources, explain the global default and the explicit per-project override, and keep the project's own tasks, specs, and identity untouched.
+
 In `user-directory` mode every `.fstar/...` path below is an identity path inside the project data root, not a directory inside the repository.
 
 1. Explore the project: directory structure, frameworks, build and test files, package manifests, and existing authoritative documents. Do not ask the user to confirm the discovered facts.

@@ -349,8 +349,83 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
             lines.append(INIT_PROMPT)
             lines.append("")
     lines.append(learn_hint)
+    lines.extend(_migration_hint(located, session_id, runtime_root=runtime_root))
     return {"text": "\n".join(lines), "session_id": session_id,
             "initialized": project_root is not None, "current_task": task_summary}
+
+
+def _migration_hint(located: dict, session_id: Optional[str], *,
+                    runtime_root: Optional[Path] = None) -> List[str]:
+    """Read-only global-vs-legacy resource note (D-003).
+
+    This path performs ZERO writes: not to the project, tasks, resources, or
+    the runtime root. It reads the shared inspection result and the already
+    recorded reminder state (delivery/deferral) and reports what the caller
+    should know.
+
+    Showing the migration question is a separate explicit operation
+    (``fstar resource-remind``): it atomically checks and records the
+    delivery for (project identity, target resource version, session id) and
+    returns whether the question may be shown. The hook never records a
+    decision, so it never claims it saved one.
+    """
+    project_root = located.get("project_root")
+    user = located.get("user_root")
+    if project_root is None:
+        return []
+    if runtime_root is None:
+        runtime_root = user / "runtime"
+    try:
+        from ..global_resources import (inspect_project, delivered_this_session,
+                                        is_deferred, _project_identity)
+        from ..installer import load_bundle_manifest, default_host_root
+        report = inspect_project(project_root=project_root, user_root=user,
+                                 host_roots={"claude": default_host_root(user)})
+        target = str(load_bundle_manifest().get("resource_version", ""))
+        identity = _project_identity(project_root, user)
+        deferred = is_deferred(runtime_root=runtime_root, project_identity=identity,
+                                target_version=target)
+        already = delivered_this_session(runtime_root=runtime_root,
+                                         project_identity=identity,
+                                         target_version=target, session_id=session_id or "")
+    except Exception:
+        # The session hook must not fail because of the resource check.
+        return []
+    legacy = report.get("legacy", {})
+    if not legacy.get("count"):
+        return []
+    health = report.get("global_health", {})
+    lines = ["## fstar resources", ""]
+    if not health.get("usable"):
+        if health.get("reason") == "not_installed":
+            lines.append("This project carries %d per-project fstar resource item(s), but no "
+                         "fstar-owned global entry is installed for %s. Install the global "
+                         "entry first (`fstar install --host claude`); migrating this project "
+                         "is only safe once the shared global delivery is healthy."
+                         % (legacy["count"], health.get("host_root", "the global host root")))
+        else:
+            lines.append("This project carries %d per-project fstar resource item(s) and the "
+                         "global fstar entry is incomplete or modified (%d issue(s)); resolve "
+                         "it (fstar doctor) before migrating this project."
+                         % (legacy["count"], len(health.get("problems") or [])))
+        lines.append("")
+        return lines
+    if deferred or already:
+        # The user deferred this project for this target version, or the
+        # question was already shown and claimed in this session: stay quiet
+        # (no section at all, so nothing is injected into the session).
+        return []
+    lines.append("This project carries %d per-project fstar resource item(s) (copies/pin) while "
+                 "the shared global delivery (version %s) is healthy. Migrating (one confirmed "
+                 "`fstar resource-migrate`) backs the copies up, removes them, keeps tasks/specs/"
+                 "identity, and lets one global update serve every migrated project; modified "
+                 "or unowned files are kept and reported. Ask the user at most once per session: "
+                 "run `fstar resource-remind` first (it decides and records whether the question "
+                 "may be shown), then `fstar resource-migrate --confirmation FILE` on approval "
+                 "or `fstar resource-defer` to postpone."
+                 % (legacy["count"], report.get("global_target_version", "?")))
+    lines.append("")
+    return lines
 
 
 # ---------------------------------------------------------------------------

@@ -1595,9 +1595,11 @@ class TestCommandSurface(InstallerCase):
 
 
 class TestProjectDefaultHost(InstallerCase):
-    """`fstar install` defaults to the current project's .claude; user-level
-    needs an explicit --user-level. Outside a project the bare command fails
-    before building a plan (zero writes) with actionable guidance."""
+    """Global-default host resolution (R-001/D-001): every install/update
+    defaults to the user-level ~/.claude skills/agents/hooks entry, whether
+    run inside or outside a project. Explicit --host-root still wins, and
+    per-project installs are only reachable through that explicit flag; a
+    project-level install's entries stay untouched by a later default one."""
 
     def _init_project(self, root) -> Path:
         (root / ".fstar").mkdir(parents=True, exist_ok=True)
@@ -1611,10 +1613,12 @@ class TestProjectDefaultHost(InstallerCase):
         return subprocess.run([sys.executable, "-m", "fstar"] + args, capture_output=True,
                               text=True, env=environment, cwd=str(cwd))
 
-    def test_install_inside_project_defaults_to_project_claude(self):
+    def test_install_inside_project_defaults_to_global_claude(self):
         project = self._init_project(self.tmp / "proj")
+        home = self.tmp / "home"
+        home.mkdir()
         result = self._run(["--json", "--user-data-root", str(self.user_root), "install", "--host", "claude"],
-                           cwd=project)
+                           cwd=project, env={"HOME": str(home)})
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         applied = payload["applied"]
@@ -1622,28 +1626,29 @@ class TestProjectDefaultHost(InstallerCase):
         for entry in applied["files"]:
             destinations.add(Path(entry["path"]))
         self.assertTrue(destinations)
-        # Everything this install wrote outside the user data root lives in
-        # the project's .claude, not anywhere else.
+        # Global default: everything written outside the user data root lives
+        # in the user-level ~/.claude, never in the project's own .claude.
         host_written = {path for path in destinations if not _within(path, self.user_root)}
         self.assertTrue(host_written)
-        self.assertTrue(all(_within(path, project / ".claude") for path in host_written))
-        self.assertTrue((project / ".claude" / "settings.json").is_file())
-        self.assertTrue((project / ".claude" / "agents" / "fstar-implement.md").is_file())
-        self.assertTrue((project / ".claude" / "skills" / "fstar-init" / "SKILL.md").is_file())
+        self.assertTrue(all(_within(path, home / ".claude") for path in host_written))
+        self.assertTrue((home / ".claude" / "settings.json").is_file())
+        self.assertTrue((home / ".claude" / "agents" / "fstar-implement.md").is_file())
+        self.assertTrue((home / ".claude" / "skills" / "fstar-init" / "SKILL.md").is_file())
+        self.assertFalse((project / ".claude").exists())
 
-    def test_install_outside_project_errors_with_guidance(self):
+    def test_install_outside_project_still_targets_global_claude(self):
         outside = self.tmp / "outside"
         outside.mkdir()
+        home = self.tmp / "home"
+        home.mkdir()
         before = _tree_snapshot(self.user_root)
         result = self._run(["--json", "--user-data-root", str(self.user_root), "install", "--host", "claude"],
-                           cwd=outside)
-        self.assertNotEqual(result.returncode, 0)
-        payload = json.loads(result.stderr)
-        self.assertEqual(payload["error"]["code"], "host_root_required")
-        message = payload["error"]["message"]
-        self.assertIn("--user-level", message)
-        self.assertIn("init", message)
-        self.assertEqual(_tree_snapshot(self.user_root), before)
+                           cwd=outside, env={"HOME": str(home)})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertTrue((home / ".claude" / "settings.json").is_file())
+        self.assertTrue((home / ".claude" / "skills" / "fstar-init" / "SKILL.md").is_file())
+        self.assertFalse((outside / ".claude").exists())
 
     def test_install_user_level_targets_home_claude(self):
         home = self.tmp / "home"
@@ -1687,64 +1692,49 @@ class TestProjectDefaultHost(InstallerCase):
         self.assertFalse((home / ".claude").exists())
         self.assertFalse((project / ".claude").exists())
 
-    def test_update_user_level_targets_recorded_user_level_install(self):
+    def test_update_targets_recorded_global_install(self):
         home = self.tmp / "home"
         home.mkdir()
         project = self._init_project(self.tmp / "proj")
         result = self._run(["--json", "--user-data-root", str(self.user_root),
-                            "install", "--user-level", "--host", "claude"],
+                            "install", "--host", "claude"],
                            cwd=project, env={"HOME": str(home)})
         self.assertEqual(result.returncode, 0, result.stderr)
         marker = home / ".claude" / "skills" / "fstar-init" / "SKILL.md"
         self.assertTrue(marker.is_file())
         before = _sha(marker)
-        # Bare update inside the project resolves the project root; with no
-        # install recorded there it must refuse instead of half-updating.
+        # A default update resolves the same global root and succeeds; a
+        # second explicit --user-level target would be a different root and
+        # must not silently reuse this install.
         result = self._run(["--json", "--user-data-root", str(self.user_root), "update"],
                            cwd=project, env={"HOME": str(home)})
-        self.assertNotEqual(result.returncode, 0)
-        payload = json.loads(result.stderr)
-        self.assertEqual(payload["error"]["code"], "uninstall_host_root_mismatch")
-        # --user-level selects the recorded root and the update succeeds.
-        result = self._run(["--json", "--user-data-root", str(self.user_root),
-                            "update", "--user-level"], cwd=project, env={"HOME": str(home)})
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         applied = payload["applied"]
-        # An unchanged install reuses the recorded settings groups rather
-        # than rewriting them; either way the touched path is user-level.
         touched = [Path(entry["path"]) for entry in applied["settings"]]
         touched += [Path(entry["path"]) for entry in applied.get("reused", [])]
         self.assertTrue(touched)
         self.assertTrue(all(_within(path, home / ".claude") for path in touched))
         self.assertFalse((project / ".claude").exists())
 
-    def test_bare_uninstall_in_project_leaves_user_level_install_alone(self):
+    def test_bare_uninstall_in_project_targets_global_default(self):
         home = self.tmp / "home"
         home.mkdir()
         project = self._init_project(self.tmp / "proj")
-        # User-level install recorded in this user root's manifest.
+        # Default install inside the project now records the global root.
         result = self._run(["--json", "--user-data-root", str(self.user_root),
-                            "install", "--user-level", "--host", "claude"],
+                            "install", "--host", "claude"],
                            cwd=project, env={"HOME": str(home)})
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((home / ".claude" / "settings.json").is_file())
-        user_settings = _sha(home / ".claude" / "settings.json")
-        # Bare uninstall inside the project resolves the project root; the
-        # recorded install lives in the fake home. Refusing to guess beats
-        # half-removing: the command errors with both roots named and
-        # nothing is touched.
-        before = _tree_snapshot(self.user_root)
+        before_settings = _sha(home / ".claude" / "settings.json")
+        # A bare uninstall inside the project resolves the same global root
+        # and removes the unmodified owned entries.
         result = self._run(["--json", "--user-data-root", str(self.user_root),
                             "uninstall", "--host", "claude"],
                            cwd=project, env={"HOME": str(home)})
-        self.assertNotEqual(result.returncode, 0)
-        payload = json.loads(result.stderr)
-        self.assertEqual(payload["error"]["code"], "uninstall_host_root_mismatch")
-        self.assertIn("--user-level", payload["error"]["message"])
-        self.assertTrue((home / ".claude" / "settings.json").is_file())
-        self.assertEqual(_sha(home / ".claude" / "settings.json"), user_settings)
-        self.assertEqual(_tree_snapshot(self.user_root), before)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse((home / ".claude" / "settings.json").exists())
 
     def test_uninstall_user_level_removes_user_level_install(self):
         home = self.tmp / "home"

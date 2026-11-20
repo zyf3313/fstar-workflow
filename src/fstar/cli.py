@@ -337,7 +337,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--actor-role", choices=("user", "agent", "coordinator", "implement", "check"))
     subparsers = parser.add_subparsers(dest="command", required=True)
     register_core_commands(subparsers)
-    for module in ("project", "runtime", "dispatch", "installer", "crossproject"):
+    for module in ("project", "runtime", "dispatch", "installer", "crossproject",
+                   "global_resources", "magpie"):
         _register_optional(subparsers, module)
     return parser
 
