@@ -1,0 +1,3218 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-20T11:24:57.776858Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "13817f92-d1db-4e4e-97ba-d3414a669142"
+    ],
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user"
+      },
+      "at": "2026-11-20T00:00:00Z",
+      "quote": "你当前任务你check过了就行 到已完成吧 然后开始下一个任务",
+      "reference": "会话用户验收指令",
+      "scope": "host-abstraction-magpie-router",
+      "source_id": "fd490157-93e5-4fdb-9ed5-b8fd659d129b",
+      "type": "conversation",
+      "validates": "592c93974fc9dd8cab55b4f6ca61cc7c0e6cdc6f5c0e2e12f62f2c44c8156505"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "c7abf916d8ad79ca121117936e8bacf715f0b69213d081b5686d50c358248ca6"
+      ],
+      "task": "592c93974fc9dd8cab55b4f6ca61cc7c0e6cdc6f5c0e2e12f62f2c44c8156505"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "feat/host-abstraction-magpie-router",
+  "capabilities": [],
+  "children": [],
+  "commit": "3215114d33c96474a32863fb3aa868ce32c773e8",
+  "completedAt": "2026-11-20T11:24:57.777291Z",
+  "createdAt": "2026-11-20T06:29:34.611376Z",
+  "creator": "coordinator",
+  "description": "统一各编码工具的 hooks/skills/agents 安装能力矩阵；Codex 补齐用户级 hooks、skills 通道与未验证事件；Magpie 存在时 skills 统一由其分发（软路由），缺失时回退各工具原生安装。",
+  "events": [
+    {
+      "at": "2026-11-20T06:29:34.612155Z",
+      "data": {
+        "parent": null
+      },
+      "id": "5e83c9a8-54d1-44ba-b706-ca3bb3f58720",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent"
+        },
+        "at": "2026-11-20T06:29:34.612150Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "e9a4aede-9a38-486a-973e-ec5418698757",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-20T06:29:34.673872Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-20T06:29:34.672322Z",
+          "excluded": [],
+          "id": "planning-review",
+          "included": [
+            "clarify",
+            "design",
+            "doc-check",
+            "editor",
+            "plan",
+            "prd"
+          ],
+          "reason": "用户要求作为新任务按完整流程实施",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "zyf3313",
+              "role": "user"
+            },
+            "at": "2026-11-20T06:29:34.672268Z",
+            "quote": "我的目的就是做个通用的然后能通过 magpie的能力实现共享，还有你说的skills重复配置的问题我想的是magpie应该集成的是软路由吧 如果有就直接配到magpie通过magpie统一管理如果没有 就配置到各个agents上面就好了",
+            "reference": "本会话用户关于通用共享配置与 Magpie 软路由的要求",
+            "scope": "host-abstraction-magpie-router",
+            "source_id": "9c8e7250-4fb6-4c42-b402-691be40c18a4",
+            "type": "conversation",
+            "validates": "85768fb363b03d1d7e3de00da0ae278be19ef96eaf65c46bff7c6c07d44bb611"
+          }
+        },
+        "old": null
+      },
+      "id": "085dce23-43a9-438a-b699-4785ec3691c9",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T06:29:34.672268Z",
+        "quote": "我的目的就是做个通用的然后能通过 magpie的能力实现共享，还有你说的skills重复配置的问题我想的是magpie应该集成的是软路由吧 如果有就直接配到magpie通过magpie统一管理如果没有 就配置到各个agents上面就好了",
+        "reference": "本会话用户关于通用共享配置与 Magpie 软路由的要求",
+        "scope": "host-abstraction-magpie-router",
+        "source_id": "9c8e7250-4fb6-4c42-b402-691be40c18a4",
+        "type": "conversation",
+        "validates": "85768fb363b03d1d7e3de00da0ae278be19ef96eaf65c46bff7c6c07d44bb611"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-20T06:29:34.675969Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-20T06:29:34.674469Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "archive",
+            "events",
+            "evidence",
+            "lease",
+            "recovery",
+            "task"
+          ],
+          "reason": "用户要求作为新任务按完整流程实施",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "zyf3313",
+              "role": "user"
+            },
+            "at": "2026-11-20T06:29:34.672268Z",
+            "quote": "我的目的就是做个通用的然后能通过 magpie的能力实现共享，还有你说的skills重复配置的问题我想的是magpie应该集成的是软路由吧 如果有就直接配到magpie通过magpie统一管理如果没有 就配置到各个agents上面就好了",
+            "reference": "本会话用户关于通用共享配置与 Magpie 软路由的要求",
+            "scope": "host-abstraction-magpie-router",
+            "source_id": "9c8e7250-4fb6-4c42-b402-691be40c18a4",
+            "type": "conversation",
+            "validates": "85768fb363b03d1d7e3de00da0ae278be19ef96eaf65c46bff7c6c07d44bb611"
+          }
+        },
+        "old": null
+      },
+      "id": "7513a85c-ff89-4fe0-93dd-403281b900a0",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T06:29:34.672268Z",
+        "quote": "我的目的就是做个通用的然后能通过 magpie的能力实现共享，还有你说的skills重复配置的问题我想的是magpie应该集成的是软路由吧 如果有就直接配到magpie通过magpie统一管理如果没有 就配置到各个agents上面就好了",
+        "reference": "本会话用户关于通用共享配置与 Magpie 软路由的要求",
+        "scope": "host-abstraction-magpie-router",
+        "source_id": "9c8e7250-4fb6-4c42-b402-691be40c18a4",
+        "type": "conversation",
+        "validates": "85768fb363b03d1d7e3de00da0ae278be19ef96eaf65c46bff7c6c07d44bb611"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-20T06:51:24.553127Z",
+      "data": {
+        "branch": "feat/host-abstraction-magpie-router",
+        "detached": false,
+        "snapshot": "d09a8c4f3925a09492f240e8fccd62bbcee179d522a0cdba3f98f120612ad0d8",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "7c7c0e70-8cae-4710-ae41-f248b1f0ab94",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T06:51:24.497482Z",
+        "quote": "你派一个子agent去查这个是从哪来的 然后继续当前任务开发",
+        "reference": "用户确认按完整流程实施 host 抽象/软路由任务",
+        "scope": "host-abstraction-magpie-router",
+        "source_id": "e0676dcd-6ce5-4c4f-be1e-66cadd2dd705",
+        "type": "conversation",
+        "validates": "ae60f397375fc3a1be1baca9ed803f193a092dc9bbb2b3483f132b4dffc108cb"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-20T06:51:24.571179Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "54ad9b64-a919-4745-9b7c-b653cba74c55",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T06:51:24.571176Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "cb3e373e-c536-4b3d-b3f7-dd9405b50937",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-20T06:51:24.573975Z",
+      "data": {
+        "dispatch_id": "impl-host-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "implement"
+      },
+      "id": "ee09ca40-110c-417c-b6e5-334ed984ffa9",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T06:51:24.573967Z",
+        "quote": "",
+        "reference": "dispatch impl-host-1",
+        "scope": "dispatch",
+        "source_id": "aa520def-a64b-41c1-90a2-d01ef30286ee",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T08:40:49.732400Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "previous lease expired after 90-minute implement run; same coordinator continuing"
+      },
+      "id": "284ee0bd-ac84-4732-a731-abe2917e25d0",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T08:40:49.732397Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "e6a9ed84-3f6d-4cf5-a375-f7f0f437d9ca",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-20T08:41:00.715191Z",
+      "data": {
+        "evidence_id": "56224536-a8da-4fd5-a5c1-a237c7508d6d",
+        "state": "valid"
+      },
+      "id": "bcd7f6f0-3b9e-48d5-9f06-6e2f0fbc89c8",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T08:57:57.660797Z",
+      "data": {
+        "expires_at": "2026-11-20T09:27:57.660616Z"
+      },
+      "id": "78fa7a45-dda2-41a9-8e34-20a5f8cac06e",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T08:59:21.027240Z",
+      "data": {
+        "evidence_id": "7c3e35f0-4771-4cc3-8901-f7892b44f2e2",
+        "state": "valid"
+      },
+      "id": "8c6820ba-907b-4320-b986-c1ee3080057f",
+      "source": {
+        "id": "check-host-1-agent",
+        "role": "check",
+        "session_id": "check-host-1"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T09:00:10.522849Z",
+      "data": {
+        "reason": "check-host-1 harvested valid; entering awaiting_acceptance"
+      },
+      "id": "202a166e-a88d-4c9e-8c74-c9a370003c62",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-20T09:00:57.758304Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": "re-harvest check with corrected payload (task.json removed from read_context)"
+      },
+      "id": "0689859d-579b-44ec-a4b6-50c4f6107bfa",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T09:00:57.758301Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "82714f6e-10a9-47c2-ac5c-1fec503fd059",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-20T09:01:19.390369Z",
+      "data": {
+        "evidence_id": "5173a117-dcc2-4475-b3c4-5c423303b7e4",
+        "state": "valid"
+      },
+      "id": "d9d613b1-97a6-42a1-9622-fddffb3b2fae",
+      "source": {
+        "id": "check-host-1-agent",
+        "role": "check",
+        "session_id": "check-host-1"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T09:01:40.345107Z",
+      "data": {
+        "reason": "check-host-2 harvested valid; entering awaiting_acceptance"
+      },
+      "id": "43e98d7c-006e-4461-b238-b0b31571b844",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-20T09:01:40.457029Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "5173a117-dcc2-4475-b3c4-5c423303b7e4"
+        ]
+      },
+      "id": "9d7aebc5-b333-4389-bfac-a9ebbe0d25a4",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T09:01:40.456856Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "2030895e-146f-4796-9853-98c74a6bcfb0",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-20T09:34:55.277370Z",
+      "data": {
+        "reason": "Magpie 软路由接管后原生 skills 目录被清空，Claude Code 失去 /fstar-* 手动斜杠命令入口；宿主侧仍需注入原生 skills"
+      },
+      "id": "cdff784a-9e8a-4694-91b0-ce5e02144417",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T09:20:00Z",
+        "quote": "我发现好像magpie 只是软路由的作用但是那个claude 本身agent下面还是要注入skills要不然没有办法手动使用/fstar-*相关的命令了",
+        "reference": "本会话用户在 awaiting_acceptance 阶段报告的问题（对话消息）",
+        "scope": "rework",
+        "source_id": "75566094-451d-4edb-8e37-c8954c976fd3",
+        "type": "conversation",
+        "validates": "860404114b88feb3c3702a0bd4f2a57615bddf5b426954c513b7163c8937adb2"
+      },
+      "type": "rework_requested"
+    },
+    {
+      "at": "2026-11-20T09:41:03.747476Z",
+      "data": {
+        "branch": "feat/host-abstraction-magpie-router",
+        "detached": false,
+        "snapshot": "6d9f444afc1f40a43791bd9ab44a630d1c1f9be4fe343ce484bca0cbbc4a1aaf",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "e1a5fda7-c932-4647-9b09-0b66e621db81",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T09:35:00Z",
+        "quote": "我发现好像magpie 只是软路由的作用但是那个claude 本身agent下面还是要注入skills要不然没有办法手动使用/fstar-*相关的命令了",
+        "reference": "用户在 awaiting_acceptance 报告返工问题，隐含继续实施指令（本会话消息）",
+        "scope": "start",
+        "source_id": "a7663047-991f-40c9-9433-3d1dbf575913",
+        "type": "conversation",
+        "validates": "4561fe95a2309b338173660d8eff76a0bb8ffc9ed2246263a6bf29d8a6ac90fa"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-20T09:41:38.846010Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "e6414b00-d050-4f56-a333-bb4854a7540e",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T09:41:38.846007Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "64656862-8716-4df0-aeee-21dd154bc8f1",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-20T09:41:48.432361Z",
+      "data": {
+        "dispatch_id": "impl-host-2",
+        "plan_item_ids": [
+          "P-003"
+        ],
+        "role": "implement"
+      },
+      "id": "f1a0de31-709a-42bd-8a2c-22341158f8b9",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T09:41:48.432356Z",
+        "quote": "",
+        "reference": "dispatch impl-host-2",
+        "scope": "dispatch",
+        "source_id": "5bb80f19-47c6-4ba6-98aa-4604341001fe",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T10:09:39.662309Z",
+      "data": {
+        "evidence_id": "963bebb6-42bb-4561-916f-59a7835b03e2",
+        "state": "valid"
+      },
+      "id": "d2962e09-4eba-423e-aed5-8ad75ee6aa9f",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T10:10:19.030407Z",
+      "data": {
+        "dispatch_id": "check-host-3",
+        "plan_item_ids": [
+          "P-003"
+        ],
+        "role": "check"
+      },
+      "id": "c1d932b1-7fb7-4445-a49e-03efd2c0ebfb",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T10:10:19.030403Z",
+        "quote": "",
+        "reference": "dispatch check-host-3",
+        "scope": "dispatch",
+        "source_id": "5dedd744-06b7-4b57-96ed-bf162d0d1291",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T10:32:57.996570Z",
+      "data": {
+        "expires_at": "2026-11-20T11:02:57.996559Z"
+      },
+      "id": "f2c17a67-e61b-4227-ba50-726a6e0c80eb",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T10:32:58.008211Z",
+      "data": {
+        "blockers": [],
+        "dispatch_id": "check-host-3",
+        "role": "check",
+        "status": "failed"
+      },
+      "id": "e0f875e1-6ac9-40d4-b9a0-611a63af1226",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T10:32:58.008202Z",
+        "quote": "",
+        "reference": "dispatch check-host-3",
+        "scope": "dispatch",
+        "source_id": "ce7e4023-5d2f-48f2-9048-1389c3235068",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_terminal"
+    },
+    {
+      "at": "2026-11-20T10:33:09.858784Z",
+      "data": {
+        "dispatch_id": "editor-host-doc-repair",
+        "plan_item_ids": [
+          "P-003",
+          "P-004"
+        ],
+        "role": "editor"
+      },
+      "id": "72e9d21e-99d2-4466-a415-421bef96b737",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T10:33:09.858779Z",
+        "quote": "",
+        "reference": "dispatch editor-host-doc-repair",
+        "scope": "dispatch",
+        "source_id": "b5767904-fad6-43ad-9c39-6c417ecd830a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T10:39:02.215699Z",
+      "data": {
+        "expires_at": "2026-11-20T11:09:02.215688Z"
+      },
+      "id": "81e841a2-6594-4739-85d7-d940efadfaa6",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T10:39:02.227090Z",
+      "data": {
+        "evidence_id": "cc57b8cd-64da-47cf-842b-3eaa4fe992a5",
+        "state": "stale"
+      },
+      "id": "af84e9ac-5191-4f18-bcf1-3bb612ec27af",
+      "source": {
+        "id": "coordinator",
+        "role": "editor",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T10:39:25.049373Z",
+      "data": {
+        "dispatch_id": "check-host-4",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "12f410f4-5f48-46a5-8195-b61f9c5d9e15",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T10:39:25.049367Z",
+        "quote": "",
+        "reference": "dispatch check-host-4",
+        "scope": "dispatch",
+        "source_id": "c4623fa5-897e-41fc-b66b-a29a69e6da08",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T10:43:54.486544Z",
+      "data": {
+        "expires_at": "2026-11-20T11:13:54.486530Z"
+      },
+      "id": "9cadd15e-1bff-4eda-9166-f78e416f5f15",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T10:43:54.528252Z",
+      "data": {
+        "blockers": [],
+        "dispatch_id": "check-host-4",
+        "role": "check",
+        "status": "failed"
+      },
+      "id": "c9ab936e-4318-4c28-b973-53eeaaaf766b",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T10:43:54.528239Z",
+        "quote": "",
+        "reference": "dispatch check-host-4",
+        "scope": "dispatch",
+        "source_id": "4cec0b72-2836-4477-a4ba-7a19af4c3c39",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_terminal"
+    },
+    {
+      "at": "2026-11-20T10:44:14.100485Z",
+      "data": {
+        "expires_at": "2026-11-20T11:14:14.100475Z"
+      },
+      "id": "ed76ac46-2fbc-4491-8441-4b3d8a6719a6",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T10:44:24.752576Z",
+      "data": {
+        "dispatch_id": "editor-host-doc-debug",
+        "plan_item_ids": [
+          "P-003",
+          "P-004"
+        ],
+        "role": "editor"
+      },
+      "id": "21b950a7-ffcd-496e-a054-971f87c85032",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T10:44:24.752569Z",
+        "quote": "",
+        "reference": "dispatch editor-host-doc-debug",
+        "scope": "dispatch",
+        "source_id": "2213b015-28fe-462a-8375-80253d0dcb50",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T10:49:35.984826Z",
+      "data": {
+        "expires_at": "2026-11-20T11:19:35.984810Z"
+      },
+      "id": "1bef43f4-cfa3-48af-809b-3fdf15c83ff3",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T10:49:35.996220Z",
+      "data": {
+        "evidence_id": "02434812-f693-45d8-bbd3-f700cffa4132",
+        "state": "stale"
+      },
+      "id": "79d8d299-0564-4571-a95f-3f47fbef6370",
+      "source": {
+        "id": "coordinator",
+        "role": "editor",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T10:49:36.178125Z",
+      "data": {
+        "dispatch_id": "check-host-5",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "18db40ee-41ba-4c68-978a-cf2137caa546",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T10:49:36.178120Z",
+        "quote": "",
+        "reference": "dispatch check-host-5",
+        "scope": "dispatch",
+        "source_id": "55e7dfb7-0421-405a-b223-1f9c4483f5ff",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T10:52:10.677851Z",
+      "data": {
+        "expires_at": "2026-11-20T11:22:10.677840Z"
+      },
+      "id": "2a1e5f60-a9ac-4e62-86cb-de6b1bd93488",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T10:52:10.717538Z",
+      "data": {
+        "evidence_id": "13817f92-d1db-4e4e-97ba-d3414a669142",
+        "state": "valid"
+      },
+      "id": "dabe6186-84ab-4c6a-8174-1e6ef83b7d9a",
+      "source": {
+        "id": "check-host-independent-agent",
+        "role": "check",
+        "session_id": "check-host-5"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T10:52:40.686926Z",
+      "data": {
+        "reason": "Final independent check-host-5 valid; hand off to user acceptance"
+      },
+      "id": "0f28a993-a7ac-45fa-a4d9-6916388dd80d",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-20T10:52:40.828154Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "13817f92-d1db-4e4e-97ba-d3414a669142"
+        ]
+      },
+      "id": "f0db7fda-e8d0-4c54-8526-c178b09126ab",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T10:52:40.827933Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "fffce88b-8204-4b81-83dc-42449b582b90",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-20T11:24:57.777295Z",
+      "data": {
+        "evidence_refs": [
+          "13817f92-d1db-4e4e-97ba-d3414a669142"
+        ]
+      },
+      "id": "0e9c4b9d-060d-4d74-9de5-7005ecbb46af",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "你当前任务你check过了就行 到已完成吧 然后开始下一个任务",
+        "reference": "会话用户验收指令",
+        "scope": "host-abstraction-magpie-router",
+        "source_id": "fd490157-93e5-4fdb-9ed5-b8fd659d129b",
+        "type": "conversation",
+        "validates": "592c93974fc9dd8cab55b4f6ca61cc7c0e6cdc6f5c0e2e12f62f2c44c8156505"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "07ab64d983d5c7f64e9dd8bb2196da91364eafc82c7436b5863dfa1fcc5d2630",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "3d432eb11931c373e11bf511b669968b988fe2deb0d9a6895e379fb09db577a5"
+          },
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "60bb656b2a282a72cc61250c6f5da1eb2153cb3d7d70fdcabcb141eb72a513c7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "4b674d4ffbd2d1946e1f811215192a6e2f5a6a652f5b830f22a047e37fe2cb5f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/magpie.py",
+            "sha256": "40d8040ab0c96f51831e1ace20bf61e3c81fb8a31dc2aed8f484f79be455c5aa"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/registration.py",
+            "sha256": "4333dc2898683f42ee56c3c8a50e0cc5e472623bb78bfa661d35a1967cb9042b"
+          },
+          {
+            "exists": true,
+            "path": "tests/__init__.py",
+            "sha256": "14e798dad0ac4ecf1101c3a8b3a86128a795cb12ca4042f039eb88410c0955e8"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "9a78abc44ce1a52f68f6ff93032a85302c16d28ac53d8734f898a3010667c7db"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "15362ace7621614d038e3b22c92fb38c68738cd6ec208bc3934e56e8184bf377"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "e20d7af5ec51f6091f4a4a235db5f4e277ed60385fce64bc83e84cf2ba9337fc"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_magpie.py",
+            "sha256": "69994424fdf7d947c9ac85300467bdb57442c3dc46eb5000501a652a476cd5d9"
+          }
+        ]
+      },
+      "dispatch_id": "impl-host-1",
+      "id": "56224536-a8da-4fd5-a5c1-a237c7508d6d",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/plan.md",
+          "sha256": "32e9e96662b58d97ccfeb76b5b4a06a4ff2c6879084436346cae05dc8b7acf1a"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/clarify.md",
+          "sha256": "9f1d25d4bcb0a14a70b4f7305744a7c1be8bec58c5ba2161eb7c1bce9ee2c475"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "sha256": "0034317fcd1b28e4840fee2e16b8b770415a34201991083e76c19782ca1e380c"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "sha256": "8229b0d5d41eca940676eadcd55e7aff20ff6a01b50ecc8ff4d94070e7e51beb"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/frontend/hook-guidelines.md",
+          "sha256": "49801cb1eb7c779e9b01cdeabcd47dd0bc12be018405fc248646cf8a829aaf6c"
+        },
+        {
+          "path": ".fstar/specs/frontend/directory-structure.md",
+          "sha256": "731713ac66d21f383bb49fb19d30888aa8db9e50acb5c77329fa4b98546cd7bc"
+        },
+        {
+          "path": ".fstar/specs/frontend/component-guidelines.md",
+          "sha256": "7ca6ea4f9305a8267b7570505f9ebf6030bb5911cbe3f2a135cfb7ebd402805b"
+        },
+        {
+          "path": ".fstar/specs/frontend/state-management.md",
+          "sha256": "a007d40daba4db27f1fcfad8d6192d5de2cd385f4bbbd0161a39a3e4c0dd6c1b"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/frontend/quality-guidelines.md",
+          "sha256": "ac5a4da858d93492cbb4c721b164850b625f38696905e463e8feb5968eae78bc"
+        },
+        {
+          "path": ".fstar/specs/frontend/type-safety.md",
+          "sha256": "1ced8d3ea4f5e6e63599a5a606db52fa86b3973046db57d550ed2964a8d4c40f"
+        },
+        {
+          "path": ".fstar/specs/backend/database-guidelines.md",
+          "sha256": "fa04a37014f16acc116e095d97ab02937cc06a0e120c4b96c3b5702f38fb06cb"
+        },
+        {
+          "path": ".fstar/specs/backend/directory-structure.md",
+          "sha256": "57edf3199e6baca66a782280a52083ef5d8b65ab3c6b436d7efd92410a3f94cc"
+        },
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/backend/logging-guidelines.md",
+          "sha256": "03a0398c3480af11a5cecf68c025d505b0090f38ede899b78bd85d6ff97752c4"
+        },
+        {
+          "path": ".fstar/specs/backend/error-handling.md",
+          "sha256": "f6b4145a8fcdfd8f0006bec6dd9c9b4a7fa69a7bd5f6e0c851dee5db39ea7273"
+        },
+        {
+          "path": ".fstar/specs/backend/quality-guidelines.md",
+          "sha256": "262fa49d9c4bd29b8490edd0c11ddb8f7e23fd2eb4418c8a388e176aab550357"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        },
+        {
+          "path": ".fstar/specs/guides/code-reuse-thinking-guide.md",
+          "sha256": "86fd10dc10916c00309714aa2275234f01b0ad40d21a485d43b3422e7ca79397"
+        },
+        {
+          "path": ".fstar/specs/guides/cross-layer-thinking-guide.md",
+          "sha256": "4c54130c02a7b8bc43f9a012e0837f798f43e2d137d6bc6d7498d2adb0bac3f4"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": "resources/runtime/routing.md",
+          "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-20T08:41:00.709967Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "stale_reasons": [
+        {
+          "reason": "Magpie 软路由接管后原生 skills 目录被清空，Claude Code 失去 /fstar-* 手动斜杠命令入口；宿主侧仍需注入原生 skills",
+          "type": "rework_requested"
+        }
+      ],
+      "state": "stale",
+      "unverified_inputs": [],
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "0918e3c8645bbb2d6b67f68668b7b4d29ac68aea72134518a473ee87fd3dee28"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9b49e322b13eaa362ca924c2262521d6046871aaaf0b982836286f068c2f6359"
+            },
+            {
+              "id": "R-003",
+              "sha256": "284640a9bb377c58998075e1990020ca6f9ff5ae0aeca87dbbec4653b23cc1ed"
+            },
+            {
+              "id": "R-004",
+              "sha256": "417874942f3c5a28b64fe22f0c0ad32ff5814182243589c21088f31cbc3173b4"
+            },
+            {
+              "id": "R-005",
+              "sha256": "b4b1364f074ad9822f91b0c75ccc86227de3ee3ada43a777048136876b076dd3"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "0918e3c8645bbb2d6b67f68668b7b4d29ac68aea72134518a473ee87fd3dee28"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9b49e322b13eaa362ca924c2262521d6046871aaaf0b982836286f068c2f6359"
+            },
+            {
+              "id": "R-003",
+              "sha256": "284640a9bb377c58998075e1990020ca6f9ff5ae0aeca87dbbec4653b23cc1ed"
+            },
+            {
+              "id": "R-004",
+              "sha256": "417874942f3c5a28b64fe22f0c0ad32ff5814182243589c21088f31cbc3173b4"
+            },
+            {
+              "id": "R-005",
+              "sha256": "b4b1364f074ad9822f91b0c75ccc86227de3ee3ada43a777048136876b076dd3"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "7434235faa1335905cfa3fb9802412b8c8921af410f88ba39dc0eab8120ddca0"
+            },
+            {
+              "id": "D-002",
+              "sha256": "5c43900c7bd61a214febebf27ec108562e229692ae1568b963c732b0bca2c5d4"
+            },
+            {
+              "id": "D-003",
+              "sha256": "ed31dea94b6f10ede2976b308d0dac41096057ec384db4c34799d092e6a8a785"
+            },
+            {
+              "id": "D-004",
+              "sha256": "286764fdf4015790a644d4ff7b66fb4b3bebe8a9f7d40165770442d03a27abf8"
+            },
+            {
+              "id": "D-005",
+              "sha256": "cb68ccd9d7dac7ebbec19a313dc69ddf8be246d3278b3035f9cded90b9f499c5"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "7434235faa1335905cfa3fb9802412b8c8921af410f88ba39dc0eab8120ddca0"
+            },
+            {
+              "id": "D-002",
+              "sha256": "5c43900c7bd61a214febebf27ec108562e229692ae1568b963c732b0bca2c5d4"
+            },
+            {
+              "id": "D-003",
+              "sha256": "ed31dea94b6f10ede2976b308d0dac41096057ec384db4c34799d092e6a8a785"
+            },
+            {
+              "id": "D-004",
+              "sha256": "286764fdf4015790a644d4ff7b66fb4b3bebe8a9f7d40165770442d03a27abf8"
+            },
+            {
+              "id": "D-005",
+              "sha256": "cb68ccd9d7dac7ebbec19a313dc69ddf8be246d3278b3035f9cded90b9f499c5"
+            }
+          ]
+        }
+      ],
+      "validation_facts": []
+    },
+    {
+      "delivery": {
+        "digest": "0b40fcb979136b92a650f03392904d743680b48126471a6fcead7afb902acf72",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/check-report.md",
+            "sha256": "b4ac59488f31d1dad79851526eecc6e5e593c98f21998302b9735a83e1bffe8f"
+          },
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "3d432eb11931c373e11bf511b669968b988fe2deb0d9a6895e379fb09db577a5"
+          },
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "60bb656b2a282a72cc61250c6f5da1eb2153cb3d7d70fdcabcb141eb72a513c7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "4b674d4ffbd2d1946e1f811215192a6e2f5a6a652f5b830f22a047e37fe2cb5f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/magpie.py",
+            "sha256": "40d8040ab0c96f51831e1ace20bf61e3c81fb8a31dc2aed8f484f79be455c5aa"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/registration.py",
+            "sha256": "4333dc2898683f42ee56c3c8a50e0cc5e472623bb78bfa661d35a1967cb9042b"
+          },
+          {
+            "exists": true,
+            "path": "tests/__init__.py",
+            "sha256": "14e798dad0ac4ecf1101c3a8b3a86128a795cb12ca4042f039eb88410c0955e8"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "9a78abc44ce1a52f68f6ff93032a85302c16d28ac53d8734f898a3010667c7db"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "15362ace7621614d038e3b22c92fb38c68738cd6ec208bc3934e56e8184bf377"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "e20d7af5ec51f6091f4a4a235db5f4e277ed60385fce64bc83e84cf2ba9337fc"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_magpie.py",
+            "sha256": "69994424fdf7d947c9ac85300467bdb57442c3dc46eb5000501a652a476cd5d9"
+          }
+        ]
+      },
+      "dispatch_id": "check-host-1",
+      "environment": {
+        "isolation": "tests/__init__.py guard; temp roots; fake Magpie binary",
+        "node": "node --test tests/test_package.cjs",
+        "os": "darwin",
+        "python": "python3 (785-test suite)"
+      },
+      "id": "7c3e35f0-4771-4cc3-8901-f7892b44f2e2",
+      "input_files": [
+        {
+          "path": "src/fstar/runtime/registration.py",
+          "sha256": "4333dc2898683f42ee56c3c8a50e0cc5e472623bb78bfa661d35a1967cb9042b"
+        },
+        {
+          "path": "src/fstar/runtime/hooks.py",
+          "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
+        },
+        {
+          "path": "src/fstar/installer.py",
+          "sha256": "4b674d4ffbd2d1946e1f811215192a6e2f5a6a652f5b830f22a047e37fe2cb5f"
+        },
+        {
+          "path": "src/fstar/magpie.py",
+          "sha256": "40d8040ab0c96f51831e1ace20bf61e3c81fb8a31dc2aed8f484f79be455c5aa"
+        },
+        {
+          "path": "tests/__init__.py",
+          "sha256": "14e798dad0ac4ecf1101c3a8b3a86128a795cb12ca4042f039eb88410c0955e8"
+        },
+        {
+          "path": "tests/test_installer.py",
+          "sha256": "e20d7af5ec51f6091f4a4a235db5f4e277ed60385fce64bc83e84cf2ba9337fc"
+        },
+        {
+          "path": "tests/test_hooks.py",
+          "sha256": "15362ace7621614d038e3b22c92fb38c68738cd6ec208bc3934e56e8184bf377"
+        },
+        {
+          "path": "tests/test_e2e_scenarios.py",
+          "sha256": "9a78abc44ce1a52f68f6ff93032a85302c16d28ac53d8734f898a3010667c7db"
+        },
+        {
+          "path": "tests/test_magpie.py",
+          "sha256": "69994424fdf7d947c9ac85300467bdb57442c3dc46eb5000501a652a476cd5d9"
+        },
+        {
+          "path": "README.md",
+          "sha256": "3d432eb11931c373e11bf511b669968b988fe2deb0d9a6895e379fb09db577a5"
+        },
+        {
+          "path": "package.json",
+          "sha256": "60bb656b2a282a72cc61250c6f5da1eb2153cb3d7d70fdcabcb141eb72a513c7"
+        },
+        {
+          "path": "resources/package-assets.json",
+          "sha256": "523dc0372d58c7f6268cc72101fcf5f847fe81d4e715e05b38d81a91dd1489a5"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "sha256": "0034317fcd1b28e4840fee2e16b8b770415a34201991083e76c19782ca1e380c"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "sha256": "8229b0d5d41eca940676eadcd55e7aff20ff6a01b50ecc8ff4d94070e7e51beb"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/plan.md",
+          "sha256": "32e9e96662b58d97ccfeb76b5b4a06a4ff2c6879084436346cae05dc8b7acf1a"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/clarify.md",
+          "sha256": "9f1d25d4bcb0a14a70b4f7305744a7c1be8bec58c5ba2161eb7c1bce9ee2c475"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/task.json",
+          "sha256": "97e351e4131b2ed39f81bf8fbb9224e3b5e40a7f2504336ab98218d123663986"
+        }
+      ],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-001",
+            "D-001"
+          ],
+          "result": "passed",
+          "review_method": "matrix consumed by installer (_settings_file, HOST_FILE_KINDS, skipped_capabilities) and doctor (_capability_report); unknown_host error verified; code+tests+README traceability"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "R-002",
+            "D-002"
+          ],
+          "result": "passed",
+          "review_method": "codex user-level hooks.json with 5 PascalCase events; UserPromptSubmit verified from two independent read-only sources; skills channel to $CODEX_HOME/skills; agents not-applicable; trust-review caveat in matrix/version_report/README"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "plan_item": "P-003",
+          "requirement_ids": [
+            "R-003",
+            "D-003"
+          ],
+          "result": "passed",
+          "review_method": "per-skill routing with all fallback paths (handover failure, magpie absent, owner missing, native-only) verified in code, 11 new tests, and isolated CLI smoke"
+        },
+        {
+          "command": "node scripts/build-package.cjs (x2) && node --test tests/test_package.cjs",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "R-004",
+            "R-005",
+            "D-004",
+            "D-005"
+          ],
+          "result": "passed",
+          "review_method": "share_instructions read-then-write with conflict protection verified at CLI level (written/updated/conflict-keeps-user-content); README matrix/flows; version sync 0.8.0"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-20T08:59:21.021233Z",
+      "producer": {
+        "id": "check-host-1-agent",
+        "role": "check",
+        "session_id": "check-host-1"
+      },
+      "report": {
+        "path": ".fstar/tasks/host-abstraction-magpie-router/check-report.md",
+        "sha256": "b4ac59488f31d1dad79851526eecc6e5e593c98f21998302b9735a83e1bffe8f"
+      },
+      "run_id": "check-host-1-run",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "reason": "Magpie 软路由接管后原生 skills 目录被清空，Claude Code 失去 /fstar-* 手动斜杠命令入口；宿主侧仍需注入原生 skills",
+          "type": "rework_requested"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "0918e3c8645bbb2d6b67f68668b7b4d29ac68aea72134518a473ee87fd3dee28"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9b49e322b13eaa362ca924c2262521d6046871aaaf0b982836286f068c2f6359"
+            },
+            {
+              "id": "R-003",
+              "sha256": "284640a9bb377c58998075e1990020ca6f9ff5ae0aeca87dbbec4653b23cc1ed"
+            },
+            {
+              "id": "R-004",
+              "sha256": "417874942f3c5a28b64fe22f0c0ad32ff5814182243589c21088f31cbc3173b4"
+            },
+            {
+              "id": "R-005",
+              "sha256": "b4b1364f074ad9822f91b0c75ccc86227de3ee3ada43a777048136876b076dd3"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "0918e3c8645bbb2d6b67f68668b7b4d29ac68aea72134518a473ee87fd3dee28"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9b49e322b13eaa362ca924c2262521d6046871aaaf0b982836286f068c2f6359"
+            },
+            {
+              "id": "R-003",
+              "sha256": "284640a9bb377c58998075e1990020ca6f9ff5ae0aeca87dbbec4653b23cc1ed"
+            },
+            {
+              "id": "R-004",
+              "sha256": "417874942f3c5a28b64fe22f0c0ad32ff5814182243589c21088f31cbc3173b4"
+            },
+            {
+              "id": "R-005",
+              "sha256": "b4b1364f074ad9822f91b0c75ccc86227de3ee3ada43a777048136876b076dd3"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "7434235faa1335905cfa3fb9802412b8c8921af410f88ba39dc0eab8120ddca0"
+            },
+            {
+              "id": "D-002",
+              "sha256": "5c43900c7bd61a214febebf27ec108562e229692ae1568b963c732b0bca2c5d4"
+            },
+            {
+              "id": "D-003",
+              "sha256": "ed31dea94b6f10ede2976b308d0dac41096057ec384db4c34799d092e6a8a785"
+            },
+            {
+              "id": "D-004",
+              "sha256": "286764fdf4015790a644d4ff7b66fb4b3bebe8a9f7d40165770442d03a27abf8"
+            },
+            {
+              "id": "D-005",
+              "sha256": "cb68ccd9d7dac7ebbec19a313dc69ddf8be246d3278b3035f9cded90b9f499c5"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "7434235faa1335905cfa3fb9802412b8c8921af410f88ba39dc0eab8120ddca0"
+            },
+            {
+              "id": "D-002",
+              "sha256": "5c43900c7bd61a214febebf27ec108562e229692ae1568b963c732b0bca2c5d4"
+            },
+            {
+              "id": "D-003",
+              "sha256": "ed31dea94b6f10ede2976b308d0dac41096057ec384db4c34799d092e6a8a785"
+            },
+            {
+              "id": "D-004",
+              "sha256": "286764fdf4015790a644d4ff7b66fb4b3bebe8a9f7d40165770442d03a27abf8"
+            },
+            {
+              "id": "D-005",
+              "sha256": "cb68ccd9d7dac7ebbec19a313dc69ddf8be246d3278b3035f9cded90b9f499c5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "0b40fcb979136b92a650f03392904d743680b48126471a6fcead7afb902acf72",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/check-report.md",
+            "sha256": "b4ac59488f31d1dad79851526eecc6e5e593c98f21998302b9735a83e1bffe8f"
+          },
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "3d432eb11931c373e11bf511b669968b988fe2deb0d9a6895e379fb09db577a5"
+          },
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "60bb656b2a282a72cc61250c6f5da1eb2153cb3d7d70fdcabcb141eb72a513c7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "4b674d4ffbd2d1946e1f811215192a6e2f5a6a652f5b830f22a047e37fe2cb5f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/magpie.py",
+            "sha256": "40d8040ab0c96f51831e1ace20bf61e3c81fb8a31dc2aed8f484f79be455c5aa"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/registration.py",
+            "sha256": "4333dc2898683f42ee56c3c8a50e0cc5e472623bb78bfa661d35a1967cb9042b"
+          },
+          {
+            "exists": true,
+            "path": "tests/__init__.py",
+            "sha256": "14e798dad0ac4ecf1101c3a8b3a86128a795cb12ca4042f039eb88410c0955e8"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "9a78abc44ce1a52f68f6ff93032a85302c16d28ac53d8734f898a3010667c7db"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "15362ace7621614d038e3b22c92fb38c68738cd6ec208bc3934e56e8184bf377"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "e20d7af5ec51f6091f4a4a235db5f4e277ed60385fce64bc83e84cf2ba9337fc"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_magpie.py",
+            "sha256": "69994424fdf7d947c9ac85300467bdb57442c3dc46eb5000501a652a476cd5d9"
+          }
+        ]
+      },
+      "dispatch_id": "check-host-2",
+      "environment": {
+        "isolation": "tests/__init__.py guard; temp roots; fake Magpie binary",
+        "node": "node --test tests/test_package.cjs",
+        "os": "darwin",
+        "python": "python3 (785-test suite)"
+      },
+      "id": "5173a117-dcc2-4475-b3c4-5c423303b7e4",
+      "input_files": [
+        {
+          "path": "src/fstar/runtime/registration.py",
+          "sha256": "4333dc2898683f42ee56c3c8a50e0cc5e472623bb78bfa661d35a1967cb9042b"
+        },
+        {
+          "path": "src/fstar/runtime/hooks.py",
+          "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
+        },
+        {
+          "path": "src/fstar/installer.py",
+          "sha256": "4b674d4ffbd2d1946e1f811215192a6e2f5a6a652f5b830f22a047e37fe2cb5f"
+        },
+        {
+          "path": "src/fstar/magpie.py",
+          "sha256": "40d8040ab0c96f51831e1ace20bf61e3c81fb8a31dc2aed8f484f79be455c5aa"
+        },
+        {
+          "path": "tests/__init__.py",
+          "sha256": "14e798dad0ac4ecf1101c3a8b3a86128a795cb12ca4042f039eb88410c0955e8"
+        },
+        {
+          "path": "tests/test_installer.py",
+          "sha256": "e20d7af5ec51f6091f4a4a235db5f4e277ed60385fce64bc83e84cf2ba9337fc"
+        },
+        {
+          "path": "tests/test_hooks.py",
+          "sha256": "15362ace7621614d038e3b22c92fb38c68738cd6ec208bc3934e56e8184bf377"
+        },
+        {
+          "path": "tests/test_e2e_scenarios.py",
+          "sha256": "9a78abc44ce1a52f68f6ff93032a85302c16d28ac53d8734f898a3010667c7db"
+        },
+        {
+          "path": "tests/test_magpie.py",
+          "sha256": "69994424fdf7d947c9ac85300467bdb57442c3dc46eb5000501a652a476cd5d9"
+        },
+        {
+          "path": "README.md",
+          "sha256": "3d432eb11931c373e11bf511b669968b988fe2deb0d9a6895e379fb09db577a5"
+        },
+        {
+          "path": "package.json",
+          "sha256": "60bb656b2a282a72cc61250c6f5da1eb2153cb3d7d70fdcabcb141eb72a513c7"
+        },
+        {
+          "path": "resources/package-assets.json",
+          "sha256": "523dc0372d58c7f6268cc72101fcf5f847fe81d4e715e05b38d81a91dd1489a5"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "sha256": "0034317fcd1b28e4840fee2e16b8b770415a34201991083e76c19782ca1e380c"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "sha256": "8229b0d5d41eca940676eadcd55e7aff20ff6a01b50ecc8ff4d94070e7e51beb"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/plan.md",
+          "sha256": "32e9e96662b58d97ccfeb76b5b4a06a4ff2c6879084436346cae05dc8b7acf1a"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/clarify.md",
+          "sha256": "9f1d25d4bcb0a14a70b4f7305744a7c1be8bec58c5ba2161eb7c1bce9ee2c475"
+        }
+      ],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-001",
+            "D-001"
+          ],
+          "result": "passed",
+          "review_method": "matrix consumed by installer (_settings_file, HOST_FILE_KINDS, skipped_capabilities) and doctor (_capability_report); unknown_host error verified; code+tests+README traceability"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "R-002",
+            "D-002"
+          ],
+          "result": "passed",
+          "review_method": "codex user-level hooks.json with 5 PascalCase events; UserPromptSubmit verified from two independent read-only sources; skills channel to $CODEX_HOME/skills; agents not-applicable; trust-review caveat in matrix/version_report/README"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "plan_item": "P-003",
+          "requirement_ids": [
+            "R-003",
+            "D-003"
+          ],
+          "result": "passed",
+          "review_method": "per-skill routing with all fallback paths (handover failure, magpie absent, owner missing, native-only) verified in code, 11 new tests, and isolated CLI smoke"
+        },
+        {
+          "command": "node scripts/build-package.cjs (x2) && node --test tests/test_package.cjs",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "R-004",
+            "R-005",
+            "D-004",
+            "D-005"
+          ],
+          "result": "passed",
+          "review_method": "share_instructions read-then-write with conflict protection verified at CLI level (written/updated/conflict-keeps-user-content); README matrix/flows; version sync 0.8.0"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-20T09:01:19.383983Z",
+      "producer": {
+        "id": "check-host-1-agent",
+        "role": "check",
+        "session_id": "check-host-1"
+      },
+      "report": {
+        "path": ".fstar/tasks/host-abstraction-magpie-router/check-report.md",
+        "sha256": "b4ac59488f31d1dad79851526eecc6e5e593c98f21998302b9735a83e1bffe8f"
+      },
+      "run_id": "check-host-1-run",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "reason": "Magpie 软路由接管后原生 skills 目录被清空，Claude Code 失去 /fstar-* 手动斜杠命令入口；宿主侧仍需注入原生 skills",
+          "type": "rework_requested"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "0918e3c8645bbb2d6b67f68668b7b4d29ac68aea72134518a473ee87fd3dee28"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9b49e322b13eaa362ca924c2262521d6046871aaaf0b982836286f068c2f6359"
+            },
+            {
+              "id": "R-003",
+              "sha256": "284640a9bb377c58998075e1990020ca6f9ff5ae0aeca87dbbec4653b23cc1ed"
+            },
+            {
+              "id": "R-004",
+              "sha256": "417874942f3c5a28b64fe22f0c0ad32ff5814182243589c21088f31cbc3173b4"
+            },
+            {
+              "id": "R-005",
+              "sha256": "b4b1364f074ad9822f91b0c75ccc86227de3ee3ada43a777048136876b076dd3"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "0918e3c8645bbb2d6b67f68668b7b4d29ac68aea72134518a473ee87fd3dee28"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9b49e322b13eaa362ca924c2262521d6046871aaaf0b982836286f068c2f6359"
+            },
+            {
+              "id": "R-003",
+              "sha256": "284640a9bb377c58998075e1990020ca6f9ff5ae0aeca87dbbec4653b23cc1ed"
+            },
+            {
+              "id": "R-004",
+              "sha256": "417874942f3c5a28b64fe22f0c0ad32ff5814182243589c21088f31cbc3173b4"
+            },
+            {
+              "id": "R-005",
+              "sha256": "b4b1364f074ad9822f91b0c75ccc86227de3ee3ada43a777048136876b076dd3"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "7434235faa1335905cfa3fb9802412b8c8921af410f88ba39dc0eab8120ddca0"
+            },
+            {
+              "id": "D-002",
+              "sha256": "5c43900c7bd61a214febebf27ec108562e229692ae1568b963c732b0bca2c5d4"
+            },
+            {
+              "id": "D-003",
+              "sha256": "ed31dea94b6f10ede2976b308d0dac41096057ec384db4c34799d092e6a8a785"
+            },
+            {
+              "id": "D-004",
+              "sha256": "286764fdf4015790a644d4ff7b66fb4b3bebe8a9f7d40165770442d03a27abf8"
+            },
+            {
+              "id": "D-005",
+              "sha256": "cb68ccd9d7dac7ebbec19a313dc69ddf8be246d3278b3035f9cded90b9f499c5"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "7434235faa1335905cfa3fb9802412b8c8921af410f88ba39dc0eab8120ddca0"
+            },
+            {
+              "id": "D-002",
+              "sha256": "5c43900c7bd61a214febebf27ec108562e229692ae1568b963c732b0bca2c5d4"
+            },
+            {
+              "id": "D-003",
+              "sha256": "ed31dea94b6f10ede2976b308d0dac41096057ec384db4c34799d092e6a8a785"
+            },
+            {
+              "id": "D-004",
+              "sha256": "286764fdf4015790a644d4ff7b66fb4b3bebe8a9f7d40165770442d03a27abf8"
+            },
+            {
+              "id": "D-005",
+              "sha256": "cb68ccd9d7dac7ebbec19a313dc69ddf8be246d3278b3035f9cded90b9f499c5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "01addbc8b9b6cf93ca28aaaa2cfc2642fec4a142dac5d9ce4c168895303bdb0f",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "9999a04c797261fad63c3a0d2ac6e0a39508b696443e72c043d0bd473ab52c5f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "9f6dd356605f54bc28efd1ac2bb4282e7c4084a1ea652d2973f2fbb1427f57da"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/magpie.py",
+            "sha256": "0eda775fdc210b431c9560f9d5c483ec7e6106bf454a2d934a949ecee64d8fac"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/registration.py",
+            "sha256": "71ca52af5d2ee42cd697586a140eb2dc9b25d2a70763e42c0cffe37c762c4991"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_magpie.py",
+            "sha256": "2f37e3ce274e1d36afbd88f331f283e87eedbb63194cc7af7334e902cf707009"
+          }
+        ]
+      },
+      "dispatch_id": "impl-host-2",
+      "id": "963bebb6-42bb-4561-916f-59a7835b03e2",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "sha256": "7d1772286cf5dcf7d278573ba91ef2af7213168436cffcb955e28f2587fd8d5c"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "sha256": "c6c6bc0f9b4f0f74e31ec5e0470ba59047bc9e58ef15456557b239234ba4436f"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/plan.md",
+          "sha256": "8175b448b370d46575b9c93e47e449fd72ade7cacf09777db1a03998b8c41ca3"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/clarify.md",
+          "sha256": "b805bd5f39b8d3263dce116d0a14b0e685714ff2c7210ede4e02dfbd97dee646"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": "resources/runtime/routing.md",
+          "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-20T10:09:39.658657Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "state": "valid",
+      "unverified_inputs": [],
+      "validates": [],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 788 tests, OK"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "16/16 pass"
+        },
+        {
+          "command": "isolated CLI smoke (temp roots, fake Magpie, env overrides)",
+          "result": "routed: native 11/11 both hosts + library handed_over; --native-only: native only; magpie absent: native install; magpie gone: doctor healthy with 1 info diagnostic, 11 native intact; idempotent rerun already_integrated"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "fc3c8740518ac19b8a25850bccc8cf3eafe07aeb176c0647c735f59b4c23b487",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+            "sha256": "828cf523f0ca26a823d00cf100a9b8d8d3b2f880f012cabe9055099ace86813f"
+          }
+        ]
+      },
+      "dispatch_id": "editor-host-doc-repair",
+      "id": "cc57b8cd-64da-47cf-842b-3eaa4fe992a5",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "sha256": "7d1772286cf5dcf7d278573ba91ef2af7213168436cffcb955e28f2587fd8d5c"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/clarify.md",
+          "sha256": "b805bd5f39b8d3263dce116d0a14b0e685714ff2c7210ede4e02dfbd97dee646"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/plan.md",
+          "sha256": "8175b448b370d46575b9c93e47e449fd72ade7cacf09777db1a03998b8c41ca3"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/check-report.md",
+          "sha256": "6491768624e39dbb4d28f144226132588a00628477a11636a8e3cea91818a1ce"
+        },
+        {
+          "path": "README.md",
+          "sha256": "9999a04c797261fad63c3a0d2ac6e0a39508b696443e72c043d0bd473ab52c5f"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-20T10:39:02.223840Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "editor",
+        "session_id": "coordinator"
+      },
+      "stale_reasons": [
+        {
+          "inputs": [
+            {
+              "field": "input_versions",
+              "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+              "reason": "reported_worker_output"
+            }
+          ],
+          "type": "unverified_inputs"
+        }
+      ],
+      "state": "stale",
+      "unverified_inputs": [
+        {
+          "field": "input_versions",
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "reason": "reported_worker_output"
+        }
+      ],
+      "validates": [],
+      "validation_facts": [
+        {
+          "command": "shasum -a 256 over 6 editor inputs before editing",
+          "result": "All matched payload; design baseline c6c6bc0f9b4f0f74e31ec5e0470ba59047bc9e58ef15456557b239234ba4436f"
+        },
+        {
+          "command": "python3 marker/ID/consistency script on doc/design.md",
+          "result": "6 paired slots unchanged; D-001..D-005 markers preserved; obsolete exclusive-routing statements removed from sections 1/2/3/7/8 and D-003/D-005; native-always and separate library field documented"
+        },
+        {
+          "command": "Editor bounded write report",
+          "result": "Only design.md changed; no production changes or test reruns; document-checklist.md not found by editor under .fstar"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "1eec880f8e5fc57008e43c2baa2e09f0043bf6a9da75b24ffad1a0c85ff98a00",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+            "sha256": "c67ae4d6001b690265a9d9d34da74daf94556d7603dc2b78e288333527a65338"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+            "sha256": "2a9d4d69646712f78598d4505092ac7c952cfcc5359d05c4188b2ed950bda104"
+          }
+        ]
+      },
+      "dispatch_id": "editor-host-doc-debug",
+      "id": "02434812-f693-45d8-bbd3-f700cffa4132",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/plan.md",
+          "sha256": "7d2703648eead0fdacf58860f06878d8b5458ee7b227aebdf177906ca084674f"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/clarify.md",
+          "sha256": "b805bd5f39b8d3263dce116d0a14b0e685714ff2c7210ede4e02dfbd97dee646"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/check-report.md",
+          "sha256": "47bc76facb0b2f785ed0bef18fd7ae55cc40aa208f69124201c3c69a34737bc0"
+        },
+        {
+          "path": "README.md",
+          "sha256": "9999a04c797261fad63c3a0d2ac6e0a39508b696443e72c043d0bd473ab52c5f"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-20T10:49:35.993610Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "editor",
+        "session_id": "coordinator"
+      },
+      "stale_reasons": [
+        {
+          "inputs": [
+            {
+              "field": "input_versions",
+              "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "input_versions",
+              "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+              "reason": "reported_worker_output"
+            }
+          ],
+          "type": "unverified_inputs"
+        }
+      ],
+      "state": "stale",
+      "unverified_inputs": [
+        {
+          "field": "input_versions",
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "input_versions",
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "reason": "reported_worker_output"
+        }
+      ],
+      "validates": [],
+      "validation_facts": [
+        {
+          "command": "shasum -a 256 over all 6 editor inputs before editing",
+          "result": "6/6 matched payload"
+        },
+        {
+          "command": "python3 marker/ID/consistency check across PRD and design",
+          "result": "6 slot pairs each preserved; R-001..R-005 and D-001..D-005 unique and paired; full document obsolete-pattern scan zero hits; historical facts labeled; R-005 tests aligned with R-003; user quotes preserved"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "c7abf916d8ad79ca121117936e8bacf715f0b69213d081b5686d50c358248ca6",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/specs/backend/index.md",
+            "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/specs/frontend/index.md",
+            "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/specs/guides/index.md",
+            "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/check-report.md",
+            "sha256": "0846f15d7784402a1e33c599f424a3f88477fba300bce5a4f74c9c2d1111a03f"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/clarify.md",
+            "sha256": "b805bd5f39b8d3263dce116d0a14b0e685714ff2c7210ede4e02dfbd97dee646"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+            "sha256": "c67ae4d6001b690265a9d9d34da74daf94556d7603dc2b78e288333527a65338"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+            "sha256": "2a9d4d69646712f78598d4505092ac7c952cfcc5359d05c4188b2ed950bda104"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/host-abstraction-magpie-router/plan.md",
+            "sha256": "7d2703648eead0fdacf58860f06878d8b5458ee7b227aebdf177906ca084674f"
+          },
+          {
+            "exists": true,
+            "path": "AGENTS.md",
+            "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+          },
+          {
+            "exists": true,
+            "path": "CONTRIBUTING.md",
+            "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+          },
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "9999a04c797261fad63c3a0d2ac6e0a39508b696443e72c043d0bd473ab52c5f"
+          },
+          {
+            "exists": true,
+            "path": "bin/fstar-bootstrap.py",
+            "sha256": "b5881f64aa87ea686f00b69ea2dd05f977a4cc7165163f6a11003f88e44964c8"
+          },
+          {
+            "exists": true,
+            "path": "bin/fstar-hook.cjs",
+            "sha256": "986e55d2e40fa49aaf4b5e535e093f84be3885f72580dd52d4dac907e2777db2"
+          },
+          {
+            "exists": true,
+            "path": "bin/fstar.cjs",
+            "sha256": "d3950996ca48c4dee14d79a2682be700fcecbebb2786807714bd834073f1759f"
+          },
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "60bb656b2a282a72cc61250c6f5da1eb2153cb3d7d70fdcabcb141eb72a513c7"
+          },
+          {
+            "exists": true,
+            "path": "resources/agents/fstar-check.md",
+            "sha256": "5f24bd2259ac94e63f4b008747f3e0474fae37fd3d7fa8cee0e0b95a9ec220e4"
+          },
+          {
+            "exists": true,
+            "path": "resources/agents/fstar-editor.md",
+            "sha256": "d0c361f8a50172683f1533217912a24819911a8a9cd68f6c5437f53e60730ed3"
+          },
+          {
+            "exists": true,
+            "path": "resources/agents/fstar-implement.md",
+            "sha256": "ac9aad02abea3f3952aed0b8ed5a5347372ea1b2d16c833e18a87c569e626b77"
+          },
+          {
+            "exists": true,
+            "path": "resources/agents/fstar-research.md",
+            "sha256": "40b3af8cca46d50579783f69d3d9fc4e7f4151270a73986f2040bf4ebe266f53"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "9ecac02db67701a7b4f6a4539b9123bbe31ae0a5ed0ee7dcd02db2c1058199d6"
+          },
+          {
+            "exists": true,
+            "path": "resources/references/document-checklist.md",
+            "sha256": "955aa4e4592e421bb3e871677c0768e39f60ddfc5822b99c0b3fcc0f9f1b8fd0"
+          },
+          {
+            "exists": true,
+            "path": "resources/references/knowledge-format.md",
+            "sha256": "93ace2103128f6330edf9d4d65b7f83c8acbffb119ac5db5ae4ea23501440c9f"
+          },
+          {
+            "exists": true,
+            "path": "resources/references/technical-design-profiles.md",
+            "sha256": "d51219967f3bb9aabbee5f5a908763ff6806c84709474ec2c941850626f073d5"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/capabilities.md",
+            "sha256": "45e515de8a984c2d1d268607dfd7aad544ac16465337383ebdb406a60a18128e"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "9a62f6a094108d7dfb65e267a0fc576a68cc815cbe6cdcf2cd48b45398346aad"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-archive/SKILL.md",
+            "sha256": "1ccf928cd49776590c0bebe6e29e84121b77defe583f8bd9f8f451ae68dcd094"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-check/SKILL.md",
+            "sha256": "45568ce2afc37ce87e12a1a7999883f94b417ebcaff19cf8d594735f093b068a"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-clarify/SKILL.md",
+            "sha256": "d57d0456b8807e8776cf046bd1fa00cd420faf75a60167be5f42075ecb223de9"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-continue/SKILL.md",
+            "sha256": "74addc70b698ace2485f72bcbc8bb7d09c63096a7e17429ef299ac14abc21ca1"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-debug/SKILL.md",
+            "sha256": "50478b3e6fcf54369edee772da50cf89a1fdc127ef6fb2e2ec4846433c3ed1a3"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-doc/SKILL.md",
+            "sha256": "863bd024c7d54d9f7bce0c5ae9c26e3765e7e62202af9e641d851db6a8e10298"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-execute/SKILL.md",
+            "sha256": "54d672a40cbc18172930b6fcb618270b51b2cabb0960ad9e02e602f34eef4ef7"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-help/SKILL.md",
+            "sha256": "bb32ae2021d391ff0e3bb27569e6e247662c9fc9a3130047aff1db635d87bc1e"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-init/SKILL.md",
+            "sha256": "7af1c0e06dc98701d84e731706c32eb9316d750230059536feef5a526cfbb2ff"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-learn/SKILL.md",
+            "sha256": "c45a3a5fd78a2355d373cc6e82840171abaa6f8e9dc61b2ee45e8427f9a858ce"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-plan/SKILL.md",
+            "sha256": "2a0eda93d4d4d3ef66277c4f024daea0dbc570d0495da445503aa3526241a4c1"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/doc/design.mapping.yaml",
+            "sha256": "dbcbe7f0fb806e72c47d770f92c362d8ff1ba5519e6cb477d22fc2c556427644"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/doc/design.md",
+            "sha256": "de6baddb795f177d629b1fc30713332abe1124ba58cf8091cce56c66bb320c55"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/doc/prd.mapping.yaml",
+            "sha256": "9b4c67433f03b7aed2c017dd08ffc18cc2e88590ed9f756a745f3aff01f53048"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/doc/prd.md",
+            "sha256": "0e1877ca062eb95ed1aa50db0cf3c7341853e87adaa099ebdab99c90e9ba170d"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/entry/project-index.md",
+            "sha256": "a00e11dafcb8d59d1f7b876828fe55bf1292ba5ab69b9ab3aa54f59760a01719"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/entry/user-index.md",
+            "sha256": "48ee29656eb3c8af41ac7449e6d53880a540618c28c03b2c0861124c84639fd6"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/knowledge/memory.md",
+            "sha256": "e455e1072c61838f284d0348871c4202a5cc64e8ee4aa767b7d9e1ee6194bcb9"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/knowledge/rule.md",
+            "sha256": "558b635bbcbdb96f32ff81894f4ddf5b5285a1ad35e91242bf4ddd54f0923900"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/knowledge/spec.md",
+            "sha256": "e8a5e37354be46a69af7fbcc5224e6726e85e07cc6d8333ece4b4215536dc221"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/task/check.md",
+            "sha256": "aa3f32d092cb6aa6985ece0595b0cd35356f0df99afdd476fe5a3deb04d3ef32"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/task/clarify.md",
+            "sha256": "d6e9d1c6843b945038efba3525db58895011809c6ce255acbfda2e015e6de06a"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/task/plan.mapping.yaml",
+            "sha256": "1ce20103c0f6ae82047a15acb59cd4d093039356101ca7e2913158b580c4ffef"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/task/plan.md",
+            "sha256": "738f6dfcab6ed7e2586f6645fd4c0f5a3e2dcdee794a0600a75c8bb64a7f469d"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/task/research.md",
+            "sha256": "5c489ced403a1681feb4e9ad8eb0c3d7b3aba78c25fb9bb2fa91f8ddc24ae35f"
+          },
+          {
+            "exists": true,
+            "path": "scripts/build-package.cjs",
+            "sha256": "033de7d3fccfda2ecc7fab1466f4b5f61506d470cfdb7984da6b54948374ba90"
+          },
+          {
+            "exists": true,
+            "path": "scripts/integrate-magpie.cjs",
+            "sha256": "998999fccf2fdb767b55e8d3ed00c664d96c8e46fc0697ace3c37048dda8f06d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/__init__.py",
+            "sha256": "16e1d9d8ffc9a2194c2cc87a8893e8e80dd4401b110567f1556ed6dc463f7a66"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/__main__.py",
+            "sha256": "307299fda7b77d22c64cb51430ec75e5f59d78e9c948786afb3b2544fe45e4b7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "bbd6ef71900a2322429413432f8747454caf0715b7b52fe83ed04b01ae91c986"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/config.py",
+            "sha256": "75eb5632fe858611dcef516ea7a813373468560b4e23c312c42720d661676532"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/content.py",
+            "sha256": "587fe907264cc1594bc12694faaba3022496bdce4c46bca17b132b2ab06fab3b"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/crossproject.py",
+            "sha256": "e5304194c4d8156f2cdd4ebf5c750d7d9722197c5c90230d60031eed291ae67f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "49bdfe3343fcc4da4ccb641c063964254b39cd59f27505c8bcb39986a7278998"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/evidence.py",
+            "sha256": "1e43f0fa0598a313638bdec5426791938f08a7b382d6454e6eb11f903c820576"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/extensions.py",
+            "sha256": "6fc01d9c263442945d4a4944daab59152d1b7d4f80c7fb565f8461eae744bde7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/global_resources.py",
+            "sha256": "ddb9068b2d09dfc2239cac5baed602ef6e9c7cc7c9ecf7be3d82a9be3a065b7f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "9f6dd356605f54bc28efd1ac2bb4282e7c4084a1ea652d2973f2fbb1427f57da"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/knowledge.py",
+            "sha256": "2cfedc8cc775961d418ca72f66f280988cd233d1c9ed7c9480821007021b0616"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/learn_bridge.py",
+            "sha256": "751ac11c31a48c9f04ff5d6b1680a7255c2b71305a44ed20448b9d66e737c159"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/magpie.py",
+            "sha256": "0eda775fdc210b431c9560f9d5c483ec7e6106bf454a2d934a949ecee64d8fac"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/models.py",
+            "sha256": "a0c588862dc4df1ebc015a0e50de6e0bd3d674d5905b0856c21a1bce80680bcc"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/project.py",
+            "sha256": "d6f18bcd814ca65297066084b55a2c7a050d39879a3ae2e7f6d9a82a85a28cd4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/__init__.py",
+            "sha256": "876eb526798ca7c8fd728ef3447c6aba56effeb74ec4e2263ddfa155ec6efec4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/__main__.py",
+            "sha256": "69adba8ee99cecbe32bd7fa058da497b154db9e0c015ec8213371202530686b9"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/registration.py",
+            "sha256": "71ca52af5d2ee42cd697586a140eb2dc9b25d2a70763e42c0cffe37c762c4991"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "40e77e9bd6d9322ba77a2abe77fced5564851af120519165b51cc65a0a3b9c31"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "506ac4790aa4e5cb5cea760decae12d0370437362120f0169f893bf07ff76952"
+          },
+          {
+            "exists": true,
+            "path": "tests/__init__.py",
+            "sha256": "14e798dad0ac4ecf1101c3a8b3a86128a795cb12ca4042f039eb88410c0955e8"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_acceptance_phase.py",
+            "sha256": "2d09ac4975f77050dbd14e9b027a5195d305f8053d2bad7a10d795551dc3cc84"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_branch_location.py",
+            "sha256": "66ff4ed04f0a3094a3ac4851b170927f2d20b23a51d342220c441339c260ce35"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_config.py",
+            "sha256": "0a8ac1ffb0a8a5f0e0fe4556e1dc0b02ca87b343400699c59fc6f173029f38d1"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "646e6dde72515fb0c757ab15ab679f46475c60344f7d241dad9f810dcc0774d2"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "f6b0c625a5a157918a7002babb9555a15446f07fe5ee4a3bde8de7a5d5050439"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_crossproject.py",
+            "sha256": "60b42f4b7ac47432b26f18e9cd7446335923a857ecb39e2437a00bbd3b20649d"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_dispatch.py",
+            "sha256": "80e94fd3e2516a7337b2a222f37598263d3551c9e252a75645e6a7a2f441d8e6"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "9a78abc44ce1a52f68f6ff93032a85302c16d28ac53d8734f898a3010667c7db"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_global_resources.py",
+            "sha256": "220874427f0cb1dec0a98f8ff8968c2ef24f495f45bb56c8927f2ae8ba4fe085"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "15362ace7621614d038e3b22c92fb38c68738cd6ec208bc3934e56e8184bf377"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_init_workflow_cli.py",
+            "sha256": "b4213828ce5fc34e1c9ef5d3ff77cc10b1afa428aba617262e7c8ffcace2e6a9"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "e20d7af5ec51f6091f4a4a235db5f4e277ed60385fce64bc83e84cf2ba9337fc"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_integration_wiring.py",
+            "sha256": "6db2b5d2f5144f4549a752be2857110195da16182ad8805837410be151ace00a"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_knowledge.py",
+            "sha256": "70584e56eec0d892bd0153a197886ebd224d2f7c1887e91fe35685b4093b8c7f"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_learn_bridge.py",
+            "sha256": "d9983759f418819796edd0d5e6ed8ddb6961906322ccd1ceb7beac3a347e5a54"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_magpie.py",
+            "sha256": "2f37e3ce274e1d36afbd88f331f283e87eedbb63194cc7af7334e902cf707009"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_package.cjs",
+            "sha256": "abb5986c0a99fd3a0ddac8a7ac187bf83fb22426b37c636b0a93ba3d85c0208e"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_project.py",
+            "sha256": "203dc5d8e2ed0173dc0baeef1c1894d54ee290e7a6fa6a181ffbcd6bb2dd0953"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_storage_modes.py",
+            "sha256": "e22b6bd988007491dde5f38db4cceb98e99f09a201a786d645b1158722dc0cfb"
+          }
+        ]
+      },
+      "dispatch_id": "check-host-5",
+      "environment": {
+        "isolation": "temporary host/user roots and fake Magpie; working-tree Python CLI",
+        "os": "darwin",
+        "validation": "check-host-3 runtime runs + check-host-5 documentation consistency; runtime delivery unchanged by SHA-256"
+      },
+      "id": "13817f92-d1db-4e4e-97ba-d3414a669142",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/clarify.md",
+          "sha256": "b805bd5f39b8d3263dce116d0a14b0e685714ff2c7210ede4e02dfbd97dee646"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "sha256": "c67ae4d6001b690265a9d9d34da74daf94556d7603dc2b78e288333527a65338"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "sha256": "2a9d4d69646712f78598d4505092ac7c952cfcc5359d05c4188b2ed950bda104"
+        },
+        {
+          "path": ".fstar/tasks/host-abstraction-magpie-router/plan.md",
+          "sha256": "7d2703648eead0fdacf58860f06878d8b5458ee7b227aebdf177906ca084674f"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": "README.md",
+          "sha256": "9999a04c797261fad63c3a0d2ac6e0a39508b696443e72c043d0bd473ab52c5f"
+        },
+        {
+          "path": "bin/fstar-bootstrap.py",
+          "sha256": "b5881f64aa87ea686f00b69ea2dd05f977a4cc7165163f6a11003f88e44964c8"
+        },
+        {
+          "path": "bin/fstar-hook.cjs",
+          "sha256": "986e55d2e40fa49aaf4b5e535e093f84be3885f72580dd52d4dac907e2777db2"
+        },
+        {
+          "path": "bin/fstar.cjs",
+          "sha256": "d3950996ca48c4dee14d79a2682be700fcecbebb2786807714bd834073f1759f"
+        },
+        {
+          "path": "package.json",
+          "sha256": "60bb656b2a282a72cc61250c6f5da1eb2153cb3d7d70fdcabcb141eb72a513c7"
+        },
+        {
+          "path": "resources/agents/fstar-check.md",
+          "sha256": "5f24bd2259ac94e63f4b008747f3e0474fae37fd3d7fa8cee0e0b95a9ec220e4"
+        },
+        {
+          "path": "resources/agents/fstar-editor.md",
+          "sha256": "d0c361f8a50172683f1533217912a24819911a8a9cd68f6c5437f53e60730ed3"
+        },
+        {
+          "path": "resources/agents/fstar-implement.md",
+          "sha256": "ac9aad02abea3f3952aed0b8ed5a5347372ea1b2d16c833e18a87c569e626b77"
+        },
+        {
+          "path": "resources/agents/fstar-research.md",
+          "sha256": "40b3af8cca46d50579783f69d3d9fc4e7f4151270a73986f2040bf4ebe266f53"
+        },
+        {
+          "path": "resources/package-assets.json",
+          "sha256": "9ecac02db67701a7b4f6a4539b9123bbe31ae0a5ed0ee7dcd02db2c1058199d6"
+        },
+        {
+          "path": "resources/references/document-checklist.md",
+          "sha256": "955aa4e4592e421bb3e871677c0768e39f60ddfc5822b99c0b3fcc0f9f1b8fd0"
+        },
+        {
+          "path": "resources/references/knowledge-format.md",
+          "sha256": "93ace2103128f6330edf9d4d65b7f83c8acbffb119ac5db5ae4ea23501440c9f"
+        },
+        {
+          "path": "resources/references/technical-design-profiles.md",
+          "sha256": "d51219967f3bb9aabbee5f5a908763ff6806c84709474ec2c941850626f073d5"
+        },
+        {
+          "path": "resources/runtime/capabilities.md",
+          "sha256": "45e515de8a984c2d1d268607dfd7aad544ac16465337383ebdb406a60a18128e"
+        },
+        {
+          "path": "resources/runtime/prompt-states.md",
+          "sha256": "9a62f6a094108d7dfb65e267a0fc576a68cc815cbe6cdcf2cd48b45398346aad"
+        },
+        {
+          "path": "resources/runtime/routing.md",
+          "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+        },
+        {
+          "path": "resources/skills/fstar-archive/SKILL.md",
+          "sha256": "1ccf928cd49776590c0bebe6e29e84121b77defe583f8bd9f8f451ae68dcd094"
+        },
+        {
+          "path": "resources/skills/fstar-check/SKILL.md",
+          "sha256": "45568ce2afc37ce87e12a1a7999883f94b417ebcaff19cf8d594735f093b068a"
+        },
+        {
+          "path": "resources/skills/fstar-clarify/SKILL.md",
+          "sha256": "d57d0456b8807e8776cf046bd1fa00cd420faf75a60167be5f42075ecb223de9"
+        },
+        {
+          "path": "resources/skills/fstar-continue/SKILL.md",
+          "sha256": "74addc70b698ace2485f72bcbc8bb7d09c63096a7e17429ef299ac14abc21ca1"
+        },
+        {
+          "path": "resources/skills/fstar-debug/SKILL.md",
+          "sha256": "50478b3e6fcf54369edee772da50cf89a1fdc127ef6fb2e2ec4846433c3ed1a3"
+        },
+        {
+          "path": "resources/skills/fstar-doc/SKILL.md",
+          "sha256": "863bd024c7d54d9f7bce0c5ae9c26e3765e7e62202af9e641d851db6a8e10298"
+        },
+        {
+          "path": "resources/skills/fstar-execute/SKILL.md",
+          "sha256": "54d672a40cbc18172930b6fcb618270b51b2cabb0960ad9e02e602f34eef4ef7"
+        },
+        {
+          "path": "resources/skills/fstar-help/SKILL.md",
+          "sha256": "bb32ae2021d391ff0e3bb27569e6e247662c9fc9a3130047aff1db635d87bc1e"
+        },
+        {
+          "path": "resources/skills/fstar-init/SKILL.md",
+          "sha256": "7af1c0e06dc98701d84e731706c32eb9316d750230059536feef5a526cfbb2ff"
+        },
+        {
+          "path": "resources/skills/fstar-learn/SKILL.md",
+          "sha256": "c45a3a5fd78a2355d373cc6e82840171abaa6f8e9dc61b2ee45e8427f9a858ce"
+        },
+        {
+          "path": "resources/skills/fstar-plan/SKILL.md",
+          "sha256": "2a0eda93d4d4d3ef66277c4f024daea0dbc570d0495da445503aa3526241a4c1"
+        },
+        {
+          "path": "resources/templates/doc/design.mapping.yaml",
+          "sha256": "dbcbe7f0fb806e72c47d770f92c362d8ff1ba5519e6cb477d22fc2c556427644"
+        },
+        {
+          "path": "resources/templates/doc/design.md",
+          "sha256": "de6baddb795f177d629b1fc30713332abe1124ba58cf8091cce56c66bb320c55"
+        },
+        {
+          "path": "resources/templates/doc/prd.mapping.yaml",
+          "sha256": "9b4c67433f03b7aed2c017dd08ffc18cc2e88590ed9f756a745f3aff01f53048"
+        },
+        {
+          "path": "resources/templates/doc/prd.md",
+          "sha256": "0e1877ca062eb95ed1aa50db0cf3c7341853e87adaa099ebdab99c90e9ba170d"
+        },
+        {
+          "path": "resources/templates/entry/project-index.md",
+          "sha256": "a00e11dafcb8d59d1f7b876828fe55bf1292ba5ab69b9ab3aa54f59760a01719"
+        },
+        {
+          "path": "resources/templates/entry/user-index.md",
+          "sha256": "48ee29656eb3c8af41ac7449e6d53880a540618c28c03b2c0861124c84639fd6"
+        },
+        {
+          "path": "resources/templates/knowledge/memory.md",
+          "sha256": "e455e1072c61838f284d0348871c4202a5cc64e8ee4aa767b7d9e1ee6194bcb9"
+        },
+        {
+          "path": "resources/templates/knowledge/rule.md",
+          "sha256": "558b635bbcbdb96f32ff81894f4ddf5b5285a1ad35e91242bf4ddd54f0923900"
+        },
+        {
+          "path": "resources/templates/knowledge/spec.md",
+          "sha256": "e8a5e37354be46a69af7fbcc5224e6726e85e07cc6d8333ece4b4215536dc221"
+        },
+        {
+          "path": "resources/templates/task/check.md",
+          "sha256": "aa3f32d092cb6aa6985ece0595b0cd35356f0df99afdd476fe5a3deb04d3ef32"
+        },
+        {
+          "path": "resources/templates/task/clarify.md",
+          "sha256": "d6e9d1c6843b945038efba3525db58895011809c6ce255acbfda2e015e6de06a"
+        },
+        {
+          "path": "resources/templates/task/plan.mapping.yaml",
+          "sha256": "1ce20103c0f6ae82047a15acb59cd4d093039356101ca7e2913158b580c4ffef"
+        },
+        {
+          "path": "resources/templates/task/plan.md",
+          "sha256": "738f6dfcab6ed7e2586f6645fd4c0f5a3e2dcdee794a0600a75c8bb64a7f469d"
+        },
+        {
+          "path": "resources/templates/task/research.md",
+          "sha256": "5c489ced403a1681feb4e9ad8eb0c3d7b3aba78c25fb9bb2fa91f8ddc24ae35f"
+        },
+        {
+          "path": "scripts/build-package.cjs",
+          "sha256": "033de7d3fccfda2ecc7fab1466f4b5f61506d470cfdb7984da6b54948374ba90"
+        },
+        {
+          "path": "scripts/integrate-magpie.cjs",
+          "sha256": "998999fccf2fdb767b55e8d3ed00c664d96c8e46fc0697ace3c37048dda8f06d"
+        },
+        {
+          "path": "src/fstar/__init__.py",
+          "sha256": "16e1d9d8ffc9a2194c2cc87a8893e8e80dd4401b110567f1556ed6dc463f7a66"
+        },
+        {
+          "path": "src/fstar/__main__.py",
+          "sha256": "307299fda7b77d22c64cb51430ec75e5f59d78e9c948786afb3b2544fe45e4b7"
+        },
+        {
+          "path": "src/fstar/cli.py",
+          "sha256": "bbd6ef71900a2322429413432f8747454caf0715b7b52fe83ed04b01ae91c986"
+        },
+        {
+          "path": "src/fstar/config.py",
+          "sha256": "75eb5632fe858611dcef516ea7a813373468560b4e23c312c42720d661676532"
+        },
+        {
+          "path": "src/fstar/content.py",
+          "sha256": "587fe907264cc1594bc12694faaba3022496bdce4c46bca17b132b2ab06fab3b"
+        },
+        {
+          "path": "src/fstar/crossproject.py",
+          "sha256": "e5304194c4d8156f2cdd4ebf5c750d7d9722197c5c90230d60031eed291ae67f"
+        },
+        {
+          "path": "src/fstar/dispatch.py",
+          "sha256": "49bdfe3343fcc4da4ccb641c063964254b39cd59f27505c8bcb39986a7278998"
+        },
+        {
+          "path": "src/fstar/evidence.py",
+          "sha256": "1e43f0fa0598a313638bdec5426791938f08a7b382d6454e6eb11f903c820576"
+        },
+        {
+          "path": "src/fstar/extensions.py",
+          "sha256": "6fc01d9c263442945d4a4944daab59152d1b7d4f80c7fb565f8461eae744bde7"
+        },
+        {
+          "path": "src/fstar/global_resources.py",
+          "sha256": "ddb9068b2d09dfc2239cac5baed602ef6e9c7cc7c9ecf7be3d82a9be3a065b7f"
+        },
+        {
+          "path": "src/fstar/installer.py",
+          "sha256": "9f6dd356605f54bc28efd1ac2bb4282e7c4084a1ea652d2973f2fbb1427f57da"
+        },
+        {
+          "path": "src/fstar/knowledge.py",
+          "sha256": "2cfedc8cc775961d418ca72f66f280988cd233d1c9ed7c9480821007021b0616"
+        },
+        {
+          "path": "src/fstar/learn_bridge.py",
+          "sha256": "751ac11c31a48c9f04ff5d6b1680a7255c2b71305a44ed20448b9d66e737c159"
+        },
+        {
+          "path": "src/fstar/magpie.py",
+          "sha256": "0eda775fdc210b431c9560f9d5c483ec7e6106bf454a2d934a949ecee64d8fac"
+        },
+        {
+          "path": "src/fstar/models.py",
+          "sha256": "a0c588862dc4df1ebc015a0e50de6e0bd3d674d5905b0856c21a1bce80680bcc"
+        },
+        {
+          "path": "src/fstar/project.py",
+          "sha256": "d6f18bcd814ca65297066084b55a2c7a050d39879a3ae2e7f6d9a82a85a28cd4"
+        },
+        {
+          "path": "src/fstar/runtime/__init__.py",
+          "sha256": "876eb526798ca7c8fd728ef3447c6aba56effeb74ec4e2263ddfa155ec6efec4"
+        },
+        {
+          "path": "src/fstar/runtime/__main__.py",
+          "sha256": "69adba8ee99cecbe32bd7fa058da497b154db9e0c015ec8213371202530686b9"
+        },
+        {
+          "path": "src/fstar/runtime/hooks.py",
+          "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
+        },
+        {
+          "path": "src/fstar/runtime/inject.py",
+          "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+        },
+        {
+          "path": "src/fstar/runtime/registration.py",
+          "sha256": "71ca52af5d2ee42cd697586a140eb2dc9b25d2a70763e42c0cffe37c762c4991"
+        },
+        {
+          "path": "src/fstar/store.py",
+          "sha256": "40e77e9bd6d9322ba77a2abe77fced5564851af120519165b51cc65a0a3b9c31"
+        },
+        {
+          "path": "src/fstar/tasks.py",
+          "sha256": "506ac4790aa4e5cb5cea760decae12d0370437362120f0169f893bf07ff76952"
+        },
+        {
+          "path": "tests/__init__.py",
+          "sha256": "14e798dad0ac4ecf1101c3a8b3a86128a795cb12ca4042f039eb88410c0955e8"
+        },
+        {
+          "path": "tests/test_acceptance_phase.py",
+          "sha256": "2d09ac4975f77050dbd14e9b027a5195d305f8053d2bad7a10d795551dc3cc84"
+        },
+        {
+          "path": "tests/test_branch_location.py",
+          "sha256": "66ff4ed04f0a3094a3ac4851b170927f2d20b23a51d342220c441339c260ce35"
+        },
+        {
+          "path": "tests/test_config.py",
+          "sha256": "0a8ac1ffb0a8a5f0e0fe4556e1dc0b02ca87b343400699c59fc6f173029f38d1"
+        },
+        {
+          "path": "tests/test_content.py",
+          "sha256": "646e6dde72515fb0c757ab15ab679f46475c60344f7d241dad9f810dcc0774d2"
+        },
+        {
+          "path": "tests/test_core.py",
+          "sha256": "f6b0c625a5a157918a7002babb9555a15446f07fe5ee4a3bde8de7a5d5050439"
+        },
+        {
+          "path": "tests/test_crossproject.py",
+          "sha256": "60b42f4b7ac47432b26f18e9cd7446335923a857ecb39e2437a00bbd3b20649d"
+        },
+        {
+          "path": "tests/test_dispatch.py",
+          "sha256": "80e94fd3e2516a7337b2a222f37598263d3551c9e252a75645e6a7a2f441d8e6"
+        },
+        {
+          "path": "tests/test_e2e_scenarios.py",
+          "sha256": "9a78abc44ce1a52f68f6ff93032a85302c16d28ac53d8734f898a3010667c7db"
+        },
+        {
+          "path": "tests/test_global_resources.py",
+          "sha256": "220874427f0cb1dec0a98f8ff8968c2ef24f495f45bb56c8927f2ae8ba4fe085"
+        },
+        {
+          "path": "tests/test_hooks.py",
+          "sha256": "15362ace7621614d038e3b22c92fb38c68738cd6ec208bc3934e56e8184bf377"
+        },
+        {
+          "path": "tests/test_init_workflow_cli.py",
+          "sha256": "b4213828ce5fc34e1c9ef5d3ff77cc10b1afa428aba617262e7c8ffcace2e6a9"
+        },
+        {
+          "path": "tests/test_installer.py",
+          "sha256": "e20d7af5ec51f6091f4a4a235db5f4e277ed60385fce64bc83e84cf2ba9337fc"
+        },
+        {
+          "path": "tests/test_integration_wiring.py",
+          "sha256": "6db2b5d2f5144f4549a752be2857110195da16182ad8805837410be151ace00a"
+        },
+        {
+          "path": "tests/test_knowledge.py",
+          "sha256": "70584e56eec0d892bd0153a197886ebd224d2f7c1887e91fe35685b4093b8c7f"
+        },
+        {
+          "path": "tests/test_learn_bridge.py",
+          "sha256": "d9983759f418819796edd0d5e6ed8ddb6961906322ccd1ceb7beac3a347e5a54"
+        },
+        {
+          "path": "tests/test_magpie.py",
+          "sha256": "2f37e3ce274e1d36afbd88f331f283e87eedbb63194cc7af7334e902cf707009"
+        },
+        {
+          "path": "tests/test_package.cjs",
+          "sha256": "abb5986c0a99fd3a0ddac8a7ac187bf83fb22426b37c636b0a93ba3d85c0208e"
+        },
+        {
+          "path": "tests/test_project.py",
+          "sha256": "203dc5d8e2ed0173dc0baeef1c1894d54ee290e7a6fa6a181ffbcd6bb2dd0953"
+        },
+        {
+          "path": "tests/test_storage_modes.py",
+          "sha256": "e22b6bd988007491dde5f38db4cceb98e99f09a201a786d645b1158722dc0cfb"
+        }
+      ],
+      "items": [
+        {
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-001",
+            "D-001"
+          ],
+          "result": "passed",
+          "review_method": "Read current plan/R-001/D-001; validate slots and IDs; reuse matrix/install/doctor tests under unchanged runtime hashes"
+        },
+        {
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "R-002",
+            "D-002"
+          ],
+          "result": "passed",
+          "review_method": "Read PRD historical marking and R-002/D-002; cross-check registration evidence and reuse Codex installer tests and smoke under unchanged hashes"
+        },
+        {
+          "plan_item": "P-003",
+          "requirement_ids": [
+            "R-003",
+            "D-003"
+          ],
+          "result": "passed",
+          "review_method": "Full PRD/design/plan/clarify consistency review, stale phrase scan, reused isolated smoke and legacy checks plus 306-test impact subset"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "R-004",
+            "D-004",
+            "R-005",
+            "D-005"
+          ],
+          "result": "passed",
+          "review_method": "Read R-004/R-005/D-004/D-005 and plan P-004; compare README native-always/native-only/info diagnostic; reuse instructions and package tests"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-20T10:52:10.698660Z",
+      "producer": {
+        "id": "check-host-independent-agent",
+        "role": "check",
+        "session_id": "check-host-5"
+      },
+      "report": {
+        "path": ".fstar/tasks/host-abstraction-magpie-router/check-report.md",
+        "sha256": "0846f15d7784402a1e33c599f424a3f88477fba300bce5a4f74c9c2d1111a03f"
+      },
+      "run_id": "check-host-5-doc-recheck",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "0918e3c8645bbb2d6b67f68668b7b4d29ac68aea72134518a473ee87fd3dee28"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9b49e322b13eaa362ca924c2262521d6046871aaaf0b982836286f068c2f6359"
+            },
+            {
+              "id": "R-003",
+              "sha256": "49ce2638c2199ccc8e5bf2381a6a9fb11a6007dfea053f7496477649b02d3454"
+            },
+            {
+              "id": "R-004",
+              "sha256": "417874942f3c5a28b64fe22f0c0ad32ff5814182243589c21088f31cbc3173b4"
+            },
+            {
+              "id": "R-005",
+              "sha256": "cc8c58299e021d71adecca9e4d3e5953d0df4e578015a31d3c1f4acfd53fcbf6"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "0918e3c8645bbb2d6b67f68668b7b4d29ac68aea72134518a473ee87fd3dee28"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9b49e322b13eaa362ca924c2262521d6046871aaaf0b982836286f068c2f6359"
+            },
+            {
+              "id": "R-003",
+              "sha256": "49ce2638c2199ccc8e5bf2381a6a9fb11a6007dfea053f7496477649b02d3454"
+            },
+            {
+              "id": "R-004",
+              "sha256": "417874942f3c5a28b64fe22f0c0ad32ff5814182243589c21088f31cbc3173b4"
+            },
+            {
+              "id": "R-005",
+              "sha256": "cc8c58299e021d71adecca9e4d3e5953d0df4e578015a31d3c1f4acfd53fcbf6"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/host-abstraction-magpie-router/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "7434235faa1335905cfa3fb9802412b8c8921af410f88ba39dc0eab8120ddca0"
+            },
+            {
+              "id": "D-002",
+              "sha256": "5c43900c7bd61a214febebf27ec108562e229692ae1568b963c732b0bca2c5d4"
+            },
+            {
+              "id": "D-003",
+              "sha256": "251dd780af4a506a36cd75cc348c4254076ca0ae74a4c4b1c49bd0acd3ffe00f"
+            },
+            {
+              "id": "D-004",
+              "sha256": "286764fdf4015790a644d4ff7b66fb4b3bebe8a9f7d40165770442d03a27abf8"
+            },
+            {
+              "id": "D-005",
+              "sha256": "c244d2863c8420db219db82fc54eb1efcbfbfdfe27b1673810721048c3d61cfd"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "7434235faa1335905cfa3fb9802412b8c8921af410f88ba39dc0eab8120ddca0"
+            },
+            {
+              "id": "D-002",
+              "sha256": "5c43900c7bd61a214febebf27ec108562e229692ae1568b963c732b0bca2c5d4"
+            },
+            {
+              "id": "D-003",
+              "sha256": "251dd780af4a506a36cd75cc348c4254076ca0ae74a4c4b1c49bd0acd3ffe00f"
+            },
+            {
+              "id": "D-004",
+              "sha256": "286764fdf4015790a644d4ff7b66fb4b3bebe8a9f7d40165770442d03a27abf8"
+            },
+            {
+              "id": "D-005",
+              "sha256": "c244d2863c8420db219db82fc54eb1efcbfbfdfe27b1673810721048c3d61cfd"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-20T06:29:34.672322Z",
+      "excluded": [],
+      "id": "planning-review",
+      "included": [
+        "clarify",
+        "design",
+        "doc-check",
+        "editor",
+        "plan",
+        "prd"
+      ],
+      "reason": "用户要求作为新任务按完整流程实施",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T06:29:34.672268Z",
+        "quote": "我的目的就是做个通用的然后能通过 magpie的能力实现共享，还有你说的skills重复配置的问题我想的是magpie应该集成的是软路由吧 如果有就直接配到magpie通过magpie统一管理如果没有 就配置到各个agents上面就好了",
+        "reference": "本会话用户关于通用共享配置与 Magpie 软路由的要求",
+        "scope": "host-abstraction-magpie-router",
+        "source_id": "9c8e7250-4fb6-4c42-b402-691be40c18a4",
+        "type": "conversation",
+        "validates": "85768fb363b03d1d7e3de00da0ae278be19ef96eaf65c46bff7c6c07d44bb611"
+      }
+    },
+    {
+      "enabled_at": "2026-11-20T06:29:34.674469Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "archive",
+        "events",
+        "evidence",
+        "lease",
+        "recovery",
+        "task"
+      ],
+      "reason": "用户要求作为新任务按完整流程实施",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T06:29:34.672268Z",
+        "quote": "我的目的就是做个通用的然后能通过 magpie的能力实现共享，还有你说的skills重复配置的问题我想的是magpie应该集成的是软路由吧 如果有就直接配到magpie通过magpie统一管理如果没有 就配置到各个agents上面就好了",
+        "reference": "本会话用户关于通用共享配置与 Magpie 软路由的要求",
+        "scope": "host-abstraction-magpie-router",
+        "source_id": "9c8e7250-4fb6-4c42-b402-691be40c18a4",
+        "type": "conversation",
+        "validates": "85768fb363b03d1d7e3de00da0ae278be19ef96eaf65c46bff7c6c07d44bb611"
+      }
+    }
+  ],
+  "id": "2beb3cd7-6b50-4c95-bc7f-8d0c36fb7181",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/host-abstraction-magpie-router/doc/design.md": {
+          "D-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-001:end -->",
+            "start_marker": "<!-- fstar:item:D-001:start -->"
+          },
+          "D-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-002:end -->",
+            "start_marker": "<!-- fstar:item:D-002:start -->"
+          },
+          "D-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-003:end -->",
+            "start_marker": "<!-- fstar:item:D-003:start -->"
+          },
+          "D-004": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-004:end -->",
+            "start_marker": "<!-- fstar:item:D-004:start -->"
+          },
+          "D-005": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-005:end -->",
+            "start_marker": "<!-- fstar:item:D-005:start -->"
+          }
+        },
+        ".fstar/tasks/host-abstraction-magpie-router/doc/prd.md": {
+          "R-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-001:end -->",
+            "start_marker": "<!-- fstar:item:R-001:start -->"
+          },
+          "R-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-002:end -->",
+            "start_marker": "<!-- fstar:item:R-002:start -->"
+          },
+          "R-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-003:end -->",
+            "start_marker": "<!-- fstar:item:R-003:start -->"
+          },
+          "R-004": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-004:end -->",
+            "start_marker": "<!-- fstar:item:R-004:start -->"
+          },
+          "R-005": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-005:end -->",
+            "start_marker": "<!-- fstar:item:R-005:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "94308384a05a7c75f2dc17ce5e9492848534b8c25c5230fbcfa3e43470c8d198",
+      "artifact_map_source": {
+        "reference": "Editor delivery; independent doc review deferred to final check",
+        "source_id": "docs-host-1",
+        "type": "system"
+      },
+      "dispatch_harvested": [
+        "check-host-1",
+        "check-host-2",
+        "check-host-3",
+        "check-host-4",
+        "check-host-5",
+        "editor-host-doc-debug",
+        "editor-host-doc-repair",
+        "impl-host-1",
+        "impl-host-2"
+      ]
+    }
+  },
+  "name": "host-abstraction-magpie-router",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "Host 抽象层、Codex 对齐与 Magpie 软路由",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}

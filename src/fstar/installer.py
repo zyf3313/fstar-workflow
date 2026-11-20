@@ -45,6 +45,12 @@ MANIFEST_SCHEMA = "fstar.install.v1"
 ENTRY_INDEX_SCHEMA = "fstar.entries.v1"
 BUNDLE_SCHEMA = "fstar.package-assets.v1"
 SUPPORTED_HOSTS = ("claude", "codex")
+# The single source of truth for what each host can carry (R-001/D-001):
+# installer execution and doctor reporting both read this matrix; nothing
+# outside it is ever attempted and unverified cells are never reported as
+# guaranteed.
+HOST_CAPABILITIES = registration.HOST_CAPABILITIES
+HOST_CAPABILITY_KINDS = ("hooks", "skills", "agents", "instructions")
 HOOK_SEMANTICS = ("session-context", "worker-context", "worker-result", "doc-change", "prompt-context")
 CONFLICT_POLICIES = ("keep", "overwrite", "new")
 # Capability/resource invariants reported by doctor (parent design §4.4).
@@ -146,6 +152,10 @@ def roots_from_args(args, *, bundle_root: Optional[Path] = None) -> Roots:
     project_root = Path(project).expanduser() if project else find_project_root(Path.cwd())
     if "claude" not in host_roots:
         host_roots["claude"] = default_host_root(user_root)
+    if "codex" not in host_roots:
+        # Every supported host resolves to its own user-level root by
+        # default; the matrix declares where each host's entries live.
+        host_roots["codex"] = default_codex_host_root()
     return Roots(
         user_root=user_root,
         runtime_root=runtime_root,
@@ -169,6 +179,19 @@ def default_host_root(user_root: Optional[Path] = None) -> Path:
     tests isolates the real host settings.
     """
     return Path.home() / ".claude"
+
+
+def default_codex_host_root() -> Path:
+    """The Codex user-level root (``$CODEX_HOME`` or ``~/.codex``).
+
+    The matrix declares Codex's user-level hooks file and skills directory
+    under the Codex home, so the root follows the same rule the host itself
+    uses: ``CODEX_HOME`` when it is set, the default location otherwise.
+    """
+    override = os.environ.get("CODEX_HOME")
+    if override:
+        return Path(override).expanduser()
+    return Path.home() / ".codex"
 
 
 def load_bundle_manifest(bundle_root: Optional[Path] = None) -> dict:
@@ -479,23 +502,35 @@ def _semantic_for_shape(shape: Mapping) -> str:
 
 
 def _settings_file(host: str) -> str:
-    if host == "claude":
-        return "settings.json"
-    # Verified live against codex-cli 0.165.0 (2026-11-01): ~/.codex/hooks.json
-    # IS a real user-level hooks layer (the host warns when both it and the
-    # config.toml [hooks] table exist), but first use requires an interactive
-    # TUI trust review ([hooks.state] + trusted_hash), and headless codex exec
-    # never runs untrusted hooks — so unattended install cannot complete it.
-    raise DomainError("host_unsupported",
-                      "Codex user-level hooks (~/.codex/hooks.json) require an interactive trust review that unattended install cannot complete; project .codex/hooks.json is not a user-level substitute",
-                      {"host": host})
+    """The host settings/hooks file name, taken from the capability matrix.
+
+    The matrix is the only place that decides where a host's registrations
+    live; the installer never hardcodes a second opinion. Codex's user-level
+    hooks file (``~/.codex/hooks.json``) was verified live on 2026-11-20
+    (codex-cli 0.167.0): it is a real user-level layer carrying the same
+    PascalCase keys as the project file. Writing it is safe; the host only
+    RUNS the entries after the user's one-time trust review in the Codex TUI,
+    and the installer reports that fact instead of claiming live delivery.
+    """
+    cell = HOST_CAPABILITIES.get(host, {}).get("hooks")
+    if not cell or cell.get("status") != "supported":
+        raise DomainError("host_unsupported", "Host has no supported hooks channel",
+                          {"host": host, "hosts": sorted(HOST_CAPABILITIES)})
+    return cell["settings_file"]
 
 
 def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = None,
                  hosts: Sequence[str] = (), conflict_policy: str = "keep",
                  requested_version: Optional[str] = None,
-                 explicit_roots: bool = False) -> dict:
-    """Build the full action/conflict/expected-hash plan. Pure read."""
+                 explicit_roots: bool = False,
+                 named_hosts: Optional[Sequence[str]] = None) -> dict:
+    """Build the full action/conflict/expected-hash plan. Pure read.
+
+    Native skills copies are always planned for hosts with a declared skills
+    channel (R-003 rework): the Magpie library hand-over is a separate,
+    additive distribution owned by fstar.magpie and never suppresses a
+    native copy here.
+    """
     if operation not in ("install", "update", "uninstall"):
         raise DomainError("invalid_operation", "Unknown installer operation", {"operation": operation})
     if conflict_policy not in CONFLICT_POLICIES:
@@ -581,28 +616,43 @@ def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = 
     if operation in ("update", "uninstall") and not target_hosts:
         if explicit_roots:
             # The user named the root: touch exactly the hosts they selected.
-            target_hosts = [host for host in sorted(resolved.host_roots) if host in SUPPORTED_HOSTS]
+            # Only the named hosts are touched, never every resolved host
+            # (a resolved default root is not a selection).
+            if named_hosts:
+                target_hosts = [host for host in sorted(set(named_hosts))
+                                if host in SUPPORTED_HOSTS and host in resolved.host_roots]
+            else:
+                target_hosts = [host for host in sorted(resolved.host_roots) if host in SUPPORTED_HOSTS]
         elif manifest:
             target_hosts = [host for host, roots_set in sorted(owned_roots.items())
                             if host in resolved.host_roots and resolved.host_roots[host] in roots_set]
+    skipped_capabilities = []
     for host in target_hosts:
         if host not in SUPPORTED_HOSTS:
             raise DomainError("unknown_host", "Unknown host", {"host": host, "hosts": list(SUPPORTED_HOSTS)})
-        if host == "codex":
-            # Live-verified against codex-cli 0.165.0 (2026-11-01):
-            # ~/.codex/hooks.json is a real user-level layer, but first use
-            # needs an interactive TUI trust review ([hooks.state] +
-            # trusted_hash) that unattended install cannot complete, and
-            # headless codex exec never runs untrusted hooks. Report; never
-            # write. Project .codex/hooks.json is NOT a user-level substitute.
-            conflicts.append({"kind": "host_unsupported", "path": None,
-                              "reason": "Codex user-level hooks require an interactive trust review that unattended install cannot complete; install never writes Codex settings and does not substitute project .codex/hooks.json."})
-            continue
+        cells = HOST_CAPABILITIES.get(host)
+        if not cells:
+            raise DomainError("unknown_host", "Unknown host", {"host": host, "hosts": sorted(HOST_CAPABILITIES)})
         if host not in resolved.host_roots:
             conflicts.append({"kind": "host_root", "path": None,
                               "reason": "no --host-root %s=PATH provided; nothing will be written for this host" % host})
             continue
-        settings_entries.extend(_plan_host_settings(host, resolved, operation, manifest))
+        hooks_cell = cells.get("hooks") or {}
+        if hooks_cell.get("status") == "supported":
+            settings_entries.extend(_plan_host_settings(host, resolved, operation, manifest))
+        else:
+            skipped_capabilities.append({
+                "host": host, "capability": "hooks", "status": hooks_cell.get("status", "unsupported"),
+                "reason": hooks_cell.get("note", "the host has no supported hooks channel"),
+            })
+        for capability in ("skills", "agents", "instructions"):
+            cell = cells.get(capability) or {}
+            if cell.get("status") == "supported":
+                continue
+            skipped_capabilities.append({
+                "host": host, "capability": capability, "status": cell.get("status", "unsupported"),
+                "reason": cell.get("note", "the host does not carry this capability"),
+            })
         host_files.extend(_plan_host_files(host, resolved, operation, manifest, bundle, conflict_policy))
     return {
         "schema": "fstar.install-plan.v1",
@@ -614,6 +664,8 @@ def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = 
         "host_files": host_files,
         "conflicts": conflicts,
         "warnings": warnings,
+        "capabilities": {host: dict(cells) for host, cells in HOST_CAPABILITIES.items()},
+        "skipped_capabilities": skipped_capabilities,
         "roots": {
             "user_root": str(resolved.user_root),
             "runtime_root": str(resolved.runtime_root),
@@ -751,15 +803,23 @@ def _owned_setting(manifest: Optional[dict], host: str, event: str, group: Mappi
 
 # Host-side skill/agent adaptation (parent design §2.3: the host user
 # directory carries "skills/agents 与必要的入口适配"). The list is driven by
-# the declared SKILLS/ROLES constants, never by scanning, so nothing
-# undeclared can ever reach the host root. Claude only; Codex adaptation
-# stays unimplemented behind its interactive trust gate.
-HOST_FILE_KINDS = {
-    "claude": (
-        [("skill", "skills/fstar-%s/SKILL.md" % name) for name in SKILLS]
-        + [("agent", "agents/fstar-%s.md" % role) for role in ROLES]
-    ),
-}
+# the declared SKILLS/ROLES constants and by the capability matrix, never by
+# scanning, so nothing undeclared can ever reach the host root. A host whose
+# capability cell says unsupported gets no entry at all (Codex has no fstar
+# role cards, so it carries skills only).
+def _host_file_kinds() -> Dict[str, tuple]:
+    kinds: Dict[str, tuple] = {}
+    for host, cells in HOST_CAPABILITIES.items():
+        entries = []
+        if cells.get("skills", {}).get("status") == "supported":
+            entries.extend(("skill", "skills/fstar-%s/SKILL.md" % name) for name in SKILLS)
+        if cells.get("agents", {}).get("status") == "supported":
+            entries.extend(("agent", "agents/fstar-%s.md" % role) for role in ROLES)
+        kinds[host] = tuple(entries)
+    return kinds
+
+
+HOST_FILE_KINDS = _host_file_kinds()
 
 
 def _manifest_owned_roots(manifest: Optional[dict]) -> Dict[str, set]:
@@ -796,6 +856,14 @@ def _manifest_owned_roots(manifest: Optional[dict]) -> Dict[str, set]:
     return roots
 
 
+def _skill_name(relative: str) -> Optional[str]:
+    """The skill name behind a declared host adaptation path."""
+    parts = PurePosixPath(relative).parts
+    if len(parts) == 3 and parts[0] == "skills" and parts[2] == "SKILL.md":
+        return parts[1]
+    return None
+
+
 def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional[dict],
                      bundle: Mapping, conflict_policy: str = "keep") -> List[dict]:
     """Plan the per-file adaptation of bundled skills/agents into the host root.
@@ -803,6 +871,14 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
     Ownership is per-file content hash from the install manifest, the same
     rule as cache files and settings entries: an unowned path is never taken
     over, identical content is reused, different content is a conflict.
+
+    Native copies are ALWAYS planned for hosts with a declared skills
+    channel (R-003 rework, 2026-11-20): manual /fstar-* slash commands are a
+    client feature supplied only by the host's native skills directory
+    (Magpie delivers skills through a single aggregated router skill and can
+    never provide the per-skill commands). A Magpie library hand-over is a
+    separate additive distribution recorded by fstar.magpie; it never
+    suppresses or retires a native copy.
     """
     entries = []
     bundle_hashes = {record.get("source"): record.get("sha256") for record in bundle.get("files", [])}
@@ -817,6 +893,7 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
             raise DomainError("host_plan_invalid", "Bundled host file is missing from package-assets.json",
                               {"source": source})
         destination = roots.host_roots[host] / relative
+        skill_name = _skill_name(relative) if kind == "skill" else None
         current_hash = None
         if destination.exists() or destination.is_symlink():
             if destination.is_symlink() or not destination.is_file():
@@ -869,6 +946,7 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
             "current_hash": current_hash,
             "action": action,
             "owned": record_owned is not None,
+            "skill": skill_name,
             "bundle_root": str(roots.bundle_root) if roots.bundle_root else str(_package_root()),
         })
     entries.extend(_plan_stale_host_files(host, roots, operation, manifest, bundle_hashes,
@@ -1724,6 +1802,11 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
                 # recorded baseline must follow it; otherwise doctor keeps
                 # reporting a file the installer itself refreshed.
                 existing["installed_hash"] = entry["expected_hash"]
+        elif entry["action"] in ("remove_owned", "remove_missing"):
+            # The file left the manifest (uninstall, or a resource that left
+            # the bundle). The record must not keep pointing at a file this
+            # installation no longer owns.
+            host_files.pop(entry["destination"], None)
     manifest["host_file_entries"] = sorted(host_files.values(), key=lambda record: record["destination"])
     manifest["version"] = version
     manifest["transaction"] = {"operation_id": operation_id, "state": "committed",
@@ -2172,7 +2255,82 @@ def _doctor_host_files(resolved: Roots) -> List[dict]:
     return diagnostics
 
 
-def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None) -> dict:
+def _capability_report(resolved: Roots) -> dict:
+    """The host capability matrix as doctor reports it.
+
+    Pure data plus the resolved location per host. An unverified cell is
+    reported with the "how to verify" hint the matrix carries; it is never
+    phrased as a guarantee.
+    """
+    hosts = {}
+    unverified = []
+    for host, cells in HOST_CAPABILITIES.items():
+        root = resolved.host_roots.get(host)
+        entries = {}
+        for capability, cell in cells.items():
+            entry = dict(cell)
+            if root is not None:
+                if capability == "hooks" and cell.get("settings_file"):
+                    entry["resolved_location"] = str(root / cell["settings_file"])
+                elif capability == "skills":
+                    entry["resolved_location"] = str(root / "skills")
+                elif capability == "agents":
+                    entry["resolved_location"] = str(root / "agents")
+            entries[capability] = entry
+            if cell.get("status") == "unverified":
+                unverified.append({"host": host, "capability": capability,
+                                   "how_to_verify": cell.get("how_to_verify",
+                                                             "observe the host's own configuration and keep the evidence")})
+        hosts[host] = entries
+    return {
+        "hosts": hosts,
+        "unverified": unverified,
+        "note": "verified means the shape was observed on the host; it never means the "
+                "host guarantees a live invocation of the registered entry",
+    }
+
+
+def _doctor_magpie_ownership(resolved: Roots, status=None) -> List[dict]:
+    """Informational diagnostic when the Magpie library share is unreachable.
+
+    Native entry points are always installed (R-003 rework, 2026-11-20), so a
+    missing Magpie never takes a skill away: only the additional library
+    distribution is unreachable. The diagnostic says exactly that; it never
+    implies the workflow lost a skill and never asks for a fallback.
+    """
+    from . import magpie as magpie_module
+
+    record = magpie_module.load_record(resolved.user_root)
+    handed_over = []
+    for name, entry in (record.get("skills") or {}).items():
+        state, _ = magpie_module._library_state(entry or {})
+        if state == "handed_over":
+            handed_over.append(name)
+    handed_over.sort()
+    if not handed_over:
+        return []
+    if status is None:
+        try:
+            binary = magpie_module.default_discovery()
+        except Exception:
+            binary = None
+        status = (magpie_module.probe(binary=binary) if binary
+                  else magpie_module.MagpieStatus(False, None, None, "magpie binary not found"))
+    if status.available:
+        return []
+    return [{"code": "MAGPIE_LIBRARY_UNREACHABLE",
+             "path": str(resolved.user_root / "magpie-integration.json"),
+             "line": 1,
+             "message": ("%d skill(s) were handed over to the Magpie library but Magpie is "
+                         "not available; only the extra library share is affected - the "
+                         "native skill entries are installed and unaffected"
+                         % len(handed_over)),
+             "severity": "info",
+             "details": {"skills": handed_over, "reason": status.reason}}]
+
+
+def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None,
+           magpie_status=None) -> dict:
     """Read-only structural health report (PI-06)."""
     resolved = roots.resolved()
     selection = resolve_resources(project_root=resolved.project_root, user_root=resolved.user_root,
@@ -2204,6 +2362,8 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None) -> dict
                                  journal.parent.name for journal in
                                  (resolved.user_root / "install-backups").glob("mig-res-*/journal.jsonl"))]
     host_file_diagnostics = _doctor_host_files(resolved)
+    magpie_diagnostics = _doctor_magpie_ownership(resolved, magpie_status)
+    capability_report = _capability_report(resolved)
     return {
         "schema": "fstar.doctor.v1",
         "resource_version": selection.version,
@@ -2222,7 +2382,9 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None) -> dict
                         + missing_entries
                         + pending_diagnostics
                         + migration_diagnostics
-                        + host_file_diagnostics),
+                        + host_file_diagnostics
+                        + magpie_diagnostics),
+        "capabilities": capability_report,
         "entries": {"total": len(entry_index.get("entries", [])),
                     "by_host": _entries_by_host(entry_index),
                     "active": entries_report["active"],
@@ -2239,7 +2401,9 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None) -> dict
                     and not missing_entries
                     and not pending_diagnostics
                     and not migration_diagnostics
-                    and not host_file_diagnostics),
+                    and not host_file_diagnostics
+                    and not [item for item in magpie_diagnostics
+                             if item.get("severity") != "info"]),
         "read_only": True,
     }
 
@@ -2407,10 +2571,17 @@ def version_report(*, roots: Roots) -> dict:
             "package_name": "fstar-workflow",
             "source_ref": bundle.get("source_ref"),
             "license_status": bundle.get("license_status"),
-            "codex_user_level": "unsupported-for-unattended",
+            # Verified 2026-11-20 on this machine (codex-cli 0.167.0):
+            # ~/.codex/hooks.json is a real user-level layer with the same
+            # PascalCase keys, and the host records trusted_hash entries for
+            # it. Unattended install can write the file but cannot complete
+            # the one-time interactive trust review in the Codex TUI, so the
+            # entries only run after the user approved them there.
+            "codex_user_level": "supported-user-level-trust-review-required",
+            "codex_skills": "supported-user-level",
             "live_delivery": "claude session-context",
             "release_ready": False,
-            "note": "Evidence complete (npm name available; source commit verified, upstream license pending with adaptation-only content; Codex user-level needs an interactive trust review, so unattended install stays unsupported; claude session-context delivered live). release_ready stays false until the owner decides to publish.",
+            "note": "Evidence complete (npm name available; source commit verified, upstream license pending with adaptation-only content; Codex user-level hooks and skills are written to the user level and need the one-time interactive trust review in the Codex TUI before the host runs them; claude session-context delivered live). release_ready stays false until the owner decides to publish.",
         },
     }
 
@@ -2431,8 +2602,12 @@ def register_commands(subparsers) -> None:
     install.add_argument("--conflict", choices=list(CONFLICT_POLICIES), default="keep",
                          help="treatment for installer-owned files modified by the user")
     install.add_argument("--magpie", action="store_true",
-                         help="optional: hand fstar's named skills over to Magpie "
-                              "(skipped when Magpie is absent; never fails the install)")
+                         help="accepted for backward compatibility: the Magpie library "
+                              "hand-over is additive and also happens by default when "
+                              "Magpie is available")
+    install.add_argument("--native-only", action="store_true",
+                         help="skip the Magpie library hand-over entirely; native skills "
+                              "entries are installed either way")
     install.add_argument("--user-level", action="store_true",
                          help="target ~/.claude instead of the current fstar project's .claude")
     install.add_argument("--storage", choices=list(STORAGE_MODES), default=None,
@@ -2448,6 +2623,13 @@ def register_commands(subparsers) -> None:
                         help="treatment for installer-owned files modified by the user")
     update.add_argument("--user-level", action="store_true",
                         help="target ~/.claude instead of the current fstar project's .claude")
+    update.add_argument("--magpie", action="store_true",
+                        help="accepted for backward compatibility: the Magpie library "
+                             "hand-over is additive and also happens by default when "
+                             "Magpie is available")
+    update.add_argument("--native-only", action="store_true",
+                        help="skip the Magpie library hand-over entirely; native skills "
+                             "entries are installed either way")
     update.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_update})
 
     uninstall = subparsers.add_parser(
@@ -2497,6 +2679,73 @@ def _explicit_roots(args) -> bool:
     return bool(getattr(args, "user_level", False) or getattr(args, "host_root", None))
 
 
+def _named_hosts(args) -> List[str]:
+    """The hosts the user named explicitly (--host-root, --user-level)."""
+    names = []
+    for pair in getattr(args, "host_root", None) or []:
+        name = pair.partition("=")[0]
+        if name and name not in names:
+            names.append(name)
+    if getattr(args, "user_level", False) and "claude" not in names:
+        names.append("claude")
+    return names
+
+
+def _resolve_skills_routing(args, roots: Roots, *, dry_run: bool) -> dict:
+    """Additively distribute the skills to Magpie's library (R-003 rework).
+
+    Native copies are the installer's own business and are always planned; a
+    preview (dry run) never stages, hands over, or writes the record.
+    """
+    from .magpie import default_agents_source, route_skills
+
+    skills_root = _package_root() / "resources" / "skills"
+    return route_skills(skills_root=skills_root,
+                        agents_source=default_agents_source(),
+                        user_root=roots.user_root,
+                        dry_run=dry_run,
+                        native_only=bool(getattr(args, "native_only", False)))
+
+
+def _share_instructions(args, roots: Roots, routing: Mapping) -> Optional[dict]:
+    """Publish the fstar workflow entry into Magpie's library instructions.
+
+    Skipped (and reported) when Magpie is not available, when the user asked
+    for a native-only install, or when the capability cannot be used. A
+    conflict with the user's own instructions keeps their content.
+    """
+    from .magpie import share_instructions
+
+    if getattr(args, "native_only", False):
+        return {"action": "skipped", "reason": "native-only install: Magpie was not consulted"}
+    magpie_info = routing.get("magpie") or {}
+    if not magpie_info.get("available") or not magpie_info.get("binary"):
+        return None
+    try:
+        return share_instructions(binary=magpie_info["binary"], user_root=roots.user_root)
+    except Exception as exc:  # a broken Magpie never fails the install
+        return {"action": "unavailable", "reason": "magpie instructions failed: %s" % exc}
+
+
+def _routing_report(routing: Mapping, instructions: Optional[dict]) -> dict:
+    """The Magpie library-distribution section of an install or update result.
+
+    Every per-skill entry describes ONLY the library distribution; native
+    copies are always installed and reported by the installer's own plan.
+    """
+    report = {
+        "status": routing.get("status"),
+        "magpie": dict(routing.get("magpie") or {}),
+        "skills": routing.get("skills") or [],
+        "library": routing.get("library") or {},
+        "note": "native skills entries are always installed; these results describe "
+                "only the additional Magpie library distribution",
+    }
+    if instructions is not None:
+        report["instructions"] = instructions
+    return report
+
+
 def _handle_install(args):
     storage = getattr(args, "storage", None)
     if storage is not None:
@@ -2506,37 +2755,22 @@ def _handle_install(args):
         # A previous crash must be repaired before planning against its
         # half-written state; dry runs stay read-only.
         recover_pending(roots)
-    plan = plan_install(operation="install", roots=roots, hosts=args.host, conflict_policy=args.conflict)
+    plan = plan_install(operation="install", roots=roots, hosts=args.host,
+                        conflict_policy=args.conflict,
+                        named_hosts=_named_hosts(args))
     if args.dry_run:
-        return {"dry_run": True, **plan}
+        preview = _resolve_skills_routing(args, roots, dry_run=True)
+        return {"dry_run": True, **plan, "magpie": _routing_report(preview, None)}
     if _declines_confirmation(args, plan):
         return {"dry_run": False, "aborted": True, "reason": "user_declined",
                 "host_roots": plan["roots"]["host_roots"], "warnings": plan["warnings"]}
     result = {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
-    if getattr(args, "magpie", False):
-        # Optional, opt-in integration: a missing or failing Magpie degrades
-        # the report and never fails the base install.
-        result["magpie"] = _optional_magpie_integration(roots)
+    # Additive library distribution (native copies are already applied by the
+    # plan above and are never suppressed by it).
+    routing = _resolve_skills_routing(args, roots, dry_run=False)
+    instructions = _share_instructions(args, roots, routing)
+    result["magpie"] = _routing_report(routing, instructions)
     return result
-
-
-def _optional_magpie_integration(roots: Roots) -> dict:
-    """Hand fstar's named skills over to Magpie, best effort.
-
-    Never raises: the base fstar install already succeeded, and an absent or
-    broken Magpie must not turn a successful install into a failure. Only the
-    public Magpie CLI is used; Magpie-private files are never touched.
-    """
-    try:
-        from .magpie import default_agents_source, integrate
-
-        skills_root = _package_root() / "resources" / "skills"
-        return integrate(skills_root=skills_root,
-                         agents_source=default_agents_source(),
-                         user_root=roots.user_root)
-    except Exception as exc:
-        return {"schema": "fstar.magpie-integration.v1", "status": "degraded",
-                "reason": "magpie integration failed: %s" % exc, "skills": []}
 
 
 def _initialize_storage_for_install(args, storage: str) -> None:
@@ -2607,10 +2841,16 @@ def _handle_update(args):
     if not args.dry_run:
         recover_pending(roots)
     plan = plan_install(operation="update", roots=roots, conflict_policy=args.modified,
-                        explicit_roots=_explicit_roots(args))
+                        explicit_roots=_explicit_roots(args),
+                        named_hosts=_named_hosts(args))
     if args.dry_run:
-        return {"dry_run": True, **plan}
-    return {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
+        preview = _resolve_skills_routing(args, roots, dry_run=True)
+        return {"dry_run": True, **plan, "magpie": _routing_report(preview, None)}
+    result = {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
+    routing = _resolve_skills_routing(args, roots, dry_run=False)
+    instructions = _share_instructions(args, roots, routing)
+    result["magpie"] = _routing_report(routing, instructions)
+    return result
 
 
 def _handle_uninstall(args):
@@ -2618,10 +2858,24 @@ def _handle_uninstall(args):
     if not args.dry_run:
         recover_pending(roots)
     plan = plan_install(operation="uninstall", roots=roots, hosts=args.host,
-                        explicit_roots=_explicit_roots(args))
+                        explicit_roots=_explicit_roots(args),
+                        named_hosts=_named_hosts(args))
     if args.dry_run:
         return {"dry_run": True, **plan}
-    return {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
+    result = {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
+    # Skills handed over to the Magpie library are not ours to remove: there
+    # is no verified public removal API, so they are reported instead of
+    # deleted. Native copies were removed by the plan like any owned file.
+    from .magpie import load_record, _library_state
+
+    record = load_record(roots.user_root)
+    handed_over = sorted(name for name, entry in (record.get("skills") or {}).items()
+                         if _library_state(entry or {})[0] == "handed_over")
+    if handed_over:
+        result["magpie"] = {"status": "kept_in_library", "skills": handed_over,
+                            "reason": "handed over to the Magpie library; remove them through Magpie "
+                                      "(the native entries were removed by this uninstall)"}
+    return result
 
 
 def _handle_doctor(args):

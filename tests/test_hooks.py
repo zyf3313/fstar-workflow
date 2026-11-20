@@ -1019,20 +1019,28 @@ class RegistrationPlanTests(HookCase):
         result = registration.plan("codex")
         self.assertEqual(len(result["entries"]), 5)
         # The four codex hook events fired live with exit code 0 on 2026-11-05
-        # (SessionStart / SubagentStart / SubagentStop / PostToolUse); evidence
-        # is observed-schema for those. UserPromptSubmit has not been observed
-        # and must stay honestly unverified with a to_verify note.
+        # (SessionStart / SubagentStart / SubagentStop / PostToolUse).
         observed = [entry for entry in result["entries"] if entry["semantic"] != "prompt-context"]
         self.assertEqual(len(observed), 4)
         self.assertTrue(all(entry["verified"] for entry in observed))
         self.assertTrue(all(not entry["to_verify"] for entry in observed))
         self.assertTrue(all(entry["hooks"][0]["evidence"] == "observed-schema" for entry in observed))
+        # The prompt-context event name was verified on 2026-11-20 from two
+        # independent read-only sources (the codex-cli 0.167.0 binary and a
+        # real project hooks.json the host had trusted), so it is verified
+        # now; the manual fallback stays as the boundary path.
         prompt = [entry for entry in result["entries"] if entry["semantic"] == "prompt-context"][0]
-        self.assertFalse(prompt["verified"])
-        self.assertTrue(prompt["to_verify"])
-        self.assertEqual(prompt["hooks"][0]["evidence"], "unverified-schema")
+        self.assertTrue(prompt["verified"])
+        self.assertEqual(prompt["to_verify"], [])
+        self.assertEqual(prompt["hooks"][0]["evidence"], "observed-schema")
         self.assertEqual(prompt["schema_event"], "userPromptSubmit")
         self.assertEqual(prompt["fallback"], "fstar hook prompt-context invoked manually")
+
+    def test_codex_user_level_scope_is_declared_in_the_plan(self):
+        # Verified 2026-11-20: ~/.codex/hooks.json is a real user-level
+        # layer, so the plan declares it instead of the project file.
+        for entry in registration.plan("codex")["entries"]:
+            self.assertEqual(entry["settings_path"], "~/.codex/hooks.json")
 
     def test_unknown_host_rejected(self):
         with self.assertRaises(DomainError):

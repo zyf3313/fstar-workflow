@@ -25,7 +25,8 @@ Plan ──► Start ──► Implement ⇄ Check ──► Fresh evidence ─�
 
 - Node.js 18 or newer (launcher only)
 - Python 3.9 or newer on `PATH` (the kernel)
-- Optional hosts: Claude Code (verified), Codex CLI (limited, see below)
+- Optional hosts: Claude Code (verified), Codex CLI (user-level hooks and
+  skills supported; one-time TUI trust review, see below)
 
 ## Install
 
@@ -394,26 +395,31 @@ install lives in another host root the command refuses
 
 ## Host support
 
-| Host | Hooks | Skills | Agents |
-|---|---|---|---|
-| Claude Code | four existing events verified live; the newer `UserPromptSubmit` prompt-context hook has unit/CLI verification only — no live host firing observed yet | verified live | verified live |
-| Codex CLI | four hook events verified live (SessionStart / SubagentStart / SubagentStop / PostToolUse fired with exit code 0 on 2026-11-05); the newer `userPromptSubmit` prompt-context registration is unverified live (event/schema casing not observed in the Codex schema); installer still requires manual trust approval in the TUI before any `.codex/hooks.json` is written, and remains read-only when run headless | not adapted | not adapted |
+One capability matrix (in `src/fstar/runtime/registration.py`) is the single
+source of truth: the installer only installs a cell marked `supported`, the
+doctor reports every cell as-is, and an unverified cell is never described
+as guaranteed. `fstar doctor` prints the same matrix with the resolved
+location per host.
 
-Codex trust is a deliberate gap, not a bug: the host requires a human to
-approve each hook the first time, and no installer can consent on your behalf.
-To collect live evidence without changing your real configuration, run the
-read-only adapter plan and copy the four commands into a disposable project
-hook configuration, then approve the trust prompt in the Codex TUI:
+| Host | Hooks | Skills | Agents | Instructions |
+|---|---|---|---|---|
+| Claude Code | user-level `~/.claude/settings.json`; all five events (SessionStart / PreToolUse / SubagentStop / PostToolUse / UserPromptSubmit) verified live | `~/.claude/skills/fstar-<name>/SKILL.md` | `~/.claude/agents/fstar-<role>.md` (fstar role cards) | no per-host instructions file; the Magpie library instructions channel is the shared entry when Magpie is present |
+| Codex CLI | user-level `~/.codex/hooks.json` (`$CODEX_HOME/hooks.json`) with the same five PascalCase events — verified live 2026-11-20 against codex-cli 0.167.0 on this machine; the host also honors per-project `.codex/hooks.json` | `~/.codex/skills/fstar-<name>/SKILL.md` (`$CODEX_HOME/skills`) — verified from the codex-cli 0.167.0 binary | not applicable: Codex's agents are coding tools, not fstar role definitions; fstar role cards stay in fstar's own dispatch protocol | same as Claude: the Magpie channel is the shared entry |
 
-```bash
-fstar --json hook plan --host codex
-```
+Codex trust is a deliberate boundary, not a bug: the host requires a human
+to approve each hook file the first time, and no installer can consent on
+your behalf. `fstar install --host codex` **writes** the user-level
+`~/.codex/hooks.json` (that layer is real and verified), but Codex only
+*runs* the entries after you approve them once in the Codex TUI — the host
+then records `trusted_hash` entries in `~/.codex/config.toml` and fires
+them (headless `codex exec` never runs untrusted hooks). The install
+report and `fstar doctor` say exactly this; they never claim live delivery
+before that approval.
 
-If any event does not fire, keep the event payload and exit status as evidence
-and file it against the `to_verify` item in the plan. Do not commit the
-project hook file. `fstar install --host codex` remains read-only by design,
-while `--host claude` continues to use its independently verified `.claude`
-adapter; the two host roots never share configuration.
+`verified` in the plan and the matrix always means "the schema was
+observed", never "the host guarantees an invocation". Each hook keeps its
+documented fallback boundary (for example `fstar hook prompt-context`
+invoked manually), which runs the same code path as the host event.
 
 ## Command reference
 
@@ -429,8 +435,9 @@ Run `fstar <command> --help` for flags. The commands group by purpose:
 - **Install maintenance** — `install`, `update`, `uninstall`, `doctor`,
   `migrate`, `version`, `resource-inspect`, `resource-remind`,
   `resource-migrate`, `resource-defer`
-- **Optional Magpie integration** — `scripts/integrate-magpie.cjs` (see
-  "Optional Magpie skills integration" below)
+- **Optional Magpie soft router** — built into `install`/`update`
+  (`--native-only` opts out; see "Optional Magpie soft router" below);
+  `scripts/integrate-magpie.cjs` remains as a convenience wrapper
 - **Agent-side** (invoked by agents, rarely by hand) — `dispatch ...`,
   `interrupt`, `doc-edit`, `hook ...`
 
@@ -448,41 +455,81 @@ fstar doctor                     # confirm everything is healthy
 A running session may have the previous resource version cached; restart the
 session (or clear/compact it) for the new version to take effect.
 
-## Optional Magpie skills integration
+## Optional Magpie soft router (additional skills distribution)
 
-If you use [Magpie](https://magpie.dev), install-time integration can hand
-fstar's named skills over to Magpie's library through its public CLI:
+Native skill copies are **always installed**. Every host with a declared
+skills channel (Claude Code, Codex) receives all of fstar's named skills in
+its own skills directory, because the manual `/fstar-*` slash commands are a
+client feature supplied only by that native directory. Magpie delivers
+skills to hosts through a **single aggregated router skill**, so it can
+never provide the per-skill commands: routing a skill to Magpie does not and
+must not remove its native copy.
 
-```bash
-node scripts/integrate-magpie.cjs                # installs globally, then offers the hand-over
-node scripts/integrate-magpie.cjs --dry-run      # never writes anything
-fstar install --host claude --magpie             # opt-in hand-over as part of an install
-```
+When [Magpie](https://magpie.dev) is installed, `fstar install` and
+`fstar update` additionally hand each skill over to Magpie's library
+(`magpie library skill hand-over <name>`, the public CLI), so **agents that
+have no native skills channel** can share the same skills through Magpie's
+router. The hand-over is additive:
 
-Facts and boundaries (verified against magpie 0.1.4380 on 2026-11-20):
+- The per-skill results in the install report (`magpie.skills`,
+  `magpie.library`) describe **only the library distribution**
+  (`handed_over`, `handover_failed`, `conflict`, `already_integrated`, ...).
+  They never say a skill is missing: the native copy is installer-owned and
+  unaffected.
+- A failed hand-over (timeout, non-zero exit, a user's same-named skill in
+  the staging directory) removes only the staged library copy; the native
+  copy stays installed and the install still succeeds.
+- `--native-only` skips the Magpie library hand-over entirely (Magpie is
+  not probed or invoked); `--magpie` remains accepted as a no-op alias for
+  backward compatibility. Native installs are the same either way.
+- The library hand-over is recorded separately in
+  `~/.fstar/magpie-integration.json` as a per-skill `library` field
+  (`handed_over` / `handover_failed`). Native copies stay recorded in the
+  install manifest. Records written by the earlier ownership model
+  (`ownership: magpie`) are read compatibly as "library handed over", and
+  the native copy is installed as usual.
+- Magpie disappears later: the native entries keep working unchanged.
+  `fstar doctor` reports `MAGPIE_LIBRARY_UNREACHABLE` as an **informational**
+  diagnostic (the extra library share is unreachable; no skill is lost and
+  no fallback install is needed).
 
-- The hand-over is opt-in (`fstar install --magpie`) or run through the
-  script; a plain `fstar install` never touches Magpie.
+Known trade-off: with both copies present, a request routed through Magpie
+can list the skills twice (the native listing plus the router skill's
+listing). Deduplication is a Magpie-side configuration (exclude the host in
+Magpie's skill routing); fstar does not manage Magpie's per-agent routing.
+
+Boundaries (verified against magpie 0.1.4582 on 2026-11-20):
+
 - Discovery checks `PATH` first, then the standard app location
-  (`/Applications/magpie.app/Contents/MacOS/magpie`). No Magpie found → the
-  step is skipped and the base fstar install is unaffected.
+  (`/Applications/magpie.app/Contents/MacOS/magpie`). A missing Magpie is a
+  clean native install, never a failure.
 - `FSTAR_MAGPIE_BINARY` and `FSTAR_MAGPIE_AGENTS_SOURCE` redirect the binary
-  and the staging directory, so an isolated run never reaches the real app.
-- Only the public `magpie library skill hand-over <name>` command is used,
-  with a bounded timeout and argv (never a shell string). fstar stages its
-  skills into `~/.agents/skills` first; a user's same-named skill is never
-  overwritten (reported as a conflict).
-- Re-running is idempotent: skills already handed over with the same content
-  fingerprint are skipped.
-- fstar does NOT edit Magpie-private files (`library.json`,
-  `providers.json`), never changes models, accounts, providers, or other
-  skills' routing, and does not import hooks or sub-agent definitions —
-  Magpie's `agents` are coding tools, not fstar roles. Hooks and agent cards
-  stay in the tool-native global host entry described above.
-- Updating or removing Magpie-managed skills has no verified public CLI
-  path: manage those through Magpie itself. `fstar` only removes local
-  staged entries it still owns and that still match the recorded
-  fingerprint.
+  and the staging directory, so an isolated run never reaches the real app
+  (the test suite sets both to non-existent paths).
+- Only public CLI commands are used, with bounded timeouts and argv (never
+  a shell string). fstar does NOT edit Magpie-private files
+  (`library.json`, `providers.json`), never changes models, accounts,
+  providers, or other skills' routing, and does not import hooks or
+  sub-agent definitions — Magpie's `agents` are coding tools, not fstar
+  roles. Hooks and agent cards stay in the tool-native host entries.
+- Re-running is idempotent: a skill already handed over with the same
+  content fingerprint is skipped (`already_integrated`); a changed
+  fingerprint is re-staged and handed over again through the public CLI.
+- Removing a skill from Magpie's library has no verified public CLI path:
+  manage that through Magpie itself. `fstar uninstall` removes the native
+  copies it owns and reports any skill still present in the library.
+
+### Shared workflow instructions
+
+When Magpie is available, an install also publishes a short natural-language
+fstar workflow entry into Magpie's **library instructions**
+(`magpie library instructions` / `… set`), so tools without hooks can still
+be guided into the workflow. The current instructions are read first: an
+empty library or text fstar itself wrote is replaced; anything else is the
+user's own content — it is kept unchanged and reported as a conflict.
+`--native-only` skips this step entirely, and a Magpie whose instructions
+channel cannot be read or written is skipped and reported without failing
+the install.
 
 ## Development
 

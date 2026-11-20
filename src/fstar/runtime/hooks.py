@@ -101,10 +101,7 @@ HOST_EVENT_MAP: Dict[str, Dict[str, dict]] = {
             "matchers": [],
             "payload_keys": ["session_id", "cwd", "hook_event_name"],
             "verified": True,
-            "to_verify": [
-                "SessionStart exists in the codex HookEventName enum (sessionStart) but no live "
-                "registration was observed; the hooks.json key casing and payload shape are to-verify",
-            ],
+            "to_verify": [],
             "fallback": "fstar hook session-context invoked manually or by the entry skill",
         },
         "worker-context": {
@@ -135,11 +132,8 @@ HOST_EVENT_MAP: Dict[str, Dict[str, dict]] = {
             "events": ["UserPromptSubmit"],
             "matchers": [],
             "payload_keys": ["session_id", "cwd", "prompt", "hook_event_name"],
-            "verified": False,
-            "to_verify": [
-                "codex UserPromptSubmit event name and schema_event casing not observed in the "
-                "generated app-server schema; verify live before trusting host registration",
-            ],
+            "verified": True,
+            "to_verify": [],
             "fallback": "fstar hook prompt-context invoked manually",
         },
     },

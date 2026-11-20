@@ -144,10 +144,33 @@ CLAUDE_PLAN = [
 # PostToolUse adds turn_id/transcript_path/model/permission_mode/tool_name/
 # tool_input/tool_response/tool_use_id, where apply_patch/Bash carry
 # tool_input.command rather than a file_path key).
+#
+# User-level scope verified 2026-11-20 on this machine: ~/.codex/hooks.json
+# is a real user-level hooks layer (codex-cli 0.167.0). It carries the same
+# PascalCase keys as the project file, and the TUI trust review recorded
+# trusted_hash entries for it in config.toml [hooks.state] and the hooks
+# fired. Unattended install can write the file but cannot complete that
+# first interactive trust review — the installer reports this honestly and
+# the user activates the entries in the Codex TUI once.
+#
+# userPromptSubmit casing verified 2026-11-20 from two independent
+# read-only sources on this machine:
+#  (1) the installed codex-cli 0.167.0 native binary carries both
+#      "user_prompt_submit" (internal/snake payload id) and
+#      "userPromptSubmit" (camelCase in the same enum string as
+#      sessionStart/subagentStart/subagentStop/postToolUse);
+#  (2) a real project hooks.json on this machine
+#      (…/kincare-ai/.codex/hooks.json) registers the key "UserPromptSubmit"
+#      in PascalCase, and Codex recorded a trusted_hash for it in
+#      config.toml [hooks.state] — the host parsed and trusted that key.
+# The settings key here is therefore UserPromptSubmit (PascalCase, matching
+# the other four events) with schema_event userPromptSubmit. "verified" still
+# means the schema was observed, not that the host guarantees a live
+# invocation; the fallback stays.
 CODEX_PLAN = [
     {
         "host": "codex",
-        "settings_path": "<project>/.codex/hooks.json",
+        "settings_path": "~/.codex/hooks.json",
         "location": "hooks.<EventName>[] (append, never overwrite other entries)",
         "dedup_key": "event + command",
         "event": "SessionStart",
@@ -162,7 +185,7 @@ CODEX_PLAN = [
     },
     {
         "host": "codex",
-        "settings_path": "<project>/.codex/hooks.json",
+        "settings_path": "~/.codex/hooks.json",
         "location": "hooks.<EventName>[] (append, never overwrite other entries)",
         "dedup_key": "event + command",
         "event": "SubagentStart",
@@ -177,7 +200,7 @@ CODEX_PLAN = [
     },
     {
         "host": "codex",
-        "settings_path": "<project>/.codex/hooks.json",
+        "settings_path": "~/.codex/hooks.json",
         "location": "hooks.<EventName>[] (append, never overwrite other entries)",
         "dedup_key": "event + command",
         "event": "SubagentStop",
@@ -192,7 +215,7 @@ CODEX_PLAN = [
     },
     {
         "host": "codex",
-        "settings_path": "<project>/.codex/hooks.json",
+        "settings_path": "~/.codex/hooks.json",
         "location": "hooks.<EventName>[] (append, never overwrite other entries)",
         "dedup_key": "event + command",
         "event": "PostToolUse",
@@ -207,7 +230,7 @@ CODEX_PLAN = [
     },
     {
         "host": "codex",
-        "settings_path": "<project>/.codex/hooks.json",
+        "settings_path": "~/.codex/hooks.json",
         "location": "hooks.<EventName>[] (append, never overwrite other entries)",
         "dedup_key": "event + command",
         "event": "UserPromptSubmit",
@@ -216,14 +239,122 @@ CODEX_PLAN = [
         "matchers": [],
         "hooks": [{"type": "command", "command": "@@prompt-context@@", "timeout": 15}],
         "owned_by": "fstar",
-        "verified": False,
-        "to_verify": [
-            "codex userPromptSubmit event/schema_event casing not observed in the generated "
-            "app-server schema; verify live before trusting host registration",
-        ],
+        "verified": True,
+        "to_verify": [],
         "fallback": "fstar hook prompt-context invoked manually",
     },
 ]
+
+# ---------------------------------------------------------------------------
+# Host capability matrix (R-001/D-001)
+#
+# Single declared source of truth for what each supported host can carry.
+# Every cell states supported / unsupported / unverified plus the concrete
+# location and the evidence note; the installer executes from it, doctor
+# reports from it, and nothing outside the matrix is ever attempted. An
+# unknown host is an explicit error, never a guess. Values marked unverified
+# must never be reported as guaranteed — the wording rules are enforced in
+# the doctor/installer reporting layer.
+
+
+def _hooks_cell(entries, scope: str, notes: str, settings_file: str,
+                how_to_verify: str = "") -> dict:
+    events = {}
+    for entry in entries:
+        events[entry["semantic"]] = {
+            "event": entry["event"],
+            "status": "supported" if entry.get("verified") else "unverified",
+            "to_verify": list(entry.get("to_verify") or []),
+        }
+    cell = {"status": "supported", "scope": scope, "settings_file": settings_file,
+            "events": events, "note": notes}
+    if how_to_verify:
+        cell["how_to_verify"] = how_to_verify
+    return cell
+
+
+HOST_CAPABILITIES = {
+    "claude": {
+        "hooks": _hooks_cell(
+            CLAUDE_PLAN,
+            "user-level ~/.claude/settings.json (hooks.<EventName>[])",
+            "settings shape verified against Claude Code 2.1.312/2.1.316 and this "
+            "repository's live registration; verified means the schema was observed, "
+            "not that the host guarantees a live invocation.",
+            "settings.json",
+            "start a Claude Code session and check that the hook wrote its breadcrumb "
+            "into the project data root",
+        ),
+        "skills": {
+            "status": "supported",
+            "location": "~/.claude/skills/fstar-<name>/SKILL.md",
+            "note": "native channel; always written, because manual /fstar-* slash commands "
+                    "are supplied only by the host's native skills directory. A Magpie library "
+                    "hand-over is an additional distribution, never a replacement",
+            "how_to_verify": "list the host's skills and check that the fstar entry points "
+                             "at the installed SKILL.md",
+        },
+        "agents": {
+            "status": "supported",
+            "location": "~/.claude/agents/fstar-<role>.md",
+            "note": "Claude subagent definitions carry fstar role cards",
+            "how_to_verify": "list the host's subagent definitions and check that the fstar "
+                             "role cards are there",
+        },
+        "instructions": {
+            "status": "unsupported",
+            "note": "no per-host instructions file; the Magpie library instructions "
+                    "channel is the shared entry when Magpie is present",
+        },
+    },
+    "codex": {
+        "hooks": _hooks_cell(
+            CODEX_PLAN,
+            "user-level ~/.codex/hooks.json ($CODEX_HOME/hooks.json); the host also "
+            "honors per-project <project>/.codex/hooks.json",
+            "Live-verified 2026-11-20 on this machine: ~/.codex/hooks.json carries the "
+            "four fstar hooks with PascalCase keys (PreToolUse/PostToolUse/SessionStart/"
+            "SubagentStop) and they run after the interactive TUI trust review "
+            "(config.toml [hooks.state] trusted_hash). Unattended install writes the "
+            "file but Codex does not RUN an untrusted hook: first activation requires "
+            "the trust review in the Codex TUI. verified means the schema was "
+            "observed, not that the host guarantees a live invocation.",
+            "hooks.json",
+            "approve the entries once in the Codex TUI; the host then records "
+            "trusted_hash entries in ~/.codex/config.toml and fires the hooks",
+        ),
+        "skills": {
+            "status": "supported",
+            "location": "~/.codex/skills/fstar-<name>/SKILL.md ($CODEX_HOME/skills)",
+            "note": "verified from the codex-cli 0.167.0 binary: skills are discovered "
+                    "in $CODEX_HOME/skills (~/.codex/skills when CODEX_HOME is unset); "
+                    "always written; a Magpie library hand-over is additional, never a replacement",
+            "how_to_verify": "put the skill directory under $CODEX_HOME/skills and check "
+                             "that the host lists it",
+        },
+        "agents": {
+            "status": "unsupported",
+            "note": "not applicable: Codex's agents are coding tools, not fstar role "
+                    "definitions; fstar role cards stay in fstar's own dispatch "
+                    "protocol (magpie.py evidence).",
+            "how_to_verify": "not applicable; the capability is explicitly out of scope",
+        },
+        "instructions": {
+            "status": "unsupported",
+            "note": "no per-host instructions file; the Magpie library instructions "
+                    "channel is the shared entry when Magpie is present",
+        },
+    },
+}
+
+
+def capabilities(host: str) -> dict:
+    """The declared capability cells for one host. Pure data, no I/O."""
+    if host not in HOST_CAPABILITIES:
+        raise DomainError("unknown_host", "Unknown host for capability matrix",
+                          {"host": host, "hosts": sorted(HOST_CAPABILITIES)})
+    return {"host": host, "capabilities": HOST_CAPABILITIES[host]}
+
 
 PLANS: Dict[str, list] = {"claude": CLAUDE_PLAN, "codex": CODEX_PLAN}
 

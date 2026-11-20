@@ -254,17 +254,42 @@ class TestSettingsOwnership(InstallerCase):
             self.install(hosts=["claude"])
         self.assertEqual(caught.exception.code, "host_settings_unreadable")
 
-    def test_codex_install_reports_unsupported_and_writes_nothing(self):
+    def test_codex_install_writes_the_user_level_hooks_and_skills(self):
+        # Verified 2026-11-20 (codex-cli 0.167.0): ~/.codex/hooks.json is a
+        # real user-level layer and Codex discovers skills in $CODEX_HOME/skills.
+        # The installer writes both; the host still needs the one-time
+        # interactive trust review before it RUNS the entries.
         codex_root = self.tmp / "host" / "codex"
         codex_root.mkdir(parents=True)
         roots = self.roots(host_roots={"claude": self.host_root, "codex": codex_root})
         plan = installer.plan_install(operation="install", roots=roots, hosts=["codex"])
-        self.assertTrue(any(c["kind"] == "host_unsupported" for c in plan["conflicts"]))
+        self.assertFalse(any(c["kind"] == "host_unsupported" for c in plan["conflicts"]))
+        self.assertEqual({entry["settings_path"] for entry in plan["settings_entries"]},
+                         {str(codex_root.resolve() / "hooks.json")})
+        self.assertEqual(len(plan["settings_entries"]), 5)
         result = installer.apply_plan(plan, roots=roots)
         self.assertEqual(plan["conflicts"], result["conflicts"])
-        self.assertFalse(result["applied"]["settings"])
-        self.assertEqual(plan["settings_entries"], [])
-        self.assertEqual(list(codex_root.iterdir()), [])
+        self.assertTrue(result["applied"]["settings"])
+        document = json.loads((codex_root / "hooks.json").read_text(encoding="utf-8"))
+        self.assertEqual(sorted(document["hooks"]), ["PostToolUse", "SessionStart",
+                                                      "SubagentStart", "SubagentStop",
+                                                      "UserPromptSubmit"])
+        skills = sorted(p.name for p in (codex_root / "skills").glob("fstar-*/SKILL.md"))
+        self.assertEqual(len(skills), 11)
+        # Codex has no fstar role cards: the matrix marks agents unsupported.
+        self.assertFalse((codex_root / "agents").exists())
+        skipped = {(item["host"], item["capability"]) for item in plan["skipped_capabilities"]}
+        self.assertIn(("codex", "agents"), skipped)
+
+    def test_codex_agents_are_reported_as_not_applicable(self):
+        codex_root = self.tmp / "host" / "codex"
+        codex_root.mkdir(parents=True)
+        roots = self.roots(host_roots={"claude": self.host_root, "codex": codex_root})
+        plan = installer.plan_install(operation="install", roots=roots, hosts=["codex"])
+        entry = next(item for item in plan["skipped_capabilities"]
+                     if item["host"] == "codex" and item["capability"] == "agents")
+        self.assertEqual(entry["status"], "unsupported")
+        self.assertTrue(entry["reason"])
 
 
 class TestFileOwnership(InstallerCase):
@@ -628,10 +653,15 @@ class TestHostSkillAdaptation(InstallerCase):
         for record in installer.plan_install(operation="install", roots=self.roots())["host_files"]:
             self.assertEqual(_sha(Path(record["destination"])), record["expected_hash"])
 
-    def test_codex_host_never_receives_host_file_entries(self):
+    def test_codex_host_receives_skills_but_no_role_cards(self):
+        # The matrix declares Codex skills as supported and Codex agents as
+        # not applicable; the installer follows the matrix exactly.
         plan = installer.plan_install(operation="install", roots=self.roots(
             host_roots={"codex": self.tmp / "host" / "codex"}), hosts=["codex"])
-        self.assertEqual(plan["host_files"], [])
+        kinds = sorted({record["kind"] for record in plan["host_files"]})
+        self.assertEqual(kinds, ["skill"])
+        self.assertEqual(len(plan["host_files"]), 11)
+        self.assertFalse(any(record["kind"] == "agent" for record in plan["host_files"]))
 
     def test_foreign_host_files_are_untouched(self):
         foreign = self.host_root / "skills" / "user-skill" / "SKILL.md"
@@ -1508,7 +1538,12 @@ class TestVersionReport(InstallerCase):
         self.assertTrue(readiness["package_name_verified"])
         self.assertEqual(readiness["package_name"], "fstar-workflow")
         self.assertIn("source-pending-adaptation-only", readiness["license_status"])
-        self.assertEqual(readiness["codex_user_level"], "unsupported-for-unattended")
+        # 2026-11-20: the Codex user-level layer was verified live, so the
+        # wording states the support and the remaining honest limitation
+        # (the one-time interactive trust review) instead of "unsupported".
+        self.assertEqual(readiness["codex_user_level"],
+                         "supported-user-level-trust-review-required")
+        self.assertEqual(readiness["codex_skills"], "supported-user-level")
         self.assertEqual(readiness["live_delivery"], "claude session-context")
 
 
