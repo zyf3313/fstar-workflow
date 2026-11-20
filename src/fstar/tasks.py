@@ -1354,8 +1354,13 @@ class TaskService:
                     updated.append({"id": task["id"], "reminder_key": key, "deferred_until": ledger[key]["deferred_until"]})
         return updated
 
-    def archive_candidates(self, *, older_than_days: int = 30) -> list:
-        threshold = parse_time(self.clock()) - timedelta(days=older_than_days)
+    def archive_candidates(self, *, older_than_days: int = 7) -> list:
+        # Completed tasks are nagged sooner: a finished task only waits for
+        # its archive confirmation, so a short window is enough. Incomplete
+        # tasks keep a longer horizon below so reminders do not fire while
+        # work is still active.
+        threshold_completed = parse_time(self.clock()) - timedelta(days=older_than_days)
+        threshold_active = parse_time(self.clock()) - timedelta(days=30)
         candidates = []
         for task in self.store.scan(archived=False):
             path = Path(task["_path"])
@@ -1363,7 +1368,11 @@ class TaskService:
                 continue
             substantial = [event["at"] for event in task["events"] if event.get("type") not in {"summary", "lease_renewed"} and event.get("at")]
             last = max(substantial + [task["createdAt"]])
-            if parse_time(last) > threshold:
+            is_completed = task["phase"] == "completed" or bool(task.get("meta", {}).get("disposition"))
+            if is_completed:
+                if parse_time(last) > threshold_completed:
+                    continue
+            elif parse_time(last) > threshold_active:
                 continue
             missing = []
             if task["phase"] != "completed" and not task.get("meta", {}).get("disposition"):
