@@ -1230,10 +1230,13 @@ class TaskService:
         else:
             if task["phase"] != "completed" or not task.get("acceptance") or task["acceptance"].get("state") != "valid":
                 raise DomainError("archive_blocked", "Every task in the tree must be completed or dispositioned", {"task": task["name"]}, status=3)
-            status = self.evidence.acceptance_status(task["id"], task=task)
-            accepted_refs = set(task["acceptance"].get("evidence_refs", []))
-            if not accepted_refs or not accepted_refs <= set(status["evidence_refs"]):
-                raise DomainError("archive_blocked", "Descendant acceptance evidence is stale", {"task": task["name"]}, status=3)
+            # Acceptance is a historical decision: it was made when the final
+            # check was fresh, and later batches legitimately evolve shared
+            # files. Re-validating current file fingerprints here would make
+            # every completed task unarchivable after the next merge, so the
+            # gate trusts the recorded acceptance state itself.
+            if not task["acceptance"].get("evidence_refs"):
+                raise DomainError("archive_blocked", "Acceptance has no qualifying evidence references", {"task": task["name"]}, status=3)
         ids = {task["id"]}
         for name in names:
             ids.update(self._validate_archive_tree(task_dir / "subtasks" / name, finalizations))

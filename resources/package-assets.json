@@ -167,7 +167,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "b3499dc91016168e5a6130ed1b1389e62f60dc5db2b2eb06dac73423778b6eab"
+      "sha256": "f9491a25ff865088fddcd8ce912904b2c4d1e0f0a123278daa82d4655083cfca"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",
