@@ -284,7 +284,9 @@ class LifecycleTests(CoreCase):
             ]
             self.store.write(self.store.resolve("root"), task)
         reopened = self.service.continue_task("root", action="reopen", actor=self.user, confirmation=self.source("root"), reason="found defect")
-        self.assertEqual("in_progress", reopened["phase"])
+        # PRD R-004: a reopened completed task returns to planning; the
+        # normal start -> dispatch/check cycle re-applies.
+        self.assertEqual("planning", reopened["phase"])
         by_id = {item["id"]: item for item in reopened["evidence"]}
         self.assertEqual("stale", by_id["ck1"]["state"])
         self.assertEqual([{"type": "reopened", "reason": "found defect"}], by_id["ck1"]["stale_reasons"])
@@ -438,6 +440,7 @@ class EvidenceArchiveTests(CoreCase):
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="check complete")
         rule = {"rule_ref": "~/.fstar/rules/docs-only.md", "quote": "以后纯文档改动、check 全绿的，不用再问我"}
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         accepted = self.service.accept("root", actor=self.user, confirmation=self.source("root"), rule=rule)
         self.assertEqual("completed", accepted["phase"])
         event = next(event for event in accepted["events"] if event["type"] == "accepted")
@@ -451,12 +454,13 @@ class EvidenceArchiveTests(CoreCase):
         lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="check complete")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         with self.assertRaises(DomainError) as caught:
             self.service.accept("root", actor=self.user, confirmation=self.source("root"), rule={"rule_ref": "x"})
         self.assertEqual("invalid_acceptance_rule", caught.exception.code)
         # Without a rule the flow is unchanged (user-only acceptance).
         task = self.store.read("root")
-        self.assertEqual("in_progress", task["phase"])
+        self.assertEqual("awaiting_acceptance", task["phase"])
 
     def test_wrong_producer_and_old_result_rejected(self):
         self.create()
@@ -570,6 +574,11 @@ class EvidenceArchiveTests(CoreCase):
     def test_stale_confirmation_rejected_on_accept(self):
         self.create()
         self.start()
+        self.prepare_artifacts()
+        lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
+        self.check_record(lease)
+        self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         stale = self.source("root")
         with self.store.transaction():
             task = self.store.read("root")
@@ -616,6 +625,7 @@ class EvidenceArchiveTests(CoreCase):
         lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         self.service.accept("root", actor=self.user, confirmation=self.source("root"))
         def grant(included, excluded):
             self.service.enable_extension("root", authorization={"id": "persistent-task", "scope": "custom", "included": included, "excluded": excluded, "source": {"type": "test"}}, actor=self.user)
@@ -641,6 +651,7 @@ class EvidenceArchiveTests(CoreCase):
         lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         accepted = self.service.accept("root", actor=self.user, confirmation=self.source("root"))
         self.assertEqual("completed", accepted["phase"])
         archive_source = self.source("root")
@@ -661,6 +672,7 @@ class EvidenceArchiveTests(CoreCase):
         lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         self.service.accept("root", actor=self.user, confirmation=self.source("root"))
         archived = self.service.archive("root", actor=self.user, confirmation=self.source("root"))
         related = [{"id": archived["task"]["id"], "archive_path": archived["path"], "relation": "follow_up", "reason": "new scope"}]
@@ -694,6 +706,7 @@ class EvidenceArchiveTests(CoreCase):
         lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         self.service.accept("root", actor=self.user, confirmation=self.source("root"))
         confirmation = self.source("root")
         task_dir = self.store.resolve("root")
@@ -727,6 +740,7 @@ class EvidenceArchiveTests(CoreCase):
         lease = self.service.acquire_lease(child, holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease, ref=child)
         self.service.release_lease(child, token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance(child, actor=self.agent)
         self.service.accept(child, actor=self.user, confirmation=self.source(child))
 
     def test_accept_rejects_stale_child_acceptance(self):
@@ -737,6 +751,10 @@ class EvidenceArchiveTests(CoreCase):
         self.complete_child()
         self.start("root")
         (self.project / "config.ini").write_text("enabled=0\n")
+        lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
+        self.check_record(lease)
+        self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         with self.assertRaises(DomainError) as caught:
             self.service.accept("root", actor=self.user, confirmation=self.source("root"))
         self.assertEqual("children_incomplete", caught.exception.code)
@@ -751,6 +769,7 @@ class EvidenceArchiveTests(CoreCase):
         lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         self.service.accept("root", actor=self.user, confirmation=self.source("root"))
         # A child reopened after the parent acceptance makes the tree
         # non-terminal; archive must reject it.
@@ -961,6 +980,7 @@ class LifecycleMemberBoundaryTests(EvidenceArchiveTests):
         lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         self.service.accept("root", actor=self.user, confirmation=self.source("root"))
         confirmation = self.source("root")
         # Grant the archive member so the initial workflow archive is authorized.
@@ -996,6 +1016,7 @@ class LifecycleMemberBoundaryTests(EvidenceArchiveTests):
         lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
         self.check_record(lease)
         self.service.release_lease("root", token=lease["token"], reason="done")
+        self.service.enter_awaiting_acceptance("root", actor=self.agent)
         self.service.accept("root", actor=self.user, confirmation=self.source("root"))
         confirmation = self.source("root")
         self._trim_bookkeeping_members()

@@ -247,8 +247,18 @@ class SemanticContentTests(unittest.TestCase):
         for state in ("no_task", "planning", "in_progress", "awaiting_acceptance"):
             self.assertIn("[prompt-state:%s]" % state, text)
             self.assertIn("[/prompt-state:%s]" % state, text)
-        for keyword in ("large", "small", "discussion", "read-only", "treat as large"):
+        for keyword in ("large", "small", "discussion", "read-only", "treat the work as large"):
             self.assertIn(keyword, text)
+        # Natural-language user-facing wording, no command-style copy (D-007).
+        for phrase in ("tell the user in one short line",
+                       "Tell the user what was done and what the\nverification showed",
+                       "tell the user in natural language what was done",
+                       "do not phrase\nacceptance as a command for them to run"):
+            self.assertIn(phrase, text)
+        for state in ("no_task", "planning", "in_progress", "awaiting_acceptance"):
+            block = text.split("[prompt-state:%s]" % state, 1)[1].split("[/prompt-state", 1)[0]
+            self.assertNotIn("fstar ", block, state)
+            self.assertNotIn("--", block, state)
 
     def test_learning_loop_rules_present(self):
         routing = (RESOURCES / "runtime" / "routing.md").read_text()
@@ -298,7 +308,56 @@ class SemanticContentTests(unittest.TestCase):
         self.assertIn("state-management.md", text)
         self.assertIn("type-safety.md", text)
 
-    def test_archive_only_reminders_and_continue_boundary(self):
+    def test_natural_language_user_facing_wording(self):
+        """D-007: user-facing copy is natural language; commands stay agent-internal."""
+        routing = (RESOURCES / "runtime" / "routing.md").read_text()
+        self.assertIn("## User-facing language", routing)
+        self.assertIn("Never reply to the user with a fstar command line", routing)
+        self.assertIn("records the actual conversation as the confirmation source", routing)
+        self.assertIn("describe in natural language what was done", routing)
+        execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
+        self.assertIn("tell the user in natural language what was done", execute)
+        self.assertIn("never present a command line to the user as the way to confirm", execute)
+        self.assertIn("the conversation quote and reference", execute)
+        # The agent-internal commands remain documented (behavior unchanged).
+        self.assertIn("`fstar accept <task> --awaiting`", execute)
+        self.assertIn("`fstar accept <task> --unified`", execute)
+        archive = (RESOURCES / "skills/fstar-archive/SKILL.md").read_text()
+        self.assertIn("never as a command for the user to run", archive)
+        self.assertIn("the user decides in conversation", archive)
+        continuing = (RESOURCES / "skills/fstar-continue/SKILL.md").read_text()
+        self.assertIn("explain the takeover, redispatch, or abandon options to the user in plain language", continuing)
+        self.assertIn("never present the choices as commands for the user to run", continuing)
+        init = (RESOURCES / "skills/fstar-init/SKILL.md").read_text()
+        self.assertIn("explain the options in plain language", init)
+        self.assertIn("never a command to hand to the user", init)
+
+    def test_skill_boundaries_are_accurate(self):
+        # fstar-continue boundary: rework during awaiting-acceptance is not a
+        # replan; replan applies to in-progress, reopen to completed tasks.
+        continuing = (RESOURCES / "skills/fstar-continue/SKILL.md").read_text()
+        self.assertIn("a problem reported during awaiting-acceptance is handled by the rework transition", continuing)
+        # fstar-plan boundary: the plan runs after user review of documents;
+        # it is not gated on the task already being in_progress (the plan is
+        # formed while the task is still planning).
+        plan = (RESOURCES / "skills/fstar-plan/SKILL.md").read_text()
+        self.assertIn("the plan runs only after the user reviews the planning documents", plan)
+        self.assertNotIn("not in `in_progress` with user-reviewed", plan)
+
+    def test_knowledge_spec_reading_stays_authorized(self):
+        # Wording changes must not bypass authorization: discovery/reading
+        # never implies write authorization; the learn pipeline is intact.
+        routing = (RESOURCES / "runtime" / "routing.md").read_text()
+        self.assertIn("Discovery and reading never imply authorization", routing)
+        self.assertIn("never recorded silently", routing)
+        learn = (RESOURCES / "skills/fstar-learn/SKILL.md").read_text()
+        self.assertIn("save only when that exact content and scope are authorized", learn)
+        self.assertIn("do not invent approval", learn)
+        # Spec/knowledge reads for cross-project work resolve the target's
+        # own specs; authorization boundaries are untouched.
+        self.assertIn("later writes to specs, knowledge, rules, or memory still require", routing)
+
+
         archive = (RESOURCES / "skills/fstar-archive/SKILL.md").read_text()
         continuing = (RESOURCES / "skills/fstar-continue/SKILL.md").read_text()
         self.assertIn("only then", archive)

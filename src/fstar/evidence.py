@@ -23,21 +23,6 @@ def file_digest(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _safe_project_file(root: Path, relative: str) -> Path:
-    candidate = Path(relative)
-    if candidate.is_absolute() or ".." in candidate.parts:
-        raise DomainError("unsafe_evidence_path", "Evidence path must be project-relative", {"path": relative})
-    path = root / candidate
-    resolved = path.resolve(strict=False)
-    try:
-        resolved.relative_to(root.resolve())
-    except ValueError:
-        raise DomainError("unsafe_evidence_path", "Evidence path escapes the project", {"path": relative})
-    if path.is_symlink() or (path.exists() and resolved != path.absolute()):
-        raise DomainError("unsafe_evidence_path", "Evidence cannot follow a symbolic link", {"path": relative})
-    return path
-
-
 def _normal_text(path: Path) -> str:
     return path.read_bytes().decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
 
@@ -76,7 +61,7 @@ class EvidenceService:
                 if items != "file":
                     raise DomainError("mapping_invalid", "Unknown artifact map mode", {"mode": items})
                 continue
-            _safe_project_file(self.store.project_root, artifact)
+            self.store.project_file(artifact)
             if not isinstance(items, dict):
                 raise DomainError("mapping_invalid", "Artifact mapping items must be an object", {"artifact": artifact})
             normalized[artifact] = {}
@@ -107,7 +92,7 @@ class EvidenceService:
         mappings = task.get("meta", {}).get("templates", {}).get("artifact_map", {})
         artifact_map = mappings.get(artifact, {})
         file_mode = mappings.get("mode") == "file"
-        path = _safe_project_file(self.store.project_root, artifact)
+        path = self.store.project_file(artifact)
         if not path.is_file():
             raise DomainError("artifact_missing", "Artifact does not exist", {"artifact": artifact})
         text = _normal_text(path)
@@ -154,7 +139,7 @@ class EvidenceService:
     def delivery_snapshot(self, paths: list) -> dict:
         entries = []
         for relative in sorted(set(paths)):
-            path = _safe_project_file(self.store.project_root, relative)
+            path = self.store.project_file(relative)
             entries.append({"path": relative, "exists": path.is_file(), "sha256": file_digest(path) if path.is_file() else None})
         return {"paths": entries, "digest": content_hash(entries)}
 
@@ -169,7 +154,7 @@ class EvidenceService:
             path = None
             text = None
             try:
-                path = _safe_project_file(self.store.project_root, artifact)
+                path = self.store.project_file(artifact)
                 if not path.is_file():
                     raise DomainError("artifact_missing", "Artifact does not exist", {"artifact": artifact})
                 text = _normal_text(path)
@@ -232,7 +217,7 @@ class EvidenceService:
         for entry in evidence.get("input_files", []):
             relative = entry.get("path")
             try:
-                path = _safe_project_file(self.store.project_root, relative)
+                path = self.store.project_file(relative)
                 if not path.is_file() or file_digest(path) != entry.get("sha256"):
                     reasons.append({"type": "input_file", "path": relative})
             except (DomainError, OSError, ValueError, TypeError, RuntimeError):
@@ -244,7 +229,7 @@ class EvidenceService:
                 reasons.append({"type": "delivery", "expected": delivery.get("digest"), "actual": current["digest"]})
         report = evidence.get("report")
         if report:
-            path = _safe_project_file(self.store.project_root, report.get("path", ""))
+            path = self.store.project_file(report.get("path", ""))
             if not path.is_file() or file_digest(path) != report.get("sha256"):
                 reasons.append({"type": "report", "path": report.get("path")})
         return reasons
@@ -357,6 +342,12 @@ class EvidenceService:
                     task["completedAt"] = None
                     if task["acceptance"]:
                         task["acceptance"]["state"] = "stale"
+                elif task["phase"] == "awaiting_acceptance":
+                    # The acceptance basis is gone: the task is no longer
+                    # awaiting acceptance. It returns to in_progress so the
+                    # coordinator can run a fresh check and re-enter the
+                    # phase (the transition stays explicit).
+                    task["phase"] = "in_progress"
                 self.store.write(task_dir, task)
         return {"invalidated": changed}
 

@@ -17,7 +17,7 @@ LEASE_MINUTES = 30
 EVENT_LIMIT = 200
 # correction stays out of compaction: retro analysis quotes the user's exact
 # words from these events, so they are load-bearing records, not noise.
-MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "accepted", "dropped", "revived", "archived", "extension_enabled", "extension_changed", "correction"}
+MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "accepted", "dropped", "revived", "archived", "extension_enabled", "extension_changed", "correction", "awaiting_acceptance", "rework_requested", "recheck_requested", "reopened", "unified_acceptance", "evidence_invalidated"}
 EXTENSIONS = {
     "planning-review": {"clarify", "prd", "design", "plan", "editor", "doc-check"},
     "persistent-task": {"task", "evidence", "lease", "events", "recovery", "archive"},
@@ -39,6 +39,79 @@ _REVISIT_DOCS = ("doc/prd.md", "doc/design.md", "plan.md", "clarify.md")
 def _docs_to_revisit(task_dir: Path) -> list:
     """Planning documents present at replan time, for revisit surfacing."""
     return [relative for relative in _REVISIT_DOCS if (task_dir / relative).is_file()]
+
+
+def _git_output(args: list, cwd: Path) -> Optional[str]:
+    """One read-only git query; None on any failure (no side effects)."""
+    import subprocess
+    try:
+        result = subprocess.run(["git"] + list(args), cwd=str(cwd),
+                                capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if result.returncode != 0:
+        return None
+    return (result.stdout or "").strip() or None
+
+
+def _has_git_worktree(start: Path) -> bool:
+    """Cheap upward probe for a .git entry (directory or worktree file)."""
+    current = Path(start).resolve()
+    if current.is_file():
+        current = current.parent
+    for candidate in (current,) + tuple(current.parents):
+        if (candidate / ".git").exists():
+            return True
+    return False
+
+
+def git_repo_info(start: Path) -> Optional[dict]:
+    """Read-only snapshot of the git state at ``start`` (P-004 branch binding).
+
+    Only read-only git plumbing runs here (rev-parse). A detached HEAD is
+    reported honestly as detached with its commit — no branch name is ever
+    fabricated. Returns None when the path is not inside a git worktree or
+    git is unavailable.
+    """
+    start = Path(start)
+    if not _has_git_worktree(start):
+        return None
+    commit = _git_output(["rev-parse", "HEAD"], start)
+    if not commit:
+        return None
+    branch = _git_output(["rev-parse", "--abbrev-ref", "HEAD"], start)
+    detached = branch in (None, "HEAD")
+    toplevel = _git_output(["rev-parse", "--show-toplevel"], start)
+    return {"commit": commit, "branch": "" if detached else (branch or ""),
+            "detached": detached, "worktree": toplevel or ""}
+
+
+def _fill_branch_info(task: dict, git_root: Path) -> Optional[dict]:
+    """Fill empty branch/worktree/base fields with the ACTUAL git state.
+
+    Never overwrites an explicitly recorded value; never fabricates a
+    branch for a detached HEAD (branch stays empty and the info carries
+    ``detached: true`` with the commit). Returns the recorded info when
+    the task lives inside a git worktree, else None.
+    """
+    info = git_repo_info(git_root)
+    if info is None:
+        return None
+    if not task.get("worktree_path"):
+        task["worktree_path"] = info["worktree"]
+    if not task.get("commit"):
+        task["commit"] = info["commit"]
+    if not task.get("branch"):
+        task["branch"] = info["branch"]
+    if not task.get("base_branch") and info["worktree"]:
+        base = _git_output(["rev-parse", "--abbrev-ref", "origin/HEAD"],
+                           Path(info["worktree"]))
+        if base and base != "HEAD":
+            task["base_branch"] = base
+    task["meta"]["git_binding"] = {
+        "detached": info["detached"], "recorded_by": "branch_binding",
+    }
+    return info
 
 
 def _git_head_commit(task_dir: Path) -> Optional[str]:
@@ -189,7 +262,16 @@ class TaskService:
                 for relation in related:
                     archive_path = Path(relation.get("archive_path", ""))
                     if not archive_path.is_absolute():
-                        archive_path = self.store.project_root / archive_path
+                        # archive_path identity keeps the ".fstar/" prefix; the
+                        # archive tree itself lives under the resolved data
+                        # root (which is <repo>/.fstar or the user-directory
+                        # data root), so resolve it through the store.
+                        rel = archive_path
+                        parts = rel.parts
+                        if parts and parts[0] == ".fstar":
+                            archive_path = self.store.fstar_root.joinpath(*parts[1:])
+                        else:
+                            archive_path = self.store.project_root / rel
                     try:
                         archive_path.resolve().relative_to(self.store.archive_root.resolve())
                     except ValueError:
@@ -200,8 +282,11 @@ class TaskService:
                     archived = self.store._read_path(related_dir / "task.json")
                     if archived["id"] != relation.get("id"):
                         raise DomainError("invalid_related_task", "Related task id does not match archive path")
-                    task["meta"]["related_tasks"].append({"id": archived["id"], "archive_path": str(related_dir.relative_to(self.store.project_root)), "relation": relation.get("relation", "follow_up"), "reason": relation.get("reason", "")})
+                    task["meta"]["related_tasks"].append({"id": archived["id"], "archive_path": self.store.identity_path(related_dir), "relation": relation.get("relation", "follow_up"), "reason": relation.get("reason", "")})
             self._event(task, "created", self._actor_source(actor, "task create"), {"parent": parent})
+            # Branch binding (P-004): capture the actual git state of the
+            # repo the task is being created in; explicit values survive.
+            _fill_branch_info(task, self.store.project_root)
             if parent:
                 parent_dir = self.store.resolve(parent)
                 parent_task = self.store._read_path(parent_dir / "task.json")
@@ -247,6 +332,140 @@ class TaskService:
             rows = [row for row in rows if value in row["name"].lower() or value in row["title"].lower()]
         return rows
 
+    # -- QA task location by branch (P-004 / D-006 / R-006) ------------------
+
+    def _candidate_row(self, task: dict, archived: bool) -> dict:
+        return {"task_id": task["id"], "ref": task["name"], "title": task.get("title", ""),
+                "phase": task["phase"], "completed": task["phase"] == "completed",
+                "archived": archived or bool(task.get("archivedAt")),
+                "dropped": bool(task.get("meta", {}).get("disposition")),
+                "branch": task.get("branch", ""), "worktree": task.get("worktree_path", ""),
+                "path": task.get("_path", "")}
+
+    def _branch_candidates(self, branch: Optional[str], worktree: Optional[str]) -> tuple:
+        """(active_matches, archived_matches) for a branch (+optional worktree).
+
+        The search spans this project's active and archived trees AND every
+        other worktree of the same git repository (P-004: several worktrees
+        of one repo may each carry a task bound to the same branch name; git
+        itself refuses checking one branch out twice, but tasks keep their
+        recorded binding). Sibling worktrees are discovered read-only via
+        ``git worktree list``; unresolvable or un-initialized siblings are
+        skipped. No match is ever mutated.
+        """
+        active, archived = [], []
+        stores = [self.store]
+        seen_roots = {str(self.store.project_root)}
+        current_info = git_repo_info(self.store.project_root)
+        if current_info and current_info["worktree"]:
+            listing = _git_output(["worktree", "list", "--porcelain"],
+                                  Path(current_info["worktree"]))
+            if listing:
+                for line in listing.splitlines():
+                    if not line.startswith("worktree "):
+                        continue
+                    candidate = line[len("worktree "):].strip()
+                    if not candidate or candidate in seen_roots:
+                        continue
+                    seen_roots.add(candidate)
+                    try:
+                        sibling = TaskStore(Path(candidate),
+                                            user_home=self.store.user_home,
+                                            runtime_root=self.store.runtime_root)
+                        sibling.require_project()
+                    except (DomainError, OSError):
+                        continue
+                    stores.append(sibling)
+        for sibling in stores:
+            try:
+                scanned = [(sibling.scan(archived=flag), flag) for flag in (False, True)]
+            except DomainError:
+                # A sibling worktree with unreadable task data must not break
+                # the lookup for this project; it is skipped. The project's
+                # OWN corrupt data is reported instead of being hidden.
+                if sibling is self.store:
+                    raise
+                continue
+            for tasks, scan_archived in scanned:
+                for task in tasks:
+                    if branch and task.get("branch") != branch:
+                        continue
+                    if worktree and task.get("worktree_path") != worktree:
+                        continue
+                    row = self._candidate_row(task, scan_archived)
+                    if sibling is not self.store:
+                        row["project_root"] = str(sibling.project_root)
+                    (archived if scan_archived else active).append(row)
+        return active, archived
+
+    def locate(self, *, ref: Optional[str] = None, session_id: Optional[str] = None,
+               branch: Optional[str] = None, worktree: Optional[str] = None) -> dict:
+        """Resolve which task a branch (or session) belongs to (R-006).
+
+        Order: explicit task ref > a valid compatible session pointer >
+        a unique project/worktree/branch candidate. Multiple candidates
+        (including completed and archived matches) are LISTED for
+        natural-language selection — nothing is auto-selected and nothing
+        is reopened. No matches is a clear negative result. Archived hits
+        can only be linked to a follow-up task, never reopened or mutated.
+        """
+        if ref:
+            try:
+                task_dir = self.store.resolve(ref)
+                archived = False
+            except DomainError as exc:
+                if exc.code != "task_not_found":
+                    raise
+                # A completed/archived task stays findable for QA (R-006):
+                # the explicit ref resolves in the archive tree instead of
+                # failing, and the hit is reported as archived — nothing is
+                # reopened or mutated.
+                try:
+                    task_dir = self.store.resolve(ref, archived=True)
+                    archived = True
+                except DomainError:
+                    # Neither tree holds it: report the original lookup
+                    # failure, not the archive-only attempt.
+                    raise exc
+            task = self.store._read_path(task_dir / "task.json")
+            row = self._candidate_row({**task, "_path": str(task_dir)},
+                                      archived or bool(task.get("archivedAt")))
+            return {"status": "found", "via": "explicit_ref", "task": row}
+        if session_id:
+            current = self.current(session_id)
+            pointer_task = current.get("current")
+            if pointer_task is not None:
+                # Session pointers are keyed per project (P-001): the pointer
+                # already resolves inside this project's own data, but the
+                # recorded project root must still match, so a pointer left
+                # by a session in a different worktree of the same project
+                # does not silently win.
+                pointer = self.store.current(session_id) or {}
+                compatible = (pointer.get("project") == str(self.store.project_root)
+                              or (not pointer.get("project")))
+                if not branch or pointer_task.get("branch") == branch:
+                    if compatible:
+                        row = self._candidate_row(pointer_task, bool(pointer_task.get("archivedAt")))
+                        row["path"] = current.get("path", row["path"])
+                        return {"status": "found", "via": "session_pointer", "task": row}
+        if not branch and not worktree:
+            # A candidate search without a branch (or worktree) key matches
+            # EVERY task in the project, which would report an arbitrary task
+            # as "the" answer. An honest negative is better than a wrong one.
+            return {"status": "no_task", "via": "no_key",
+                    "message": "Nothing to locate: no task reference, no valid session pointer, and no branch given"}
+        active, archived = self._branch_candidates(branch, worktree)
+        candidates = active + archived
+        if not candidates:
+            return {"status": "no_task", "via": "branch_search",
+                    "message": "No task is bound to this branch in this project"}
+        if len(candidates) == 1:
+            return {"status": "found", "via": "unique_candidate",
+                    "task": candidates[0], "ambiguous": False}
+        return {"status": "ambiguous", "via": "branch_search",
+                "candidates": candidates,
+                "message": "Several tasks match this branch; select one explicitly (archived matches can only be linked to a follow-up task)"}
+
     def current(self, session_id: Optional[str]) -> dict:
         pointer = self.store.current(session_id)
         if not pointer:
@@ -277,7 +496,15 @@ class TaskService:
                 if not templates.get("artifact_map"):
                     raise DomainError("planning_artifacts_missing", "Planning review requires mapped current planning artifacts", status=3)
             task["phase"] = "in_progress"
-            self._event(task, "started", confirmation, {"snapshot": source_snapshot(task)})
+            # Branch binding at start time (P-004/D-006): the task records the
+            # branch/worktree it actually runs on; an explicit recorded value
+            # is never overwritten.
+            info = _fill_branch_info(task, self.store.project_root)
+            self._event(task, "started", confirmation,
+                        {"snapshot": source_snapshot(task),
+                         "branch": task.get("branch", ""),
+                         "worktree": task.get("worktree_path", ""),
+                         "detached": bool(info and info["detached"])})
             self._write(task_dir, task)
             if session_id:
                 self.store.set_current(session_id, task_dir, task["id"])
@@ -359,6 +586,118 @@ class TaskService:
             self._write(task_dir, task)
             return task
 
+    def enter_awaiting_acceptance(self, ref: str, *, actor: dict) -> dict:
+        """Move in_progress -> awaiting_acceptance after a fresh final check.
+
+        Explicit transition (design D-004): a successful final-check harvest
+        alone never changes the phase; the coordinator calls this once the
+        harvest recorded qualifying evidence. Re-validation happens here, so
+        an expired/stale final check (files changed after the check, a newer
+        failed final round, blocked/leased/dropped task) can never land in
+        awaiting_acceptance. ``completedAt`` stays empty in this phase.
+        """
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            if task.get("meta", {}).get("disposition"):
+                raise DomainError("task_dropped", "A dropped task cannot enter awaiting_acceptance; revive it explicitly", status=3)
+            if task["phase"] != "in_progress":
+                raise DomainError("phase_transition_forbidden",
+                                  "Only an in-progress task may enter awaiting_acceptance; "
+                                  "planning must start first", {"phase": task["phase"]}, status=3)
+            lease = task.get("lease")
+            if lease and lease.get("expires_at", "") > self.clock():
+                raise DomainError("lease_conflict",
+                                  "Release the writer lease before entering awaiting_acceptance",
+                                  {"holder": lease.get("holder")}, status=4)
+            status = self.evidence.acceptance_status(ref, task=task)
+            if not status["awaiting_acceptance"]:
+                raise DomainError("acceptance_blocked",
+                                  "A fresh qualifying final check is required before awaiting_acceptance",
+                                  status, status=3)
+            if task.get("blocked"):
+                raise DomainError("phase_transition_forbidden", "A blocked task cannot enter awaiting_acceptance", status=3)
+            # The same independence gate accept() applies: the final check
+            # producer must differ from every delivery producer, otherwise
+            # the phase could be entered with evidence that can never be
+            # accepted.
+            qualifying = [item for item in task["evidence"] if item.get("id") in status["evidence_refs"]]
+            implementers = {item.get("producer", {}).get("id") for item in task["evidence"] if item.get("kind") == "delivery"}
+            for item in qualifying:
+                if item.get("producer", {}).get("id") in implementers:
+                    raise DomainError("check_not_independent",
+                                      "The final check producer also delivered the implementation",
+                                      status, status=3)
+            task["phase"] = "awaiting_acceptance"
+            self._event(task, "awaiting_acceptance", self._actor_source(actor, "enter_awaiting_acceptance"),
+                        {"evidence_refs": status["evidence_refs"], "completedAt": None})
+            self._write(task_dir, task)
+            return task
+
+    def report_problem(self, ref: str, *, actor: dict, confirmation: dict, reason: str) -> dict:
+        """User rework during awaiting_acceptance: back to planning.
+
+        The user reports a problem with the delivered work while it sits in
+        awaiting_acceptance; the task returns to planning for rework with all
+        currently-valid evidence staled (the old final check no longer
+        describes the next delivery). No auto-transition follows: the normal
+        start -> dispatch/check cycle re-applies. User-initiated only.
+        """
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            if actor.get("role") != "user":
+                raise DomainError("rework_forbidden", "Only a user may report a problem on a task awaiting acceptance", status=3)
+            if task["phase"] != "awaiting_acceptance":
+                raise DomainError("rework_forbidden", "Rework applies to a task awaiting acceptance", {"phase": task["phase"]}, status=3)
+            if not reason:
+                raise DomainError("reason_required", "Reporting a problem requires a reason")
+            validate_source(confirmation, task, actor=actor)
+            for evidence in task["evidence"]:
+                if evidence.get("state") == "valid":
+                    evidence["state"] = "stale"
+                    evidence["stale_reasons"] = [{"type": "rework_requested", "reason": reason}]
+            if task.get("acceptance"):
+                task["acceptance"]["state"] = "stale"
+            task["phase"] = "planning"
+            task["lease"] = None
+            task["completedAt"] = None
+            self._event(task, "rework_requested", confirmation, {"reason": reason})
+            self._write(task_dir, task)
+            return task
+
+    def request_recheck(self, ref: str, *, actor: dict, reason: str) -> dict:
+        """Return an awaiting_acceptance task to in_progress for a re-check.
+
+        The final check behind the phase went stale (the delivered files
+        changed after the check), so the task can no longer be accepted.
+        The coordinator asks explicitly for a fresh check; the phase moves
+        back to in_progress, where the normal dispatch/check cycle re-applies.
+        Nothing is auto-transitioned and no evidence is rewritten here: the
+        stale evidence already says so.
+        """
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            if task["phase"] != "awaiting_acceptance":
+                raise DomainError("recheck_forbidden", "Only a task awaiting acceptance can be sent back for a re-check",
+                                  {"phase": task["phase"]}, status=3)
+            if task.get("meta", {}).get("disposition"):
+                raise DomainError("task_dropped", "A dropped task cannot be re-checked; revive it explicitly", status=3)
+            if not reason:
+                raise DomainError("reason_required", "Requesting a re-check requires a reason")
+            status = self.evidence.acceptance_status(ref, task=task)
+            if status["awaiting_acceptance"]:
+                raise DomainError("recheck_forbidden",
+                                  "The final check is still fresh; complete the acceptance instead",
+                                  status, status=3)
+            task["phase"] = "in_progress"
+            task["lease"] = None
+            self._event(task, "recheck_requested", self._actor_source(actor, "request_recheck"),
+                        {"reason": reason, "blockers": status["blockers"]})
+            self._write(task_dir, task)
+            return task
+
     def state(self, ref: str) -> dict:
         task_dir = self.store.resolve(ref)
         task = self.store._read_path(task_dir / "task.json")
@@ -368,7 +707,8 @@ class TaskService:
             child = self.store._read_path(task_dir / "subtasks" / name / "task.json")
             child_states.append({"name": name, "phase": child["phase"], "dropped": bool(child.get("meta", {}).get("disposition"))})
         effective = task["phase"]
-        order = {"planning": 0, "in_progress": 1, "completed": 2}
+        from .models import PHASE_ORDER
+        order = PHASE_ORDER
         active = [x["phase"] for x in child_states if not x["dropped"]]
         if active and min(order[x] for x in active) < order[effective]:
             effective = min(active, key=lambda x: order[x])
@@ -384,6 +724,13 @@ class TaskService:
                 acceptance["stale"] = True
                 acceptance["blockers"].append("acceptance_stale")
                 effective = "in_progress"
+        if task["phase"] == "awaiting_acceptance" and not acceptance["awaiting_acceptance"]:
+            # The qualifying final check went stale while the task sat in
+            # awaiting_acceptance (delivery files changed). A read-only
+            # effective view reports the re-check requirement; the task stays
+            # in awaiting_acceptance until the user reports the problem or
+            # the phase is explicitly re-entered after a fresh check.
+            effective = "in_progress"
         return {"task_id": task["id"], "phase": task["phase"], "effective_phase": effective, "blocked": task["blocked"], "disposition": task.get("meta", {}).get("disposition"), "lease": task["lease"], "evidence": task["evidence"], "extensions": task["extensions"], "children": child_states, "acceptance": acceptance}
 
     def continue_task(self, ref: Optional[str], *, session_id: Optional[str] = None, action: Optional[str] = None, actor: Optional[dict] = None, confirmation: Optional[dict] = None, reason: Optional[str] = None, workflow: bool = False) -> dict:
@@ -397,7 +744,13 @@ class TaskService:
                 _require_workflow_member(self.store.read(ref), "recovery")
             state = self.state(ref)
             lease = state.get("lease")
-            if lease and lease.get("expires_at", "") <= self.clock():
+            active_lease = bool(lease and lease.get("expires_at", "") > self.clock())
+            if state["phase"] == "awaiting_acceptance":
+                # The work is delivered and waiting for the user: an expired
+                # lease is not an orphan to take over here, and an active
+                # one still means a writer is at work.
+                state["next"] = "active_worker_do_not_redispatch" if active_lease else "accept_or_rework"
+            elif lease and lease.get("expires_at", "") <= self.clock():
                 state["orphaned"] = True
                 state["next"] = "choose_takeover_replan_or_drop"
             elif lease:
@@ -405,7 +758,9 @@ class TaskService:
             elif state["phase"] == "planning":
                 state["next"] = "start"
             elif state["acceptance"]["awaiting_acceptance"]:
-                state["next"] = "accept"
+                # Fresh final check recorded but the phase transition was not
+                # taken yet: the next step is the explicit transition.
+                state["next"] = "enter_awaiting_acceptance"
             else:
                 state["next"] = "implement_or_check"
             return state
@@ -420,7 +775,7 @@ class TaskService:
             task = self.store._read_path(task_dir / "task.json")
             if workflow:
                 _require_workflow_member(task, "recovery")
-            if action in {"replan", "reopen"}:
+            if action in {"replan", "reopen", "rework"}:
                 if task.get("meta", {}).get("disposition"):
                     raise DomainError("task_dropped", "Revive the dropped task before changing its phase", status=3)
                 if not reason:
@@ -457,7 +812,10 @@ class TaskService:
                 elif action == "reopen":
                     if actor.get("role") != "user" or task["phase"] != "completed":
                         raise DomainError("reopen_forbidden", "Only a user may reopen an unarchived completed task", status=3)
-                    task["phase"] = "in_progress"
+                    # PRD R-004: a reopened task goes back to planning for
+                    # rework; the normal start -> dispatch/check cycle
+                    # re-applies before it can be accepted again.
+                    task["phase"] = "planning"
                     task["completedAt"] = None
                     if task.get("acceptance"):
                         task["acceptance"]["state"] = "historical"
@@ -470,6 +828,24 @@ class TaskService:
                             evidence["state"] = "stale"
                             evidence["stale_reasons"] = [{"type": "reopened", "reason": reason}]
                     self._event(task, "reopened", confirmation or self._actor_source(actor, "continue reopen"), {"reason": reason})
+                elif action == "rework":
+                    # Same transition as report_problem, reachable through
+                    # the continue surface: the user reports a problem while
+                    # the task awaits acceptance.
+                    if actor.get("role") != "user":
+                        raise DomainError("rework_forbidden", "Only a user may report a problem on a task awaiting acceptance", status=3)
+                    if task["phase"] != "awaiting_acceptance":
+                        raise DomainError("rework_forbidden", "Rework applies to a task awaiting acceptance", {"phase": task["phase"]}, status=3)
+                    for evidence in task["evidence"]:
+                        if evidence.get("state") == "valid":
+                            evidence["state"] = "stale"
+                            evidence["stale_reasons"] = [{"type": "rework_requested", "reason": reason}]
+                    if task.get("acceptance"):
+                        task["acceptance"]["state"] = "stale"
+                    task["phase"] = "planning"
+                    task["lease"] = None
+                    task["completedAt"] = None
+                    self._event(task, "rework_requested", confirmation or self._actor_source(actor, "continue rework"), {"reason": reason})
             elif action == "unblock":
                 raise DomainError("use_service", "Unblock requires set_blocked so source rules are enforced")
             else:
@@ -500,8 +876,15 @@ class TaskService:
             task = self.store._read_path(task_dir / "task.json")
             if actor.get("role") != "user":
                 raise DomainError("acceptance_forbidden", "Only a user confirmation may complete a task", status=3)
-            if task["phase"] != "in_progress":
-                raise DomainError("acceptance_blocked", "Only an in-progress task may be accepted", status=3)
+            if task["phase"] != "awaiting_acceptance":
+                # Design D-004: a fresh final check moves the task into
+                # awaiting_acceptance; completion only happens from there.
+                # An in-progress task must call enter_awaiting_acceptance
+                # once its fresh final check has been recorded.
+                raise DomainError("acceptance_blocked",
+                                  "Only a task in awaiting_acceptance may be accepted; "
+                                  "enter awaiting acceptance after a fresh final check",
+                                  {"phase": task["phase"]}, status=3)
             validate_source(confirmation, task, actor=actor)
             self._require_children_ready(task_dir, task)
             status = self.evidence.acceptance_status(ref, task=task)
@@ -531,6 +914,179 @@ class TaskService:
             self._event(task, "accepted", confirmation, accepted_data)
             self._write(task_dir, task)
             return task
+
+    def accept_unified(self, ref: str, *, actor: dict, confirmation: dict, rule: Optional[dict] = None) -> dict:
+        """Unified cross-project acceptance (PRD R-005, design D-005).
+
+        When the master task carries cross-project child links, one explicit
+        user confirmation completes the master AND every linked child that
+        the confirmation message listed. Before anything is written, every
+        listed child is validated: reachable project, awaiting_acceptance
+        phase, fresh qualifying final check, valid evidence state. Any
+        failure blocks the whole acceptance with the reason; partial
+        failure never fakes full success.
+
+        The confirmation binds the CURRENT version of every task (the
+        master's ``validates`` snapshot covers phase/description/templates
+        and each child's snapshot is re-checked at write time inside the
+        held locks, so an old acceptance can never be reused for a new
+        delivery.
+
+        Each child's acceptance event records its source as the master's
+        unified confirmation reference (confirmation source_id + master
+        task id), and carries the child's own version snapshot in
+        ``validates`` so the binding is auditable per task.
+
+        All writes happen inside one ordered cross-project lock region
+        (master first, then every child project); every phase/evidence
+        check re-runs under the locks on freshly re-read tasks, so a
+        concurrent change between validation and write cannot slip through.
+        The children are completed before the master, so a write failure
+        leaves the master still in awaiting_acceptance: the region is
+        crash-recoverable by retrying the same confirmation (each child
+        write is a small atomic task.json replace, and a child already
+        completed by this confirmation source is skipped idempotently).
+        """
+        from .crossproject import CROSS_LINKS_KEY, cross_project_locks, unified_acceptance_children
+        if actor.get("role") != "user":
+            raise DomainError("acceptance_forbidden", "Only a user confirmation may complete tasks", status=3)
+        children = unified_acceptance_children(self.store, ref)
+        # Two children may live in the SAME target project: the lock region
+        # locks each physical project once (re-locking the same file through
+        # a second descriptor would self-deadlock).
+        target_stores = []
+        seen_locks = set()
+        for _, child_store, _ in children:
+            key = str(child_store.lock_path)
+            if key in seen_locks:
+                continue
+            seen_locks.add(key)
+            target_stores.append(child_store)
+        with cross_project_locks(self.store, *target_stores):
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            if task["phase"] != "awaiting_acceptance":
+                raise DomainError("acceptance_blocked", "The master task is not awaiting acceptance",
+                                  {"phase": task["phase"]}, status=3)
+            self._require_children_ready(task_dir, task)
+            validate_source(confirmation, task, actor=actor)
+            # The master itself must also hold a fresh qualifying final
+            # check: a delivery change after the check invalidates its own
+            # acceptance exactly as it would in plain accept().
+            master_status = self.evidence.acceptance_status(ref, task=task)
+            if not master_status["awaiting_acceptance"]:
+                raise DomainError("acceptance_blocked",
+                                  "The master task's own final check is stale",
+                                  master_status, status=3)
+            # Validate children BEFORE writing anything: each child must be
+            # a linked cross-project child in awaiting_acceptance with a
+            # fresh qualifying final check and unchanged on-disk version.
+            # A child already completed by THIS SAME confirmation (a retry
+            # after a partial write) is accepted as done.
+            pending = []
+            for project_id, child_store, child_id in children:
+                child_dir = child_store.resolve(child_id)
+                child_task = child_store._read_path(child_dir / "task.json")
+                if child_task["phase"] == "completed" and \
+                        (child_task.get("acceptance") or {}).get("source", {}).get("source_id") == confirmation.get("source_id"):
+                    continue
+                self._validate_unified_child(child_store, child_dir, child_task, child_id, project_id, confirmation, actor)
+                pending.append((project_id, child_store, child_id))
+            # Everything validated. The children are completed FIRST and the
+            # master LAST: a write failure between children leaves the
+            # already-written children completed and the master still in
+            # awaiting_acceptance, so the same confirmation retried as a
+            # whole completes exactly the missing pieces (a child already
+            # completed by this confirmation is skipped idempotently).
+            reference = "%s unified acceptance %s" % (task["id"], confirmation.get("source_id"))
+            completed = []
+            for project_id, child_store, child_id in pending:
+                child_dir = child_store.resolve(child_id)
+                child_task = child_store._read_path(child_dir / "task.json")
+                child_confirmation = dict(confirmation)
+                child_confirmation["reference"] = reference
+                child_confirmation["scope"] = "unified-acceptance child of %s" % task["id"]
+                # The recorded source binds the child's CURRENT version, not
+                # the master's snapshot: the acceptance record of the child
+                # must describe the child it accepted.
+                child_confirmation["validates"] = source_snapshot(child_task)
+                completed.append(self._complete_one(child_store, child_dir, child_task, child_confirmation, actor,
+                                                    accepted_via={"unified_confirmation": reference}))
+            completed.append(self._complete_one(self.store, task_dir, task, confirmation, actor, rule=rule,
+                                                accepted_via={"unified_confirmation": reference}))
+            return {"completed": [{"task_id": item["id"], "name": item["name"], "phase": "completed"} for item in completed],
+                    "children": len(children), "confirmation_source_id": confirmation.get("source_id")}
+
+    def _validate_unified_child(self, child_store: TaskStore, child_dir, child_task: dict, child_id: str,
+                               project_id: str, confirmation: dict, actor: dict) -> None:
+        if child_task["phase"] != "awaiting_acceptance":
+            raise DomainError("unified_child_not_ready",
+                              "A linked child task is not awaiting acceptance",
+                              {"project_id": project_id, "task_id": child_id, "phase": child_task["phase"],
+                               "reason": "child_not_awaiting_acceptance"}, status=3)
+        if child_task.get("meta", {}).get("disposition"):
+            raise DomainError("unified_child_not_ready",
+                              "A linked child task is dropped",
+                              {"project_id": project_id, "task_id": child_id, "reason": "child_dropped"}, status=3)
+        if child_task.get("blocked"):
+            raise DomainError("unified_child_not_ready",
+                              "A linked child task is blocked",
+                              {"project_id": project_id, "task_id": child_id, "reason": "child_blocked"}, status=3)
+        child_service = TaskService(child_store, clock=self.clock)
+        status = child_service.evidence.acceptance_status(child_id, task=child_task)
+        if not status["awaiting_acceptance"]:
+            raise DomainError("unified_child_not_ready",
+                              "A linked child task has no fresh qualifying final check",
+                              {"project_id": project_id, "task_id": child_id,
+                               "reason": "child_check_stale",
+                               "blockers": status["blockers"]}, status=3)
+        # Same-repo grandchildren of the child must be complete too, exactly
+        # as a direct accept of that child would require.
+        child_service._require_children_ready(child_dir, child_task)
+        child_confirmation = dict(confirmation)
+        child_confirmation["reference"] = "%s unified acceptance %s" % (child_id, confirmation.get("source_id"))
+        # The user's ONE confirmation covered the listed child versions; the
+        # child's binding is re-derived from the CURRENT child snapshot so
+        # an acceptance taken for an older child version is refused here.
+        child_confirmation["validates"] = source_snapshot(child_task)
+        validate_source(child_confirmation, child_task, actor=actor)
+
+    def _complete_one(self, store: TaskStore, task_dir, task: dict, confirmation: dict, actor: dict,
+                       *, rule: Optional[dict] = None, accepted_via: Optional[dict] = None) -> dict:
+        """Complete ONE fully validated task inside an already-held lock region.
+
+        All gates (user-only, fresh final check, producer independence,
+        same-repo children ready) have already passed in the caller under
+        the locks; this method re-derives only the acceptance evidence refs
+        (a pure read over the in-hand task) so a partially completed
+        multi-project acceptance stays recoverable by retry.
+        """
+        status = self.evidence.acceptance_status(task["id"], task=task) if store is self.store \
+            else TaskService(store, clock=self.clock).evidence.acceptance_status(task["id"], task=task)
+        qualifying = [item for item in task["evidence"] if item.get("id") in status["evidence_refs"]]
+        implementers = {item.get("producer", {}).get("id") for item in task["evidence"] if item.get("kind") == "delivery"}
+        for item in qualifying:
+            if item.get("producer", {}).get("id") in implementers:
+                raise DomainError("check_not_independent", "The final check producer also delivered the implementation", status, status=3)
+        delivery_digests = [item.get("delivery", {}).get("digest") for item in qualifying]
+        task["acceptance"] = {"confirmed_at": self.clock(), "confirmed_by": "user", "source": confirmation,
+                              "evidence_refs": status["evidence_refs"],
+                              "validates": {"task": source_snapshot(task), "delivery": delivery_digests},
+                              "state": "valid"}
+        task["phase"] = "completed"
+        task["completedAt"] = self.clock()
+        accepted_data = {"evidence_refs": status["evidence_refs"]}
+        if accepted_via:
+            accepted_data["accepted_via"] = accepted_via
+        if rule is not None:
+            for key in ("rule_ref", "quote"):
+                if not isinstance(rule.get(key), str) or not rule[key].strip():
+                    raise DomainError("invalid_acceptance_rule", "A rule-driven acceptance requires the rule reference and the user's exact quote")
+            accepted_data["accepted_via_rule"] = {"rule_ref": rule["rule_ref"], "quote": rule["quote"]}
+        service = self if store is self.store else TaskService(store, clock=self.clock)
+        service._event(task, "unified_acceptance" if accepted_via else "accepted", confirmation, accepted_data)
+        service._write(task_dir, task)
+        return task
 
     def drop(self, ref: str, *, actor: dict, confirmation: dict, reason: str, disposition: str = "keep", action: str = "drop") -> dict:
         if actor.get("role") != "user":
@@ -704,7 +1260,7 @@ class TaskService:
                     # a task in a half-moved state. The grant is only consulted
                     # before a NEW archive operation starts (see below).
                     pending_event = pending[-1]
-                    actual_target = str(archived.relative_to(self.store.project_root))
+                    actual_target = self.store.identity_path(archived)
                     if pending_event.get("data", {}).get("target") != actual_target or archived.parent.parent != self.store.archive_root:
                         raise DomainError("archive_conflict", "Archive operation target does not match the archived root", {"operation_id": operation_id}, status=4)
                     # A retry finishes only the original operation and carries
@@ -758,14 +1314,14 @@ class TaskService:
             # overwritten by the stale pre-validation copy below.
             if finalizations:
                 task = self.store._read_path(task_dir / "task.json")
-            pending = make_event("archive_operation", confirmation, {"operation_id": operation_id, "target": str(target.relative_to(self.store.project_root)), "archived_at": now}, now)
+            pending = make_event("archive_operation", confirmation, {"operation_id": operation_id, "target": self.store.identity_path(target), "archived_at": now}, now)
             task["events"].append(pending)
             self._write(task_dir, task)
             target.parent.mkdir(parents=True, exist_ok=True)
             os.rename(str(task_dir), str(target))
             task = self.store._read_path(target / "task.json")
             task["archivedAt"] = now
-            self._event(task, "archived", confirmation, {"operation_id": operation_id, "target": str(target.relative_to(self.store.project_root))})
+            self._event(task, "archived", confirmation, {"operation_id": operation_id, "target": self.store.identity_path(target)})
             self._write(target, task)
             self.store.clear_tree_pointers(tree_ids)
         warnings = []

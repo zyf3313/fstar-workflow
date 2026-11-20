@@ -276,16 +276,40 @@ def _validate(values: Mapping[str, object]) -> None:
                 raise ConfigError("CONFIG_VALIDATION", "project.id must be a UUID", key="project.id")
 
 
+def project_config_paths(project_root: Optional[Path]) -> list:
+    """Project config layers: the legacy in-repo root, plus any pointer data root.
+
+    A user-directory project keeps its config inside the data root, so the
+    pointer file (when present and valid) contributes a second read-only
+    candidate. An invalid pointer is reported as a config error here so
+    callers cannot silently read a stale in-repo config as if authoritative.
+    """
+    if project_root is None:
+        return []
+    from .store import POINTER_FILE, _read_pointer, _safe_pointer_data_root
+    paths = [project_root / ".fstar" / "config.yaml", project_root / ".fstar" / "config.local.yaml"]
+    pointer = project_root / POINTER_FILE
+    if pointer.is_file() and not pointer.is_symlink():
+        record = _read_pointer(pointer)
+        data_root = _safe_pointer_data_root(project_root, record)
+        if data_root != project_root / ".fstar":
+            paths.extend([data_root / "config.yaml", data_root / "config.local.yaml"])
+    return paths
+
+
 def load_config(project_root: Optional[Path], user_root: Path, *,
                 defaults: Optional[Mapping[str, object]] = None) -> ConfigResult:
     values: Dict[str, object] = copy.deepcopy(dict(defaults if defaults is not None else DEFAULT_CONFIG))
     origins: Dict[str, str] = {}
     _leaf_origins(values, "<defaults>", "", origins)
     paths = [user_root / "config.yaml", user_root / "config.local.yaml"]
-    if project_root is not None:
-        paths.extend([project_root / ".fstar" / "config.yaml", project_root / ".fstar" / "config.local.yaml"])
+    project_candidates = project_config_paths(project_root)
+    paths.extend(project_candidates)
     sources: List[Path] = []
-    project_config = project_root / ".fstar" / "config.yaml" if project_root is not None else None
+    # project.id may only be declared by a project config.yaml layer (the
+    # in-repo root or the pointer data root), never config.local.yaml or
+    # user-level configs.
+    project_configs = {path for path in project_candidates if path.name == "config.yaml"}
     for candidate in paths:
         try:
             text = candidate.read_text(encoding="utf-8")
@@ -297,7 +321,7 @@ def load_config(project_root: Optional[Path], user_root: Path, *,
             raise ConfigError("CONFIG_READ_ERROR", str(exc), path=candidate)
         layer = parse_config(text, candidate)
         project_value = layer.get("project")
-        if isinstance(project_value, dict) and "id" in project_value and candidate != project_config:
+        if isinstance(project_value, dict) and "id" in project_value and candidate not in project_configs:
             raise ConfigError("CONFIG_PROJECT_IDENTITY", "project.id may only be declared by project config.yaml", path=candidate, key="project.id")
         _merge(values, layer, str(candidate), origins, candidate)
         sources.append(candidate)

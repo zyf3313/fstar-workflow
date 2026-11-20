@@ -598,6 +598,8 @@ class Catalog:
     diagnostics: Tuple[Diagnostic, ...]
     snapshot_hash: str
     language: Mapping[str, str]
+    data_root: Optional[Path] = None  # project data root (differs from project_root in user-directory mode)
+    storage_mode: Optional[str] = None  # project-shared | project-local | user-directory
     _raw: Mapping[str, bytes] = field(default_factory=dict, repr=False, compare=False)
 
     def by_key(self, key: str) -> Optional[CatalogDocument]:
@@ -778,6 +780,20 @@ def _authority_key(project_root: Path, reference: str) -> Optional[str]:
     return _key(OWNER_PROJECT, "/".join(pure.parts))
 
 
+def _project_layout(project_root: Optional[Path]):
+    """(data_root, storage_mode) for a project root, honoring pointer layouts."""
+    if project_root is None:
+        return None, None
+    from .store import _resolve_project_layout
+    layout = _resolve_project_layout(Path(project_root))
+    return layout[0], layout[1]
+
+
+def _project_data_root(project_root: Optional[Path]) -> Optional[Path]:
+    """The project's actual data root, honoring pointer/user-directory layouts."""
+    return _project_layout(project_root)[0]
+
+
 def load_catalog(*, user_root, project_root=None) -> Catalog:
     """Take a read-only snapshot of the current knowledge corpus.
 
@@ -790,8 +806,8 @@ def load_catalog(*, user_root, project_root=None) -> Catalog:
 
     user = Path(user_root).expanduser().resolve()
     project = Path(project_root).expanduser().resolve() if project_root is not None else None
-    lock_paths = _lock_paths(user, project)
-    for _ in range(READ_RETRIES):
+    lock_paths = _lock_paths(user, _project_data_root(project) if project is not None else None)
+    for _attempt in range(READ_RETRIES):
         existing = [path for path in lock_paths if path.exists()]
         locks: List[_FileLock] = []
         try:
@@ -802,13 +818,14 @@ def load_catalog(*, user_root, project_root=None) -> Catalog:
                     locks.append(lock)
             owner_roots = {OWNER_USER: user}
             if project is not None:
-                owner_roots[OWNER_PROJECT] = project
+                owner_roots[OWNER_PROJECT] = _project_data_root(project)
             pending = _pending_operations(owner_roots)
             if pending:
                 raise _fail("knowledge_recovery_required",
                             "A pending knowledge operation must be recovered before reading",
                             {"operations": sorted(pending)})
-            catalog = _load_catalog_once(user_root=user, project_root=project)
+            catalog = _load_catalog_once(user_root=user, project_root=project,
+                                         data_root=_project_data_root(project))
         finally:
             for lock in locks:
                 lock.release()
@@ -819,9 +836,17 @@ def load_catalog(*, user_root, project_root=None) -> Catalog:
                 {"path": str(user)}, status=4)
 
 
-def _load_catalog_once(*, user_root, project_root=None) -> Catalog:
+def _load_catalog_once(*, user_root, project_root=None, data_root=None) -> Catalog:
     user = Path(user_root).expanduser().resolve()
     project = Path(project_root).expanduser().resolve() if project_root is not None else None
+    data_root = Path(data_root).expanduser().resolve() if data_root is not None else (project if project is not None else None)
+    if data_root is None:
+        raise _fail("knowledge_read_error", "A project data root is required when a project exists")
+    layout_root, storage_mode = _project_layout(project)
+    if layout_root is not None:
+        data_root = layout_root
+    elif project is not None and data_root == project:
+        data_root = project / ".fstar"
     if not user.exists() or not user.is_dir():
         raise _fail("knowledge_read_error", "User root must be an existing directory", {"path": str(user)})
     if project is not None and (not project.exists() or not project.is_dir()):
@@ -833,8 +858,8 @@ def _load_catalog_once(*, user_root, project_root=None) -> Catalog:
     indexes: List[IndexDocument] = []
     raw: Dict[str, bytes] = {}
 
-    def add_index(owner: str, relative: str, root: Path) -> Optional[IndexDocument]:
-        path = root.joinpath(*relative.split("/"))
+    def add_index(owner: str, relative: str, root: Path, physical: Optional[str] = None) -> Optional[IndexDocument]:
+        path = root.joinpath(*(physical or relative).split("/"))
         data = _read_bytes(path)
         if data is None:
             return None
@@ -844,8 +869,9 @@ def _load_catalog_once(*, user_root, project_root=None) -> Catalog:
         indexes.append(document)
         return document
 
-    def add_knowledge(owner: str, category: str, root: Path, path: Path) -> None:
-        relative = "/".join(path.relative_to(root).parts)
+    def add_knowledge(owner: str, category: str, root: Path, path: Path,
+                      relative: Optional[str] = None) -> None:
+        relative = relative or "/".join(path.relative_to(root).parts)
         data = _read_bytes(path)
         if data is None:
             return
@@ -871,8 +897,9 @@ def _load_catalog_once(*, user_root, project_root=None) -> Catalog:
             digest=document.digest, active=active, effective=effective,
             language=language[CATEGORY_LANGUAGE_ROLE[category]], key=_key(owner, relative)))
 
-    def add_plain(owner: str, category: str, root: Path, path: Path) -> None:
-        relative = "/".join(path.relative_to(root).parts)
+    def add_plain(owner: str, category: str, root: Path, path: Path,
+                  relative: Optional[str] = None) -> None:
+        relative = relative or "/".join(path.relative_to(root).parts)
         data = _read_bytes(path)
         if data is None:
             return
@@ -905,19 +932,38 @@ def _load_catalog_once(*, user_root, project_root=None) -> Catalog:
     authority_refs: Tuple[DocumentReference, ...] = ()
     knowledge_refs: Tuple[DocumentReference, ...] = ()
     if project is not None:
-        project_index = add_index(OWNER_PROJECT, _index_relative(OWNER_PROJECT), project)
+        user_directory = storage_mode == "user-directory"
+
+        def project_member_path(relative: str) -> Path:
+            # CATEGORY_DIRS carries the legacy ".fstar/" identity prefix; the data
+            # root IS that directory in every layout, so the physical path strips it.
+            parts = relative.split("/")
+            if parts and parts[0] == ".fstar":
+                parts = parts[1:]
+            return data_root.joinpath(*parts)
+
+        index_parts = _index_relative(OWNER_PROJECT).split("/")
+        # The data root IS the .fstar directory in every layout (legacy root is
+        # <repo>/.fstar; user-directory root is the per-project folder), so the
+        # physical index path is always data_root/index.md while the identity
+        # key keeps the legacy ".fstar/index.md" form.
+        if index_parts and index_parts[0] == ".fstar":
+            index_parts = index_parts[1:]
+        project_index = add_index(OWNER_PROJECT, _index_relative(OWNER_PROJECT), data_root,
+                                  physical="/".join(index_parts))
         for category, directory in sorted(CATEGORY_DIRS[OWNER_PROJECT].items()):
-            base = project.joinpath(*directory.split("/"))
+            base = project_member_path(directory)
             files, links = _walk_files(base)
             for link in links:
                 diagnostics.append(Diagnostic("knowledge_unsafe_path",
                                               "Symbolic links are not allowed in managed knowledge directories",
                                               path=link, blocking=True))
             for path in files:
+                identity_relative = "/".join((directory.rstrip("/"), path.relative_to(base).as_posix()))
                 if category in CATEGORY_TYPES:
-                    add_knowledge(OWNER_PROJECT, category, project, path)
+                    add_knowledge(OWNER_PROJECT, category, data_root, path, relative=identity_relative)
                 else:
-                    add_plain(OWNER_PROJECT, category, project, path)
+                    add_plain(OWNER_PROJECT, category, data_root, path, relative=identity_relative)
         if project_index is not None:
             topics, authority_refs, knowledge_refs, index_diagnostics = _parse_project_index(
                 project_index.text, project_index.path)
@@ -952,7 +998,8 @@ def _load_catalog_once(*, user_root, project_root=None) -> Catalog:
     snapshot = content_hash({
         "documents": {key: _sha256_bytes(data) for key, data in sorted(raw.items())},
     })
-    return Catalog(user_root=user, project_root=project, documents=tuple(documents),
+    return Catalog(user_root=user, project_root=project, data_root=data_root,
+                   storage_mode=storage_mode, documents=tuple(documents),
                    indexes=tuple(indexes), authority_refs=authority_refs,
                    knowledge_refs=knowledge_refs, topic_refs=topics,
                    diagnostics=tuple(diagnostics), snapshot_hash=snapshot,
@@ -1831,8 +1878,8 @@ def _prose_preserved(before: str, after: str, markers: Sequence[str]) -> bool:
     return _is_subsequence(kept, [line for line in after.split("\n") if line.strip()])
 
 
-def _require_initialized_project(project_root: Path) -> None:
-    marker = project_root / ".fstar" / ".schema-version"
+def _require_initialized_project(project_root: Path, *, data_root: Optional[Path] = None) -> None:
+    marker = (data_root or (project_root / ".fstar")) / ".schema-version"
     if not marker.is_file():
         raise _fail("knowledge_invalid_schema", "Project writes require an initialized project (schema 1)",
                     {"path": str(marker), "expected": "1", "actual": None})
@@ -1904,8 +1951,8 @@ def prepare_change(catalog: Catalog, *, edits: Sequence[KnowledgeEdit], intent: 
             if catalog.project_root is None:
                 raise _fail("knowledge_unsafe_path", "The catalog has no project root",
                             {"field": "edit.owner", "actual": owner})
-            _require_initialized_project(catalog.project_root)
-        owner_roots.setdefault(owner, catalog.user_root if owner == OWNER_USER else catalog.project_root)
+            _require_initialized_project(catalog.project_root, data_root=catalog.data_root)
+        owner_roots.setdefault(owner, catalog.user_root if owner == OWNER_USER else (catalog.data_root or catalog.project_root))
 
     topic = intent.topic
     known_topics = {item.id for item in catalog.topic_refs}
@@ -1940,11 +1987,18 @@ def prepare_change(catalog: Catalog, *, edits: Sequence[KnowledgeEdit], intent: 
     def record_index(owner: str, kind: str, *arguments) -> None:
         index_changes.setdefault(owner, []).append((kind,) + arguments)
 
+    user_directory = catalog.storage_mode == "user-directory"
     for edit in edits:
         owner = _normalize_owner(edit.owner)
         root = owner_roots[owner]
         relative = _norm_rel(edit.path)
-        target = _safe_target(root, relative)
+        if owner == OWNER_PROJECT:
+            # Edit paths keep the ".fstar/" identity prefix; the data root IS
+            # that directory in every layout, so the prefix drops physically.
+            parts = relative.split("/")
+            target = _safe_target(root, "/".join(parts[1:]) if parts and parts[0] == ".fstar" else relative)
+        else:
+            target = _safe_target(root, relative)
         category = _category_for(owner, relative)
         if category is None and relative != _index_relative(owner):
             raise _fail("knowledge_unsafe_path", "Path is outside the managed knowledge categories",
@@ -2065,7 +2119,10 @@ def prepare_change(catalog: Catalog, *, edits: Sequence[KnowledgeEdit], intent: 
     for owner in sorted(set(index_changes) | set(supplied_index)):
         root = owner_roots[owner]
         index_relative = _index_relative(owner)
-        index_path = root.joinpath(*index_relative.split("/"))
+        physical_relative = index_relative
+        if owner == OWNER_PROJECT and physical_relative.startswith(".fstar/"):
+            physical_relative = physical_relative[len(".fstar/"):]
+        index_path = _owner_write_path(owner, root, physical_relative)
         current = _read_bytes(index_path)
         before_text = current.decode("utf-8") if current is not None else None
         if before_text is None:
@@ -2112,7 +2169,12 @@ def prepare_change(catalog: Catalog, *, edits: Sequence[KnowledgeEdit], intent: 
                                 mode=None, key=entry.key)
                      for entry in index_inventory if entry.key not in planned_keys)
 
-    reference_inventory, scanned_files = _reference_inventory(catalog, owner_roots, planned,
+    scan_roots = dict(owner_roots)
+    if OWNER_USER not in scan_roots:
+        scan_roots[OWNER_USER] = catalog.user_root
+    if OWNER_PROJECT not in scan_roots and catalog.project_root is not None:
+        scan_roots[OWNER_PROJECT] = catalog.data_root or catalog.project_root
+    reference_inventory, scanned_files = _reference_inventory(catalog, scan_roots, planned,
                                                                affected_keys, intent)
 
     language = intent.language or _language_for_edits(catalog, planned)
@@ -2384,7 +2446,9 @@ def _inject(point: str) -> None:
 def _runtime_root(owner: str, root: Path) -> Path:
     if owner == OWNER_USER:
         return root / "runtime" / "knowledge"
-    return root / ".fstar" / "runtime" / "knowledge"
+    # The owner root handed in for the project is the DATA root (the .fstar
+    # directory in every layout), so project runtime lives at its top level.
+    return root / "runtime" / "knowledge"
 
 
 class _FileLock:
@@ -2598,7 +2662,10 @@ def apply_change(proposal: KnowledgeProposal, confirmation: Confirmation, *, use
 
     user = Path(user_root).expanduser().resolve()
     project = Path(project_root).expanduser().resolve() if project_root is not None else None
+    data_root, storage_mode = _project_layout(project)
     owner_roots = dict(proposal.owner_roots)
+    if OWNER_USER not in owner_roots:
+        owner_roots[OWNER_USER] = user
     if OWNER_USER in owner_roots and owner_roots[OWNER_USER] != user:
         raise _fail("knowledge_confirmation_mismatch", "The proposal was prepared for another user root",
                     {"expected": str(owner_roots[OWNER_USER]), "actual": str(user)})
@@ -2606,9 +2673,11 @@ def apply_change(proposal: KnowledgeProposal, confirmation: Confirmation, *, use
         if project is None:
             raise _fail("knowledge_confirmation_mismatch", "The proposal needs a project root",
                         {"expected": str(owner_roots[OWNER_PROJECT]), "actual": None})
-        if owner_roots[OWNER_PROJECT] != project:
-            raise _fail("knowledge_confirmation_mismatch", "The proposal was prepared for another project root",
-                        {"expected": str(owner_roots[OWNER_PROJECT]), "actual": str(project)})
+        expected_root = owner_roots[OWNER_PROJECT]
+        actual_root = data_root if data_root is not None else project
+        if expected_root != actual_root:
+            raise _fail("knowledge_confirmation_mismatch", "The proposal was prepared for another project data root",
+                        {"expected": str(expected_root), "actual": str(actual_root)})
 
     locks = _acquire_owner_locks(owner_roots, proposal.owners, DEFAULT_LOCK_TIMEOUT, exclusive=True)
     try:
@@ -2617,13 +2686,27 @@ def apply_change(proposal: KnowledgeProposal, confirmation: Confirmation, *, use
             raise _fail("knowledge_recovery_required",
                         "A pending knowledge operation must be recovered before writing",
                         {"operations": sorted(pending)})
-        return _apply_locked(proposal, owner_roots)
+        return _apply_locked(proposal, owner_roots, user_directory=storage_mode == "user-directory")
     finally:
         for lock in locks:
             lock.release()
 
 
-def _apply_locked(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path]) -> ChangeReceipt:
+def _owner_write_path(owner: str, root: Path, relative: str) -> Path:
+    """Resolve one write target under an owner root.
+
+    Project edit paths keep the legacy ``.fstar/`` identity prefix; the data
+    root IS that directory in every layout, so the prefix resolves against
+    the root itself instead of nesting another level.
+    """
+    if owner == OWNER_PROJECT:
+        parts = relative.split("/")
+        if parts and parts[0] == ".fstar":
+            return root.joinpath(*parts[1:])
+    return root.joinpath(*relative.split("/"))
+
+
+def _apply_locked(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path], *, user_directory: bool = False) -> ChangeReceipt:
     before_hashes: Dict[str, Optional[str]] = {}
     after_hashes: Dict[str, Optional[str]] = {}
     for edit in proposal.edits:
@@ -2638,7 +2721,7 @@ def _apply_locked(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path]) 
 
     for edit in proposal.edits:
         root = owner_roots[edit.owner]
-        path = root.joinpath(*edit.relative.split("/"))
+        path = _owner_write_path(edit.owner, root, edit.relative)
         exists, current_hash = _state_of(path)
         if edit.before_absent:
             if exists:
@@ -2651,10 +2734,14 @@ def _apply_locked(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path]) 
 
     for scanned in proposal.scanned_files:
         owner, relative = _split_key(scanned.key)
-        root = owner_roots.get(owner)
-        if root is None:
-            continue
-        path = root.joinpath(*relative.split("/"))
+        # A scanned file's absolute path is authoritative: authority documents
+        # live outside the managed categories (repo root), not under the data root.
+        path = scanned.path if getattr(scanned, "path", None) is not None else None
+        if path is None:
+            root = owner_roots.get(owner)
+            if root is None:
+                continue
+            path = _owner_write_path(owner, root, relative)
         exists, current_hash = _state_of(path)
         if not exists or current_hash != scanned.digest:
             raise _fail("knowledge_write_conflict",
@@ -2696,7 +2783,7 @@ def _apply_locked(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path]) 
         _inject("coordinator")
         for edit in proposal.edits:
             root = owner_roots[edit.owner]
-            path = root.joinpath(*edit.relative.split("/"))
+            path = _owner_write_path(edit.owner, root, edit.relative)
             missing = _missing_directories(path.parent, root)
             created_directories.extend(missing)
             _inject("publish:%s" % edit.key)
@@ -2754,7 +2841,7 @@ def _apply_locked(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path]) 
 def _already_applied(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path]) -> bool:
     for edit in proposal.edits:
         root = owner_roots[edit.owner]
-        path = root.joinpath(*edit.relative.split("/"))
+        path = _owner_write_path(edit.owner, root, edit.relative)
         exists, current_hash = _state_of(path)
         if edit.after_hash is None:
             if exists:
@@ -2782,7 +2869,7 @@ def _stage_operation(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path
     for edit in proposal.edits:
         owner = edit.owner
         root = owner_roots[owner]
-        path = root.joinpath(*edit.relative.split("/"))
+        path = _owner_write_path(edit.owner, root, edit.relative)
         runtime = _runtime_root(owner, root)
         staging = runtime / "staging" / proposal.operation_id
         staging.mkdir(parents=True, exist_ok=True)
@@ -2817,7 +2904,7 @@ def _stage_operation(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path
 def _validate_published(proposal: KnowledgeProposal, owner_roots: Mapping[str, Path]) -> None:
     for edit in proposal.edits:
         root = owner_roots[edit.owner]
-        path = root.joinpath(*edit.relative.split("/"))
+        path = _owner_write_path(edit.owner, root, edit.relative)
         exists, current_hash = _state_of(path)
         if edit.after_hash is None:
             if exists:
@@ -2886,7 +2973,7 @@ def recover_changes(*, user_root, project_root=None) -> RecoveryReport:
     project = Path(project_root).expanduser().resolve() if project_root is not None else None
     owner_roots: Dict[str, Path] = {OWNER_USER: user}
     if project is not None:
-        owner_roots[OWNER_PROJECT] = project
+        owner_roots[OWNER_PROJECT] = _project_data_root(project)
     locks = _acquire_owner_locks(owner_roots, list(owner_roots), DEFAULT_LOCK_TIMEOUT, exclusive=True)
     try:
         records = _operation_records(owner_roots)

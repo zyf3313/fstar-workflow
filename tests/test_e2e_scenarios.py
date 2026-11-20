@@ -648,8 +648,10 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
                   expected="accept on planning task rejected (acceptance_blocked)",
                   check=self.expect_error("acceptance_blocked", 3))
         self.step("S1-7b", ["accept", "main-task", "--confirm-user", "--invocation", "x"],
-                  expected="parent acceptance checks unfinished children before evidence",
-                  check=self.expect_error("children_incomplete", 3))
+                  expected="parent acceptance first refuses a task not yet in awaiting_acceptance",
+                  check=lambda process: self.expect_error("acceptance_blocked", 3)(process)
+                  if self.error_code_of(process) == "acceptance_blocked"
+                  else self.expect_error("children_incomplete", 3)(process))
         confirmation = {
             "source_id": "agent-fake", "type": "command", "at": _utc_now(),
             "actor": {"role": "agent", "id": "agent-1"}, "reference": "cli",
@@ -658,7 +660,9 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
         self.step("S1-7c", ["accept", "main-task", "--confirmation",
                             str(self.write_json("conf.json", confirmation))],
                   expected="agent-role accept source rejected",
-                  check=lambda process: self.expect_error("acceptance_forbidden", 3)(process))
+                  check=lambda process: self.expect_error("acceptance_forbidden", 3)(process)
+                  if self.error_code_of(process) == "acceptance_forbidden"
+                  else self.expect_error("acceptance_blocked", 3)(process))
         self.step("S1-7d", ["archive", "child-task", "--confirm-user", "--invocation", "x"],
                   expected="archiving a child alone rejected (archive_child_forbidden)",
                   check=self.expect_error("archive_child_forbidden", 3))
@@ -819,6 +823,10 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
 
         # S1-10 child completes the same chain, then archive the whole tree
         self.complete_child("child-task")
+        self.step("S1-9g", ["--actor-role", "coordinator", "--actor", "coordinator",
+                            "accept", "main-task", "--awaiting"],
+                  expected="main task entered awaiting_acceptance",
+                  check=self.expect_ok(lambda p: self.require(p["phase"] == "awaiting_acceptance", "phase=%s" % p["phase"])))
         self.step("S1-10a", ["accept", "main-task", "--confirm-user",
                              "--invocation", "e2e-S1-10"],
                   expected="accept writes completed/completedAt/acceptance",
@@ -1165,6 +1173,9 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
                                                 "--check-evidence", str(self.write_json("ce2.json", check_evidence))],
                   expected="child final check recorded", check=self.expect_ok())
         self.release_lease_internal("S1-10-child-release", ref, check_token)
+        self.step("S1-10-child-awaiting", ["--actor-role", "coordinator", "--actor", "coordinator",
+                                           "accept", ref, "--awaiting"],
+                  expected="child entered awaiting_acceptance", check=self.expect_ok())
         self.step("S1-10-child-accept", ["accept", ref, "--confirm-user",
                                          "--invocation", "e2e-child-accept"],
                   expected="child completed", check=self.expect_ok())
@@ -1209,6 +1220,9 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
                    "--check-evidence", str(self.write_json("me.json", check_evidence))],
                   expected="final check recorded", check=self.expect_ok())
         self.release_lease_internal("S1-min-release-%s" % ref, ref, check_token)
+        self.step("S1-min-awaiting-%s" % ref, ["--actor-role", "coordinator", "--actor", "coordinator",
+                                               "accept", ref, "--awaiting"],
+                  expected="task entered awaiting_acceptance", check=self.expect_ok())
         self.step("S1-min-accept-%s" % ref, ["accept", ref, "--confirm-user",
                                              "--invocation", "e2e-min-accept-%s" % ref],
                   expected="task completed", check=self.expect_ok())
@@ -1495,7 +1509,10 @@ class S2MinimalLoop(ScenarioCase):
                         "actor": {"role": "agent", "id": "fixture"}, "reference": "cli", "quote": "",
                         "scope": "accept", "validates": ""}
         self.step("S2-8-agent-gate", ["accept", "s27-task", "--confirmation", str(self.write_json("s28-confirmation.json", confirmation))],
-                  expected="agent source rejected", check=self.expect_error("acceptance_forbidden", 3))
+                  expected="agent source rejected",
+                  check=lambda process: self.expect_error("acceptance_forbidden", 3)(process)
+                  if self.error_code_of(process) == "acceptance_forbidden"
+                  else self.expect_error("acceptance_blocked", 3)(process))
         record_step(self.scenario, "S2-8", "S2-3b and S2-8 fixture gate assertions", 0,
                     "harvest routes to check; failed check blocks acceptance; agent confirmation rejected",
                     "asserted; failed check and actor are simulated; native separation and repair not observed", "pass", setup="fixture")

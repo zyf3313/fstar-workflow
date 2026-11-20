@@ -11,6 +11,18 @@ description: "Initialize from verified project facts; preserve authority. 基于
 
 Initialize from facts you can verify, without asking the user to confirm what exploration already proved.
 
+## Where the data lives
+
+Ask the user only when they raise it; otherwise use the default. When the storage location does come up, explain the options in plain language — where the data sits, what gets committed, what stays machine-local — and apply the user's choice yourself; the `fstar init ... --storage <mode>` invocation below is the agent's own bookkeeping, never a command to hand to the user.
+
+- Default (`project-shared`): `.fstar/` sits in the project and is committed with it.
+- `project-local`: `.fstar/` stays in the project but is ignored through the machine-local Git exclude (`.git/info/exclude`); the shared `.gitignore` is never rewritten. In a non-Git directory the ignore cannot be applied — say so instead of claiming it worked.
+- `user-directory`: no `.fstar/` in the project. Data lives under the user root in `projects/<uuid>-<name>/`, and the repo keeps only a small machine-local pointer file. Two projects with the same name never collide. If the project is moved, the next command stops and asks for an explicit rebind to the new path; never re-initialize to "fix" it, because that would create a second data root.
+
+Record the choice with `fstar init <project-path> --storage <mode>` (or `fstar install --storage <mode>` when installing). The mode is chosen once: an already-initialized project keeps it, and data is never moved silently.
+
+In `user-directory` mode every `.fstar/...` path below is an identity path inside the project data root, not a directory inside the repository.
+
 1. Explore the project: directory structure, frameworks, build and test files, package manifests, and existing authoritative documents. Do not ask the user to confirm the discovered facts.
 2. Create the user root first when needed: `fstar init <project-path>` auto-creates a missing `~/.fstar` (or the configured user root), validates an existing config, and repairs a partial layout. This initialization-only creation is not a governance write.
 3. Collect a JSON context file with `project_summary` (string), `topics` (objects with `id`, `title`, `applies_to`, `read_when`, `path`), and optional `authority_refs` and `knowledge_refs` (objects with `title`, `path`). Every referenced path must be an existing project file.

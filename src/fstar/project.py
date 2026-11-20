@@ -67,6 +67,13 @@ class InitError(Exception):
 
 _PROJECT_IGNORE = "/runtime/\n/*.local.yaml\n/.identity\n/identity\n"
 _USER_IGNORE = "/runtime/\n/config.local.yaml\n/.identity\n/identity\n"
+STORAGE_MODES = ("project-shared", "project-local", "user-directory")
+GIT_EXCLUDE_LINE = "/.fstar/\n"
+STORAGE_MARKER_FILE = "storage-mode"
+_LOCAL_GITIGNORE_WARNING = ("LOCAL_GITIGNORE_READONLY",
+                            "A shared .gitignore already ignores .fstar locally; "
+                            "its ignored=true line cannot be rewritten by fstar. "
+                            "Remove the local ignore to let the git exclude file handle it.")
 
 
 def _controlled(root: Path, relative: str) -> Path:
@@ -150,9 +157,9 @@ def _read_text(path: Path, code: str, message: str, *, created: Sequence[Path] =
         raise InitError(code, "%s: %s" % (message, exc), path=path, created=created)
 
 
-def _check_existing_project(root: Path) -> None:
-    marker = root / ".fstar" / ".schema-version"
-    config = root / ".fstar" / "config.yaml"
+def _check_existing_project(root: Path, data_subdir: str = ".fstar") -> None:
+    marker = root / data_subdir / ".schema-version"
+    config = root / data_subdir / "config.yaml"
     marker_value = None
     if marker.exists():
         if not marker.is_file():
@@ -254,13 +261,13 @@ def _backfill_index(path: Path, content: str, *, dry_run: bool) -> bool:
 
 
 def _initialize(root: Path, files, *, dry_run: bool, context_complete: bool,
-                project: bool, index_context: bool = False) -> InitResult:
+                project: bool, index_context: bool = False, data_subdir: str = ".fstar") -> InitResult:
     created, preserved, warnings = [], [], []
-    directory = root / ".fstar" if project else root
+    directory = root / data_subdir if project else root
     if directory.exists() and (directory.is_symlink() or not directory.is_dir()):
         raise InitError("PATH_CONFLICT", "Data root is not a safe directory", path=directory)
     if project:
-        _check_existing_project(root)
+        _check_existing_project(root, data_subdir)
     else:
         _check_existing_user(root)
     for relative, content in files:
@@ -281,7 +288,7 @@ def _initialize(root: Path, files, *, dry_run: bool, context_complete: bool,
     if not dry_run:
         if not directory.exists():
             try:
-                directory.mkdir(mode=0o755)
+                directory.mkdir(mode=0o755, parents=True)
             except FileExistsError:
                 if directory.is_symlink() or not directory.is_dir():
                     raise InitError("PATH_CONFLICT", "Data root is not a safe directory", path=directory, created=created)
@@ -320,25 +327,257 @@ def _initialize(root: Path, files, *, dry_run: bool, context_complete: bool,
     return InitResult(root, tuple(created), tuple(preserved), tuple(warnings), context_complete, dry_run)
 
 
+def _git_repo_root(root: Path) -> Optional[Path]:
+    """Nearest enclosing .git directory or worktree file; None when absent."""
+    current = root
+    while True:
+        candidate = current / ".git"
+        if candidate.is_dir():
+            return current
+        if candidate.is_file():
+            return current  # linked worktree: exclude lives in the commondir git dir
+        if current.parent == current:
+            return None
+        current = current.parent
+
+
+def _apply_local_exclude(root: Path, created: list, warnings: list, *, dry_run: bool) -> None:
+    """Ignore machine-local fstar files through the LOCAL git exclude file.
+
+    Never the shared .gitignore: rewriting the user's tracked file would be
+    a silent out-of-scope write. Non-git projects are reported, not pretended
+    ignored. A pre-existing shared .gitignore rule is reported too.
+    """
+    from .store import DomainError
+
+    repo = _git_repo_root(root)
+    if repo is None:
+        warnings.append(InitWarning("LOCAL_EXCLUDE_NOT_GIT", root,
+                                    "project-local storage uses the local git exclude file, "
+                                    "but this project is not a git repository; .fstar is NOT ignored"))
+        return
+    git_dir = repo / ".git"
+    if git_dir.is_file():  # linked worktree pointer: gitdir: <path>
+        try:
+            text = git_dir.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            warnings.append(InitWarning("LOCAL_EXCLUDE_UNREADABLE", git_dir,
+                                        "Cannot read the worktree .git pointer; exclude not verified"))
+            return
+        target = Path(text.partition("gitdir:")[2].strip()) if "gitdir:" in text else None
+        if target is None or not target.is_dir():
+            warnings.append(InitWarning("LOCAL_EXCLUDE_UNREADABLE", git_dir,
+                                        "The worktree .git pointer does not name a git directory"))
+            return
+        git_dir = target.resolve()
+    shared_ignore = repo / ".gitignore"
+    if shared_ignore.is_file():
+        try:
+            ignored = any(line.strip() in ("/.fstar/", "/.fstar", ".fstar/")
+                          for line in shared_ignore.read_text(encoding="utf-8").splitlines())
+        except (OSError, UnicodeError):
+            ignored = False
+        if ignored:
+            warnings.append(InitWarning(*_LOCAL_GITIGNORE_WARNING[:1], shared_ignore,
+                                        *_LOCAL_GITIGNORE_WARNING[1:]))
+            return
+    exclude = git_dir / "info" / "exclude"
+    try:
+        existing = exclude.read_text(encoding="utf-8") if exclude.is_file() else ""
+    except (OSError, UnicodeError):
+        warnings.append(InitWarning("LOCAL_EXCLUDE_UNREADABLE", exclude,
+                                    "Cannot read the local git exclude file"))
+        return
+    # splitlines() strips the newline, so the constant (which carries one)
+    # is compared in its stripped form.
+    if any(line.strip() in ("/.fstar", ".fstar/", "/.fstar/")
+           for line in existing.splitlines()):
+        return
+    if dry_run:
+        created.append(exclude)
+        return
+    try:
+        exclude.parent.mkdir(parents=True, exist_ok=True)
+        separator = "" if (not existing or existing.endswith("\n")) else "\n"
+        with exclude.open("a", encoding="utf-8") as stream:
+            stream.write(separator + "# fstar local storage (machine-local; not shared)\n" + GIT_EXCLUDE_LINE)
+            stream.flush()
+            os.fsync(stream.fileno())
+    except OSError as exc:
+        raise InitError("IO_ERROR", str(exc), path=exclude)
+    created.append(exclude)
+
+
+def _apply_local_pointer_exclude(root: Path, created: list) -> None:
+    """Keep the pointer file machine-local (it records an absolute data root).
+
+    The pointer is a locator for one machine's data root, so it is added to
+    the LOCAL git exclude file. The shared .gitignore is never touched.
+    """
+    from .store import POINTER_FILE
+
+    repo = _git_repo_root(root)
+    if repo is None:
+        return
+    git_dir = repo / ".git"
+    if git_dir.is_file():
+        try:
+            text = git_dir.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            return
+        target = Path(text.partition("gitdir:")[2].strip()) if "gitdir:" in text else None
+        if target is None or not target.is_dir():
+            return
+        git_dir = target.resolve()
+    exclude = git_dir / "info" / "exclude"
+    line = "/%s\n" % POINTER_FILE
+    try:
+        existing = exclude.read_text(encoding="utf-8") if exclude.is_file() else ""
+    except (OSError, UnicodeError):
+        return
+    if line.strip() in [entry.strip() for entry in existing.splitlines()]:
+        return
+    try:
+        exclude.parent.mkdir(parents=True, exist_ok=True)
+        separator = "" if (not existing or existing.endswith("\n")) else "\n"
+        with exclude.open("a", encoding="utf-8") as stream:
+            stream.write(separator + "# fstar pointer file (machine-local)\n" + line)
+            stream.flush()
+            os.fsync(stream.fileno())
+    except OSError:
+        return
+    created.append(exclude)
+
+
+def _resolve_storage_mode(mode: Optional[str]) -> str:
+    if mode is None:
+        return "project-shared"
+    if mode not in STORAGE_MODES:
+        from .models import DomainError
+        raise DomainError("invalid_storage_mode", "Unknown storage mode",
+                          {"mode": mode, "modes": list(STORAGE_MODES)})
+    return mode
+
+
 def initialize_project(path: Path, user_root: Path, *, context: Optional[ProjectContext] = None,
-                       dry_run: bool = False) -> InitResult:
-    del user_root
+                       dry_run: bool = False, storage: Optional[str] = None) -> InitResult:
+    from .store import POINTER_FILE, register_user_directory_project
+
+    mode = _resolve_storage_mode(storage)
     root = path.expanduser().resolve()
     if not root.exists() or not root.is_dir():
         raise InitError("PROJECT_ROOT_INVALID", "Project root must be an existing directory", path=root)
+    if storage is None and (root / POINTER_FILE).is_file():
+        # Re-initializing an existing user-directory project: its mode comes
+        # from the pointer, so a bare `fstar init` never creates a second
+        # (in-repo) data root.
+        mode = "user-directory"
+    if mode == "user-directory":
+        return _initialize_user_directory(root, Path(user_root).expanduser(),
+                                          context=context, dry_run=dry_run)
     index, complete = _project_index(root, context)
     project_id = str(uuid.uuid4())
-    files = (("index.md", index),
+    files = [("index.md", index),
              ("config.yaml", "schema_version: 1\nproject:\n  id: \"%s\"\n" % project_id),
+             (".gitignore", _PROJECT_IGNORE), (".schema-version", "1\n")]
+    if mode == "project-local":
+        # The mode must be discoverable from the data root: this mode has no
+        # pointer file, so the marker is what distinguishes it from the
+        # legacy project-shared layout.
+        files.append((STORAGE_MARKER_FILE, mode + "\n"))
+    files = tuple(files)
+    result = _initialize(root, files, dry_run=dry_run, context_complete=complete, project=True,
+                         index_context=context is not None and bool(context.project_summary.strip()))
+    if mode == "project-local" and not dry_run:
+        created, warnings = list(result.created), list(result.warnings)
+        _apply_local_exclude(root, created, warnings, dry_run=False)
+        result = replace(result, created=tuple(created), warnings=tuple(warnings))
+    return result
+
+
+def _initialize_user_directory(root: Path, user_root: Path, *, context: Optional[ProjectContext],
+                               dry_run: bool) -> InitResult:
+    """user-directory mode: data lives under the user root, repo stays clean.
+
+    A minimal pointer file (``.fstar-pointer.json``) is written inside the
+    project so find_project_root keeps working; no ``.fstar/`` directory is
+    created inside the repo. The pointer carries the project UUID and the
+    pointer-relative data-root path, so identity is stable across moves.
+    """
+    from .store import (POINTER_FILE, POINTER_SCHEMA, _read_pointer, _safe_pointer_data_root,
+                         register_user_directory_project, user_directory_root)
+
+    name = _readable_name(root)
+    pointer = root / POINTER_FILE
+    existing_pointer = None
+    if pointer.exists():
+        if not pointer.is_file():
+            raise InitError("PATH_CONFLICT", "Pointer path is not a regular file", path=pointer)
+        try:
+            existing_pointer = _read_pointer(pointer)
+        except DomainError as exc:
+            raise InitError("INVALID_POINTER", exc.message, path=pointer)
+    if existing_pointer is not None:
+        # Re-running init on an initialized project must not create a second
+        # data root: the existing identity and location are reused.
+        project_id = existing_pointer["project_id"]
+        data_root = _safe_pointer_data_root(root, existing_pointer)
+        pointer_record = dict(existing_pointer)
+        pointer_record.setdefault("mode", "user-directory")
+        pointer_record["bound_path"] = str(root)
+    else:
+        project_id = str(uuid.uuid4())
+        data_root = user_directory_root(user_root.expanduser(), project_id, name)
+        pointer_relative = os.path.relpath(data_root, root).replace(os.sep, "/")
+        if pointer_relative.startswith(".."):
+            # Data root lives outside the repo (typical user-directory layout):
+            # store the resolved absolute path; traversal rules live in the reader.
+            pointer_relative = str(data_root)
+        pointer_record = {"schema": POINTER_SCHEMA, "project_id": project_id,
+                          "data_root": pointer_relative, "bound_path": str(root),
+                          "mode": "user-directory"}
+    index, complete = _project_index(root, context)
+    files = (("index.md", index),
+             ("config.yaml", "schema_version: 1\nproject:\n  id: \"%s\"\n  storage: user-directory\n" % project_id),
              (".gitignore", _PROJECT_IGNORE), (".schema-version", "1\n"))
-    return _initialize(root, files, dry_run=dry_run, context_complete=complete, project=True,
-                       index_context=context is not None and bool(context.project_summary.strip()))
+    if existing_pointer is None and (data_root / ".schema-version").is_file():
+        # Same-name second project: a fresh UUID gives a fresh folder, so an
+        # existing folder with a marker means this data root already belongs
+        # to someone (or the pointer file was lost).
+        raise InitError("PATH_CONFLICT", "This user-directory data root already exists",
+                        path=data_root)
+    created, preserved, warnings = [], [], []
+    # data_root IS the project data folder; schema marker sits at its top level.
+    preview = _initialize(data_root, files, dry_run=dry_run, context_complete=complete,
+                         project=True, index_context=context is not None and bool(context.project_summary.strip()),
+                         data_subdir=".")
+    if not dry_run:
+        if existing_pointer is not None:
+            preserved.append(pointer)
+            if pointer_record != existing_pointer:
+                # The binding may have moved; refresh the pointer in place.
+                _exclusive_write(pointer, json.dumps(pointer_record, ensure_ascii=False, indent=2) + "\n",
+                                 created, preserved)
+        else:
+            _exclusive_write(pointer, json.dumps(pointer_record, ensure_ascii=False, indent=2) + "\n",
+                             created, preserved)
+        _apply_local_pointer_exclude(root, created)
+        register_user_directory_project(user_home=user_root.expanduser(), project_id=project_id,
+                                        name=name, data_root=data_root, project_path=root)
+    return InitResult(root, tuple(created) + tuple(preview.created),
+                      tuple(preserved) + tuple(preview.preserved),
+                      tuple(warnings) + tuple(preview.warnings), complete, dry_run)
+
+
+def _readable_name(root: Path) -> str:
+    return root.name or root.resolve().name or "project"
 
 
 def initialize_workflow_project(path: Path, user_root: Path, *, task_ref: str,
                                 extensions: Optional[list] = None,
                                 context: Optional[ProjectContext] = None,
-                                dry_run: bool = False) -> InitResult:
+                                dry_run: bool = False,
+                                storage: Optional[str] = None) -> InitResult:
     """Initialize both roots, validating and repairing a partial user layout."""
     from .extensions import grants
     from .store import TaskStore
@@ -353,10 +592,11 @@ def initialize_workflow_project(path: Path, user_root: Path, *, task_ref: str,
     grants(records)  # Validate any supplied context; initialization needs no governance grant.
     # Validate project inputs before creating either root. User initialization
     # also validates an existing config and repairs files missing beside it.
-    preview = initialize_project(root, user_root, context=context, dry_run=True)
+    preview = initialize_project(root, user_root, context=context, dry_run=True, storage=storage)
     user_result = initialize_user(user_root, dry_run=dry_run)
     try:
-        result = preview if dry_run else initialize_project(root, user_root, context=context)
+        result = preview if dry_run else initialize_project(root, user_root, context=context,
+                                                            storage=storage)
     except InitError as exc:
         raise InitError(exc.code, exc.message, path=exc.path,
                         created=user_result.created + exc.created)
@@ -380,12 +620,57 @@ def initialize_user(user_root: Path, *, dry_run: bool = False) -> InitResult:
 
 
 def register_commands(subparsers) -> None:
+    from .store import STORAGE_MODES
+
     parser = subparsers.add_parser("init")
     parser.add_argument("path", nargs="?", default=".")
     parser.add_argument("--user", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--storage", choices=list(STORAGE_MODES), default=None,
+                        help="where project data lives: project-shared (default), "
+                             "project-local (local git exclude), or user-directory")
     parser.add_argument("--context", metavar="JSON_FILE", help="Project context collected for initialization")
     parser.set_defaults(_fstar_project_handler=_handle_init)
+    rebind = subparsers.add_parser("rebind")
+    rebind.add_argument("path", help="new project root path after a move")
+    # The old/current project root comes from the global --project option (or
+    # cwd discovery); a second --project here would shadow the global one.
+    rebind.set_defaults(_fstar_project_handler=_handle_rebind)
+
+
+def _handle_rebind(args):
+    from .models import DomainError
+    from .store import (POINTER_FILE, TaskStore, find_rebind_source, rebind_registered)
+
+    args.command = "rebind"
+    target = Path(args.path).expanduser().resolve()
+    explicit = Path(args.project).expanduser().resolve() if getattr(args, "project", None) else None
+    user_home = Path(args.user_data_root).expanduser() if getattr(args, "user_data_root", None) else None
+    runtime = Path(args.runtime_root).expanduser() if getattr(args, "runtime_root", None) else None
+    # The source project may have moved: the pointer travels with the
+    # repository but its recorded binding points at the old path, so a moved
+    # project must stay discoverable for an explicit rebind.
+    source = explicit or find_rebind_source(Path.cwd())
+    if source is None:
+        raise DomainError("project_not_initialized",
+                          "No fstar project found at this path; pass --project PATH",
+                          {"hint": "run rebind from inside the moved project, or pass "
+                                   "--project with its recorded root"})
+    pointer = source / POINTER_FILE
+    if pointer.is_file() and not pointer.is_symlink():
+        store = TaskStore(source, user_home=user_home, runtime_root=runtime)
+        return store.rebind(target, confirmation={"source_id": "cli", "type": "rebind"})
+    # No pointer at the source path (the repository moved without it): the
+    # user-level registry still names the project, so the binding is
+    # re-established explicitly from there.
+    if user_home is None:
+        raise DomainError("rebind_needs_user_root",
+                          "Rebinding without a pointer needs the user-level registry; "
+                          "pass --user-data-root",
+                          {"path": str(source)})
+    return rebind_registered(user_home=user_home, source_path=source,
+                             target_path=target,
+                             confirmation={"source_id": "cli", "type": "rebind"})
 
 
 def _context_file(path: str) -> ProjectContext:
@@ -421,7 +706,17 @@ def _handle_init(args):
         raise DomainError("invalid_project_context", "Project context cannot be used with --user")
     context = _context_file(args.context) if args.context else None
     result = initialize_user(user_root, dry_run=args.dry_run) if args.user else initialize_workflow_project(
-        Path(args.path), user_root, task_ref="session-only", context=context, dry_run=args.dry_run)
+        Path(args.path), user_root, task_ref="session-only", context=context, dry_run=args.dry_run,
+        storage=getattr(args, "storage", None))
+    if not args.user and getattr(args, "storage", None):
+        value = asdict(result)
+        value["storage_mode"] = getattr(args, "storage", None)
+        value["root"] = str(result.root)
+        value["created"] = [str(path) for path in result.created]
+        value["preserved"] = [str(path) for path in result.preserved]
+        value["warnings"] = [{"code": item.code, "path": str(item.path), "message": item.message}
+                             for item in result.warnings]
+        return value
     value = asdict(result)
     value["root"] = str(result.root)
     value["created"] = [str(path) for path in result.created]

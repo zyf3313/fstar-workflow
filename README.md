@@ -15,9 +15,10 @@ integration. No third-party runtime dependencies.
 Session starts ──► hook injects routing + project index (from disk, not memory)
       │
       ▼
-Plan ──► Start ──► Implement ⇄ Check ──► Fresh evidence ──► User acceptance ──► Archive
-  │                                                          │
-  └── every step recorded in task.json + event log ◄─────────┘
+Plan ──► Start ──► Implement ⇄ Check ──► Fresh evidence ──► Awaiting acceptance ──► User acceptance ──► Archive
+  │                                                          │        ▲
+  │                     user reports a problem ──────────────┘        │ (rework: back to planning)
+  └── every step recorded in task.json + event log ◄─────────────────┘
 ```
 
 ## Requirements
@@ -66,7 +67,8 @@ fstar install --host claude      # wire hooks + skills + agents into <project>/.
 fstar task create "My feature" --name my-feature
 fstar start my-feature           # planning → in_progress
 # ... work with your agent; fstar-managed skills drive the flow ...
-fstar accept my-feature          # user acceptance
+# ... after a fresh final check: in_progress → awaiting_acceptance ...
+fstar accept my-feature          # user acceptance: awaiting_acceptance → completed
 fstar archive my-feature         # archive to .fstar/archive/
 ```
 
@@ -116,9 +118,16 @@ separately, so "tests passed" always names its exact code state.
 ### 5. Evidence & acceptance (`review`, `evidence`, `acceptance`)
 
 Evidence records are content-addressed: when the artifacts they validated
-change, the evidence goes stale and completion is blocked. Completion requires
-fresh check evidence **plus explicit user acceptance** (`fstar accept`) — a
-command succeeding is not acceptance. `fstar evidence invalidate --file PATH`
+change, the evidence goes stale and completion is blocked. After a fresh
+final check is recorded, the task moves to the `awaiting_acceptance` phase
+(`fstar accept <task> --awaiting`, a coordinator action — the transition is
+explicit, never automatic at check-harvest time) and `completedAt` stays
+empty. Completion requires a task in `awaiting_acceptance` **plus explicit
+user acceptance** (`fstar accept`) — a command succeeding is not acceptance.
+If the user reports a problem during `awaiting_acceptance`,
+`fstar accept <task> --rework --reason ...` returns the task to `planning`
+and stales the evidence; the normal start → check cycle re-applies.
+`fstar evidence invalidate --file PATH`
 expires evidence on demand; `fstar acceptance status` shows what's missing.
 
 ### 6. Archive (`archive`, `drop`)
@@ -136,9 +145,13 @@ returns the task to `planning`, and records the pre-replan documents plus
 the baseline git commit — the session context then surfaces those documents
 for re-clarification, and dispatch is refused until `plan.md` has actually
 been rewritten (`stale_plan_dispatch`), so a pre-replan plan can never
-silently flow to implementation. **Reopen** stales the final-check evidence
-so re-acceptance requires a fresh independent check (deliveries stay
-valid). Long-running dispatches can
+silently flow to implementation. **Reopen** (user-only, unarchived
+completed tasks) returns the task to `planning` and stales the final-check
+evidence so re-acceptance requires a fresh independent check (deliveries
+stay valid); archived tasks are immutable — follow-up only, never reopen.
+A task whose fresh final check went stale in `awaiting_acceptance` goes
+back to `in_progress` for a re-check via `fstar accept <task> --recheck`.
+Long-running dispatches can
 be steered with `fstar interrupt` (change propagation, cancel, checkpoint
 stop). Concurrent document edits go through `fstar doc-edit`, which rejects
 stale baselines instead of silently overwriting.
@@ -193,6 +206,134 @@ acceptance. Procedural knowledge ("how to do X") lives in
 `read_context` — never exported into host skills, so the knowledge base stays
 the single authority.
 
+## Where the project data lives
+
+`fstar init --storage MODE` chooses where the project's data root lives.
+Every mode keeps the same task/spec/archive structure and the same commands;
+only the location and the ignore rule change.
+
+| Mode | Data root | Ignore rule | Use when |
+|---|---|---|---|
+| `project-shared` (default) | `<repo>/.fstar/` | none — the data root is committed with the repository | the team should share tasks and specs |
+| `project-local` | `<repo>/.fstar/` | `.git/info/exclude` (machine-local; the shared `.gitignore` is never rewritten) | you want the data in the repository but not uploaded |
+| `user-directory` | `~/.fstar/projects/<uuid>-<name>/` | the repo holds only a small pointer file (`.fstar-pointer.json`), itself machine-local | you do not want fstar data inside the repository at all |
+
+```bash
+fstar init --storage project-local     # data stays in the repo, untracked
+fstar init --storage user-directory    # data lives under the user root
+fstar install --storage user-directory # initialize the mode, then install
+```
+
+`install --storage` initializes an uninitialized project in the requested
+mode before installing; an already-initialized project keeps its mode — data
+is never moved silently (`storage_mode_mismatch`).
+
+Identity is a stable project UUID plus a readable name. Two projects with the
+same name never collide: each gets its own `projects/<uuid>-<name>/` folder.
+Nothing is ever merged by name or by remote URL.
+
+In `user-directory` mode the project folder carries a pointer file that records
+where its data lives. If the repository is moved, the pointer no longer
+matches and every command stops with `project_moved_needs_rebind` instead of
+guessing. Rebinding is always explicit:
+
+```bash
+fstar rebind /new/path/to/project     # rebind the project to its new location
+```
+
+`fstar doctor` reports the storage mode and the resolved data root for every
+mode, and additionally checks that a user-directory project folder and its
+registered UUID agree.
+
+## Cross-project tasks (master + child in different repositories)
+
+A master task in one project can own child tasks that live in other
+initialized fstar projects. Each side records its own copy of the link in
+`task.json` `meta.cross_project_links`
+(`{direction: child|parent, project_id, task_id, path_hint}`); the existing
+26-field structure and same-repo `children` semantics are untouched. The
+`path_hint` is a location hint only — authoritative resolution goes through
+the project registry / recorded project identity.
+
+```bash
+# from the master project (master task "root" must exist and hold the link;
+# the TARGET child task must be in_progress — dispatch registers on it)
+fstar cross create-child root --target /path/to/other-repo \
+    --name child-a --title "Deliver the other repo's part"
+fstar cross link root --target /path/to/other-repo --target-task existing-task
+fstar cross links root          # list links with live target task status
+fstar cross dispatch root --target /path/to/other-repo --target-task child-a \
+    --role implement --plan-item P-1 --allowed-path src/app.py
+```
+
+`--target` accepts an existing project path or a registered user-directory
+project id. Pre-dispatch checks (by design):
+
+- **Target not initialized** (no fstar data root): the operation is refused
+  with `target_not_initialized` and you are directed to the init flow.
+- **Target has no real specs yet** (missing/empty/placeholder): the dispatch
+  continues and the fact is recorded on the child task
+  (`cross_project_spec_note`) — a placeholder never permanently blocks.
+- **Spec loading**: the dispatched worker's `read_context` is built from the
+  TARGET project's own specs; the master project's specs are never
+  substituted.
+- **Unavailable target path** (moved/deleted): link status reports it and new
+  dispatches are blocked with the recorded path as reason.
+
+Failure handling: duplicate links and cross-project parent-child cycles are
+refused; cross-project writes take the master project lock first and then
+any further project locks in sorted order, so a failed operation leaves no
+partial records and is retriable as a whole.
+
+## Branch binding & task locate (QA)
+
+`fstar start` records the branch and worktree a task actually runs on
+(detached HEAD is recorded as detached, never fabricated). When QA finds a
+problem on a branch, `fstar task locate` finds the task it belongs to:
+
+```bash
+fstar task locate --branch feat/some-branch   # unique candidate: found
+fstar task locate --branch feat/shared --worktree /path/to/wt  # disambiguate
+fstar task locate my-task                     # explicit ref beats everything
+```
+
+Lookup order: explicit task ref > a valid compatible session pointer > a
+unique project/worktree/branch candidate. Same-named branches in sibling
+worktrees are distinguished by the worktree path. Several matches —
+including completed and archived ones, which stay searchable for QA — are
+listed with identifiable info for a natural-language choice; nothing is
+auto-selected and no branch is auto-switched. Archived hits can only be
+linked to a follow-up task, never reopened or mutated.
+
+## Unified cross-project acceptance
+
+When a master task carries cross-project child links, one explicit user
+confirmation can complete the master and every listed child together:
+
+```bash
+# every linked child must be in awaiting_acceptance with a fresh final
+# check, and the master must be in awaiting_acceptance itself
+fstar accept root --unified --confirm-user --invocation <this confirmation>
+```
+
+Any stale, unavailable, or not-yet-awaiting child blocks the whole
+acceptance with the reason (`unified_child_not_ready`) and nothing is
+written — partial failure never fakes full success. Each child's
+acceptance event records its source as the master's unified confirmation
+reference, and the confirmation binds the current version of every task,
+so an old acceptance can never be reused for a new delivery.
+
+## Natural-language UX
+
+All fstar commands are agent-internal. In a conversation the agent reports
+in natural language — what was done, what the verification showed, and
+what confirmation is awaited — and runs the commands itself, recording the
+actual conversation as the confirmation source when one is required. You
+never see (or need to run) a command like `fstar accept <task>
+--confirm-user` as a reply; the CLI flags above exist for scripted and
+agent-internal use. This is presentation only: confirmation stays
+explicit, one-time, user-initiated, and traceable in the event log.
+
 ## What lands in your project
 
 ```
@@ -237,12 +378,13 @@ adapter; the two host roots never share configuration.
 
 Run `fstar <command> --help` for flags. The commands group by purpose:
 
-- **Task lifecycle** — `task create|list|current`, `start`, `accept`,
+- **Task lifecycle** — `task create|list|current|locate`, `start`, `accept`,
   `archive`, `drop`, `continue`, `state show`
 - **Verification** — `review record|list`, `evidence invalidate`,
   `acceptance status`
 - **Extensions** — `extension list|enable|disable`
-- **Project** — `init`
+- **Project** — `init`, `rebind`
+- **Cross-project** — `cross create-child|link|links|dispatch`
 - **Install maintenance** — `install`, `update`, `uninstall`, `doctor`,
   `migrate`, `version`
 - **Agent-side** (invoked by agents, rarely by hand) — `dispatch ...`,

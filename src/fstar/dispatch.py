@@ -1012,8 +1012,6 @@ class DispatchService:
         A reported output may legitimately differ from its pre-edit input;
         that overlap cannot be independently verified after the edit.
         """
-        from .evidence import _safe_project_file
-        root = self.store.project_root
         changed = {str(Path(path)) for path in changed_paths}
         unverified = []
         for field in ("input_versions", "read_context"):
@@ -1023,7 +1021,7 @@ class DispatchService:
                     unverified.append({"field": field, "path": relative, "reason": "reported_worker_output"})
                     continue
                 try:
-                    path = _safe_project_file(root, relative)
+                    path = self.store.project_file(relative)
                     if not path.is_file():
                         raise OSError("input is missing or not a regular file")
                     actual = file_digest(path)
@@ -1145,9 +1143,14 @@ class DispatchService:
                 check_evidence["stale_reasons"] = [{"type": "unverified_inputs", "inputs": unverified_inputs}]
             recorded = self.evidence.record(task_ref, evidence=check_evidence, lease_token=lease_token)
             self._record_harvested(task_ref, result["dispatch_id"])
+            # The phase transition is explicit (design D-004): after a fresh
+            # FINAL check harvest the coordinator must enter
+            # awaiting_acceptance; the harvest itself never moves the phase.
+            final_check = check_evidence.get("scope") == "final" and recorded.get("state") == "valid"
             return {"recorded": True, "persistence": "task", "evidence_id": recorded["id"],
                     "state": recorded["state"], "dispatch_id": result["dispatch_id"],
-                    "unverified_inputs": unverified_inputs, "next": "acceptance_review"}
+                    "unverified_inputs": unverified_inputs,
+                    "next": "enter_awaiting_acceptance" if final_check else "acceptance_review"}
         delivery_paths = sorted(set(result["changed_paths"]))
         producer = {"role": payload["role"], "id": coordinator_id, "session_id": coordinator_id}
         evidence = {

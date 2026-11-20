@@ -21,6 +21,7 @@ from ..config import ConfigError, load_config
 from ..evidence import EvidenceService, file_digest
 from ..models import DomainError
 from ..store import TaskStore, find_project_root
+from ..store import _resolve_project_layout
 
 # Conservative defaults; the context_injection.* config keys are not yet
 # registered in config.py's DEFAULT_CONFIG (child design §9.3). Missing keys
@@ -34,6 +35,11 @@ DEFAULT_BUDGETS = {
 ROLES = ("research", "implement", "check", "editor")
 
 HOOK_MARKER = "<!-- fstar-hook-injected -->"
+
+
+def _project_data_root(project_root: Path) -> Path:
+    """The project's data root (the .fstar directory in every layout)."""
+    return _resolve_project_layout(Path(project_root))[0]
 
 
 def resource_root(project_root: Optional[Path] = None,
@@ -141,8 +147,9 @@ def index_inputs(project_root: Optional[Path], user_root: Path) -> List[Injected
     """Project and user indexes, read-only, each fingerprinted."""
     inputs = []
     if project_root is not None:
-        path = project_root / ".fstar" / "index.md"
-        found = _fingerprinted("project_index", path, relative=".fstar/index.md") if _safe_context_path(project_root, path) else None
+        data_root = _project_data_root(project_root)
+        path = data_root / "index.md"
+        found = _fingerprinted("project_index", path, relative=".fstar/index.md") if _safe_context_path(data_root, path) else None
         if found:
             inputs.append(found)
     path = user_root / "index.md"
@@ -173,13 +180,14 @@ def _safe_context_path(root: Path, path: Path) -> bool:
 def task_doc_inputs(project_root: Path, task_dir: Path, members: Optional[set] = None) -> List[InjectedInput]:
     """Task doc snapshot inputs: prd, design (when present), plan, clarify."""
     inputs = []
+    data_root = _project_data_root(project_root)
     for kind, relative in (("doc_prd", "doc/prd.md"), ("doc_design", "doc/design.md"),
                            ("plan", "plan.md"), ("clarify", "clarify.md")):
         member = {"doc_prd": "prd", "doc_design": "design", "plan": "plan", "clarify": "clarify"}[kind]
         if members is not None and member not in members:
             continue
         path = task_dir / relative
-        if not _safe_context_path(project_root, path) or not path.is_file():
+        if not _safe_context_path(data_root, path) or not path.is_file():
             continue
         try:
             found = _fingerprinted(kind, path, relative="%s/%s" % (task_dir.name, relative))
@@ -225,6 +233,21 @@ def manifest_entries(project_root: Path, task_dir: Path, action: str) -> List[di
     return entries
 
 
+def project_file(project_root: Path, relative: str) -> Path:
+    """Resolve a project-relative path, honoring the legacy ".fstar/" prefix.
+
+    The prefix addresses the project's own data (specs, task docs); it
+    resolves against the data root, which lives inside the repository in
+    project-shared/local mode and under the user root in user-directory mode.
+    """
+    candidate = Path(relative)
+    parts = candidate.parts
+    data_root = _project_data_root(project_root)
+    if parts and parts[0] == ".fstar":
+        return data_root.joinpath(*parts[1:])
+    return project_root.joinpath(*parts)
+
+
 def spec_body_inputs(project_root: Path, entries: List[dict]) -> List[InjectedInput]:
     """Load full bodies of spec/research files listed by a manifest.
 
@@ -240,8 +263,9 @@ def spec_body_inputs(project_root: Path, entries: List[dict]) -> List[InjectedIn
         if relative in seen:
             continue
         seen.add(relative)
-        path = project_root / relative
-        if not _safe_context_path(project_root, path) or not path.is_file():
+        path = project_file(project_root, relative)
+        root = _project_data_root(project_root) if Path(relative).parts[:1] == (".fstar",) else project_root
+        if not _safe_context_path(root, path) or not path.is_file():
             continue
         found = _fingerprinted("spec", path, relative=relative)
         if found:

@@ -79,6 +79,10 @@ def register_core_commands(subparsers) -> None:
     mode.add_argument("--archived", action="store_true")
     mode.add_argument("--all", action="store_true")
     listing.add_argument("--query")
+    locate = task_sub.add_parser("locate")
+    locate.add_argument("task", nargs="?", help="explicit task ref; beats every other lookup")
+    locate.add_argument("--branch", help="branch name to locate a task for")
+    locate.add_argument("--worktree", help="optional worktree path to disambiguate same-named branches")
     task_sub.add_parser("current")
 
     for name in ("start", "accept", "archive"):
@@ -87,6 +91,15 @@ def register_core_commands(subparsers) -> None:
         _add_confirmation(parser)
         if name == "accept":
             parser.add_argument("--rule", help="JSON file citing the user rule that delegates acceptance for this class of work")
+            parser.add_argument("--awaiting", action="store_true",
+                                help="move the task into awaiting_acceptance after a fresh final check (coordinator action, no user confirmation)")
+            parser.add_argument("--unified", action="store_true",
+                                help="unified cross-project acceptance: one user confirmation completes the master and every linked child task")
+            parser.add_argument("--rework", action="store_true",
+                                help="user reports a problem during awaiting_acceptance; the task returns to planning for rework")
+            parser.add_argument("--recheck", action="store_true",
+                                help="the final check behind awaiting_acceptance went stale; send the task back for a fresh check")
+            parser.add_argument("--reason", help="reason for the reported problem")
         if name == "archive":
             parser.add_argument("--operation-id")
             parser.add_argument("--workflow", action="store_true")
@@ -104,7 +117,7 @@ def register_core_commands(subparsers) -> None:
 
     continuation = subparsers.add_parser("continue")
     _add_target(continuation)
-    continuation.add_argument("--action", choices=("takeover", "replan", "reopen", "unblock"))
+    continuation.add_argument("--action", choices=("takeover", "replan", "reopen", "rework", "unblock"))
     continuation.add_argument("--reason")
     continuation.add_argument("--workflow", action="store_true")
     _add_confirmation(continuation)
@@ -221,15 +234,35 @@ def _dispatch(args):
             if args.all:
                 return {"active": service.list_tasks(query=args.query), "archived": service.list_tasks(archived=True, query=args.query)}
             return service.list_tasks(archived=args.archived, query=args.query)
+        if args.task_command == "locate":
+            if not (args.task or args.branch or args.session):
+                raise DomainError("task_required", "Locate needs a task ref, --branch, or --session", status=2)
+            return service.locate(ref=args.task, session_id=args.session,
+                                  branch=args.branch, worktree=args.worktree)
         return service.current(args.session)
     ref = _resolve_ref(args, store) if hasattr(args, "task") and args.command != "extension" else getattr(args, "task", None)
     if args.command == "start":
         confirmation = _confirmation(args, service, ref)
         return service.start(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, session_id=args.session)
     if args.command == "accept":
+        if getattr(args, "awaiting", False):
+            if getattr(args, "rework", False) or getattr(args, "unified", False) or getattr(args, "recheck", False):
+                raise DomainError("invalid_request", "--awaiting cannot be combined with --rework, --recheck, or --unified", status=2)
+            return service.enter_awaiting_acceptance(ref, actor=_actor(args))
+        if getattr(args, "recheck", False):
+            if getattr(args, "rework", False) or getattr(args, "unified", False):
+                raise DomainError("invalid_request", "--recheck cannot be combined with --rework or --unified", status=2)
+            return service.request_recheck(ref, actor=_actor(args), reason=args.reason)
+        if getattr(args, "rework", False):
+            confirmation = _confirmation(args, service, ref)
+            return service.report_problem(ref, actor=_confirmation_actor(args, confirmation),
+                                         confirmation=confirmation, reason=args.reason)
         confirmation = _confirmation(args, service, ref)
         rule = _json_file(args.rule, "acceptance rule") if args.rule else None
-        return service.accept(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, rule=rule)
+        actor = _confirmation_actor(args, confirmation)
+        if getattr(args, "unified", False):
+            return service.accept_unified(ref, actor=actor, confirmation=confirmation, rule=rule)
+        return service.accept(ref, actor=actor, confirmation=confirmation, rule=rule)
     if args.command == "archive":
         confirmation = _confirmation(args, service, ref)
         return service.archive(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, operation_id=args.operation_id, workflow=args.workflow)
@@ -239,7 +272,7 @@ def _dispatch(args):
     if args.command == "state":
         return service.state(ref)
     if args.command == "continue":
-        confirmation = _confirmation(args, service, ref) if args.action in {"replan", "reopen"} else None
+        confirmation = _confirmation(args, service, ref) if args.action in {"replan", "reopen", "rework"} else None
         if args.action == "unblock":
             return service.set_blocked(ref, actor=_actor(args), reason=None, workflow_recovery=args.workflow)
         return service.continue_task(ref, session_id=args.session, action=args.action, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, reason=args.reason, workflow=args.workflow)
@@ -304,7 +337,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--actor-role", choices=("user", "agent", "coordinator", "implement", "check"))
     subparsers = parser.add_subparsers(dest="command", required=True)
     register_core_commands(subparsers)
-    for module in ("project", "runtime", "dispatch", "installer"):
+    for module in ("project", "runtime", "dispatch", "installer", "crossproject"):
         _register_optional(subparsers, module)
     return parser
 
