@@ -1,0 +1,1208 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-20T06:27:30.281547Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "fd7ce636-7fbe-4041-b8a9-f9b85a345b92"
+    ],
+    "source": {
+      "actor": {
+        "id": "zyf3313",
+        "role": "user"
+      },
+      "at": "2026-11-20T06:27:30.261207Z",
+      "quote": "先验收本批，再开新任务（推荐）",
+      "reference": "本会话验收问答（用户选择“先验收本批，再开新任务”）",
+      "scope": "task",
+      "source_id": "03d288b9-c66c-4679-b5ae-21b10e05a440",
+      "type": "conversation",
+      "validates": "412b386725c10a2a35a23c5af34645c52573e56f6e1ed95345bba3c69bd9502c"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "6a8b94bc57fad401284144a8e855b87ba32f6f3d7663d07a32a84fc9d6dc682b"
+      ],
+      "task": "412b386725c10a2a35a23c5af34645c52573e56f6e1ed95345bba3c69bd9502c"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "feat/global-resource-management",
+  "capabilities": [],
+  "children": [],
+  "commit": "d351c5956640c235ee2c95bd6d6b5ab9fb1cbdbf",
+  "completedAt": "2026-11-20T06:27:30.281582Z",
+  "createdAt": "2026-11-20T03:55:06.918026Z",
+  "creator": "coordinator",
+  "description": "全局安装更新统一 skills/agents/hooks；SessionStart 只读检查旧项目并由 agent 询问迁移；保护项目任务规范与自定义设置；检测 Magpie 并按公开能力接入。",
+  "events": [
+    {
+      "at": "2026-11-20T03:55:06.918241Z",
+      "data": {
+        "parent": null
+      },
+      "id": "a581fa6b-2431-488e-9d51-97fa6aeec267",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent"
+        },
+        "at": "2026-11-20T03:55:06.918237Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "ed67d42d-d42b-4e7f-a03f-80d143261907",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-20T03:55:06.979834Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-20T03:55:06.978665Z",
+          "excluded": [],
+          "id": "planning-review",
+          "included": [
+            "clarify",
+            "design",
+            "doc-check",
+            "editor",
+            "plan",
+            "prd"
+          ],
+          "reason": "用户确认按完整流程实施全局管理与可选集成",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user"
+            },
+            "at": "2026-11-20T03:55:06.978612Z",
+            "quote": "好 没问题 ，然后再加个安装初始化相关的因为现在有好多用户都有magpie这个app 在安装的时候能不能写个脚本做个将 skills还有hooks还有agets工作流里面的都集成到 magpie里面 如果发现用户没有magpie这个app就不用做了",
+            "reference": "本会话用户确认全局管理方案并追加 Magpie 集成",
+            "scope": "global-resource-management",
+            "source_id": "5f3805fb-e4f3-4cc5-ab00-c01540cd8699",
+            "type": "conversation",
+            "validates": "b58c4f31de5577b75e789deea9dba14b704561215e638f1b0f9dcf7fbf48765f"
+          }
+        },
+        "old": null
+      },
+      "id": "d6615297-748d-438b-a65f-e6eb7542690d",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T03:55:06.978612Z",
+        "quote": "好 没问题 ，然后再加个安装初始化相关的因为现在有好多用户都有magpie这个app 在安装的时候能不能写个脚本做个将 skills还有hooks还有agets工作流里面的都集成到 magpie里面 如果发现用户没有magpie这个app就不用做了",
+        "reference": "本会话用户确认全局管理方案并追加 Magpie 集成",
+        "scope": "global-resource-management",
+        "source_id": "5f3805fb-e4f3-4cc5-ab00-c01540cd8699",
+        "type": "conversation",
+        "validates": "b58c4f31de5577b75e789deea9dba14b704561215e638f1b0f9dcf7fbf48765f"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-20T03:55:06.982658Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-20T03:55:06.981521Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "archive",
+            "events",
+            "evidence",
+            "lease",
+            "recovery",
+            "task"
+          ],
+          "reason": "用户确认按完整流程实施全局管理与可选集成",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user"
+            },
+            "at": "2026-11-20T03:55:06.981502Z",
+            "quote": "好 没问题 ，然后再加个安装初始化相关的因为现在有好多用户都有magpie这个app 在安装的时候能不能写个脚本做个将 skills还有hooks还有agets工作流里面的都集成到 magpie里面 如果发现用户没有magpie这个app就不用做了",
+            "reference": "本会话用户确认全局管理方案并追加 Magpie 集成",
+            "scope": "global-resource-management",
+            "source_id": "61e8a1dd-c27f-4996-8a5a-52b5afa1d968",
+            "type": "conversation",
+            "validates": "b58c4f31de5577b75e789deea9dba14b704561215e638f1b0f9dcf7fbf48765f"
+          }
+        },
+        "old": null
+      },
+      "id": "a8c8c1e9-335e-4d28-a7ef-f4239cc2a08b",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T03:55:06.981502Z",
+        "quote": "好 没问题 ，然后再加个安装初始化相关的因为现在有好多用户都有magpie这个app 在安装的时候能不能写个脚本做个将 skills还有hooks还有agets工作流里面的都集成到 magpie里面 如果发现用户没有magpie这个app就不用做了",
+        "reference": "本会话用户确认全局管理方案并追加 Magpie 集成",
+        "scope": "global-resource-management",
+        "source_id": "61e8a1dd-c27f-4996-8a5a-52b5afa1d968",
+        "type": "conversation",
+        "validates": "b58c4f31de5577b75e789deea9dba14b704561215e638f1b0f9dcf7fbf48765f"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-20T04:13:39.405228Z",
+      "data": {
+        "branch": "feat/global-resource-management",
+        "detached": false,
+        "snapshot": "2bdb5d9a5160aa14e130e4b24d53daf800fa97a2899c6f2502a5f4b278dcf3ed",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "d2c86f6b-c3ce-40ba-870a-8f153183116b",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T04:13:39.351502Z",
+        "quote": "好 没问题 ，然后再加个安装初始化相关的因为现在有好多用户都有magpie这个app 在安装的时候能不能写个脚本做个将 skills还有hooks还有agets工作流里面的都集成到 magpie里面 如果发现用户没有magpie这个app就不用做了",
+        "reference": "用户确认全局管理方案并追加 Magpie 安装集成",
+        "scope": "global-resource-management",
+        "source_id": "4ce08d2f-f69c-4567-8007-f73d038c1164",
+        "type": "conversation",
+        "validates": "219fbe4daf73dff369794e9e2c08a5ea5ff8eb59109f1ea4490b4fe83202a703"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-20T04:13:39.423391Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "9df82bf3-dc67-4fe3-9686-4583406d374d",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T04:13:39.423388Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "d92c549b-cff3-4dc6-9ea8-66b06ee3705d",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-20T04:13:39.425574Z",
+      "data": {
+        "dispatch_id": "impl-global-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "implement"
+      },
+      "id": "382725e0-5cfb-465c-86e1-1c4950849c5a",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T04:13:39.425566Z",
+        "quote": "",
+        "reference": "dispatch impl-global-1",
+        "scope": "dispatch",
+        "source_id": "8efeb9a5-24b7-4ff3-90c8-62e7c2e86d44",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T04:59:37.083231Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "b7cd551a-0112-4987-a7ca-730f4585e820",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T04:59:37.083228Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "c703ba7f-c148-4f05-acbc-06bfa3401143",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-20T04:59:37.086213Z",
+      "data": {
+        "dispatch_id": "impl-global-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "implement"
+      },
+      "id": "d15efa6e-cb60-4999-9486-2099611dc703",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T04:59:37.086207Z",
+        "quote": "",
+        "reference": "dispatch impl-global-1",
+        "scope": "dispatch",
+        "source_id": "2eb778b4-0388-4535-b97f-49fba64bc0b4",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T04:59:37.110180Z",
+      "data": {
+        "evidence_id": "2ce087cb-f0d1-441d-adf8-75e3e5f5a706",
+        "state": "valid"
+      },
+      "id": "35c50a79-fc8e-45d0-87de-9c71f7fb7369",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T04:59:50.087368Z",
+      "data": {
+        "dispatch_id": "check-global-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "e9eca189-7c80-40cf-b992-2037a4465a9f",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T04:59:50.087363Z",
+        "quote": "",
+        "reference": "dispatch check-global-1",
+        "scope": "dispatch",
+        "source_id": "7cfdcdfb-bc74-45a0-aadb-c25db8aabf2b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T05:51:32.193704Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "f999b8e3-1067-465e-8891-29532e7ad617",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T05:51:32.193701Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "ddf0119c-3126-4fe7-bbed-f6f6f455faab",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-20T05:51:32.196767Z",
+      "data": {
+        "dispatch_id": "check-global-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "6da2148a-8682-4e92-80f8-57d3921c647b",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T05:51:32.196762Z",
+        "quote": "",
+        "reference": "dispatch check-global-1",
+        "scope": "dispatch",
+        "source_id": "4713d722-f14e-47de-9c15-7c6d9ae241d8",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T05:51:58.618414Z",
+      "data": {
+        "dispatch_id": "check-global-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "1f2bb5ec-cd83-4b76-8fb8-e1408b696520",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T05:51:58.618410Z",
+        "quote": "",
+        "reference": "dispatch check-global-1",
+        "scope": "dispatch",
+        "source_id": "6a527b85-e5e2-4973-8bac-e59842bcf335",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T05:52:23.234577Z",
+      "data": {
+        "dispatch_id": "check-global-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "31676c5f-b7b4-4741-9682-0541cd3bef3e",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T05:52:23.234572Z",
+        "quote": "",
+        "reference": "dispatch check-global-1",
+        "scope": "dispatch",
+        "source_id": "9ec05f99-9c71-48ad-93dd-951c27f59889",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T05:52:23.254691Z",
+      "data": {
+        "evidence_id": "fd7ce636-7fbe-4041-b8a9-f9b85a345b92",
+        "state": "valid"
+      },
+      "id": "c233ebaa-9432-4e65-9bc2-eb4d04bba8c8",
+      "source": {
+        "id": "check-global-1-worker",
+        "role": "check",
+        "session_id": "check-global-1-worker"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T05:53:16.260927Z",
+      "data": {
+        "reason": "enter awaiting_acceptance after final check"
+      },
+      "id": "369566d3-bf3f-414a-933b-774b707bf80c",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-20T05:53:16.280026Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "fd7ce636-7fbe-4041-b8a9-f9b85a345b92"
+        ]
+      },
+      "id": "fe48aa9e-7a4c-4350-9aa7-051cdc693670",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-20T05:53:16.280013Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "e5f88999-b534-4fce-b014-4aaa607c0a76",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-20T06:27:30.281585Z",
+      "data": {
+        "evidence_refs": [
+          "fd7ce636-7fbe-4041-b8a9-f9b85a345b92"
+        ]
+      },
+      "id": "0c770357-c8be-466b-8a4b-d6c1cd51c25a",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T06:27:30.261207Z",
+        "quote": "先验收本批，再开新任务（推荐）",
+        "reference": "本会话验收问答（用户选择“先验收本批，再开新任务”）",
+        "scope": "task",
+        "source_id": "03d288b9-c66c-4679-b5ae-21b10e05a440",
+        "type": "conversation",
+        "validates": "412b386725c10a2a35a23c5af34645c52573e56f6e1ed95345bba3c69bd9502c"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "ea2864819cecdeebfe2c6b02dcefbc96a83db4b27fc40d6a97243032b6aebf39",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "3782ce3326878c4fd65e0f9cc22f4d21bc5586372499f13d8447807c04d80e66"
+          },
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "384f8b5bb28104c6d7e4531a12001c2f840e969bcd948b5c439ea652e0f28300"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "c4d46069383031f30662b4f42e583f54e0af639e3d31221289fb70e28cc36763"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "823171e6ccb614ea5ec9c201cea4de622bda5467faab4038e63366aefbf52b18"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-help/SKILL.md",
+            "sha256": "577661bee375bed92ce09affed46395601a265b1fca38b14b27435b187e3b149"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-init/SKILL.md",
+            "sha256": "7af1c0e06dc98701d84e731706c32eb9316d750230059536feef5a526cfbb2ff"
+          },
+          {
+            "exists": true,
+            "path": "scripts/integrate-magpie.cjs",
+            "sha256": "5dbf0268000acb3ec24bde42e3a8c7fa0ca744dd773cdbf5f54f3b7c682911fe"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "bbd6ef71900a2322429413432f8747454caf0715b7b52fe83ed04b01ae91c986"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/global_resources.py",
+            "sha256": "dcb35876f2d0468322efef0f6cad30d52a376a71dcbc0953015ed9f09bfe81c6"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "3c7570d470086a2dd28642fb881efd721f3fd3f7c7842dab7c44b571cb2ba142"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/magpie.py",
+            "sha256": "5133b5302ca6189285349e71d811c60c503f3937e3c5a806305244a0c6a804d8"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "a814b82c4d366e302b00960c3160705683538291d019ff37b2d25ea60c597467"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_global_resources.py",
+            "sha256": "b828e9f72c43c3c19d82c6b2640bb4e94af890ee4df1890d60f09c65aba1e209"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "b659cbbc7a9126bb2ca7c8994653274ff02386fcabb6f6898d1ecb6e3627afa2"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_magpie.py",
+            "sha256": "58018c6c0c57c0f6f455e22976c219d9b1849b1c8289c852ac3eebc4092e108f"
+          }
+        ]
+      },
+      "dispatch_id": "impl-global-1",
+      "id": "2ce087cb-f0d1-441d-adf8-75e3e5f5a706",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/global-resource-management/plan.md",
+          "sha256": "fd23a02e11b42a6884a7e0c800ae8aae1d1c0947c1451f0436a4a67d80538364"
+        },
+        {
+          "path": ".fstar/tasks/global-resource-management/clarify.md",
+          "sha256": "a8aa0ab93f340805fedb573e842b6bea56e65a39544b982de524db00ec81ab5b"
+        },
+        {
+          "path": ".fstar/tasks/global-resource-management/doc/prd.md",
+          "sha256": "d71b4218c92d972535b7d7c29a6ea3483bbb197550875779b59987b7bc8f6e89"
+        },
+        {
+          "path": ".fstar/tasks/global-resource-management/doc/design.md",
+          "sha256": "251b7cd92abe23f5b1b068dba79e9d89a908336d21d55adf7ba17723b65f3d0d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/frontend/hook-guidelines.md",
+          "sha256": "49801cb1eb7c779e9b01cdeabcd47dd0bc12be018405fc248646cf8a829aaf6c"
+        },
+        {
+          "path": ".fstar/specs/frontend/directory-structure.md",
+          "sha256": "731713ac66d21f383bb49fb19d30888aa8db9e50acb5c77329fa4b98546cd7bc"
+        },
+        {
+          "path": ".fstar/specs/frontend/component-guidelines.md",
+          "sha256": "7ca6ea4f9305a8267b7570505f9ebf6030bb5911cbe3f2a135cfb7ebd402805b"
+        },
+        {
+          "path": ".fstar/specs/frontend/state-management.md",
+          "sha256": "a007d40daba4db27f1fcfad8d6192d5de2cd385f4bbbd0161a39a3e4c0dd6c1b"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/frontend/quality-guidelines.md",
+          "sha256": "ac5a4da858d93492cbb4c721b164850b625f38696905e463e8feb5968eae78bc"
+        },
+        {
+          "path": ".fstar/specs/frontend/type-safety.md",
+          "sha256": "1ced8d3ea4f5e6e63599a5a606db52fa86b3973046db57d550ed2964a8d4c40f"
+        },
+        {
+          "path": ".fstar/specs/backend/database-guidelines.md",
+          "sha256": "fa04a37014f16acc116e095d97ab02937cc06a0e120c4b96c3b5702f38fb06cb"
+        },
+        {
+          "path": ".fstar/specs/backend/directory-structure.md",
+          "sha256": "57edf3199e6baca66a782280a52083ef5d8b65ab3c6b436d7efd92410a3f94cc"
+        },
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/backend/logging-guidelines.md",
+          "sha256": "03a0398c3480af11a5cecf68c025d505b0090f38ede899b78bd85d6ff97752c4"
+        },
+        {
+          "path": ".fstar/specs/backend/error-handling.md",
+          "sha256": "f6b4145a8fcdfd8f0006bec6dd9c9b4a7fa69a7bd5f6e0c851dee5db39ea7273"
+        },
+        {
+          "path": ".fstar/specs/backend/quality-guidelines.md",
+          "sha256": "262fa49d9c4bd29b8490edd0c11ddb8f7e23fd2eb4418c8a388e176aab550357"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        },
+        {
+          "path": ".fstar/specs/guides/code-reuse-thinking-guide.md",
+          "sha256": "86fd10dc10916c00309714aa2275234f01b0ad40d21a485d43b3422e7ca79397"
+        },
+        {
+          "path": ".fstar/specs/guides/cross-layer-thinking-guide.md",
+          "sha256": "4c54130c02a7b8bc43f9a012e0837f798f43e2d137d6bc6d7498d2adb0bac3f4"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-20T04:59:37.104852Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "state": "valid",
+      "unverified_inputs": [],
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/global-resource-management/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "f60be3fa0f197ffb98b20f5529e8878d9891942f728984fc6603adbcea8e5d52"
+            },
+            {
+              "id": "R-002",
+              "sha256": "e9e59f4577f1095dc0d774fc660a3196f42c2fea36d660b84ffd6b00b6cd03cb"
+            },
+            {
+              "id": "R-003",
+              "sha256": "613eafbc126ec2f8fedb98d97652d5236f17068bb46cedd8b79534aa194bac8b"
+            },
+            {
+              "id": "R-004",
+              "sha256": "7afa4791e4da2301f99b589eef05911d2067e34964e58322baa3f25407995551"
+            },
+            {
+              "id": "R-005",
+              "sha256": "0b5bac2c99021e8c7f7adf111aed9ab298636f7945aa31b7e45b2daf250f7d8b"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "f60be3fa0f197ffb98b20f5529e8878d9891942f728984fc6603adbcea8e5d52"
+            },
+            {
+              "id": "R-002",
+              "sha256": "e9e59f4577f1095dc0d774fc660a3196f42c2fea36d660b84ffd6b00b6cd03cb"
+            },
+            {
+              "id": "R-003",
+              "sha256": "613eafbc126ec2f8fedb98d97652d5236f17068bb46cedd8b79534aa194bac8b"
+            },
+            {
+              "id": "R-004",
+              "sha256": "7afa4791e4da2301f99b589eef05911d2067e34964e58322baa3f25407995551"
+            },
+            {
+              "id": "R-005",
+              "sha256": "0b5bac2c99021e8c7f7adf111aed9ab298636f7945aa31b7e45b2daf250f7d8b"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/global-resource-management/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "a8cf3dedd982fcd3b905cf6d52770ce7d162b333d7a717f5f44e0037778b8f40"
+            },
+            {
+              "id": "D-002",
+              "sha256": "e63f0f5700a84de9a9e05ccc94a70acbfe1f37b3a0e6c5e7271f30eed44b0558"
+            },
+            {
+              "id": "D-003",
+              "sha256": "fe7e6cf0bde40d134fa4f0fb50f3333e6ab96ca8aaef14c9b5fe6cfe3a4d613e"
+            },
+            {
+              "id": "D-004",
+              "sha256": "11ca5ba6821ff309df7a102957605931b1382181bc53a1a2240a2b3a8febe29e"
+            },
+            {
+              "id": "D-005",
+              "sha256": "0d502f2580f8123b7c7b1ac962881ae95990b40353bf609179feca04472d0773"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "a8cf3dedd982fcd3b905cf6d52770ce7d162b333d7a717f5f44e0037778b8f40"
+            },
+            {
+              "id": "D-002",
+              "sha256": "e63f0f5700a84de9a9e05ccc94a70acbfe1f37b3a0e6c5e7271f30eed44b0558"
+            },
+            {
+              "id": "D-003",
+              "sha256": "fe7e6cf0bde40d134fa4f0fb50f3333e6ab96ca8aaef14c9b5fe6cfe3a4d613e"
+            },
+            {
+              "id": "D-004",
+              "sha256": "11ca5ba6821ff309df7a102957605931b1382181bc53a1a2240a2b3a8febe29e"
+            },
+            {
+              "id": "D-005",
+              "sha256": "0d502f2580f8123b7c7b1ac962881ae95990b40353bf609179feca04472d0773"
+            }
+          ]
+        }
+      ],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 748 tests — OK (coordinator re-ran; implementer reported 747)"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "16 pass, 0 fail"
+        },
+        {
+          "command": "node scripts/build-package.cjs",
+          "result": "61 files, idempotent (identical sha256 on rebuild)"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "6a8b94bc57fad401284144a8e855b87ba32f6f3d7663d07a32a84fc9d6dc682b",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "88526430cdad3d66c488d7347ec7ac737c41bc5b82dfc4e08b61b8a4c07a9803"
+          },
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "384f8b5bb28104c6d7e4531a12001c2f840e969bcd948b5c439ea652e0f28300"
+          },
+          {
+            "exists": false,
+            "path": "resources/",
+            "sha256": null
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "049c75aa4420ad4ee6fb470ebf0e7567fadaef7556ce39df0206219df7622f89"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-help/SKILL.md",
+            "sha256": "bb32ae2021d391ff0e3bb27569e6e247662c9fc9a3130047aff1db635d87bc1e"
+          },
+          {
+            "exists": false,
+            "path": "scripts/",
+            "sha256": null
+          },
+          {
+            "exists": true,
+            "path": "scripts/integrate-magpie.cjs",
+            "sha256": "998999fccf2fdb767b55e8d3ed00c664d96c8e46fc0697ace3c37048dda8f06d"
+          },
+          {
+            "exists": false,
+            "path": "src/fstar/",
+            "sha256": null
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/global_resources.py",
+            "sha256": "ddb9068b2d09dfc2239cac5baed602ef6e9c7cc7c9ecf7be3d82a9be3a065b7f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "901bfa1ab5c0a16c914a10e2b6ae2d443f757ac2f26732f0a3a0a5c3c12196ff"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/magpie.py",
+            "sha256": "2b00cdaf61196a8fbb89e0f0ea3e55add7cb59a9dd17a1715c6cbfe452203056"
+          },
+          {
+            "exists": false,
+            "path": "tests/",
+            "sha256": null
+          },
+          {
+            "exists": true,
+            "path": "tests/test_global_resources.py",
+            "sha256": "220874427f0cb1dec0a98f8ff8968c2ef24f495f45bb56c8927f2ae8ba4fe085"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_magpie.py",
+            "sha256": "63dce40ae1071c940183681ede90a6f9f3e88e3afe6a5301d7d2ef64f63a93fb"
+          }
+        ]
+      },
+      "dispatch_id": "check-global-1",
+      "environment": "darwin; python3 stdlib; working tree; isolated temp roots; real magpie --help read-only",
+      "id": "fd7ce636-7fbe-4041-b8a9-f9b85a345b92",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/global-resource-management/plan.md",
+          "sha256": "fd23a02e11b42a6884a7e0c800ae8aae1d1c0947c1451f0436a4a67d80538364"
+        },
+        {
+          "path": ".fstar/tasks/global-resource-management/clarify.md",
+          "sha256": "a8aa0ab93f340805fedb573e842b6bea56e65a39544b982de524db00ec81ab5b"
+        },
+        {
+          "path": ".fstar/tasks/global-resource-management/doc/prd.md",
+          "sha256": "d71b4218c92d972535b7d7c29a6ea3483bbb197550875779b59987b7bc8f6e89"
+        },
+        {
+          "path": ".fstar/tasks/global-resource-management/doc/design.md",
+          "sha256": "251b7cd92abe23f5b1b068dba79e9d89a908336d21d55adf7ba17723b65f3d0d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "items": [
+        {
+          "command": "probes + full suite",
+          "detail": "global default; consent-gated migration with ownership/fingerprint/backup/restore; crash recovery + doctor diagnostic; repeat no-op",
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-001",
+            "R-002",
+            "D-001",
+            "D-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "probes + full suite",
+          "detail": "zero-write inspect; delivery!=consent; deferral per project+version; exactly-one concurrent offer",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "R-003",
+            "D-003"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "probes + full suite",
+          "detail": "public hand-over only; no private writes; no competing copy; uninstall preserves Magpie content",
+          "plan_item": "P-003",
+          "requirement_ids": [
+            "R-004",
+            "D-004"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "probes + full suite + doc review",
+          "detail": "README/routing accurate; version consistent; no weakened assertions",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "R-005",
+            "D-005"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-20T05:52:23.251063Z",
+      "producer": {
+        "id": "check-global-1-worker",
+        "role": "check",
+        "session_id": "check-global-1-worker"
+      },
+      "run_id": "check-global-1",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/global-resource-management/doc/prd.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "f60be3fa0f197ffb98b20f5529e8878d9891942f728984fc6603adbcea8e5d52"
+            },
+            {
+              "id": "R-002",
+              "sha256": "e9e59f4577f1095dc0d774fc660a3196f42c2fea36d660b84ffd6b00b6cd03cb"
+            },
+            {
+              "id": "R-003",
+              "sha256": "613eafbc126ec2f8fedb98d97652d5236f17068bb46cedd8b79534aa194bac8b"
+            },
+            {
+              "id": "R-004",
+              "sha256": "7afa4791e4da2301f99b589eef05911d2067e34964e58322baa3f25407995551"
+            },
+            {
+              "id": "R-005",
+              "sha256": "0b5bac2c99021e8c7f7adf111aed9ab298636f7945aa31b7e45b2daf250f7d8b"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/global-resource-management/doc/design.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "a8cf3dedd982fcd3b905cf6d52770ce7d162b333d7a717f5f44e0037778b8f40"
+            },
+            {
+              "id": "D-002",
+              "sha256": "e63f0f5700a84de9a9e05ccc94a70acbfe1f37b3a0e6c5e7271f30eed44b0558"
+            },
+            {
+              "id": "D-003",
+              "sha256": "fe7e6cf0bde40d134fa4f0fb50f3333e6ab96ca8aaef14c9b5fe6cfe3a4d613e"
+            },
+            {
+              "id": "D-004",
+              "sha256": "11ca5ba6821ff309df7a102957605931b1382181bc53a1a2240a2b3a8febe29e"
+            },
+            {
+              "id": "D-005",
+              "sha256": "0d502f2580f8123b7c7b1ac962881ae95990b40353bf609179feca04472d0773"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-20T03:55:06.978665Z",
+      "excluded": [],
+      "id": "planning-review",
+      "included": [
+        "clarify",
+        "design",
+        "doc-check",
+        "editor",
+        "plan",
+        "prd"
+      ],
+      "reason": "用户确认按完整流程实施全局管理与可选集成",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T03:55:06.978612Z",
+        "quote": "好 没问题 ，然后再加个安装初始化相关的因为现在有好多用户都有magpie这个app 在安装的时候能不能写个脚本做个将 skills还有hooks还有agets工作流里面的都集成到 magpie里面 如果发现用户没有magpie这个app就不用做了",
+        "reference": "本会话用户确认全局管理方案并追加 Magpie 集成",
+        "scope": "global-resource-management",
+        "source_id": "5f3805fb-e4f3-4cc5-ab00-c01540cd8699",
+        "type": "conversation",
+        "validates": "b58c4f31de5577b75e789deea9dba14b704561215e638f1b0f9dcf7fbf48765f"
+      }
+    },
+    {
+      "enabled_at": "2026-11-20T03:55:06.981521Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "archive",
+        "events",
+        "evidence",
+        "lease",
+        "recovery",
+        "task"
+      ],
+      "reason": "用户确认按完整流程实施全局管理与可选集成",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T03:55:06.981502Z",
+        "quote": "好 没问题 ，然后再加个安装初始化相关的因为现在有好多用户都有magpie这个app 在安装的时候能不能写个脚本做个将 skills还有hooks还有agets工作流里面的都集成到 magpie里面 如果发现用户没有magpie这个app就不用做了",
+        "reference": "本会话用户确认全局管理方案并追加 Magpie 集成",
+        "scope": "global-resource-management",
+        "source_id": "61e8a1dd-c27f-4996-8a5a-52b5afa1d968",
+        "type": "conversation",
+        "validates": "b58c4f31de5577b75e789deea9dba14b704561215e638f1b0f9dcf7fbf48765f"
+      }
+    }
+  ],
+  "id": "75378306-1a9e-4dd2-a97a-453eb1f44753",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/global-resource-management/doc/design.md": {
+          "D-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-001:end -->",
+            "start_marker": "<!-- fstar:item:D-001:start -->"
+          },
+          "D-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-002:end -->",
+            "start_marker": "<!-- fstar:item:D-002:start -->"
+          },
+          "D-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-003:end -->",
+            "start_marker": "<!-- fstar:item:D-003:start -->"
+          },
+          "D-004": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-004:end -->",
+            "start_marker": "<!-- fstar:item:D-004:start -->"
+          },
+          "D-005": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-005:end -->",
+            "start_marker": "<!-- fstar:item:D-005:start -->"
+          }
+        },
+        ".fstar/tasks/global-resource-management/doc/prd.md": {
+          "R-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-001:end -->",
+            "start_marker": "<!-- fstar:item:R-001:start -->"
+          },
+          "R-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-002:end -->",
+            "start_marker": "<!-- fstar:item:R-002:start -->"
+          },
+          "R-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-003:end -->",
+            "start_marker": "<!-- fstar:item:R-003:start -->"
+          },
+          "R-004": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-004:end -->",
+            "start_marker": "<!-- fstar:item:R-004:start -->"
+          },
+          "R-005": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-005:end -->",
+            "start_marker": "<!-- fstar:item:R-005:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "46ee64e47bd99853071d0d0f030483260055f4fbb5d850b1199c5e7442fc4d4d",
+      "artifact_map_source": {
+        "reference": "Editor delivery validated with content extraction; independent document consistency review pending",
+        "source_id": "docs-global-1",
+        "type": "system"
+      },
+      "dispatch_harvested": [
+        "check-global-1",
+        "impl-global-1"
+      ]
+    }
+  },
+  "name": "global-resource-management",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "全局资源管理、旧项目会话迁移与 Magpie 可选集成",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}
