@@ -95,7 +95,7 @@
       "source": "src/fstar/installer.py",
       "destination": "src/fstar/installer.py",
       "kind": "python",
-      "sha256": "9f6dd356605f54bc28efd1ac2bb4282e7c4084a1ea652d2973f2fbb1427f57da"
+      "sha256": "e39806c18b70ccb3e5fce986201de158aab4f26f8ffdc2afae9df289df858d60"
     },
     {
       "source": "src/fstar/knowledge.py",
@@ -125,7 +125,7 @@
       "source": "src/fstar/project.py",
       "destination": "src/fstar/project.py",
       "kind": "python",
-      "sha256": "d6f18bcd814ca65297066084b55a2c7a050d39879a3ae2e7f6d9a82a85a28cd4"
+      "sha256": "b534caba13f602126c53a0e3ced589c11fbf6919742afaeb00734a5e4ffa65a4"
     },
     {
       "source": "src/fstar/runtime/__init__.py",
@@ -161,7 +161,7 @@
       "source": "src/fstar/store.py",
       "destination": "src/fstar/store.py",
       "kind": "python",
-      "sha256": "40e77e9bd6d9322ba77a2abe77fced5564851af120519165b51cc65a0a3b9c31"
+      "sha256": "dbcb4a4390af53da9608274abc681b7b7b763a302fab798263b93db4fa5090f9"
     },
     {
       "source": "src/fstar/tasks.py",

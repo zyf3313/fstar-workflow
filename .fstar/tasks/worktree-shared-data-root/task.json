@@ -1,0 +1,1319 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-20T13:44:39.855627Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "263e4b26-696c-45eb-9560-87bfa3d6869d"
+    ],
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user"
+      },
+      "at": "2026-11-20T00:00:00Z",
+      "quote": "需要动代码吗 如果不需要 合并到main分支 任务归档吧",
+      "reference": "会话用户验收：代码无需改动，确认合并与归档",
+      "scope": "worktree-shared-data-root",
+      "source_id": "8ad2dcad-2957-4827-b9c8-16c886dd347f",
+      "type": "conversation",
+      "validates": "8256698dfe8bccd8b7819dc4bbcfda59022597b28e18430e12bfeeb1f9cfd13e"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "73c756e599aa55c0e88210c158dd4f10eefa2f3471694979309c2921c995c7b5"
+      ],
+      "task": "8256698dfe8bccd8b7819dc4bbcfda59022597b28e18430e12bfeeb1f9cfd13e"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "feat/host-abstraction-magpie-router",
+  "capabilities": [],
+  "children": [],
+  "commit": "3215114d33c96474a32863fb3aa868ce32c773e8",
+  "completedAt": "2026-11-20T13:44:39.855849Z",
+  "createdAt": "2026-11-20T07:54:45.715215Z",
+  "creator": "coordinator",
+  "description": "解决 git worktree 新开工作树不携带 .fstar 规范/索引/身份的问题：项目采用 project-local 存储模式（.fstar 被 git 忽略）时，新 worktree 无任何 fstar 数据。方案方向：find_project_root/store 在检测到 linked worktree 时沿 git commondir 回溯主工作树的数据根，规范/索引/身份共享一份；任务数据可选共享或各 worktree 独立。改动集中在 store.py 数据根解析与 project.py 既有 worktree 指针处理。",
+  "events": [
+    {
+      "at": "2026-11-20T07:54:45.715433Z",
+      "data": {
+        "parent": null
+      },
+      "id": "ce6f5d1e-c7c6-40e4-a224-aff88fb8b990",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-20T07:54:45.715429Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "dc17e822-9c81-4e67-87f1-4eb94c6d6483",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-20T11:36:25.975221Z",
+      "data": {
+        "branch": "feat/host-abstraction-magpie-router",
+        "detached": false,
+        "snapshot": "7f8e66f7257765323382baa85e7c747296f4a2e8856b0d11011dbcbb71629490",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "f498dce5-decb-44fb-b381-7c4ecced6340",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "你当前任务你check过了就行 到已完成吧 然后开始下一个任务 对了 定个规范验收完成的任务主动合到 main 分支 然后在基于main分支拉一个新的任务开展任务开发",
+        "reference": "会话用户指令：完成上一任务后开始下一个任务",
+        "scope": "worktree-shared-data-root",
+        "source_id": "a10081a2-6365-411e-9ef9-0c535f6a376c",
+        "type": "conversation",
+        "validates": "39fdc580d41a19ccff97d439855a78751f1619d7a0b5f1ed98f398b0cec131eb"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-20T11:36:51.708466Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "fd43ce9f-a1a4-4c5d-8f91-a0524cdff43a",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T11:36:51.708462Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "1df26f7b-595e-40c4-b9c4-f7bf2726130c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-20T11:36:51.711390Z",
+      "data": {
+        "dispatch_id": "worktree-impl-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003"
+        ],
+        "role": "implement"
+      },
+      "id": "88602aa3-0118-4de7-a7bc-cb7b75343f11",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T11:36:51.711382Z",
+        "quote": "",
+        "reference": "dispatch worktree-impl-1",
+        "scope": "dispatch",
+        "source_id": "4e29452a-938e-46f6-b21c-fbfe93117898",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T12:35:52.722881Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "117d03d5-3382-452f-b950-550c77d4ee1c",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T12:35:52.722878Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "473d262a-211f-4873-bc44-b1d270a4eced",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-20T12:35:52.730936Z",
+      "data": {
+        "dispatch_id": "worktree-impl-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003"
+        ],
+        "role": "implement"
+      },
+      "id": "9bade207-24a0-4986-837c-2376ac53ab5b",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T12:35:52.730922Z",
+        "quote": "",
+        "reference": "dispatch worktree-impl-1",
+        "scope": "dispatch",
+        "source_id": "c0de8575-e4b5-44d3-814e-f844b9456a32",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T12:36:35.670807Z",
+      "data": {
+        "evidence_id": "862aa2cd-dde3-497a-b081-eddf7a803881",
+        "state": "stale"
+      },
+      "id": "95e60f9c-e868-4031-be2e-55cd1b0b86f4",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T12:37:34.736663Z",
+      "data": {
+        "dispatch_id": "worktree-check-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003"
+        ],
+        "role": "check"
+      },
+      "id": "37b1823e-3440-4dff-850f-f4f2ce30c3d2",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T12:37:34.736658Z",
+        "quote": "",
+        "reference": "dispatch worktree-check-1",
+        "scope": "dispatch",
+        "source_id": "48541ec3-ee07-4459-87d8-038491b31091",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T12:54:50.445634Z",
+      "data": {
+        "expires_at": "2026-11-20T13:24:50.445623Z"
+      },
+      "id": "f185a511-0047-4f3d-8232-40150dcd340a",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T12:56:31.734961Z",
+      "data": {
+        "expires_at": "2026-11-20T13:26:31.734953Z"
+      },
+      "id": "78f69bf7-0b40-408a-a51e-5f2c646a3964",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T12:56:59.829490Z",
+      "data": {
+        "expires_at": "2026-11-20T13:26:59.829480Z"
+      },
+      "id": "e1dfccef-a8a4-4848-9f8b-d4ca162f4f70",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T12:59:45.765791Z",
+      "data": {
+        "reason": "Coordinator releasing to renormalize artifact map keys before final check harvest"
+      },
+      "id": "76106ca8-1aab-4b3f-87b3-e33a3f81821c",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-20T13:00:29.586724Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": "Expired lease; same coordinator harvesting valid final check"
+      },
+      "id": "9ab5ccdc-8e57-475e-99ce-0a248c4b326e",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T13:00:29.586721Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "e23b9e6c-fdd1-436a-b818-500fb2b2a68c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-20T13:00:29.604883Z",
+      "data": {
+        "evidence_id": "eff091cc-4647-4b8d-86c0-4e58e7e866b0",
+        "state": "valid"
+      },
+      "id": "83032a9c-4dfc-4d98-a60e-47572796c039",
+      "source": {
+        "id": "worktree-check-1-agent",
+        "role": "check",
+        "session_id": "worktree-check-1"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T13:00:41.607262Z",
+      "data": {
+        "reason": "Final independent check worktree-check-1 valid; handing off to user acceptance"
+      },
+      "id": "7def621d-3e79-4842-a0e3-8c7c4c89bfd5",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-20T13:00:41.696982Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "eff091cc-4647-4b8d-86c0-4e58e7e866b0"
+        ]
+      },
+      "id": "95ee8dde-0e64-4d9e-b5fc-fab41361e131",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T13:00:41.696822Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "507a353a-18ff-460d-8889-b8e2fd9729b9",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-20T13:35:06.328303Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-20T13:35:06.325713Z",
+          "excluded": [],
+          "id": "planning-review",
+          "included": [
+            "clarify",
+            "design",
+            "doc-check",
+            "editor",
+            "plan",
+            "prd"
+          ],
+          "reason": "文档同步需要 editor",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user"
+            },
+            "at": "2026-11-20T00:00:00Z",
+            "quote": "文档同步（推荐）",
+            "reference": "会话选择：文档同步处理 doctor 接线位置偏差",
+            "scope": "worktree-shared-data-root",
+            "source_id": "32c885ed-78d8-43a3-85a2-9228c99eeb49",
+            "type": "conversation",
+            "validates": "03fb2b66d6b9426c3b88e9daeda53b4263a8a8a3875a0b7a48ba76b5af75e5e4"
+          }
+        },
+        "old": null
+      },
+      "id": "248deac9-bd5f-4b69-bf97-7a103d8be2c1",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "文档同步（推荐）",
+        "reference": "会话选择：文档同步处理 doctor 接线位置偏差",
+        "scope": "worktree-shared-data-root",
+        "source_id": "32c885ed-78d8-43a3-85a2-9228c99eeb49",
+        "type": "conversation",
+        "validates": "03fb2b66d6b9426c3b88e9daeda53b4263a8a8a3875a0b7a48ba76b5af75e5e4"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-20T13:36:08.127578Z",
+      "data": {
+        "evidence_ids": [
+          "eff091cc-4647-4b8d-86c0-4e58e7e866b0"
+        ],
+        "file": ".fstar/tasks/worktree-shared-data-root/doc/design.md"
+      },
+      "id": "ead2bba9-50b8-4912-8e2c-a76d4c0015c5",
+      "source": {
+        "id": "fstar-hook-doc-change",
+        "role": "agent",
+        "type": "hook"
+      },
+      "type": "evidence_invalidated"
+    },
+    {
+      "at": "2026-11-20T13:37:24.317005Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "b46a12e7-6a84-4110-ba52-575de461ee18",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T13:37:24.317002Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "d68a62e0-122f-4d7e-88e3-f0d6537c2130",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-20T13:37:24.320660Z",
+      "data": {
+        "dispatch_id": "worktree-check-docs-1",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003"
+        ],
+        "role": "check"
+      },
+      "id": "420c44bb-61bf-432b-88f4-216194468312",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T13:37:24.320653Z",
+        "quote": "",
+        "reference": "dispatch worktree-check-docs-1",
+        "scope": "dispatch",
+        "source_id": "56ff0a00-ffe2-4a29-8ec2-9fba6d986923",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-20T13:40:17.413657Z",
+      "data": {
+        "expires_at": "2026-11-20T14:10:17.413645Z"
+      },
+      "id": "9a46d236-2af8-434f-9705-e92d1a16af79",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_renewed"
+    },
+    {
+      "at": "2026-11-20T13:40:17.435531Z",
+      "data": {
+        "evidence_id": "263e4b26-696c-45eb-9560-87bfa3d6869d",
+        "state": "valid"
+      },
+      "id": "8cd713a6-6210-4ee4-861f-f69a6d1a078d",
+      "source": {
+        "id": "worktree-check-docs-1-agent",
+        "role": "check",
+        "session_id": "worktree-check-docs-1"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-20T13:40:28.994674Z",
+      "data": {
+        "reason": "Doc-sync final check valid; handing off to user acceptance"
+      },
+      "id": "624b9573-9cc6-41a7-932d-0a185a7356f4",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-20T13:40:29.260281Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "263e4b26-696c-45eb-9560-87bfa3d6869d"
+        ]
+      },
+      "id": "176ab5e0-c2a0-44cf-86be-d4226d794d0d",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-20T13:40:29.260069Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "d2c362ee-3e39-492e-916c-52e151ac9469",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-20T13:44:39.855853Z",
+      "data": {
+        "evidence_refs": [
+          "263e4b26-696c-45eb-9560-87bfa3d6869d"
+        ]
+      },
+      "id": "cb5fe112-cc22-461f-bb07-7e82e1e8ca80",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "需要动代码吗 如果不需要 合并到main分支 任务归档吧",
+        "reference": "会话用户验收：代码无需改动，确认合并与归档",
+        "scope": "worktree-shared-data-root",
+        "source_id": "8ad2dcad-2957-4827-b9c8-16c886dd347f",
+        "type": "conversation",
+        "validates": "8256698dfe8bccd8b7819dc4bbcfda59022597b28e18430e12bfeeb1f9cfd13e"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "85f4f88bb74ec1889f9a59de6e4632393d966a8ffaff8b2ac39414a5865063f4",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "1d24e82f9cc6bcdc6656ec6157ec7010304ae83afdca3cea2a7fc0d6741123fa"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "882f09d2852f1b028ef4ca70a0d9dd9ad2df8683debeb70ac3409bac12d91cb0"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "e39806c18b70ccb3e5fce986201de158aab4f26f8ffdc2afae9df289df858d60"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/project.py",
+            "sha256": "b534caba13f602126c53a0e3ced589c11fbf6919742afaeb00734a5e4ffa65a4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "dbcb4a4390af53da9608274abc681b7b7b763a302fab798263b93db4fa5090f9"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_worktree_shared_root.py",
+            "sha256": "d4caf31f2760711a5ca31da713ae86985ac91aab1253503b0b66cf91ebbd68f4"
+          }
+        ]
+      },
+      "dispatch_id": "worktree-impl-1",
+      "id": "862aa2cd-dde3-497a-b081-eddf7a803881",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/doc/prd.md",
+          "sha256": "a958c8d2d590b016c42bdbcaa174824426cd442fcf8c2f9dff4b209f43a4566d"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/doc/design.md",
+          "sha256": "7a1ed45350acdc44c560c55596ca75a7e6b981c3d401eb9ad78bd887cba79314"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/plan.md",
+          "sha256": "5314762a999fa1565a598631684979c180355bd27f33eeca9d48ebba9ac42c68"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/clarify.md",
+          "sha256": "3a1bf117752c78424c83ae495914c6b510fbf9c312d520d8df05fe9fae471784"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": "resources/runtime/routing.md",
+          "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+        },
+        {
+          "path": "src/fstar/runtime/inject.py",
+          "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-20T12:36:35.667046Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "stale_reasons": [
+        {
+          "inputs": [
+            {
+              "field": "input_versions",
+              "path": "src/fstar/store.py",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "input_versions",
+              "path": "src/fstar/project.py",
+              "reason": "reported_worker_output"
+            }
+          ],
+          "type": "unverified_inputs"
+        }
+      ],
+      "state": "stale",
+      "unverified_inputs": [
+        {
+          "field": "input_versions",
+          "path": "src/fstar/store.py",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "input_versions",
+          "path": "src/fstar/project.py",
+          "reason": "reported_worker_output"
+        }
+      ],
+      "validates": [],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 806 tests in 107.761s — OK (788 pre-existing + 18 new; run twice: after source change and after assets regen)"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "16 pass, 0 fail (before and after package-assets regeneration)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_installer tests.test_magpie tests.test_global_resources tests.test_storage_modes tests.test_worktree_shared_root",
+          "result": "Ran 260 tests — OK (two-layer impact: host/magpie batch + storage-mode/Claude-path regressions)"
+        },
+        {
+          "command": "node scripts/build-package.cjs",
+          "result": "ok; 61 files, resource_version 8, cli_version 0.8.0; resources/package-assets.json regenerated (3 sha256 lines)"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "f60e4ee556c5c230af0b0644036274e7d1384a439fd36d6d2e7298c2c9cd2263",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/worktree-shared-data-root/check-report.md",
+            "sha256": "72b9ef8ce7d53bd2f4422f0f610de040e2f43e58a67ac5061fb683a8aa7687d8"
+          },
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "1d24e82f9cc6bcdc6656ec6157ec7010304ae83afdca3cea2a7fc0d6741123fa"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "882f09d2852f1b028ef4ca70a0d9dd9ad2df8683debeb70ac3409bac12d91cb0"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "e39806c18b70ccb3e5fce986201de158aab4f26f8ffdc2afae9df289df858d60"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/project.py",
+            "sha256": "b534caba13f602126c53a0e3ced589c11fbf6919742afaeb00734a5e4ffa65a4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "dbcb4a4390af53da9608274abc681b7b7b763a302fab798263b93db4fa5090f9"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_worktree_shared_root.py",
+            "sha256": "d4caf31f2760711a5ca31da713ae86985ac91aab1253503b0b66cf91ebbd68f4"
+          }
+        ]
+      },
+      "dispatch_id": "worktree-check-1",
+      "environment": {
+        "isolation": "temp git repos + git worktree add; GIT_CONFIG_GLOBAL/SYSTEM=devnull; no real host/Magpie writes",
+        "node": "node --test tests/test_package.cjs",
+        "os": "darwin",
+        "python": "python3 (806-test suite)"
+      },
+      "id": "eff091cc-4647-4b8d-86c0-4e58e7e866b0",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/doc/prd.md",
+          "sha256": "a958c8d2d590b016c42bdbcaa174824426cd442fcf8c2f9dff4b209f43a4566d"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/doc/design.md",
+          "sha256": "7a1ed45350acdc44c560c55596ca75a7e6b981c3d401eb9ad78bd887cba79314"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/plan.md",
+          "sha256": "5314762a999fa1565a598631684979c180355bd27f33eeca9d48ebba9ac42c68"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/clarify.md",
+          "sha256": "3a1bf117752c78424c83ae495914c6b510fbf9c312d520d8df05fe9fae471784"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": "resources/runtime/routing.md",
+          "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+        },
+        {
+          "path": "src/fstar/store.py",
+          "sha256": "dbcb4a4390af53da9608274abc681b7b7b763a302fab798263b93db4fa5090f9"
+        },
+        {
+          "path": "src/fstar/project.py",
+          "sha256": "b534caba13f602126c53a0e3ced589c11fbf6919742afaeb00734a5e4ffa65a4"
+        },
+        {
+          "path": "src/fstar/runtime/inject.py",
+          "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+        },
+        {
+          "path": "src/fstar/installer.py",
+          "sha256": "e39806c18b70ccb3e5fce986201de158aab4f26f8ffdc2afae9df289df858d60"
+        },
+        {
+          "path": "tests/test_worktree_shared_root.py",
+          "sha256": "d4caf31f2760711a5ca31da713ae86985ac91aab1253503b0b66cf91ebbd68f4"
+        },
+        {
+          "path": "README.md",
+          "sha256": "1d24e82f9cc6bcdc6656ec6157ec7010304ae83afdca3cea2a7fc0d6741123fa"
+        }
+      ],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_worktree_shared_root -v; isolated temp git worktree CLI runs",
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-001",
+            "D-001"
+          ],
+          "result": "passed",
+          "review_method": "store.py commondir backtrace + fallback + pointer semantics code review; independent CLI verification of sharing/identity/uninitialized-zero-write/corrupt-fallback"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m fstar doctor across 4 scenarios",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "R-002",
+            "D-002"
+          ],
+          "result": "passed",
+          "review_method": "project.py helpers + installer.py invoke_root wiring (approved deviation) + README; doctor worktree entry only when sharing active"
+        },
+        {
+          "command": "full suite; node tests; build-package diff; impact subset",
+          "plan_item": "P-003",
+          "requirement_ids": [
+            "R-003",
+            "D-003"
+          ],
+          "result": "passed",
+          "review_method": "three storage-mode regressions green; 301-test two-layer impact green; package-assets deterministic; README updated"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-20T13:00:29.600969Z",
+      "producer": {
+        "id": "worktree-check-1-agent",
+        "role": "check",
+        "session_id": "worktree-check-1"
+      },
+      "report": {
+        "path": ".fstar/tasks/worktree-shared-data-root/check-report.md",
+        "sha256": "72b9ef8ce7d53bd2f4422f0f610de040e2f43e58a67ac5061fb683a8aa7687d8"
+      },
+      "run_id": "worktree-check-1-run",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "artifact": ".fstar/tasks/worktree-shared-data-root/doc/design.md",
+          "item": "D-002",
+          "type": "item"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/doc/design.md",
+          "type": "input_file"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/plan.md",
+          "type": "input_file"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/worktree-shared-data-root/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "914cbdd5f9464a91d015add0914dcb47db8ede8b976c5cf6394bd3c376b0afb7"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9a376d3027e511088f9e741dce18bdbff36ab0c36395af42251c519597de01d5"
+            },
+            {
+              "id": "R-003",
+              "sha256": "5b56ad5e5f1b889a48e28bd7636a1a887f9ef3ffa524bbeac641f987b2a8325d"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "914cbdd5f9464a91d015add0914dcb47db8ede8b976c5cf6394bd3c376b0afb7"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9a376d3027e511088f9e741dce18bdbff36ab0c36395af42251c519597de01d5"
+            },
+            {
+              "id": "R-003",
+              "sha256": "5b56ad5e5f1b889a48e28bd7636a1a887f9ef3ffa524bbeac641f987b2a8325d"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/worktree-shared-data-root/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "70b6605cfa4ef2a02cce7d0133c9f157be31a0335d3737a83850533e4e205aac"
+            },
+            {
+              "id": "D-002",
+              "sha256": "46b0331504a875dc737cf5f16e66d437809aba758c7bc3e1c359c7fbe4b9eae8"
+            },
+            {
+              "id": "D-003",
+              "sha256": "839d8dec6e83021cfba6f2774e3928c8d95a17e7a6c091ec74d5c41ef4614dc8"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "70b6605cfa4ef2a02cce7d0133c9f157be31a0335d3737a83850533e4e205aac"
+            },
+            {
+              "id": "D-002",
+              "sha256": "46b0331504a875dc737cf5f16e66d437809aba758c7bc3e1c359c7fbe4b9eae8"
+            },
+            {
+              "id": "D-003",
+              "sha256": "839d8dec6e83021cfba6f2774e3928c8d95a17e7a6c091ec74d5c41ef4614dc8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "73c756e599aa55c0e88210c158dd4f10eefa2f3471694979309c2921c995c7b5",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/worktree-shared-data-root/check-report.md",
+            "sha256": "629f37248859a61fad5b341e53916e3224b6da3450bb2d1bf35b081c231123c3"
+          },
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "1d24e82f9cc6bcdc6656ec6157ec7010304ae83afdca3cea2a7fc0d6741123fa"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "882f09d2852f1b028ef4ca70a0d9dd9ad2df8683debeb70ac3409bac12d91cb0"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "e39806c18b70ccb3e5fce986201de158aab4f26f8ffdc2afae9df289df858d60"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/project.py",
+            "sha256": "b534caba13f602126c53a0e3ced589c11fbf6919742afaeb00734a5e4ffa65a4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "dbcb4a4390af53da9608274abc681b7b7b763a302fab798263b93db4fa5090f9"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_worktree_shared_root.py",
+            "sha256": "d4caf31f2760711a5ca31da713ae86985ac91aab1253503b0b66cf91ebbd68f4"
+          }
+        ]
+      },
+      "dispatch_id": "worktree-check-docs-1",
+      "environment": {
+        "isolation": "no real host/Magpie writes; no suite rerun (delivery unchanged)",
+        "os": "darwin",
+        "validation": "doc consistency recheck + byte-identical delivery hash gate reusing worktree-check-1 runtime evidence"
+      },
+      "id": "263e4b26-696c-45eb-9560-87bfa3d6869d",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/doc/prd.md",
+          "sha256": "a958c8d2d590b016c42bdbcaa174824426cd442fcf8c2f9dff4b209f43a4566d"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/doc/design.md",
+          "sha256": "2c618c3706312c69369f4e6f73b9f48ae65e3ac64beca5fd3f570c6417b19c42"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/plan.md",
+          "sha256": "e3da247ab24944885b5fd7e7e2dc21c666c4301e62d46c29c6334cb46c8960d1"
+        },
+        {
+          "path": ".fstar/tasks/worktree-shared-data-root/clarify.md",
+          "sha256": "3a1bf117752c78424c83ae495914c6b510fbf9c312d520d8df05fe9fae471784"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": "resources/runtime/routing.md",
+          "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+        },
+        {
+          "path": "src/fstar/store.py",
+          "sha256": "dbcb4a4390af53da9608274abc681b7b7b763a302fab798263b93db4fa5090f9"
+        },
+        {
+          "path": "src/fstar/project.py",
+          "sha256": "b534caba13f602126c53a0e3ced589c11fbf6919742afaeb00734a5e4ffa65a4"
+        },
+        {
+          "path": "src/fstar/installer.py",
+          "sha256": "e39806c18b70ccb3e5fce986201de158aab4f26f8ffdc2afae9df289df858d60"
+        },
+        {
+          "path": "src/fstar/runtime/inject.py",
+          "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+        },
+        {
+          "path": "tests/test_worktree_shared_root.py",
+          "sha256": "d4caf31f2760711a5ca31da713ae86985ac91aab1253503b0b66cf91ebbd68f4"
+        },
+        {
+          "path": "README.md",
+          "sha256": "1d24e82f9cc6bcdc6656ec6157ec7010304ae83afdca3cea2a7fc0d6741123fa"
+        }
+      ],
+      "items": [
+        {
+          "command": "sha256 comparison of store.py/tests vs check-1 baseline",
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-001",
+            "D-001"
+          ],
+          "result": "passed",
+          "review_method": "runtime delivery byte-identical; reused check-1 code review and temp-worktree verification"
+        },
+        {
+          "command": "read updated design D-002/§7 and plan P-002; hash-compare project.py/installer.py",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "R-002",
+            "D-002"
+          ],
+          "result": "passed",
+          "review_method": "docs now match delivered wiring; code unchanged so check-1 doctor scenarios still apply"
+        },
+        {
+          "command": "hash comparison of README/prd/specs vs baseline; read R-003",
+          "plan_item": "P-003",
+          "requirement_ids": [
+            "R-003",
+            "D-003"
+          ],
+          "result": "passed",
+          "review_method": "README/PRD unchanged and accurate; doc sync completes R-003 documentation; regression/impact evidence reused from check-1"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-20T13:40:17.431101Z",
+      "producer": {
+        "id": "worktree-check-docs-1-agent",
+        "role": "check",
+        "session_id": "worktree-check-docs-1"
+      },
+      "report": {
+        "path": ".fstar/tasks/worktree-shared-data-root/check-report.md",
+        "sha256": "629f37248859a61fad5b341e53916e3224b6da3450bb2d1bf35b081c231123c3"
+      },
+      "run_id": "worktree-check-docs-1-run",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/worktree-shared-data-root/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "914cbdd5f9464a91d015add0914dcb47db8ede8b976c5cf6394bd3c376b0afb7"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9a376d3027e511088f9e741dce18bdbff36ab0c36395af42251c519597de01d5"
+            },
+            {
+              "id": "R-003",
+              "sha256": "5b56ad5e5f1b889a48e28bd7636a1a887f9ef3ffa524bbeac641f987b2a8325d"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "914cbdd5f9464a91d015add0914dcb47db8ede8b976c5cf6394bd3c376b0afb7"
+            },
+            {
+              "id": "R-002",
+              "sha256": "9a376d3027e511088f9e741dce18bdbff36ab0c36395af42251c519597de01d5"
+            },
+            {
+              "id": "R-003",
+              "sha256": "5b56ad5e5f1b889a48e28bd7636a1a887f9ef3ffa524bbeac641f987b2a8325d"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/worktree-shared-data-root/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "70b6605cfa4ef2a02cce7d0133c9f157be31a0335d3737a83850533e4e205aac"
+            },
+            {
+              "id": "D-002",
+              "sha256": "2e729835b64769a1a82f7a402e1e0a1c7cef397659ea2b9a5da14b2ad465bf9f"
+            },
+            {
+              "id": "D-003",
+              "sha256": "839d8dec6e83021cfba6f2774e3928c8d95a17e7a6c091ec74d5c41ef4614dc8"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "70b6605cfa4ef2a02cce7d0133c9f157be31a0335d3737a83850533e4e205aac"
+            },
+            {
+              "id": "D-002",
+              "sha256": "2e729835b64769a1a82f7a402e1e0a1c7cef397659ea2b9a5da14b2ad465bf9f"
+            },
+            {
+              "id": "D-003",
+              "sha256": "839d8dec6e83021cfba6f2774e3928c8d95a17e7a6c091ec74d5c41ef4614dc8"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-20T13:35:06.325713Z",
+      "excluded": [],
+      "id": "planning-review",
+      "included": [
+        "clarify",
+        "design",
+        "doc-check",
+        "editor",
+        "plan",
+        "prd"
+      ],
+      "reason": "文档同步需要 editor",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-20T00:00:00Z",
+        "quote": "文档同步（推荐）",
+        "reference": "会话选择：文档同步处理 doctor 接线位置偏差",
+        "scope": "worktree-shared-data-root",
+        "source_id": "32c885ed-78d8-43a3-85a2-9228c99eeb49",
+        "type": "conversation",
+        "validates": "03fb2b66d6b9426c3b88e9daeda53b4263a8a8a3875a0b7a48ba76b5af75e5e4"
+      }
+    }
+  ],
+  "id": "2296bfdb-79aa-4f05-ade4-a279ac0afd2d",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/worktree-shared-data-root/doc/design.md": {
+          "D-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-001:end -->",
+            "start_marker": "<!-- fstar:item:D-001:start -->"
+          },
+          "D-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-002:end -->",
+            "start_marker": "<!-- fstar:item:D-002:start -->"
+          },
+          "D-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-003:end -->",
+            "start_marker": "<!-- fstar:item:D-003:start -->"
+          }
+        },
+        ".fstar/tasks/worktree-shared-data-root/doc/prd.md": {
+          "R-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-001:end -->",
+            "start_marker": "<!-- fstar:item:R-001:start -->"
+          },
+          "R-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-002:end -->",
+            "start_marker": "<!-- fstar:item:R-002:start -->"
+          },
+          "R-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-003:end -->",
+            "start_marker": "<!-- fstar:item:R-003:start -->"
+          }
+        },
+        ".fstar/tasks/worktree-shared-data-root/task/plan.md": {
+          "P-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:P-001:end -->",
+            "start_marker": "<!-- fstar:item:P-001:start -->"
+          },
+          "P-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:P-002:end -->",
+            "start_marker": "<!-- fstar:item:P-002:start -->"
+          },
+          "P-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:P-003:end -->",
+            "start_marker": "<!-- fstar:item:P-003:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "d6568afbfb317fcb4d5833a300339728f012bf3b7bdb0ca78e9030fb7efe4855",
+      "artifact_map_source": {
+        "reference": "artifact map keys normalized to project-relative paths",
+        "type": "coordinator"
+      },
+      "dispatch_harvested": [
+        "worktree-check-1",
+        "worktree-check-docs-1",
+        "worktree-impl-1"
+      ]
+    }
+  },
+  "name": "worktree-shared-data-root",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "工作树共享项目数据根与规范",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}
