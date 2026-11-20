@@ -341,6 +341,51 @@ def _git_repo_root(root: Path) -> Optional[Path]:
         current = current.parent
 
 
+def doctor_worktree_report(invoke_root: Optional[Path],
+                           project_root: Optional[Path]) -> Optional[dict]:
+    """Doctor's worktree-sharing report entry, or None when not applicable.
+
+    Reports "当前 worktree 共享自 <主工作树路径>" when the command was
+    invoked inside a linked git worktree AND project resolution actually
+    landed on the main worktree root (sharing active). When the main tree
+    is not initialized, the entry carries the ``fstar init`` guidance
+    instead — fstar never writes into a worktree implicitly. None for main
+    worktrees, non-worktree directories, and explicit --project overrides
+    keeps every other doctor output unchanged. Read-only.
+    """
+    if invoke_root is None:
+        return None
+    from .store import worktree_shared_main_root
+    main_root = worktree_shared_main_root(Path(invoke_root))
+    if main_root is None:
+        return None
+    if project_root is not None \
+            and Path(project_root).resolve(strict=False) == main_root:
+        return {
+            "shared": True,
+            "main_root": str(main_root),
+            "message": "当前 worktree 共享自 %s" % main_root,
+        }
+    marker = main_root / ".fstar" / ".schema-version"
+    if project_root is None and not marker.is_file():
+        return {
+            "shared": False,
+            "main_root": str(main_root),
+            "message": uninitialized_init_hint(main_root),
+        }
+    return None
+
+
+def uninitialized_init_hint(path: Path) -> str:
+    """Guidance line for an uninitialized project (worktree or main tree).
+
+    The hint always names ``fstar init``; it is used by reporting surfaces
+    only, never to write anything.
+    """
+    return ("未在 %s 找到已初始化的 fstar 数据根；在主工作树内运行 fstar init 后，"
+            "linked worktree 将自动共享该数据根" % path)
+
+
 def _apply_local_exclude(root: Path, created: list, warnings: list, *, dry_run: bool) -> None:
     """Ignore machine-local fstar files through the LOCAL git exclude file.
 

@@ -67,6 +67,71 @@ def find_project_root(start: Path) -> Optional[Path]:
                 marker = data / ".schema-version"
                 if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
                     return candidate
+        # Linked git worktree: share the main worktree's .fstar data root
+        # (specs, index, identity, tasks) when the main tree is initialized.
+        main_root = _linked_worktree_main_root(candidate)
+        if main_root is not None:
+            marker = main_root / ".fstar" / ".schema-version"
+            if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
+                return main_root
+    return None
+
+
+def _linked_worktree_main_root(candidate: Path) -> Optional[Path]:
+    """Main worktree root for a linked git worktree, or None.
+
+    A linked worktree carries a ``.git`` FILE whose content is
+    ``gitdir: <main>/.git/worktrees/<name>``; that gitdir holds a
+    ``commondir`` file naming the main gitdir (usually relative, e.g.
+    ``../..``). The main worktree root is the parent of the realpath-
+    normalized main gitdir. Any read or format failure returns None so
+    callers keep their current resolution unchanged; a normal ``.git``
+    directory never matches (only the FILE form is inspected).
+    """
+    git_file = candidate / ".git"
+    if not git_file.is_file():
+        return None
+    try:
+        text = git_file.read_text(encoding="utf-8").strip()
+        if not text.startswith("gitdir:"):
+            return None
+        worktree_gitdir = Path(text[len("gitdir:"):].strip())
+        if not worktree_gitdir.is_absolute():
+            worktree_gitdir = candidate / worktree_gitdir
+        worktree_gitdir = Path(os.path.realpath(str(worktree_gitdir)))
+        commondir = Path((worktree_gitdir / "commondir")
+                         .read_text(encoding="utf-8").strip())
+        if not str(commondir):
+            return None
+        if not commondir.is_absolute():
+            commondir = worktree_gitdir / commondir
+        main_gitdir = Path(os.path.realpath(str(commondir)))
+        if not main_gitdir.is_dir():
+            return None
+        main_root = main_gitdir.parent
+        if main_root == candidate:
+            # Not a linked worktree relative to a distinct main tree.
+            return None
+        return main_root
+    except (OSError, ValueError):
+        return None
+
+
+def worktree_shared_main_root(start: Path) -> Optional[Path]:
+    """Main worktree root when ``start`` sits inside a linked worktree.
+
+    Walks upward to the nearest linked-worktree ``.git`` file and resolves
+    its main worktree root; None when ``start`` is not inside a linked
+    worktree. Pure resolution helper for reporting surfaces (doctor); it
+    never reads or writes any fstar data.
+    """
+    current = Path(start).resolve()
+    if current.is_file():
+        current = current.parent
+    for candidate in (current,) + tuple(current.parents):
+        main_root = _linked_worktree_main_root(candidate)
+        if main_root is not None:
+            return main_root
     return None
 
 
@@ -477,6 +542,14 @@ class TaskStore:
         self.project_runtime = self.runtime_root / "projects" / project_key
         self.lock_path = self.project_runtime / "project.lock"
         self.lock_timeout = lock_timeout
+
+    def worktree_shared_from(self) -> Optional[Path]:
+        """Main worktree root when this project root is a linked worktree.
+
+        Pure resolution for reporting surfaces (doctor): shares nothing,
+        writes nothing; None when not inside a linked worktree.
+        """
+        return worktree_shared_main_root(self.project_root)
 
     def project_file(self, relative: str) -> Path:
         """Resolve a project-relative artifact path to a real file.

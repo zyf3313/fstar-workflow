@@ -96,6 +96,10 @@ class Roots:
     project_root: Optional[Path] = None
     host_roots: Dict[str, Path] = field(default_factory=dict)
     bundle_root: Optional[Path] = None
+    # Directory the command was invoked from, before project resolution
+    # collapsed a linked worktree onto its main tree (P-002: doctor
+    # reports where the shared data root comes from).
+    invoke_root: Optional[Path] = None
 
     def resolved(self) -> "Roots":
         return Roots(
@@ -104,6 +108,7 @@ class Roots:
             project_root=self.project_root.expanduser().resolve() if self.project_root else None,
             host_roots={name: root.expanduser().resolve() for name, root in self.host_roots.items()},
             bundle_root=self.bundle_root.expanduser().resolve() if self.bundle_root else None,
+            invoke_root=self.invoke_root.expanduser().resolve() if self.invoke_root else None,
         )
 
 
@@ -149,7 +154,10 @@ def roots_from_args(args, *, bundle_root: Optional[Path] = None) -> Roots:
         host_roots[name] = Path(value)
     # Same marker the runtime hooks use: a project is where
     # .fstar/.schema-version lives, not the --project override alone.
-    project_root = Path(project).expanduser() if project else find_project_root(Path.cwd())
+    # The invoke root records where the command ran; project resolution may
+    # collapse a linked git worktree onto the shared main-tree root (P-002).
+    invoke_root = Path.cwd()
+    project_root = Path(project).expanduser() if project else find_project_root(invoke_root)
     if "claude" not in host_roots:
         host_roots["claude"] = default_host_root(user_root)
     if "codex" not in host_roots:
@@ -162,6 +170,7 @@ def roots_from_args(args, *, bundle_root: Optional[Path] = None) -> Roots:
         project_root=project_root,
         host_roots=host_roots,
         bundle_root=bundle_root,
+        invoke_root=None if project else invoke_root,
     )
 
 
@@ -2496,6 +2505,14 @@ def _schema_report(roots: Roots) -> dict:
         "status": "pending",
         "note": "The knowledge-base public schema has not been handed over; it is not validated here.",
     }
+    # Linked-worktree sharing report (P-002/D-002): present only when the
+    # command ran inside a linked worktree, so every non-worktree doctor
+    # output stays byte-identical. Also covers the uninitialized case, where
+    # no storage block exists yet but the init guidance must still surface.
+    from .project import doctor_worktree_report
+    worktree_report = doctor_worktree_report(roots.invoke_root, roots.project_root)
+    if worktree_report is not None:
+        result.setdefault("storage", {})["worktree"] = worktree_report
     return result
 
 

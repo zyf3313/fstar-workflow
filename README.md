@@ -246,6 +246,32 @@ fstar rebind /new/path/to/project     # rebind the project to its new location
 mode, and additionally checks that a user-directory project folder and its
 registered UUID agree.
 
+### Linked git worktrees share the main worktree's data root
+
+In `project-shared` and `project-local` mode the data root lives in the
+repository, so a linked git worktree (`git worktree add`) would otherwise
+start empty and lose every task, spec, and identity the main tree
+accumulated. fstar resolves this automatically: inside a linked worktree,
+project resolution follows the worktree's `commondir` back to the main
+worktree and uses the main tree's `.fstar/` as the shared data root —
+specs, index, identity, and tasks are all shared, exactly as if you were
+working in the main tree. No pointer or registration file is written into
+the worktree; the sharing is pure resolution and takes effect immediately.
+
+If the main worktree is not yet initialized, worktree commands fail with
+`project_not_initialized` and never write anything implicitly — run
+`fstar init` in the main worktree first, and every linked worktree picks
+the shared data root up on its next command. `fstar doctor` run inside a
+linked worktree reports the sharing:
+
+```json
+"worktree": {"shared": true, "main_root": "/path/to/main", "message": "当前 worktree 共享自 /path/to/main"}
+```
+
+`user-directory` mode is unaffected: its pointer file binds to the main
+worktree path, so a linked worktree without its own pointer stays
+uninitialized rather than gaining a phantom binding.
+
 ## Cross-project tasks (master + child in different repositories)
 
 A master task in one project can own child tasks that live in other
