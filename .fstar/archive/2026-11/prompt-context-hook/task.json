@@ -26,7 +26,7 @@
       "task": "a97fd6b694d367fe99a9d58df8d9407cf2981eba7ec20f68cd9f2ef7e3c8e3ed"
     }
   },
-  "archivedAt": null,
+  "archivedAt": "2026-11-20T14:16:19.981983Z",
   "assignee": null,
   "base_branch": "",
   "blocked": null,
@@ -484,6 +484,53 @@
         "validates": "a97fd6b694d367fe99a9d58df8d9407cf2981eba7ec20f68cd9f2ef7e3c8e3ed"
       },
       "type": "accepted"
+    },
+    {
+      "at": "2026-11-20T14:16:19.981983Z",
+      "data": {
+        "archived_at": "2026-11-20T14:16:19.981983Z",
+        "operation_id": "6ea2a0a6-34aa-4ca5-afa5-62dc9fdf7b76",
+        "target": ".fstar/archive/2026-11/prompt-context-hook"
+      },
+      "id": "5967dbae-429d-4b8b-99de-0f7655571256",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-20T14:16:19.981546Z",
+        "quote": "",
+        "reference": "conversation 2026-11-20 用户指令：既然都已经完成了那就归档他们",
+        "scope": "archive",
+        "source_id": "conversation 2026-11-20 用户指令：既然都已经完成了那就归档他们",
+        "type": "command",
+        "validates": "7734071888f647a74ed8f2fce6aaaecec939842b92d5c09da0780bfbe43e0069"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-20T14:16:19.986625Z",
+      "data": {
+        "operation_id": "6ea2a0a6-34aa-4ca5-afa5-62dc9fdf7b76",
+        "target": ".fstar/archive/2026-11/prompt-context-hook"
+      },
+      "id": "f6809931-031b-4161-837c-cd6bcb1c845f",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-20T14:16:19.981546Z",
+        "quote": "",
+        "reference": "conversation 2026-11-20 用户指令：既然都已经完成了那就归档他们",
+        "scope": "archive",
+        "source_id": "conversation 2026-11-20 用户指令：既然都已经完成了那就归档他们",
+        "type": "command",
+        "validates": "7734071888f647a74ed8f2fce6aaaecec939842b92d5c09da0780bfbe43e0069"
+      },
+      "type": "archived"
     }
   ],
   "evidence": [
