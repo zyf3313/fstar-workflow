@@ -1,0 +1,3555 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-20T02:50:31.436456Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "9f22fa2c-d5d9-41aa-b336-55410e79f86a"
+    ],
+    "source": {
+      "actor": {
+        "id": "zyf3313",
+        "role": "user"
+      },
+      "at": "2026-11-20T02:50:31.404390Z",
+      "quote": "没问题 提交合并 发版吧",
+      "reference": "验收确认对话（会话内用户原话）",
+      "scope": "task",
+      "source_id": "9cbb5768-9c2b-4f34-b3e6-13dfb18abd6a",
+      "type": "conversation",
+      "validates": "cf2477f4a463a32c85b4ba40d1e4a16aeeae4bc3d2d5590f5977c8d5e0055aa9"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "e0126001857279d2a622e7ddf5440f4fc6f198605ae90b62518ec8dcaafe0712"
+      ],
+      "task": "cf2477f4a463a32c85b4ba40d1e4a16aeeae4bc3d2d5590f5977c8d5e0055aa9"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "",
+  "capabilities": [],
+  "children": [],
+  "commit": "",
+  "completedAt": "2026-11-20T02:50:31.436497Z",
+  "createdAt": "2026-11-19T13:00:29.988735Z",
+  "creator": "coordinator",
+  "description": "跨仓库主子任务及统一验收；三种项目数据存放模式；验收中阶段及返工；分支绑定和 QA 定位；自然语言确认。",
+  "events": [
+    {
+      "at": "2026-11-19T13:00:29.989096Z",
+      "data": {
+        "parent": null
+      },
+      "id": "0051235d-2a02-4c4a-851b-23490f28a187",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent"
+        },
+        "at": "2026-11-19T13:00:29.989092Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "fa4b3acb-2394-4cfb-9788-336bb72b688f",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-19T13:00:29.992072Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-19T13:00:29.991321Z",
+          "excluded": [],
+          "id": "planning-review",
+          "included": [
+            "clarify",
+            "design",
+            "doc-check",
+            "editor",
+            "plan",
+            "prd"
+          ],
+          "reason": "用户要求本批一并实施，先持久化需求与计划",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user"
+            },
+            "at": "2026-11-19T13:00:29.991294Z",
+            "quote": "我再提几个场景优化项然后上面说的那个措辞 跟着这次任务一块改了",
+            "reference": "conversation: cross-project requirements and selected unified acceptance / three storage modes",
+            "scope": "task cross-project-task-lifecycle",
+            "source_id": "conversation-cross-project-planning-review",
+            "type": "conversation",
+            "validates": "68f7b6dc80b157f8617be101b7764ea31d3adab40e60690dfe14feed9a581f5e"
+          }
+        },
+        "old": null
+      },
+      "id": "cae24709-476b-474c-bd1b-102361de554a",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-19T13:00:29.991294Z",
+        "quote": "我再提几个场景优化项然后上面说的那个措辞 跟着这次任务一块改了",
+        "reference": "conversation: cross-project requirements and selected unified acceptance / three storage modes",
+        "scope": "task cross-project-task-lifecycle",
+        "source_id": "conversation-cross-project-planning-review",
+        "type": "conversation",
+        "validates": "68f7b6dc80b157f8617be101b7764ea31d3adab40e60690dfe14feed9a581f5e"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-19T13:00:29.994003Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-19T13:00:29.993308Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "archive",
+            "events",
+            "evidence",
+            "lease",
+            "recovery",
+            "task"
+          ],
+          "reason": "用户要求本批一并实施，先持久化需求与计划",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user"
+            },
+            "at": "2026-11-19T13:00:29.993289Z",
+            "quote": "我再提几个场景优化项然后上面说的那个措辞 跟着这次任务一块改了",
+            "reference": "conversation: cross-project requirements and selected unified acceptance / three storage modes",
+            "scope": "task cross-project-task-lifecycle",
+            "source_id": "conversation-cross-project-persistent-task",
+            "type": "conversation",
+            "validates": "68f7b6dc80b157f8617be101b7764ea31d3adab40e60690dfe14feed9a581f5e"
+          }
+        },
+        "old": null
+      },
+      "id": "c2c24f46-7c5c-4b04-beea-5a07a3dc9032",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-19T13:00:29.993289Z",
+        "quote": "我再提几个场景优化项然后上面说的那个措辞 跟着这次任务一块改了",
+        "reference": "conversation: cross-project requirements and selected unified acceptance / three storage modes",
+        "scope": "task cross-project-task-lifecycle",
+        "source_id": "conversation-cross-project-persistent-task",
+        "type": "conversation",
+        "validates": "68f7b6dc80b157f8617be101b7764ea31d3adab40e60690dfe14feed9a581f5e"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-19T13:14:37.128215Z",
+      "data": {
+        "snapshot": "6075fbdfab0613842df719c39e882210db5f32393b5fef83f08ebdb1a9d831fa"
+      },
+      "id": "e524018b-0af3-4952-9cf1-7dc9c7c04fe8",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-19T13:14:37.126578Z",
+        "quote": "",
+        "reference": "start-cross-project-batch",
+        "scope": "start",
+        "source_id": "start-cross-project-batch",
+        "type": "command",
+        "validates": "392b98849e0d1cd691e1ed9f6168e91906677ea047b46898d015cc1884a13d5b"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-19T13:15:33.434841Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "725d19bf-657d-4173-aa9d-7a5448ba1351",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T13:15:33.434839Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "287a8ba0-e519-4152-94aa-54ba6f96967f",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-19T13:15:33.436913Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p001-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "implement"
+      },
+      "id": "aec96449-728c-45fa-ac6e-e4a76749965b",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T13:15:33.436903Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p001-1",
+        "scope": "dispatch",
+        "source_id": "42a00a07-6308-46b6-b890-dad8e4244bd2",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T15:34:56.062031Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "903a79e6-edcb-4ff6-b2bb-b29a75125ec6",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T15:34:56.062028Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "73d6f408-9bde-4f8d-9885-71258d0c07d6",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-19T15:34:56.063806Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p001-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "implement"
+      },
+      "id": "4c273e95-7fb7-4378-a661-85a8388d8fc3",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T15:34:56.063802Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p001-1",
+        "scope": "dispatch",
+        "source_id": "b9f62f11-4a46-4aa2-b418-2bd0fb04e9e5",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T15:34:56.078525Z",
+      "data": {
+        "evidence_id": "3f2727ba-5140-415d-a57d-9e8fbba50e9b",
+        "state": "stale"
+      },
+      "id": "702aca10-a767-48d3-b8ee-7cadf228b17a",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T15:35:44.013100Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p001-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "check"
+      },
+      "id": "f9999829-0eca-4327-9189-f00f452e6c26",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T15:35:44.013096Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p001-1",
+        "scope": "dispatch",
+        "source_id": "93529c6c-c79f-4243-8666-26b40467c153",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T15:47:45.696147Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p001-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "check"
+      },
+      "id": "e7627b00-2e74-4b92-877e-01b4d4899589",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T15:47:45.696143Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p001-1",
+        "scope": "dispatch",
+        "source_id": "e2fa9fb2-609e-4d56-ab8f-19db4caeac5b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T15:48:19.404021Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p001-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "check"
+      },
+      "id": "ba04f90e-98f6-4ec8-919d-a41e91cf4edf",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T15:48:19.404017Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p001-1",
+        "scope": "dispatch",
+        "source_id": "e4de150c-1208-4c91-933c-04d0efc4de6a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T15:48:47.028837Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p001-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "check"
+      },
+      "id": "c3d1c67d-fbdd-4358-97dd-3e71e43d1227",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T15:48:47.028833Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p001-1",
+        "scope": "dispatch",
+        "source_id": "744d2352-a58b-4f7b-9738-b286c05a3059",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T15:49:19.320581Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p001-1",
+        "plan_item_ids": [
+          "P-001"
+        ],
+        "role": "check"
+      },
+      "id": "1f338d48-c28f-4202-b0c1-50f507ef78f3",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T15:49:19.320577Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p001-1",
+        "scope": "dispatch",
+        "source_id": "e3c80c59-8162-4229-91c9-2e7bcdf4c0e0",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T15:49:19.336942Z",
+      "data": {
+        "evidence_id": "e4e6d1b4-fadc-4970-ab2c-68ffe9f7a999",
+        "state": "valid"
+      },
+      "id": "e3cadd36-9e9a-4690-b86f-6e2bb7f39793",
+      "source": {
+        "id": "check-crossproj-p001-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p001-1-worker"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T15:49:41.298047Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p002-1",
+        "plan_item_ids": [
+          "P-002"
+        ],
+        "role": "implement"
+      },
+      "id": "efdc8c0e-5f9f-4e3a-bba4-1e93268cb996",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T15:49:41.298039Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p002-1",
+        "scope": "dispatch",
+        "source_id": "ea266da6-e889-4c3c-aff4-42d79f9c832c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T16:04:29.162594Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p002-1",
+        "plan_item_ids": [
+          "P-002"
+        ],
+        "role": "implement"
+      },
+      "id": "ce7c300f-3d8d-4d90-ba77-6263b63ada86",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T16:04:29.162590Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p002-1",
+        "scope": "dispatch",
+        "source_id": "6d84371b-9299-4d00-84ad-f9831ecfac3d",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T16:04:29.177987Z",
+      "data": {
+        "evidence_id": "93e5b9fd-5b3d-4aa3-a428-f0927392eba3",
+        "state": "valid"
+      },
+      "id": "7046bc82-eb2e-4a08-b9e4-1a56fb91cbeb",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T16:04:40.244020Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p002-1",
+        "plan_item_ids": [
+          "P-002"
+        ],
+        "role": "check"
+      },
+      "id": "006e8e4c-67db-4573-8555-1db15b288303",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T16:04:40.244015Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p002-1",
+        "scope": "dispatch",
+        "source_id": "0943a53b-16cd-45ec-96f9-ec8a6303e95a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T16:53:35.712223Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "1ac3e374-aa8b-4f10-ac9f-1798c3e63786",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T16:53:35.712220Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "3f72b496-b70e-4db6-a1c1-301ea18690f1",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-19T16:53:35.715382Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p002-1",
+        "plan_item_ids": [
+          "P-002"
+        ],
+        "role": "check"
+      },
+      "id": "fe99d1e2-acce-4f03-bce9-3abd07b0d50e",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T16:53:35.715378Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p002-1",
+        "scope": "dispatch",
+        "source_id": "20d455e8-ab3a-4b63-af84-db11c667200c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T16:53:47.853720Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p002-1",
+        "plan_item_ids": [
+          "P-002"
+        ],
+        "role": "check"
+      },
+      "id": "1a6cc761-05ba-4220-996e-e56cc925e42b",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T16:53:47.853716Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p002-1",
+        "scope": "dispatch",
+        "source_id": "3deed738-9fc0-4ad3-889d-3e4a05f4d1bd",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T16:53:47.870667Z",
+      "data": {
+        "evidence_id": "fec37089-03ba-496f-9a0a-46436b3661c0",
+        "state": "valid"
+      },
+      "id": "1a86cd2a-7a9d-4a38-bb1b-5d22e56dfbb8",
+      "source": {
+        "id": "check-crossproj-p002-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p002-1-worker"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T16:54:03.257019Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p003-1",
+        "plan_item_ids": [
+          "P-003"
+        ],
+        "role": "implement"
+      },
+      "id": "a212a34e-cff7-44a5-a728-2e42281e59d4",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T16:54:03.257015Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p003-1",
+        "scope": "dispatch",
+        "source_id": "fc3880fc-2422-4ce2-9f4f-a37dc178e900",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:03:57.494935Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "fabf5bca-4284-40fd-82d8-a65507cba98d",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T18:03:57.494932Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "a33b6779-9e0b-4c50-ba03-36b81720e074",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-19T18:03:57.498336Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p003-1",
+        "plan_item_ids": [
+          "P-003"
+        ],
+        "role": "implement"
+      },
+      "id": "d4d695f4-f791-440d-aa4a-e02f86dbc262",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:03:57.498329Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p003-1",
+        "scope": "dispatch",
+        "source_id": "66e3781c-9c9d-4387-83ff-cdc63aea15f7",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:03:57.516445Z",
+      "data": {
+        "evidence_id": "fe633af8-a82e-43c6-a88b-e13499c4e316",
+        "state": "stale"
+      },
+      "id": "fd0bc726-75b9-4da4-a54a-73df4827ebee",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T18:04:13.419786Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p003-1",
+        "plan_item_ids": [
+          "P-003"
+        ],
+        "role": "check"
+      },
+      "id": "900b3b52-2baf-4ca0-a646-886683348fc0",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:04:13.419782Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p003-1",
+        "scope": "dispatch",
+        "source_id": "6240cf16-51c3-4fd2-8f17-561a42871d6d",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:14:25.845395Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p003-1",
+        "plan_item_ids": [
+          "P-003"
+        ],
+        "role": "check"
+      },
+      "id": "e25e0546-858e-4148-9979-425cecdcfc12",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:14:25.845390Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p003-1",
+        "scope": "dispatch",
+        "source_id": "264e7ea8-e554-4400-8ec7-909e9d59247c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:14:25.867580Z",
+      "data": {
+        "evidence_id": "5c1e9be9-cc20-4e13-b712-2346e8862e0b",
+        "state": "valid"
+      },
+      "id": "2cd2d215-bb62-4085-9c99-c96a4e991755",
+      "source": {
+        "id": "check-crossproj-p003-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p003-1-worker"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T18:14:44.662214Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p004-1",
+        "plan_item_ids": [
+          "P-004"
+        ],
+        "role": "implement"
+      },
+      "id": "67b18787-2130-497b-9fc8-77620a8123e7",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:14:44.662210Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p004-1",
+        "scope": "dispatch",
+        "source_id": "97b1ae58-bbb1-4223-ae27-8d2b8b23b4a8",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:29:32.555073Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p004-1",
+        "plan_item_ids": [
+          "P-004"
+        ],
+        "role": "implement"
+      },
+      "id": "e6a79fd4-48a9-42e0-a300-876eb986a7c5",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:29:32.555064Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p004-1",
+        "scope": "dispatch",
+        "source_id": "f1d8de0f-4281-4bbe-b0d8-862dc1d28091",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:29:32.582193Z",
+      "data": {
+        "evidence_id": "f5f6c51b-b947-40f6-b5cb-8268984fdb6b",
+        "state": "stale"
+      },
+      "id": "25275db9-8b28-4e27-ae1b-cd2c65fa3cd9",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T18:29:42.280772Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p004-1",
+        "plan_item_ids": [
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "eea08e0a-c00a-4600-bfe7-1b61d190652b",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:29:42.280768Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p004-1",
+        "scope": "dispatch",
+        "source_id": "7352df25-86c6-4e85-be25-557ebca4d502",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:57:25.778372Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p004-1",
+        "plan_item_ids": [
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "64b459ab-2a3a-4c6c-9668-2a7320132df8",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:57:25.778367Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p004-1",
+        "scope": "dispatch",
+        "source_id": "95b952c4-f044-426b-8e8b-07a7e4d2efd2",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:57:35.847479Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p004-1",
+        "plan_item_ids": [
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "cf100b2d-76e3-4708-8bf1-b417f6184e99",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:57:35.847474Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p004-1",
+        "scope": "dispatch",
+        "source_id": "a1115da6-7448-40b5-bd50-d9e672cfcb8a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:57:59.498592Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p004-1",
+        "plan_item_ids": [
+          "P-004"
+        ],
+        "role": "check"
+      },
+      "id": "f891804c-0704-4e53-a14e-c2593d6b23d8",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:57:59.498587Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p004-1",
+        "scope": "dispatch",
+        "source_id": "3c65308b-66ee-4402-8ceb-82330f2ae28b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T18:57:59.515592Z",
+      "data": {
+        "evidence_id": "9ad9dd14-2267-47ba-bb64-0ce943f0475d",
+        "state": "valid"
+      },
+      "id": "024488ec-00e4-417b-941b-1df9e49b7d3b",
+      "source": {
+        "id": "check-crossproj-p004-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p004-1-worker"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T18:58:13.620215Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p005-1",
+        "plan_item_ids": [
+          "P-005"
+        ],
+        "role": "implement"
+      },
+      "id": "3df70655-9722-4030-bc63-5d7aa3059d17",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T18:58:13.620207Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p005-1",
+        "scope": "dispatch",
+        "source_id": "199f10bb-b980-48f1-8b16-683e414e4710",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T19:28:06.194383Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "ad2066ca-5922-4792-9c57-2344c21562a3",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-19T19:28:06.194381Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "9f2fd5f0-20ea-499b-8c4e-b188a4afbc94",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-19T19:28:06.199575Z",
+      "data": {
+        "dispatch_id": "impl-crossproj-p005-1",
+        "plan_item_ids": [
+          "P-005"
+        ],
+        "role": "implement"
+      },
+      "id": "7583e0c4-e4d6-4fa8-8a92-5b36c00d06bf",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T19:28:06.199569Z",
+        "quote": "",
+        "reference": "dispatch impl-crossproj-p005-1",
+        "scope": "dispatch",
+        "source_id": "bbbda185-5418-428d-8f8e-3114937ec73a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T19:28:06.218684Z",
+      "data": {
+        "evidence_id": "35f1b0e3-bf7a-49a7-ac27-201ea7cfad6c",
+        "state": "stale"
+      },
+      "id": "65077e9e-14d8-43bf-ae3e-3baf3e671beb",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T19:28:48.034402Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p005-1",
+        "plan_item_ids": [
+          "P-005"
+        ],
+        "role": "check"
+      },
+      "id": "433eead7-133f-4678-917c-476b8866d126",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T19:28:48.034397Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p005-1",
+        "scope": "dispatch",
+        "source_id": "97267506-b168-4b15-92ed-891ce8dd30bb",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T19:43:22.630221Z",
+      "data": {
+        "dispatch_id": "check-crossproj-p005-1",
+        "plan_item_ids": [
+          "P-005"
+        ],
+        "role": "check"
+      },
+      "id": "a5d20f67-f348-41c0-8a27-b39fa4c2f916",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T19:43:22.630217Z",
+        "quote": "",
+        "reference": "dispatch check-crossproj-p005-1",
+        "scope": "dispatch",
+        "source_id": "1b01b0a2-da88-4d6d-a0f0-9af18804bd84",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-19T19:43:22.649923Z",
+      "data": {
+        "evidence_id": "9f22fa2c-d5d9-41aa-b336-55410e79f86a",
+        "state": "valid"
+      },
+      "id": "af0e4d3f-cfaf-430c-8f7b-96691ee7ba6b",
+      "source": {
+        "id": "check-crossproj-p005-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p005-1-worker"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-19T19:45:03.049429Z",
+      "data": {
+        "reason": "enter awaiting_acceptance after final check"
+      },
+      "id": "4d651495-38e8-495d-858b-3b9e1d04ce0d",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-19T19:45:03.083884Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "9f22fa2c-d5d9-41aa-b336-55410e79f86a"
+        ]
+      },
+      "id": "f9c1fa62-d7f2-4ef3-ae5a-fdc2d5c8c1f0",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-19T19:45:03.083874Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "2a6e583a-5574-4ceb-9f08-7f8fd8ea9443",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-20T02:50:31.436500Z",
+      "data": {
+        "evidence_refs": [
+          "9f22fa2c-d5d9-41aa-b336-55410e79f86a"
+        ]
+      },
+      "id": "1c195580-b320-4352-8a4b-08119a3a16a3",
+      "source": {
+        "actor": {
+          "id": "zyf3313",
+          "role": "user"
+        },
+        "at": "2026-11-20T02:50:31.404390Z",
+        "quote": "没问题 提交合并 发版吧",
+        "reference": "验收确认对话（会话内用户原话）",
+        "scope": "task",
+        "source_id": "9cbb5768-9c2b-4f34-b3e6-13dfb18abd6a",
+        "type": "conversation",
+        "validates": "cf2477f4a463a32c85b4ba40d1e4a16aeeae4bc3d2d5590f5977c8d5e0055aa9"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "2e592f9cbe1f21ca5b15c71353adb463b9a60832e0e280734be4095ddc987c5a",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "db434f2483a49c93dc5748e5fa6b99d7d4184214179681a7a5e94d162be8845e"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "1e85c88cfeae460c48d4aa7e48190ca246f2fc47cc022b337f7554067b4abd1c"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-init/SKILL.md",
+            "sha256": "8e4daf4709541fa469c55dc9e7ca9f1d59aa5baba944ee855487186377d2e261"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/config.py",
+            "sha256": "cdbae9600451cb58e5f32bfe256950fb6e1264666897271241b852e38845889b"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "4c5a34b0adafba551e1e830a898d9eaedd900f985f34e61f19cb3258ee516bd6"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/evidence.py",
+            "sha256": "7c70ad1c8745420642b9c47e063d19582bbe1adc4facbb7b0314e91e381592aa"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "b5975b009069a8571b9a563844bb2c73a2bda87837a69a717d94556d11a3cc9d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/knowledge.py",
+            "sha256": "2cfedc8cc775961d418ca72f66f280988cd233d1c9ed7c9480821007021b0616"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/project.py",
+            "sha256": "d6f18bcd814ca65297066084b55a2c7a050d39879a3ae2e7f6d9a82a85a28cd4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "6ae05bf00918c91c5b5b6cc927d330476ea5c980f1a81cfd2c91422f6f089cf7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "470e3a03a7951acc3125c83d847b2eb3a7150f07ec2eddb5847ab977950e8f04"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "5c7941796ef93562686fa1ab6a9bcf7e8b97c52be37470d7ac7977faef992653"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_storage_modes.py",
+            "sha256": "27584bb4708ad00ecde672e9ce18c8761393493ec4573eddc66aab0b83eb5494"
+          }
+        ]
+      },
+      "dispatch_id": "impl-crossproj-p001-1",
+      "id": "3f2727ba-5140-415d-a57d-9e8fbba50e9b",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/clarify.md",
+          "sha256": "b933be0623f496d78dfd7b7a27a4b4664ce15a4910ce4d14c81908bfb689869f"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-19T15:34:56.075206Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "stale_reasons": [
+        {
+          "inputs": [
+            {
+              "field": "read_context",
+              "path": "src/fstar/store.py",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "src/fstar/project.py",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "src/fstar/installer.py",
+              "reason": "reported_worker_output"
+            }
+          ],
+          "type": "unverified_inputs"
+        }
+      ],
+      "state": "stale",
+      "unverified_inputs": [
+        {
+          "field": "read_context",
+          "path": "src/fstar/store.py",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "src/fstar/project.py",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "src/fstar/installer.py",
+          "reason": "reported_worker_output"
+        }
+      ],
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ]
+        }
+      ],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 625 tests — OK (0 failures, 0 errors)"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "16 pass, 0 fail"
+        },
+        {
+          "command": "node scripts/build-package.cjs",
+          "result": "manifest rebuilt idempotently; 58 shipped-file hashes match"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "2fce063cf940b158c99397c0a6c7420f3dbb98de8ac44716f0b4c58f408d2f54",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "db434f2483a49c93dc5748e5fa6b99d7d4184214179681a7a5e94d162be8845e"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "633cde10c1a00ca6fdb9f8b9e156c420b96f39cda735d01be8eab626a06f5933"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-init/SKILL.md",
+            "sha256": "8e4daf4709541fa469c55dc9e7ca9f1d59aa5baba944ee855487186377d2e261"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/config.py",
+            "sha256": "75eb5632fe858611dcef516ea7a813373468560b4e23c312c42720d661676532"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "4c5a34b0adafba551e1e830a898d9eaedd900f985f34e61f19cb3258ee516bd6"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/evidence.py",
+            "sha256": "7c70ad1c8745420642b9c47e063d19582bbe1adc4facbb7b0314e91e381592aa"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "b5975b009069a8571b9a563844bb2c73a2bda87837a69a717d94556d11a3cc9d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/knowledge.py",
+            "sha256": "2cfedc8cc775961d418ca72f66f280988cd233d1c9ed7c9480821007021b0616"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/project.py",
+            "sha256": "d6f18bcd814ca65297066084b55a2c7a050d39879a3ae2e7f6d9a82a85a28cd4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "6ae05bf00918c91c5b5b6cc927d330476ea5c980f1a81cfd2c91422f6f089cf7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "40e77e9bd6d9322ba77a2abe77fced5564851af120519165b51cc65a0a3b9c31"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "5c7941796ef93562686fa1ab6a9bcf7e8b97c52be37470d7ac7977faef992653"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_storage_modes.py",
+            "sha256": "e3c97ddad6a4d62b5728a53321b01d5dc1dadc26c6919c81c3beafc12e8861b9"
+          }
+        ]
+      },
+      "dispatch_id": "check-crossproj-p001-1",
+      "environment": "darwin; python3 stdlib; branch feat/cross-project-task-lifecycle working tree",
+      "id": "e4e6d1b4-fadc-4970-ab2c-68ffe9f7a999",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/clarify.md",
+          "sha256": "b933be0623f496d78dfd7b7a27a4b4664ce15a4910ce4d14c81908bfb689869f"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "detail": "627 tests OK; all 6 R-002 acceptance conditions independently verified",
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "R-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "code read + edge probes",
+          "detail": "three modes threaded CLI/store/config/hooks/evidence/archive/installer; symlink pointer escape fixed in store.py+config.py with 2 regressions",
+          "plan_item": "P-001",
+          "requirement_ids": [
+            "D-002"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-19T15:49:19.333670Z",
+      "producer": {
+        "id": "check-crossproj-p001-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p001-1-worker"
+      },
+      "run_id": "check-crossproj-p001-1",
+      "scope": "incremental",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "679086e70b7296447a89d4e9e905d25a7d62d9fa73525170ac44917decfd3874",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "b93614e0fc0a65443eaff1591599fa7f853eb8d6578aaed3ca4bd8162e4798b9"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "c6c22c2e48b3a0e21c4af0b5dfa5a56f263d0c3156d7abca57c2b003568453a6"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "55e46d1710cb42ab0335dffc7be4c79af0f97016e8c264f25075359638ee0302"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/crossproject.py",
+            "sha256": "86c5bd8a08e863d18e9bef408d32063b85638bb96e0e483733ed3b86fbfdeb27"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_crossproject.py",
+            "sha256": "41b1a8dfca2fa00223bfb70e1c9391385708677c43910729c1960445cdb8aa4d"
+          }
+        ]
+      },
+      "dispatch_id": "impl-crossproj-p002-1",
+      "id": "93e5b9fd-5b3d-4aa3-a428-f0927392eba3",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/clarify.md",
+          "sha256": "b933be0623f496d78dfd7b7a27a4b4664ce15a4910ce4d14c81908bfb689869f"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        },
+        {
+          "path": "src/fstar/tasks.py",
+          "sha256": "5c7941796ef93562686fa1ab6a9bcf7e8b97c52be37470d7ac7977faef992653"
+        },
+        {
+          "path": "src/fstar/dispatch.py",
+          "sha256": "4c5a34b0adafba551e1e830a898d9eaedd900f985f34e61f19cb3258ee516bd6"
+        },
+        {
+          "path": "src/fstar/store.py",
+          "sha256": "40e77e9bd6d9322ba77a2abe77fced5564851af120519165b51cc65a0a3b9c31"
+        },
+        {
+          "path": "src/fstar/project.py",
+          "sha256": "d6f18bcd814ca65297066084b55a2c7a050d39879a3ae2e7f6d9a82a85a28cd4"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-19T16:04:29.175078Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "state": "valid",
+      "unverified_inputs": [],
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ]
+        }
+      ],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 644 tests — OK (+17 new crossproject tests)"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "16 pass, 0 fail"
+        },
+        {
+          "command": "node scripts/build-package.cjs",
+          "result": "ok, file_count 59, resource_version 5"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "3178d72f876a36e9a104537e57e5ed040f41dd2b2a6fe898d04242d105e20bac",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "16165818a4a286508debba6ecdba329e21d2d1be5e319b0f3dc5f8e7fa123a3b"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "6fdefd2d842e7cbe5a04a565c4dfee3191a0744b6314e1aabe673eb4eaded04b"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "55e46d1710cb42ab0335dffc7be4c79af0f97016e8c264f25075359638ee0302"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/crossproject.py",
+            "sha256": "0061d4e61d2ab75dd5c13138a9a54b68541cb2fac74d0dd377efc1bed7d241aa"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_crossproject.py",
+            "sha256": "60b42f4b7ac47432b26f18e9cd7446335923a857ecb39e2437a00bbd3b20649d"
+          }
+        ]
+      },
+      "dispatch_id": "check-crossproj-p002-1",
+      "environment": "darwin; python3 stdlib; working tree; 15 ad-hoc probes (temp roots only)",
+      "id": "fec37089-03ba-496f-9a0a-46436b3661c0",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "items": [
+        {
+          "command": "probes + full suite",
+          "detail": "bidirectional links, 26-field compat field-by-field, bounded dispatch, duplicate/cycle/same-project refused; orphan/half-link/identity-drift/lock-dedup defects fixed with regressions",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "R-001",
+            "D-001"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "probes + full suite",
+          "detail": "target-only specs, uninitialized→init guidance, empty/placeholder→record-and-continue; stale registry binding blocked, rebind recovers",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "R-003",
+            "D-003"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-19T16:53:47.868248Z",
+      "producer": {
+        "id": "check-crossproj-p002-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p002-1-worker"
+      },
+      "run_id": "check-crossproj-p002-1",
+      "scope": "incremental",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "a6ac086cca25a076cde6aca1afcebc1212ea26fe72ee9c9d01565b6bea3adb8f",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "793a89016f2968e53e6de5e364ca9f27875bffb38547ad5f04b17ce54323777a"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "5d5b90824acdf0379ee0cf8829d35e25166c03aac10f275ad79c4136c1b56504"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "ab9adda127969090ad6aabf50cf20ed247eae9101bb2c52805b9383d4ab9b7a8"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-continue/SKILL.md",
+            "sha256": "f9c17ba3a0f458962eaba0fa4962905c6a6e5abf177bbe4d2cc76faf1a6d3958"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-execute/SKILL.md",
+            "sha256": "a098b8c8cf7303de9595ed2ab91b68618fbdf8b793ed0293fe761b7f0354263b"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "c675098bbf5e5fe7414af9e374cee34c419f73cebc6a7201b142de2623e884f3"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/crossproject.py",
+            "sha256": "e5304194c4d8156f2cdd4ebf5c750d7d9722197c5c90230d60031eed291ae67f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "49bdfe3343fcc4da4ccb641c063964254b39cd59f27505c8bcb39986a7278998"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/evidence.py",
+            "sha256": "1e43f0fa0598a313638bdec5426791938f08a7b382d6454e6eb11f903c820576"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/models.py",
+            "sha256": "a0c588862dc4df1ebc015a0e50de6e0bd3d674d5905b0856c21a1bce80680bcc"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "fd0bc1023873593d61468a198d6fec23b62be598c4716196b688b15bf213d29b"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "35dd85390ecdff753e33dc88e0936e395004f90e996f5477bb9c1291703af40e"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_acceptance_phase.py",
+            "sha256": "2d09ac4975f77050dbd14e9b027a5195d305f8053d2bad7a10d795551dc3cc84"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "f6b0c625a5a157918a7002babb9555a15446f07fe5ee4a3bde8de7a5d5050439"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "5b917a03fe4e1642367d34bf3c3cfb674ea1d828792a5eccdcb0db4de7ae3438"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_storage_modes.py",
+            "sha256": "e22b6bd988007491dde5f38db4cceb98e99f09a201a786d645b1158722dc0cfb"
+          }
+        ]
+      },
+      "dispatch_id": "impl-crossproj-p003-1",
+      "id": "fe633af8-a82e-43c6-a88b-e13499c4e316",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-19T18:03:57.512839Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "stale_reasons": [
+        {
+          "inputs": [
+            {
+              "field": "read_context",
+              "path": "src/fstar/tasks.py",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "src/fstar/models.py",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "src/fstar/evidence.py",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "src/fstar/crossproject.py",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "src/fstar/dispatch.py",
+              "reason": "reported_worker_output"
+            }
+          ],
+          "type": "unverified_inputs"
+        }
+      ],
+      "state": "stale",
+      "unverified_inputs": [
+        {
+          "field": "read_context",
+          "path": "src/fstar/tasks.py",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "src/fstar/models.py",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "src/fstar/evidence.py",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "src/fstar/crossproject.py",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "src/fstar/dispatch.py",
+          "reason": "reported_worker_output"
+        }
+      ],
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ]
+        }
+      ],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 687 tests — OK (+38 acceptance-phase tests)"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "16 pass, 0 fail"
+        },
+        {
+          "command": "node scripts/build-package.cjs",
+          "result": "OK (resource_version 5, cli_version 0.5.0)"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "38f5a615041f8d2151d315bebbb88f33889488271db926d36c05d6f9d0e2f658",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "793a89016f2968e53e6de5e364ca9f27875bffb38547ad5f04b17ce54323777a"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "fd7c0d7623a6b29a4b415387ec22d22f23c49a34675caa144fe16616de7ed360"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "ab9adda127969090ad6aabf50cf20ed247eae9101bb2c52805b9383d4ab9b7a8"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-continue/SKILL.md",
+            "sha256": "f9c17ba3a0f458962eaba0fa4962905c6a6e5abf177bbe4d2cc76faf1a6d3958"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-execute/SKILL.md",
+            "sha256": "a098b8c8cf7303de9595ed2ab91b68618fbdf8b793ed0293fe761b7f0354263b"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "c675098bbf5e5fe7414af9e374cee34c419f73cebc6a7201b142de2623e884f3"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/crossproject.py",
+            "sha256": "e5304194c4d8156f2cdd4ebf5c750d7d9722197c5c90230d60031eed291ae67f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "49bdfe3343fcc4da4ccb641c063964254b39cd59f27505c8bcb39986a7278998"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/evidence.py",
+            "sha256": "1e43f0fa0598a313638bdec5426791938f08a7b382d6454e6eb11f903c820576"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/models.py",
+            "sha256": "a0c588862dc4df1ebc015a0e50de6e0bd3d674d5905b0856c21a1bce80680bcc"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "fd0bc1023873593d61468a198d6fec23b62be598c4716196b688b15bf213d29b"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "b9ca6454f8b55ab90a48ef75b2a165a03f5d3e5cf8e788d670bbb92f8af12003"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_acceptance_phase.py",
+            "sha256": "2d09ac4975f77050dbd14e9b027a5195d305f8053d2bad7a10d795551dc3cc84"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "f6b0c625a5a157918a7002babb9555a15446f07fe5ee4a3bde8de7a5d5050439"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "5b917a03fe4e1642367d34bf3c3cfb674ea1d828792a5eccdcb0db4de7ae3438"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_storage_modes.py",
+            "sha256": "e22b6bd988007491dde5f38db4cceb98e99f09a201a786d645b1158722dc0cfb"
+          }
+        ]
+      },
+      "dispatch_id": "check-crossproj-p003-1",
+      "environment": "darwin; python3 stdlib; working tree; ad-hoc probes (same-project two children, crash-retry, phase matrix, legacy reads, compaction)",
+      "id": "5c1e9be9-cc20-4e13-b712-2346e8862e0b",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "items": [
+        {
+          "command": "probes + full suite",
+          "detail": "all 4 R-004 conditions verified; phase matrix illegal transitions all rejected; evidence_invalidated event added to MILESTONES (compaction defect fixed)",
+          "plan_item": "P-003",
+          "requirement_ids": [
+            "R-004",
+            "D-004"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "probes + full suite",
+          "detail": "unified acceptance: one confirmation binds current versions, per-child blocking reasons, crash idempotent retry, same-project lock dedup verified",
+          "plan_item": "P-003",
+          "requirement_ids": [
+            "R-005",
+            "D-005"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-19T18:14:25.863779Z",
+      "producer": {
+        "id": "check-crossproj-p003-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p003-1-worker"
+      },
+      "run_id": "check-crossproj-p003-1",
+      "scope": "incremental",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "2ac23b8715a18712a37245c99afa1669918abb5eeaad4d00f813200f210cc1c1",
+        "paths": [
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "68f694bb3829f16e93dfbd58f25b522680538e6e04c316ba3b222fcc92db7a5a"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "a20672b142dc3db2f39a002f68744d96907e6234a9be390df8eac678f52d7a6d"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_branch_location.py",
+            "sha256": "f0bfd6ad2c550e978923dbad44b32195ed2baba99459028d080470db9f88f19f"
+          }
+        ]
+      },
+      "dispatch_id": "impl-crossproj-p004-1",
+      "id": "f5f6c51b-b947-40f6-b5cb-8268984fdb6b",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        },
+        {
+          "path": "src/fstar/store.py",
+          "sha256": "40e77e9bd6d9322ba77a2abe77fced5564851af120519165b51cc65a0a3b9c31"
+        },
+        {
+          "path": "src/fstar/project.py",
+          "sha256": "d6f18bcd814ca65297066084b55a2c7a050d39879a3ae2e7f6d9a82a85a28cd4"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-19T18:29:32.578469Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "stale_reasons": [
+        {
+          "inputs": [
+            {
+              "field": "read_context",
+              "path": "src/fstar/tasks.py",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "src/fstar/cli.py",
+              "reason": "reported_worker_output"
+            }
+          ],
+          "type": "unverified_inputs"
+        }
+      ],
+      "state": "stale",
+      "unverified_inputs": [
+        {
+          "field": "read_context",
+          "path": "src/fstar/tasks.py",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "src/fstar/cli.py",
+          "reason": "reported_worker_output"
+        }
+      ],
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ]
+        }
+      ],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 706 tests — OK (+19 branch-location tests)"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "fail 0"
+        },
+        {
+          "command": "node scripts/build-package.cjs",
+          "result": "BUILD_OK"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "5d82e30ef4b23e14a733c6d1ecba3c3cac543035d57bac5df26ab9a551b38cb9",
+        "paths": [
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "8ce8194482e2f329d7daed8c26125a9fc4459314b5d800f0795fa8e71b85a54f"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "68f694bb3829f16e93dfbd58f25b522680538e6e04c316ba3b222fcc92db7a5a"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "506ac4790aa4e5cb5cea760decae12d0370437362120f0169f893bf07ff76952"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_branch_location.py",
+            "sha256": "66ff4ed04f0a3094a3ac4851b170927f2d20b23a51d342220c441339c260ce35"
+          }
+        ]
+      },
+      "dispatch_id": "check-crossproj-p004-1",
+      "environment": "darwin; python3 stdlib; working tree; safety probes (git missing/hung/malicious config/non-git)",
+      "id": "9ad9dd14-2267-47ba-bb64-0ce943f0475d",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "items": [
+        {
+          "command": "probes + full suite",
+          "detail": "all R-006 conditions pass; 3 defects fixed (session-less locate matched everything; corrupt sibling crashed lookup; explicit archived ref unfound) with 4 regressions; git read-only verified incl. timeout/degrade paths",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "R-006",
+            "D-006"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-19T18:57:59.513032Z",
+      "producer": {
+        "id": "check-crossproj-p004-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p004-1-worker"
+      },
+      "run_id": "check-crossproj-p004-1",
+      "scope": "incremental",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "7863e25d0aa04b6201cec06c8f0a04d97abbed7cb70ec93e566d7e484b5d58ff",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "6a09e03292063c524bafc8493af5cf1777511018ae4627216c1b71952408cc83"
+          },
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "8ed2fbe402fa588fe4b4a75ee16e93839fdf20f74960de8d41c17f62b0f03513"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "e126d1f3f3118213c4050ebf835a978de59b76db954586b1855e0dc364418995"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "9a62f6a094108d7dfb65e267a0fc576a68cc815cbe6cdcf2cd48b45398346aad"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "77f45c2e869b76e3d93c439fc9fc4cd7838692f4f1531d24b68da220ae373c00"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-archive/SKILL.md",
+            "sha256": "1ccf928cd49776590c0bebe6e29e84121b77defe583f8bd9f8f451ae68dcd094"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-continue/SKILL.md",
+            "sha256": "74addc70b698ace2485f72bcbc8bb7d09c63096a7e17429ef299ac14abc21ca1"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-execute/SKILL.md",
+            "sha256": "54d672a40cbc18172930b6fcb618270b51b2cabb0960ad9e02e602f34eef4ef7"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-init/SKILL.md",
+            "sha256": "9d479fe82c9620e23dc31d808da9aee88fef461d0d3bbca4fb807533162b46d9"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-plan/SKILL.md",
+            "sha256": "2a0eda93d4d4d3ef66277c4f024daea0dbc570d0495da445503aa3526241a4c1"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "646e6dde72515fb0c757ab15ab679f46475c60344f7d241dad9f810dcc0774d2"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "026e6d2fee6bcd926711b358bad554fb33b19827babb0330c3091b71c728824c"
+          }
+        ]
+      },
+      "dispatch_id": "impl-crossproj-p005-1",
+      "id": "35f1b0e3-bf7a-49a7-ac27-201ea7cfad6c",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-19T19:28:06.214958Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "stale_reasons": [
+        {
+          "inputs": [
+            {
+              "field": "read_context",
+              "path": "resources/runtime/routing.md",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "resources/runtime/prompt-states.md",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "resources/skills/fstar-execute/SKILL.md",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "resources/skills/fstar-continue/SKILL.md",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "resources/skills/fstar-archive/SKILL.md",
+              "reason": "reported_worker_output"
+            },
+            {
+              "field": "read_context",
+              "path": "resources/skills/fstar-init/SKILL.md",
+              "reason": "reported_worker_output"
+            }
+          ],
+          "type": "unverified_inputs"
+        }
+      ],
+      "state": "stale",
+      "unverified_inputs": [
+        {
+          "field": "read_context",
+          "path": "resources/runtime/routing.md",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "resources/runtime/prompt-states.md",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "resources/skills/fstar-execute/SKILL.md",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "resources/skills/fstar-continue/SKILL.md",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "resources/skills/fstar-archive/SKILL.md",
+          "reason": "reported_worker_output"
+        },
+        {
+          "field": "read_context",
+          "path": "resources/skills/fstar-init/SKILL.md",
+          "reason": "reported_worker_output"
+        }
+      ],
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "ea3ed4d0c4ae7c4a2ff94a117c26dd6e0f99bed2a9b826644713c2f5ec2791be"
+            },
+            {
+              "id": "R-002",
+              "sha256": "b37baca741675943d4802aae25594ee0437335ca11156681d7569992a6bd9d63"
+            },
+            {
+              "id": "R-003",
+              "sha256": "293d6717e787c5b93eb9520e875cd3765a087634f014c00f27117ba42475accf"
+            },
+            {
+              "id": "R-004",
+              "sha256": "25a47105e6aa2a16180ab65f515c5614b66188f274e8859e79165cc795b0624f"
+            },
+            {
+              "id": "R-005",
+              "sha256": "d57891dd1e0108972869be64ad465023524383f6fd45dd06c2bf4e9f5bf7cf6d"
+            },
+            {
+              "id": "R-006",
+              "sha256": "063d4e12d1aafe2d5148becd0fddcbf60fe53961afd67e7691014cb68529b3e9"
+            },
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-001",
+              "sha256": "8d3cb572280f28bb6b6b6a93e556a1dad204dd0dc2a074931d717fae1f180355"
+            },
+            {
+              "id": "D-002",
+              "sha256": "319192f2a3376decc62cc11edf11ddd421e581778eb64c0c41bd3860501556c5"
+            },
+            {
+              "id": "D-003",
+              "sha256": "0f5e02dad1a9f634fa1c905b06061c57af61031f4f431157fc5a7aae8e2979cf"
+            },
+            {
+              "id": "D-004",
+              "sha256": "28d05ec745aeb3fd5992add4214e2ab5addc273f874ed84957f37b2b85f6d7de"
+            },
+            {
+              "id": "D-005",
+              "sha256": "96a0518eb6a687ce150ba0b3e1450b7e50f667580ebe37729527c4d9f108c327"
+            },
+            {
+              "id": "D-006",
+              "sha256": "0d38d14a51ec50626e804a2573158b94fd7e5e227ce651441149bf12d88a7956"
+            },
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ]
+        }
+      ],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "Ran 712 tests — OK (+2 net new, 2 updated)"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "16 pass, 0 fail"
+        },
+        {
+          "command": "node scripts/build-package.cjs",
+          "result": "ok, resource_version 6, file_count 59"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "e0126001857279d2a622e7ddf5440f4fc6f198605ae90b62518ec8dcaafe0712",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "6a09e03292063c524bafc8493af5cf1777511018ae4627216c1b71952408cc83"
+          },
+          {
+            "exists": true,
+            "path": "package.json",
+            "sha256": "8ed2fbe402fa588fe4b4a75ee16e93839fdf20f74960de8d41c17f62b0f03513"
+          },
+          {
+            "exists": false,
+            "path": "resources/",
+            "sha256": null
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "646e6dde72515fb0c757ab15ab679f46475c60344f7d241dad9f810dcc0774d2"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "026e6d2fee6bcd926711b358bad554fb33b19827babb0330c3091b71c728824c"
+          }
+        ]
+      },
+      "dispatch_id": "check-crossproj-p005-1",
+      "environment": "darwin; python3 stdlib; full-branch working tree (P-001..P-005)",
+      "id": "9f22fa2c-d5d9-41aa-b336-55410e79f86a",
+      "input_files": [
+        {
+          "path": ".fstar/specs/backend/index.md",
+          "sha256": "e9bbbfbc8141430a8312438a4a360f8b51d9e3bb54c5f08c1a4ca7b51e7fa130"
+        },
+        {
+          "path": ".fstar/specs/frontend/index.md",
+          "sha256": "adc1694bfef9c77bc01cec36589d9f05a97178cc5d5d965bdf324a555048ceb7"
+        },
+        {
+          "path": ".fstar/specs/guides/index.md",
+          "sha256": "6f89160c460c403d340716140b3f2e7d52841fdae34954354785190d42d6e0c5"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/plan.md",
+          "sha256": "f7bd33bd4a94fa53f8a0e533ab6f41721b4bb7cdb1bb417df9f087fbcddfe971"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "sha256": "6305a2c249bed35beba2f8f2d688c3f7b80e10eb5c10eaf84ea9a36e8891caf0"
+        },
+        {
+          "path": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "sha256": "47049d7ff9ac0129e686ee3d6a9f57ce735c618cb38c5cb04de78ec456c1c0ca"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": ".fstar/specs/guides/impact-check-guide.md",
+          "sha256": "7c5ac9086adf31f50a447b6161d7e6561c5baf8f8c71299332ea0c0e00b4a258"
+        }
+      ],
+      "items": [
+        {
+          "command": "code read + phrase assertions + full suite",
+          "detail": "all user-facing surfaces natural-language, no command-style copy in any state block; agent-internal syntax retained; confirmation semantics unchanged (user-only, one-time, snapshot-bound); README matches code; resource_version 6 exercised by installer suite; assertion diff shows no weakening",
+          "plan_item": "P-005",
+          "requirement_ids": [
+            "R-007",
+            "D-007"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-19T19:43:22.647076Z",
+      "producer": {
+        "id": "check-crossproj-p005-1-worker",
+        "role": "check",
+        "session_id": "check-crossproj-p005-1-worker"
+      },
+      "run_id": "check-crossproj-p005-1",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "R-007",
+              "sha256": "036cfca46ef61e674d430657acd14f604aecfa1abe2da81a197a618845f47f5f"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/cross-project-task-lifecycle/doc/design.md",
+          "dependencies": [],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "D-007",
+              "sha256": "a3628791344315d6db863c6789b65fe5cb75202eb8c6151dd0ce5d139da18b03"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-19T13:00:29.991321Z",
+      "excluded": [],
+      "id": "planning-review",
+      "included": [
+        "clarify",
+        "design",
+        "doc-check",
+        "editor",
+        "plan",
+        "prd"
+      ],
+      "reason": "用户要求本批一并实施，先持久化需求与计划",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-19T13:00:29.991294Z",
+        "quote": "我再提几个场景优化项然后上面说的那个措辞 跟着这次任务一块改了",
+        "reference": "conversation: cross-project requirements and selected unified acceptance / three storage modes",
+        "scope": "task cross-project-task-lifecycle",
+        "source_id": "conversation-cross-project-planning-review",
+        "type": "conversation",
+        "validates": "68f7b6dc80b157f8617be101b7764ea31d3adab40e60690dfe14feed9a581f5e"
+      }
+    },
+    {
+      "enabled_at": "2026-11-19T13:00:29.993308Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "archive",
+        "events",
+        "evidence",
+        "lease",
+        "recovery",
+        "task"
+      ],
+      "reason": "用户要求本批一并实施，先持久化需求与计划",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-19T13:00:29.993289Z",
+        "quote": "我再提几个场景优化项然后上面说的那个措辞 跟着这次任务一块改了",
+        "reference": "conversation: cross-project requirements and selected unified acceptance / three storage modes",
+        "scope": "task cross-project-task-lifecycle",
+        "source_id": "conversation-cross-project-persistent-task",
+        "type": "conversation",
+        "validates": "68f7b6dc80b157f8617be101b7764ea31d3adab40e60690dfe14feed9a581f5e"
+      }
+    }
+  ],
+  "id": "641b20c8-ae24-4a97-8167-8aa8cd00c523",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/cross-project-task-lifecycle/doc/design.md": {
+          "D-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-001:end -->",
+            "start_marker": "<!-- fstar:item:D-001:start -->"
+          },
+          "D-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-002:end -->",
+            "start_marker": "<!-- fstar:item:D-002:start -->"
+          },
+          "D-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-003:end -->",
+            "start_marker": "<!-- fstar:item:D-003:start -->"
+          },
+          "D-004": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-004:end -->",
+            "start_marker": "<!-- fstar:item:D-004:start -->"
+          },
+          "D-005": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-005:end -->",
+            "start_marker": "<!-- fstar:item:D-005:start -->"
+          },
+          "D-006": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-006:end -->",
+            "start_marker": "<!-- fstar:item:D-006:start -->"
+          },
+          "D-007": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:D-007:end -->",
+            "start_marker": "<!-- fstar:item:D-007:start -->"
+          }
+        },
+        ".fstar/tasks/cross-project-task-lifecycle/doc/prd.md": {
+          "R-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-001:end -->",
+            "start_marker": "<!-- fstar:item:R-001:start -->"
+          },
+          "R-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-002:end -->",
+            "start_marker": "<!-- fstar:item:R-002:start -->"
+          },
+          "R-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-003:end -->",
+            "start_marker": "<!-- fstar:item:R-003:start -->"
+          },
+          "R-004": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-004:end -->",
+            "start_marker": "<!-- fstar:item:R-004:start -->"
+          },
+          "R-005": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-005:end -->",
+            "start_marker": "<!-- fstar:item:R-005:start -->"
+          },
+          "R-006": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-006:end -->",
+            "start_marker": "<!-- fstar:item:R-006:start -->"
+          },
+          "R-007": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:R-007:end -->",
+            "start_marker": "<!-- fstar:item:R-007:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "9b3f002c7e3399f5ff28a626bf66fa6301f761b454cf8502815976b71468929c",
+      "artifact_map_source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "note": "editor docs-cross-project-1 delivered",
+        "source_id": "content"
+      },
+      "dispatch_harvested": [
+        "check-crossproj-p001-1",
+        "check-crossproj-p002-1",
+        "check-crossproj-p003-1",
+        "check-crossproj-p004-1",
+        "check-crossproj-p005-1",
+        "impl-crossproj-p001-1",
+        "impl-crossproj-p002-1",
+        "impl-crossproj-p003-1",
+        "impl-crossproj-p004-1",
+        "impl-crossproj-p005-1"
+      ]
+    }
+  },
+  "name": "cross-project-task-lifecycle",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "跨仓库任务、项目数据存放与验收阶段",
+  "worktree_path": ""
+}

@@ -1996,7 +1996,29 @@ MIGRATIONS: Dict[Tuple[int, int], object] = {}
 
 
 def _data_root(target_root: Path) -> Path:
+    """The data root of a migration target.
+
+    For a project this is the resolved project data root: ``<repo>/.fstar``
+    for project-shared/project-local, and the pointer target for
+    user-directory. A user root keeps its own ``.fstar`` subdirectory.
+    """
+    from .store import POINTER_FILE, _read_pointer, _safe_pointer_data_root
+    pointer = target_root / POINTER_FILE
+    if pointer.is_file() and not pointer.is_symlink():
+        record = _read_pointer(pointer)
+        return _safe_pointer_data_root(target_root, record)
     return target_root / ".fstar"
+
+
+def _backup_base(target_root: Path, data_root: Path) -> Path:
+    """Where migration backups live for this target.
+
+    Backups stay next to the data root they protect, so a user-directory
+    project never writes backup directories into the repository.
+    """
+    if data_root.parent == target_root:
+        return target_root
+    return data_root.parent
 
 
 def _snapshot(root: Path) -> Dict[str, str]:
@@ -2039,7 +2061,7 @@ def migrate(*, target_root: Path, from_schema: Optional[int] = None, to_schema: 
         raise DomainError("migration_unsupported", "No implemented migration chain for this schema pair",
                           {"from": from_schema, "to": to_schema})
     operation = operation_id or "mig-%s" % uuid.uuid4().hex[:10]
-    backup_root = target_root / "install-backups" / operation
+    backup_root = _backup_base(target_root, _data_root(target_root)) / "install-backups" / operation
     if dry_run:
         return {"operation": "migrate", "from_schema": from_schema, "to_schema": to_schema,
                 "result": "dry-run", "operation_id": operation, "backup_root": str(backup_root)}
@@ -2080,8 +2102,9 @@ def rollback_migration(*, target_root: Path, transaction_id: str, restore=None) 
     """
     if not re.fullmatch(r"mig-[0-9a-f]{10}", transaction_id):
         raise DomainError("migration_unknown_transaction", "Invalid migration transaction id")
-    backup_root = target_root / "install-backups" / transaction_id
-    _reject_symlink_ancestors(backup_root, target_root)
+    backup_base = _backup_base(target_root, _data_root(target_root))
+    backup_root = backup_base / "install-backups" / transaction_id
+    _reject_symlink_ancestors(backup_root, backup_base)
     if not backup_root.exists():
         raise DomainError("migration_unknown_transaction", "No backup directory for this transaction id",
                           {"transaction_id": transaction_id})
@@ -2283,13 +2306,64 @@ def _frontmatter_description(text: str) -> Optional[str]:
 def _schema_report(roots: Roots) -> dict:
     result = {"data_schema": {"supported": [1], "current": 1}}
     if roots.project_root:
-        marker = roots.project_root / ".fstar" / ".schema-version"
+        # The marker lives in the resolved data root, which is <repo>/.fstar for
+        # project-shared/project-local and the pointer target for user-directory.
+        from .store import _resolve_project_layout
+        try:
+            data_root, storage_mode, _project_id, _moved = _resolve_project_layout(roots.project_root)
+        except DomainError:
+            data_root, storage_mode = roots.project_root / ".fstar", None
+        marker = data_root / ".schema-version"
         result["project_marker"] = marker.read_text(encoding="utf-8").strip() if marker.exists() else None
+        result["storage"] = {"mode": storage_mode, "data_root": str(data_root)}
+        result["storage"]["checks"] = _storage_checks(roots, storage_mode, data_root)
     result["knowledge_schema"] = {
         "status": "pending",
         "note": "The knowledge-base public schema has not been handed over; it is not validated here.",
     }
     return result
+
+
+def _storage_checks(roots: Roots, storage_mode, data_root: Path) -> list:
+    """Health facts for the resolved storage mode.
+
+    Every mode reports its mode and resolved data root. user-directory mode
+    additionally verifies that the project folder and the registered UUID
+    agree, so a renamed or foreign data root is reported instead of being
+    used silently.
+    """
+    checks = []
+    if storage_mode == "user-directory":
+        from .store import _read_registry, _registry_path
+        try:
+            record = _read_registry(_registry_path(roots.user_root))
+        except DomainError as exc:
+            checks.append({"check": "registry", "status": "error", "detail": exc.message})
+            return checks
+        folder = data_root.name
+        entry = None
+        for project_id, candidate in record.get("projects", {}).items():
+            if isinstance(candidate, dict) and candidate.get("data_root") == str(data_root):
+                entry = (project_id, candidate)
+                break
+        if entry is None:
+            checks.append({"check": "registry_entry", "status": "missing",
+                           "detail": "No registered project points at this data root"})
+            return checks
+        project_id, candidate = entry
+        # The folder is "<uuid>-<readable name>"; the uuid must lead it.
+        consistent = folder == project_id or folder.startswith(project_id + "-")
+        checks.append({"check": "registry_entry", "status": "ok" if consistent else "mismatch",
+                       "project_id": project_id,
+                       "detail": "Registered project id and data-root folder agree"
+                                 if consistent else
+                                 "Data-root folder does not match the registered project id"})
+        if candidate.get("path") != str(roots.project_root):
+            checks.append({"check": "bound_path", "status": "warning",
+                           "detail": "Registered path %s differs from the current project root; "
+                                     "run the rebind command if the project moved"
+                                     % candidate.get("path")})
+    return checks
 
 
 def _auto_commit_report(roots: Roots) -> dict:
@@ -2336,6 +2410,7 @@ def version_report(*, roots: Roots) -> dict:
 
 def register_commands(subparsers) -> None:
     from .cli import OPTIONAL_HANDLER_ATTR
+    from .store import STORAGE_MODES
 
     install = subparsers.add_parser(
         "install", help="install packaged resources and verified host entries")
@@ -2346,6 +2421,10 @@ def register_commands(subparsers) -> None:
                          help="treatment for installer-owned files modified by the user")
     install.add_argument("--user-level", action="store_true",
                          help="target ~/.claude instead of the current fstar project's .claude")
+    install.add_argument("--storage", choices=list(STORAGE_MODES), default=None,
+                         help="initialize the project data root in this mode if it is not "
+                              "initialized yet: project-shared (default), project-local, "
+                              "or user-directory")
     install.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_install})
 
     update = subparsers.add_parser(
@@ -2405,6 +2484,9 @@ def _explicit_roots(args) -> bool:
 
 
 def _handle_install(args):
+    storage = getattr(args, "storage", None)
+    if storage is not None:
+        _initialize_storage_for_install(args, storage)
     roots = _roots(args)
     if not args.dry_run:
         # A previous crash must be repaired before planning against its
@@ -2417,6 +2499,46 @@ def _handle_install(args):
         return {"dry_run": False, "aborted": True, "reason": "user_declined",
                 "host_roots": plan["roots"]["host_roots"], "warnings": plan["warnings"]}
     return {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
+
+
+def _initialize_storage_for_install(args, storage: str) -> None:
+    """Honor ``install --storage``: initialize the project data root if needed.
+
+    The mode is never changed for an already-initialized project (that would
+    silently move data); the existing mode is reported instead. A dry run
+    initializes nothing.
+    """
+    from .project import initialize_project
+
+    project = getattr(args, "project", None)
+    root = Path(project).expanduser().resolve() if project else Path.cwd()
+    existing = _resolved_storage_mode(root)
+    if existing is not None:
+        if existing != storage:
+            raise DomainError(
+                "storage_mode_mismatch",
+                "This project is already initialized with a different storage mode",
+                {"initialized": existing, "requested": storage,
+                 "hint": "storage mode is chosen at init; project data is never moved silently"})
+        return
+    user = getattr(args, "user_data_root", None)
+    user_root = Path(user).expanduser() if user else Path.home() / ".fstar"
+    initialize_project(root, user_root, storage=storage,
+                       dry_run=bool(getattr(args, "dry_run", False)))
+
+
+def _resolved_storage_mode(root: Path):
+    """Storage mode of an initialized project, or None when uninitialized."""
+    from .store import _resolve_project_layout
+    try:
+        _data_root, mode, _project_id, _moved = _resolve_project_layout(root, _tolerate_mismatch=True)
+    except DomainError:
+        return None
+    marker = (root / ".fstar" / ".schema-version")
+    from .store import POINTER_FILE
+    if mode == "user-directory" or (root / POINTER_FILE).is_file() or marker.is_file():
+        return mode
+    return None
 
 
 def _declines_confirmation(args, plan: dict) -> bool:

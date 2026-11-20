@@ -11,7 +11,9 @@ TASK_FIELDS = (
     "worktree_path", "commit", "pr_url", "notes", "meta", "capabilities",
     "extensions", "events",
 )
-PHASES = {"planning", "in_progress", "completed"}
+PHASES = {"planning", "in_progress", "awaiting_acceptance", "completed"}
+# Order of the lifecycle for effective-state reporting and guards.
+PHASE_ORDER = {"planning": 0, "in_progress": 1, "awaiting_acceptance": 2, "completed": 3}
 PRIORITIES = {"P0", "P1", "P2", "P3"}
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 

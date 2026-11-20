@@ -5,14 +5,19 @@ import fcntl
 import hashlib
 import json
 import os
+import re
 import tempfile
 import time
 from pathlib import Path
 from typing import Iterator, Optional
+from uuid import UUID
 
 from .models import DomainError, validate_task
 
 SCHEMA_VERSION = "1"
+POINTER_SCHEMA = "fstar.pointer.v1"
+POINTER_FILE = ".fstar-pointer.json"
+STORAGE_MODES = ("project-shared", "project-local", "user-directory")
 
 
 def canonical_json(data: object) -> bytes:
@@ -54,7 +59,93 @@ def find_project_root(start: Path) -> Optional[Path]:
         marker = candidate / ".fstar" / ".schema-version"
         if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
             return candidate
+        pointer = candidate / POINTER_FILE
+        if pointer.is_file() and not pointer.is_symlink():
+            record = _read_pointer(pointer)
+            if _pointer_path_matches(candidate, record):
+                data = _safe_pointer_data_root(candidate, record)
+                marker = data / ".schema-version"
+                if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
+                    return candidate
     return None
+
+
+def _pointer_path_matches(project_root: Path, record: dict) -> bool:
+    """A pointer only resolves at the path it was bound to.
+
+    A moved project requires an explicit rebind; the pointer never silently
+    follows the repo to a new location. ``bound_path`` is the recorded
+    project root at init/rebind time.
+    """
+    bound = record.get("bound_path")
+    if not isinstance(bound, str) or not bound:
+        return True
+    # Compare resolved paths: a project root reached through a symlinked
+    # parent (e.g. macOS /tmp) must still match its recorded binding.
+    return Path(bound).resolve(strict=False) == Path(project_root).resolve(strict=False)
+
+
+def _read_pointer(path: Path) -> Optional[dict]:
+    """Read a pointer file; a corrupt pointer is reported, never followed."""
+    try:
+        with path.open("r", encoding="utf-8") as stream:
+            record = json.load(stream)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise DomainError("corrupt_pointer", "Project pointer file is corrupt; repair or remove it",
+                          {"path": str(path), "reason": str(exc)})
+    if not isinstance(record, dict) or record.get("schema") != POINTER_SCHEMA \
+            or not isinstance(record.get("project_id"), str) \
+            or not isinstance(record.get("data_root"), str):
+        raise DomainError("corrupt_pointer", "Project pointer file is invalid",
+                          {"path": str(path)})
+    try:
+        UUID(record["project_id"])
+    except ValueError:
+        raise DomainError("corrupt_pointer", "Project pointer id is not a UUID", {"path": str(path)})
+    data_root = record["data_root"]
+    if not data_root:
+        raise DomainError("corrupt_pointer", "Pointer data_root must be a non-empty path",
+                          {"path": str(path)})
+    if Path(data_root).is_absolute():
+        record = dict(record, data_root_abs=data_root)
+    elif ".." in Path(data_root).parts:
+        raise DomainError("corrupt_pointer", "Relative pointer data_root may not traverse upward",
+                          {"path": str(path), "data_root": data_root})
+    if record.get("mode") is not None and record["mode"] not in STORAGE_MODES:
+        raise DomainError("corrupt_pointer", "Pointer declares an unknown storage mode",
+                          {"path": str(path), "mode": record.get("mode")})
+    return record
+
+
+def _safe_pointer_data_root(project_root: Path, record: dict) -> Path:
+    """Resolve the pointer's data root, refusing aliases and escapes."""
+    relative = record["data_root"]
+    if record.get("data_root_abs") is not None:
+        absolute = Path(record["data_root_abs"])
+        # A symlinked absolute data root is an alias, not a location: the
+        # relative branch rejects it below, so the absolute branch must too.
+        if absolute.is_symlink():
+            raise DomainError("corrupt_pointer", "Pointer data_root may not be a symbolic link",
+                              {"path": str(project_root / POINTER_FILE), "data_root": str(absolute)})
+        resolved = absolute.resolve(strict=False)
+        if not resolved.is_absolute():
+            raise DomainError("corrupt_pointer", "Pointer data_root_abs must be absolute",
+                              {"path": str(project_root / POINTER_FILE)})
+        return resolved
+    if ".." in Path(relative).parts or Path(relative).is_absolute():
+        raise DomainError("corrupt_pointer", "Pointer data_root escapes the project",
+                          {"path": str(project_root / POINTER_FILE), "data_root": relative})
+    candidate = project_root.joinpath(*Path(relative).parts)
+    resolved = candidate.resolve(strict=False)
+    try:
+        resolved.relative_to(project_root.resolve())
+    except ValueError:
+        raise DomainError("corrupt_pointer", "Pointer data_root escapes the project",
+                          {"path": str(project_root / POINTER_FILE), "data_root": relative})
+    if candidate.is_symlink():
+        raise DomainError("corrupt_pointer", "Pointer data_root may not be a symbolic link",
+                          {"path": str(candidate)})
+    return resolved
 
 
 def _inside(path: Path, root: Path) -> bool:
@@ -75,20 +166,434 @@ def _reject_symlinks(path: Path, stop: Path) -> None:
         current = current.parent
 
 
+def _pointer_data_root_payload(data_root: Path, project_root: Path) -> str:
+    """Pointer data_root payload: relative when inside the project, else absolute."""
+    relative = os.path.relpath(data_root.resolve(), project_root.resolve()).replace(os.sep, "/")
+    if relative.startswith(".."):
+        return str(data_root.resolve())
+    return relative
+
+
+def _resolve_data_root(project_root: Path) -> Path:
+    """The data root for this project; project-local for every mode."""
+    return _resolve_project_layout(project_root)[0]
+
+
+REBIND_PENDING = object()
+
+
+STORAGE_MARKER_FILE = "storage-mode"
+
+
+def _config_project_id(data_root: Path) -> Optional[str]:
+    """Project UUID declared by the project's own config.yaml, if any."""
+    config = data_root / "config.yaml"
+    if not config.is_file():
+        return None
+    try:
+        from .config import parse_config
+        values = parse_config(config.read_text(encoding="utf-8"), config)
+        project = values.get("project")
+        if isinstance(project, dict) and isinstance(project.get("id"), str):
+            return project["id"]
+    except Exception:
+        return None
+    return None
+
+
+def _storage_identity(project_root: Path, data_root: Path) -> tuple:
+    """(storage_mode, project_id) for a resolved data root; legacy defaults."""
+    pointer = project_root / POINTER_FILE
+    if pointer.is_file() and not pointer.is_symlink():
+        record = _read_pointer(pointer)
+        mode = record.get("mode") or "user-directory"
+        return mode, record["project_id"]
+    marker = data_root / STORAGE_MARKER_FILE
+    if marker.is_file() and not marker.is_symlink():
+        try:
+            mode = marker.read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError):
+            mode = ""
+        if mode in STORAGE_MODES:
+            return mode, _config_project_id(data_root)
+    config = data_root / "config.yaml"
+    project_id = None
+    if config.is_file():
+        try:
+            from .config import parse_config
+            values = parse_config(config.read_text(encoding="utf-8"), config)
+            project = values.get("project")
+            if isinstance(project, dict) and isinstance(project.get("id"), str):
+                project_id = project["id"]
+        except Exception:
+            project_id = None
+    return "project-shared", project_id
+
+
+def _resolve_project_layout(project_root: Path, *, _tolerate_mismatch: bool = False) -> tuple:
+    """Resolve (data_root, storage_mode, project_id) for one project root.
+
+    Resolution order, matching find_project_root: an in-repo schema marker
+    first (legacy and project-shared/local), then a pointer file (user-directory).
+    Symlinked or escaping pointer data roots are refused, not followed.
+    """
+    project_root = project_root.resolve()
+    marker = project_root / ".fstar" / ".schema-version"
+    if marker.is_file():
+        mode, project_id = _storage_identity(project_root, project_root / ".fstar")
+        return project_root / ".fstar", mode, project_id, False
+    pointer = project_root / POINTER_FILE
+    if pointer.is_file() and not pointer.is_symlink():
+        record = _read_pointer(pointer)
+        matches = _pointer_path_matches(project_root, record)
+        if not matches and not _tolerate_mismatch:
+            raise DomainError("project_moved_needs_rebind",
+                              "This project was initialized at another path; run the rebind "
+                              "command to bind it to the current path",
+                              {"project_root": str(project_root),
+                               "bound_path": record.get("bound_path"),
+                               "project_id": record.get("project_id")})
+        anchor = Path(record["bound_path"]) if (record.get("bound_path") and not matches) else project_root
+        data_root = _safe_pointer_data_root(anchor, record)
+        mode = record.get("mode") or "user-directory"
+        return data_root, mode, record["project_id"], not matches
+    # Uninitialized: default legacy layout so errors and init previews read naturally.
+    return project_root / ".fstar", "project-shared", None, False
+
+
+def _registry_path(user_home: Path) -> Path:
+    return user_home / "projects.json"
+
+
+def _read_registry(registry: Path) -> dict:
+    if not registry.is_file():
+        return {"schema": "fstar.projects.v1", "projects": {}}
+    if registry.is_symlink():
+        raise DomainError("corrupt_registry", "Project registry may not be a symbolic link",
+                          {"path": str(registry)})
+    try:
+        with registry.open("r", encoding="utf-8") as stream:
+            record = json.load(stream)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise DomainError("corrupt_registry", "Project registry is corrupt",
+                          {"path": str(registry), "reason": str(exc)})
+    if not isinstance(record, dict) or record.get("schema") != "fstar.projects.v1" \
+            or not isinstance(record.get("projects"), dict):
+        raise DomainError("corrupt_registry", "Project registry is invalid", {"path": str(registry)})
+    return record
+
+
+def _slugify(name: str) -> str:
+    cleaned = "".join(char if char.isalnum() or char in "-_" else "-" for char in name.strip())
+    cleaned = re.sub(r"-{2,}", "-", cleaned).strip("-")
+    return (cleaned or "project")[:40]
+
+
+def register_user_directory_project(*, user_home: Path, project_id: str, name: str,
+                                    data_root: Path, project_path: Path,
+                                    confirmation: Optional[dict] = None,
+                                    explicit: bool = True) -> dict:
+    """Register a user-directory project under the user-level registry.
+
+    Idempotent for the same id+path; refuses a colliding id bound to a
+    different path instead of merging. A corrupted registry is an error, so
+    one bad file can never silently orphan every project.
+    """
+    del confirmation  # registration is machine bookkeeping; init owns user intent
+    registry = _registry_path(Path(user_home))
+    if registry.exists() and registry.is_symlink():
+        raise DomainError("corrupt_registry", "Project registry may not be a symbolic link",
+                          {"path": str(registry)})
+    registry.parent.mkdir(parents=True, exist_ok=True)
+    record = _read_registry(registry)
+    projects = dict(record.get("projects", {}))
+    existing = projects.get(project_id)
+    entry = {"path": str(project_path), "name": name, "data_root": str(data_root),
+             "storage_mode": "user-directory"}
+    if existing is not None:
+        if not isinstance(existing, dict) or existing.get("path") != str(project_path):
+            raise DomainError("project_id_conflict",
+                              "This project id is already bound to another path; "
+                              "rebind explicitly instead of re-registering",
+                              {"project_id": project_id,
+                               "registered_path": existing.get("path") if isinstance(existing, dict) else None,
+                               "requested_path": str(project_path)}, status=4)
+        return {"project_id": project_id, "data_root": str(data_root), "path": str(project_path),
+                "registered": True, "rebound": False}
+    projects[project_id] = entry
+    payload = {"schema": "fstar.projects.v1", "projects": projects}
+    atomic_write_json(registry, payload)
+    return {"project_id": project_id, "data_root": str(data_root), "path": str(project_path),
+            "registered": True, "rebound": False}
+
+
+def user_directory_root(user_home: Path, project_id: str, name: str) -> Path:
+    """Per-project data folder under the user root: ``projects/<uuid>-<name>``.
+
+    The stable UUID disambiguates same-name projects; the readable name is
+    only decoration and never participates in identity.
+    """
+    if not re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", project_id):
+        raise DomainError("invalid_project_id", "Project id must be a UUID", {"project_id": project_id})
+    return Path(user_home).resolve() / "projects" / ("%s-%s" % (project_id, _slugify(name)))
+
+
+def find_rebind_source(start: Path) -> Optional[Path]:
+    """Find a project root that can be rebound, starting at ``start``.
+
+    Unlike :func:`find_project_root` this also accepts a pointer file whose
+    ``bound_path`` no longer matches the current location, which is exactly
+    the state of a project whose directory was moved: the pointer travelled
+    with the repository but the recorded binding did not.
+    """
+    current = Path(start).resolve()
+    if current.is_file():
+        current = current.parent
+    for candidate in (current,) + tuple(current.parents):
+        pointer = candidate / POINTER_FILE
+        if pointer.is_file() and not pointer.is_symlink():
+            return candidate
+        marker = candidate / ".fstar" / ".schema-version"
+        if marker.is_file():
+            return candidate
+    return None
+
+
+def rebind_registered(*, user_home: Path, source_path: Path, target_path: Path,
+                      confirmation: Optional[dict] = None) -> dict:
+    """Rebind a user-directory project identified by its registered path.
+
+    Used when the recorded project root no longer carries a pointer (the
+    repository was moved or the pointer was lost): the user-level registry
+    still names the project, so the binding can be re-established explicitly.
+    Only an exact path match selects the project; nothing is merged by name
+    or by remote URL.
+    """
+    del confirmation  # rebinding is an explicit command; the command is the consent
+    target = Path(target_path).expanduser().resolve()
+    source = Path(source_path).expanduser().resolve()
+    if not target.is_dir():
+        raise DomainError("rebind_target_invalid", "Rebind target must be an existing directory",
+                          {"path": str(target)})
+    registry = _registry_path(Path(user_home))
+    record = _read_registry(registry)
+    matches = [pid for pid, entry in sorted(record.get("projects", {}).items())
+               if isinstance(entry, dict) and isinstance(entry.get("path"), str)
+               and Path(entry["path"]).resolve(strict=False) == source]
+    if not matches:
+        raise DomainError("rebind_project_unregistered",
+                          "No user-directory project is registered for this path",
+                          {"path": str(source)})
+    if len(matches) > 1:
+        raise DomainError("rebind_ambiguous_project",
+                          "Several projects are registered for this path; pass --project explicitly",
+                          {"path": str(source), "project_ids": matches})
+    project_id = matches[0]
+    entry = dict(record["projects"][project_id])
+    data_root = Path(entry.get("data_root", "")).expanduser()
+    marker = data_root / ".schema-version"
+    if not marker.is_file() or marker.read_text(encoding="utf-8").strip() != SCHEMA_VERSION:
+        raise DomainError("rebind_data_root_missing",
+                          "The registered data root is missing or unreadable",
+                          {"project_id": project_id, "data_root": str(data_root)})
+    pointer_record = {"schema": POINTER_SCHEMA, "project_id": project_id,
+                      "data_root": _pointer_data_root_payload(data_root, target),
+                      "bound_path": str(target),
+                      "mode": "user-directory"}
+    entry["path"] = str(target)
+    entry["rebound_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    projects = dict(record.get("projects", {}))
+    projects[project_id] = entry
+    atomic_write_json(registry, {"schema": "fstar.projects.v1", "projects": projects})
+    new_pointer = target / POINTER_FILE
+    _reject_symlinks(new_pointer.parent, target)
+    atomic_write_json(new_pointer, pointer_record)
+    return {"rebound": True, "project_root": str(target), "project_id": project_id,
+            "data_root": str(data_root)}
+
+
+def locate_project(start: Path, user_home: Optional[Path] = None) -> dict:
+    """Resolve a project by pointer or registry from any starting path.
+
+    Returns {found, project_root, data_root, storage_mode, project_id,
+    via}. Pointer resolution requires the data root to exist and match
+    schema 1; registry entries whose recorded path no longer exists are
+    reported as missing, never auto-rebound.
+    """
+    start = Path(start).resolve()
+    if start.is_file():
+        start = start.parent
+    user = (user_home or (Path.home() / ".fstar")).resolve()
+    for candidate in (start,) + tuple(start.parents):
+        pointer = candidate / POINTER_FILE
+        if pointer.is_file() and not pointer.is_symlink():
+            record = _read_pointer(pointer)
+            data_root = _safe_pointer_data_root(candidate, record)
+            marker = data_root / ".schema-version"
+            if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
+                return {"found": True, "project_root": candidate, "data_root": data_root,
+                        "storage_mode": record.get("mode") or "user-directory",
+                        "project_id": record["project_id"], "via": "pointer"}
+    registry = _read_registry(_registry_path(user))
+    for project_id, entry in sorted(registry.get("projects", {}).items()):
+        if not isinstance(entry, dict):
+            continue
+        path = entry.get("path")
+        data_root = entry.get("data_root")
+        if not isinstance(path, str) or not isinstance(data_root, str):
+            continue
+        if not Path(path).is_dir():
+            continue
+        marker = Path(data_root) / ".schema-version"
+        if not marker.is_file() or marker.read_text(encoding="utf-8").strip() != SCHEMA_VERSION:
+            continue
+        return {"found": True, "project_root": Path(path), "data_root": Path(data_root),
+                "storage_mode": entry.get("storage_mode") or "user-directory",
+                "project_id": project_id, "via": "registry"}
+    return {"found": False, "project_root": None, "data_root": None,
+            "storage_mode": None, "project_id": None, "via": None}
+
+
 class TaskStore:
     def __init__(self, project_root: Path, *, user_home: Optional[Path] = None, runtime_root: Optional[Path] = None, lock_timeout: float = 5.0):
         self.project_root = project_root.resolve()
         self.user_home = (user_home or (Path.home() / ".fstar")).resolve()
         self.runtime_root = (runtime_root or (self.user_home / "runtime")).resolve()
-        self.fstar_root = self.project_root / ".fstar"
+        layout = _resolve_project_layout(self.project_root, _tolerate_mismatch=True)
+        self.fstar_root, self.storage_mode, self.project_id = layout[0], layout[1], layout[2]
+        self.moved_needs_rebind = len(layout) > 3 and bool(layout[3])
+        self.storage_mode, self.project_id = _storage_identity(self.project_root, self.fstar_root)
         self.tasks_root = self.fstar_root / "tasks"
         self.archive_root = self.fstar_root / "archive"
-        project_key = hashlib.sha256(str(self.project_root).encode()).hexdigest()
+        # In user-directory mode the runtime slot is keyed by the stable
+        # project id, so a moved project keeps its session pointers and its
+        # lock after an explicit rebind. Other modes keep the path-derived
+        # key: their data root travels with the repository, and a copy of a
+        # repository must not share a session slot with the original.
+        if self.storage_mode == "user-directory" and self.project_id:
+            project_key = "id-" + hashlib.sha256(self.project_id.encode()).hexdigest()
+        else:
+            project_key = hashlib.sha256(str(self.project_root).encode()).hexdigest()
         self.project_runtime = self.runtime_root / "projects" / project_key
         self.lock_path = self.project_runtime / "project.lock"
         self.lock_timeout = lock_timeout
 
-    def require_project(self) -> None:
+    def project_file(self, relative: str) -> Path:
+        """Resolve a project-relative artifact path to a real file.
+
+        Paths that start with the legacy ``.fstar/`` prefix address the
+        project's own data (specs, task docs); everything else addresses the
+        repository. In user-directory mode the data root lives outside the
+        repository, so the prefix decides the root instead of the layout.
+        """
+        candidate = Path(relative)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            raise DomainError("unsafe_evidence_path", "Evidence path must be project-relative",
+                              {"path": relative})
+        if candidate.parts and candidate.parts[0] == ".fstar":
+            root = self.fstar_root
+            parts = candidate.parts[1:]
+        else:
+            root = self.project_root
+            parts = candidate.parts
+        path = root.joinpath(*parts)
+        resolved = path.resolve(strict=False)
+        try:
+            resolved.relative_to(root.resolve())
+        except ValueError:
+            raise DomainError("unsafe_evidence_path", "Evidence path escapes the project",
+                              {"path": relative})
+        if path.is_symlink() or (path.exists() and resolved != path.absolute()):
+            raise DomainError("unsafe_evidence_path", "Evidence cannot follow a symbolic link",
+                              {"path": relative})
+        return path
+
+    def storage_info(self) -> dict:
+        """Reportable storage identity for doctor/init surfaces."""
+        return {"storage_mode": self.storage_mode, "project_id": self.project_id,
+                "data_root": str(self.fstar_root),
+                "project_root": str(self.project_root)}
+
+    def identity_path(self, path: Path) -> str:
+        """Stable identity string for a path inside this project.
+
+        Data-root paths keep the ``.fstar/`` prefix so an identity is the
+        same in every storage mode (the prefix is part of the name, not of
+        the location); repository paths stay project-relative. The path
+        itself may live outside the repository (user-directory mode).
+        """
+        resolved = Path(path).resolve(strict=False)
+        try:
+            return str(Path(".fstar") / resolved.relative_to(self.fstar_root.resolve()))
+        except ValueError:
+            pass
+        try:
+            return str(resolved.relative_to(self.project_root.resolve()))
+        except ValueError:
+            return str(resolved)
+
+    def rebind(self, new_path: Path, *, confirmation: dict) -> dict:
+        """Explicitly rebind a user-directory project to a moved path.
+
+        Never moves or merges data: the pointer at the old path is preserved
+        (the old path may no longer exist) and a pointer at the new path is
+        created atomically; the registry binding is updated under the
+        project lock. No auto-merge by name or remote URL ever happens.
+        """
+        if self.storage_mode != "user-directory":
+            raise DomainError("rebind_requires_user_directory",
+                              "Only user-directory storage supports rebind",
+                              {"storage_mode": self.storage_mode})
+        target = Path(new_path).expanduser().resolve()
+        old_pointer_record = None
+        pointer = self.project_root / POINTER_FILE
+        if pointer.is_file() and not pointer.is_symlink():
+            old_pointer_record = _read_pointer(pointer)
+        if target == self.project_root and (old_pointer_record is None
+                                             or _pointer_path_matches(target, old_pointer_record)):
+            return {"rebound": False, "project_root": str(target),
+                    "project_id": self.project_id, "data_root": str(self.fstar_root),
+                    "reason": "unchanged"}
+        if not target.is_dir():
+            raise DomainError("rebind_target_invalid", "Rebind target must be an existing directory",
+                              {"path": str(target)})
+        pointer_record = {"schema": POINTER_SCHEMA, "project_id": self.project_id,
+                          "data_root": _pointer_data_root_payload(self.fstar_root, target),
+                          "bound_path": str(target),
+                          "mode": "user-directory"}
+        with self.transaction(moved_ok=True):
+            registry = _registry_path(self.user_home)
+            record = _read_registry(registry)
+            existing = record.get("projects", {}).get(self.project_id)
+            if existing is None:
+                raise DomainError("rebind_project_unregistered",
+                                  "This project is not registered for user-directory storage",
+                                  {"project_id": self.project_id})
+            existing = dict(existing)
+            existing["path"] = str(target)
+            existing["rebound_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            projects = dict(record.get("projects", {}))
+            projects[self.project_id] = existing
+            payload = {"schema": "fstar.projects.v1", "projects": projects}
+            atomic_write_json(registry, payload)
+            # Pointers are written at the OLD path (if it still exists, for the
+            # unchanged case) and at the NEW path, both carrying the new
+            # binding; the new location is the one that resolves afterwards.
+            for location in {self.project_root, target}:
+                if not location.is_dir():
+                    continue
+                new_pointer = location / POINTER_FILE
+                _reject_symlinks(new_pointer.parent, location)
+                atomic_write_json(new_pointer, pointer_record)
+        return {"rebound": True, "project_root": str(target), "project_id": self.project_id,
+                "data_root": str(self.fstar_root)}
+
+    def require_project(self, *, moved_ok: bool = False) -> None:
+        if getattr(self, "moved_needs_rebind", False) and not moved_ok:
+            raise DomainError("project_moved_needs_rebind",
+                              "This project was initialized at another path; run the rebind "
+                              "command to bind it to the current path",
+                              {"project_root": str(self.project_root), "project_id": self.project_id})
         marker = self.fstar_root / ".schema-version"
         if not marker.is_file():
             raise DomainError("project_not_initialized", "No initialized fstar project found", {"project": str(self.project_root)})
@@ -96,8 +601,8 @@ class TaskStore:
             raise DomainError("unsupported_schema", "Unsupported fstar schema version", {"path": str(marker)})
 
     @contextlib.contextmanager
-    def transaction(self) -> Iterator[None]:
-        self.require_project()
+    def transaction(self, *, moved_ok: bool = False) -> Iterator[None]:
+        self.require_project(moved_ok=moved_ok)
         self.lock_path.parent.mkdir(parents=True, exist_ok=True)
         with self.lock_path.open("a+") as stream:
             deadline = time.monotonic() + self.lock_timeout

@@ -930,18 +930,20 @@ class PromptContextTests(HookCase):
         self.assertIn("fstar prompt state: no_task", text)
         self.assertIn("<prompt-state>", text)
         self.assertIn("</prompt-state>", text)
-        for keyword in ("large", "small", "discussion", "read-only", "treat as large"):
+        for keyword in ("large", "small", "discussion", "read-only", "treat the work as large"):
             self.assertIn(keyword, text, keyword)
         # Exactly one block: no other state tags leak into the output.
         self.assertNotIn("frontier", text)
+        # User-facing wording is natural language, not a command to run.
+        self.assertIn("not as a command for them to run", text)
 
     def test_planning_state_for_created_task(self):
         self.create()
         result = self.run_prompt({"session_id": "s1"})
         self.assertEqual(result["state"], "planning")
-        self.assertIn("fstar-clarify", result["text"])
+        self.assertIn("clarify", result["text"])
         self.assertIn("frontier", result["text"])
-        self.assertIn("fstar-plan", result["text"])
+        self.assertIn("plan", result["text"])
 
     def test_in_progress_state_for_started_task(self):
         self.create()

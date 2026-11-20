@@ -218,10 +218,13 @@ def _rejected_ledger_hint(project_root: Optional[Path]) -> Optional[str]:
     """
     if project_root is None:
         return None
-    path = project_root / ".fstar" / "knowledge" / "references" / "rejected.md"
+    # The ledger lives in the project data root, which is <repo>/.fstar for
+    # project-shared/project-local and the pointer target for user-directory.
+    data_root = inject._project_data_root(project_root)
+    path = data_root / "knowledge" / "references" / "rejected.md"
     # Same alias/escape rejection as index injection: a symlinked ledger must
     # not influence the session, even though only the count is injected.
-    if not inject._safe_context_path(project_root, path) or not path.is_file():
+    if not inject._safe_context_path(data_root, path) or not path.is_file():
         return None
     try:
         entries = [line for line in path.read_text(encoding="utf-8").splitlines()
@@ -397,24 +400,50 @@ def _governance_member(project_root: Path, path: Path) -> Optional[str]:
     lexical segment check lets a case alias bypass the grant filter. On a
     case-sensitive filesystem this can only over-filter (fail closed), never
     under-filter.
+
+    The governed members live in the project's DATA root. In project-shared
+    and project-local mode that is ``<repo>/.fstar``; in user-directory mode
+    it lives under the user root, so the data root is consulted too.
     """
-    parts = _resolved_relative(path, project_root)
-    if len(parts) >= 2 and parts[0].casefold() == ".fstar":
-        member = parts[1].casefold()
-        if member in GOVERNED_MEMBERS:
-            return member
+    for root in (project_root, inject._project_data_root(project_root)):
+        parts = _resolved_relative(path, root)
+        if len(parts) >= 2 and parts[0].casefold() == ".fstar":
+            member = parts[1].casefold()
+            if member in GOVERNED_MEMBERS:
+                return member
+        elif root is not project_root and len(parts) >= 1 and parts[0].casefold() in GOVERNED_MEMBERS:
+            # user-directory layout: the data root holds "specs", "knowledge"
+            # directly, without the ".fstar" segment.
+            member = parts[0].casefold()
+            if member in GOVERNED_MEMBERS:
+                return member
     return None
 
 
 def _planning_member(project_root: Path, path: Path) -> Optional[str]:
-    """Classify planning artifacts in active tasks and archived task trees."""
-    parts = tuple(part.casefold() for part in _resolved_relative(path, project_root))
-    if len(parts) < 4 or parts[:2] not in ((".fstar", "tasks"), (".fstar", "archive")):
-        return None
-    for artifact, member in PLANNING_MEMBERS.items():
-        suffix = tuple(artifact.split("/"))
-        if len(parts) > 2 + len(suffix) and parts[-len(suffix):] == suffix:
-            return member
+    """Classify planning artifacts in active tasks and archived task trees.
+
+    The task and archive trees live in the project DATA root. In
+    project-shared/local mode that is ``<repo>/.fstar``, so the resolved
+    parts start with ``.fstar/tasks`` or ``.fstar/archive``; in
+    user-directory mode the data root holds ``tasks``/``archive`` directly.
+    """
+    for root in (project_root, inject._project_data_root(project_root)):
+        parts = tuple(part.casefold() for part in _resolved_relative(path, root))
+        if len(parts) < 4:
+            continue
+        if parts[:2] == (".fstar", "tasks") or parts[:2] == (".fstar", "archive"):
+            tail = parts[2:]
+        elif parts[0] in ("tasks", "archive"):
+            # user-directory layout: the data root holds "tasks"/"archive"
+            # directly, without the ".fstar" segment.
+            tail = parts[1:]
+        else:
+            continue
+        for artifact, member in PLANNING_MEMBERS.items():
+            suffix = tuple(artifact.split("/"))
+            if len(tail) > len(suffix) and tail[-len(suffix):] == suffix:
+                return member
     return None
 
 
@@ -657,17 +686,37 @@ def _doc_relative(payload: dict, file_path: Optional[str]) -> Optional[str]:
 
 
 def _is_task_doc(project_root: Path, relative: str) -> Optional[Path]:
-    """Return the owning task dir for a ``.fstar/tasks/**/doc/*.md`` path."""
+    """Return the owning task dir for a ``.fstar/tasks/**/doc/*.md`` path.
+
+    The task tree lives in the project's data root: inside the repository in
+    project-shared/local mode, under the user root in user-directory mode.
+    An absolute path is resolved against both.
+    """
     candidate = Path(relative)
+    roots = [project_root, inject._project_data_root(project_root)]
     if candidate.is_absolute():
-        try:
-            candidate = candidate.resolve().relative_to(project_root.resolve())
-        except (ValueError, OSError):
+        resolved = None
+        for root in roots:
+            try:
+                resolved = candidate.resolve().relative_to(root.resolve())
+                break
+            except (ValueError, OSError):
+                continue
+        if resolved is None:
             return None
+        candidate = resolved
     parts = candidate.parts
-    if ".." in parts or len(parts) < 5:
+    if ".." in parts or len(parts) < 4:
         return None
-    if parts[0] != ".fstar" or parts[1] != "tasks":
+    data_root = inject._project_data_root(project_root)
+    if parts[0] == ".fstar":
+        if len(parts) < 5 or parts[1] != "tasks":
+            return None
+        tail = parts[1:]
+    elif parts[0] == "tasks":
+        # user-directory layout: the path is already relative to the data root
+        tail = parts
+    else:
         return None
     if not parts[-1].endswith(".md"):
         return None
@@ -675,7 +724,7 @@ def _is_task_doc(project_root: Path, relative: str) -> Optional[Path]:
     # of that doc directory (works for nested subtasks too).
     if parts[-2] != "doc":
         return None
-    task_dir = project_root.joinpath(*parts[:-2])
+    task_dir = data_root.joinpath(*tail[:-2])
     if not (task_dir / "task.json").is_file():
         return None
     return task_dir
@@ -724,16 +773,25 @@ def doc_change(payload: Optional[dict] = None, *, file_path: Optional[str] = Non
 
     artifact = str(Path(normalized).as_posix())
     if Path(artifact).is_absolute():
-        try:
-            artifact = str(Path(artifact).resolve().relative_to(project_root.resolve()).as_posix())
-        except (ValueError, OSError):
+        resolved = None
+        for root in (project_root, inject._project_data_root(project_root)):
+            try:
+                resolved = Path(artifact).resolve().relative_to(root.resolve())
+                break
+            except (ValueError, OSError):
+                continue
+        if resolved is None:
             return {"processed": False, "skipped": "outside_project", "writes": 0}
+        artifact = str(resolved.as_posix())
+        if not artifact.startswith(".fstar/"):
+            # user-directory layout: the identity path keeps the ".fstar/" prefix
+            artifact = ".fstar/" + artifact
 
     # Idempotence: compare the current file digest against what existing
     # evidence already recorded. Unchanged content means zero writes.
     try:
-        current_digest = file_digest(project_root / artifact)
-    except OSError:
+        current_digest = file_digest(store.project_file(artifact))
+    except (OSError, DomainError):
         if passive:
             return {"processed": False, "skipped": "artifact_missing", "writes": 0}
         raise DomainError("artifact_missing", "Changed doc file does not exist", {"artifact": artifact})
@@ -831,13 +889,12 @@ def _prompt_state_name(service: TaskService, session_id: Optional[str]) -> str:
     if phase == "planning":
         return "planning"
     if phase == "in_progress":
-        try:
-            state = service.state(task["id"])
-        except DomainError:
-            return "in_progress"
-        if state["acceptance"].get("awaiting_acceptance"):
-            return "awaiting_acceptance"
+        # The phase transition into awaiting_acceptance is explicit, so an
+        # in-progress task stays "in_progress" even when a fresh final check
+        # exists: the coordinator still has to make the transition.
         return "in_progress"
+    if phase == "awaiting_acceptance":
+        return "awaiting_acceptance"
     # completed (or any other phase) without recorded acceptance: the closest
     # actionable reminder is the acceptance boundary.
     return "awaiting_acceptance"
