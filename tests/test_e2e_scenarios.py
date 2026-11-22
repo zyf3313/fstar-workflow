@@ -692,7 +692,7 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
             "kind": "check", "producer": {"role": "check", "id": "checker-1", "session_id": "c1"},
             "validates": [check_snap], "run_id": "run-fail-1",
             "environment": {"python": sys.version.split()[0]},
-            "delivery": check_delivery, "scope": "final",
+            "delivery": check_delivery, "scope": "final", "read_only": True,
             "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": [],
                        "command": shlex.join(command), "result": "failed", "exit_code": failure.returncode,
                        "log_refs": failure_logs, "duration": failed_duration, "retries": 0}],
@@ -782,7 +782,7 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
             "kind": "check", "producer": {"role": "check", "id": "checker-2", "session_id": "c2"},
             "validates": [final_snap], "run_id": "run-pass-1",
             "environment": {"python": sys.version.split()[0]},
-            "delivery": final_delivery, "scope": "final",
+            "delivery": final_delivery, "scope": "final", "read_only": True,
             "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": ["test_delivery.DeliveryTest.test_value"],
                        "command": shlex.join(command), "result": "passed", "exit_code": rerun.returncode,
                        "log_refs": rerun_logs, "duration": rerun_duration, "retries": 1}],
@@ -1161,7 +1161,7 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
             "kind": "check", "producer": {"role": "check", "id": "checker-child", "session_id": "cc"},
             "validates": [check_snap], "run_id": "run-child",
             "environment": {"python": sys.version.split()[0]},
-            "delivery": check_delivery, "scope": "final",
+            "delivery": check_delivery, "scope": "final", "read_only": True,
             "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": [],
                        "review_method": "synthetic fixture outcome for acceptance-gate exercise", "result": "passed", "exit_code": 0,
                        "log_refs": [], "duration": 0, "retries": 0}],
@@ -1207,7 +1207,7 @@ class S1PersistentLifecycle(PersistentLifecycleCase):
             "kind": "check", "producer": {"role": "check", "id": "checker-%s" % ref, "session_id": "cs"},
             "validates": [snap], "run_id": "run-%s" % ref,
             "environment": {"python": sys.version.split()[0]},
-            "delivery": delivery, "scope": "final",
+            "delivery": delivery, "scope": "final", "read_only": True,
             "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": [],
                        "review_method": "synthetic fixture outcome for acceptance-gate exercise", "result": "passed", "exit_code": 0,
                        "log_refs": [], "duration": 0, "retries": 0}],
@@ -1497,7 +1497,7 @@ class S2MinimalLoop(ScenarioCase):
                   "validation_facts": [], "blockers": [], "input_baseline": {}, "delivery_baseline": {}}
         evidence = {"kind": "check", "producer": {"role": "check", "id": "fixture-checker"},
                     "validates": [snap], "run_id": "s2-synthetic-failure", "environment": {"fixture": True},
-                    "delivery": delivery, "scope": "final",
+                    "delivery": delivery, "scope": "final", "read_only": True,
                     "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": [],
                                "review_method": "synthetic failure for gate assertion", "result": "failed",
                                "log_refs": []}]}
@@ -1958,7 +1958,7 @@ class S6TwoHost(ScenarioCase):
                   check=self.expect_ok(lambda p: (
                       "counts=%s healthy=%s" % (p["counts"], p["healthy"]))))
         report = json.loads(self.last_stdout)
-        self.assertEqual({"skills": 11, "roles": 4, "templates": 11,
+        self.assertEqual({"skills": 11, "roles": 4, "templates": 12,
                           "hooks": 5}, report["counts"])
         self.assertTrue(report["healthy"])
         # Stale entry index: remove an installed entry file, doctor must flag it.

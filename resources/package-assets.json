@@ -44,10 +44,16 @@
       "sha256": "307299fda7b77d22c64cb51430ec75e5f59d78e9c948786afb3b2544fe45e4b7"
     },
     {
+      "source": "src/fstar/capability_adapters.py",
+      "destination": "src/fstar/capability_adapters.py",
+      "kind": "python",
+      "sha256": "81d2a13cf0451d94168d5298fac050245b3092f759b1939535552b3736d186dc"
+    },
+    {
       "source": "src/fstar/cli.py",
       "destination": "src/fstar/cli.py",
       "kind": "python",
-      "sha256": "bbd6ef71900a2322429413432f8747454caf0715b7b52fe83ed04b01ae91c986"
+      "sha256": "d1f8dbd1bee49c474d712a78a3e83983936e12ccd20d98234ff9a76dfd7e5c75"
     },
     {
       "source": "src/fstar/config.py",
@@ -59,7 +65,7 @@
       "source": "src/fstar/content.py",
       "destination": "src/fstar/content.py",
       "kind": "python",
-      "sha256": "587fe907264cc1594bc12694faaba3022496bdce4c46bca17b132b2ab06fab3b"
+      "sha256": "b77df176bd4043566861e838e112bfed5da6de56279de805d94367d656f995ef"
     },
     {
       "source": "src/fstar/crossproject.py",
@@ -71,13 +77,13 @@
       "source": "src/fstar/dispatch.py",
       "destination": "src/fstar/dispatch.py",
       "kind": "python",
-      "sha256": "49bdfe3343fcc4da4ccb641c063964254b39cd59f27505c8bcb39986a7278998"
+      "sha256": "d0e2725fa7cf5b1c3a31464d17087a520c2aaf3f022b405447171e6b0a389a4e"
     },
     {
       "source": "src/fstar/evidence.py",
       "destination": "src/fstar/evidence.py",
       "kind": "python",
-      "sha256": "1e43f0fa0598a313638bdec5426791938f08a7b382d6454e6eb11f903c820576"
+      "sha256": "82d1b6826103565cb2c489f9c8c537160453376f0de38eeff969ce559a55c22a"
     },
     {
       "source": "src/fstar/extensions.py",
@@ -95,19 +101,19 @@
       "source": "src/fstar/installer.py",
       "destination": "src/fstar/installer.py",
       "kind": "python",
-      "sha256": "e39806c18b70ccb3e5fce986201de158aab4f26f8ffdc2afae9df289df858d60"
+      "sha256": "842c5552bfdc95256af77d653dc5541434e87e9acdccf4dbe8f11e6979d9218f"
     },
     {
       "source": "src/fstar/knowledge.py",
       "destination": "src/fstar/knowledge.py",
       "kind": "python",
-      "sha256": "2cfedc8cc775961d418ca72f66f280988cd233d1c9ed7c9480821007021b0616"
+      "sha256": "98a40c161b8e1b0bb8209e789be947898701a4e65f1d7953cf3002470e3bb895"
     },
     {
       "source": "src/fstar/learn_bridge.py",
       "destination": "src/fstar/learn_bridge.py",
       "kind": "python",
-      "sha256": "751ac11c31a48c9f04ff5d6b1680a7255c2b71305a44ed20448b9d66e737c159"
+      "sha256": "abbc3152c88712120e1ee88e3bb67dbd5b1453e4db3d1fb95888ba8194d561fb"
     },
     {
       "source": "src/fstar/magpie.py",
@@ -119,7 +125,7 @@
       "source": "src/fstar/models.py",
       "destination": "src/fstar/models.py",
       "kind": "python",
-      "sha256": "a0c588862dc4df1ebc015a0e50de6e0bd3d674d5905b0856c21a1bce80680bcc"
+      "sha256": "c383ae523ee21be513e53d57f7c391ed003ce48468584e02f806a1642e202bda"
     },
     {
       "source": "src/fstar/project.py",
@@ -143,7 +149,7 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "dfd4030f10339ec0bdf95317056fb6b5475f885d6f4fa567890c183fa9d1cd5d"
+      "sha256": "3bef02418b08e322128767a23fdc7716ce11d6086ffa92c225e92b53a824ac46"
     },
     {
       "source": "src/fstar/runtime/inject.py",
@@ -167,7 +173,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "f9491a25ff865088fddcd8ce912904b2c4d1e0f0a123278daa82d4655083cfca"
+      "sha256": "f4b5873e08034d98fad22db33ba297f152d585b14fbc5595bb7e1ddbeb0d2937"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",
@@ -179,13 +185,13 @@
       "source": "resources/skills/fstar-check/SKILL.md",
       "destination": "resources/skills/fstar-check/SKILL.md",
       "kind": "resource",
-      "sha256": "45568ce2afc37ce87e12a1a7999883f94b417ebcaff19cf8d594735f093b068a"
+      "sha256": "553f7db812b8cde1ef28f9dcc1e9bcd9469bb1e0a9d9046279062afb325b3577"
     },
     {
       "source": "resources/skills/fstar-clarify/SKILL.md",
       "destination": "resources/skills/fstar-clarify/SKILL.md",
       "kind": "resource",
-      "sha256": "d57d0456b8807e8776cf046bd1fa00cd420faf75a60167be5f42075ecb223de9"
+      "sha256": "5312d1ddf9aca7b2e18f33e1edda4ed8ff4cfc167f25cc9ea281fd4f50582853"
     },
     {
       "source": "resources/skills/fstar-continue/SKILL.md",
@@ -203,13 +209,13 @@
       "source": "resources/skills/fstar-doc/SKILL.md",
       "destination": "resources/skills/fstar-doc/SKILL.md",
       "kind": "resource",
-      "sha256": "863bd024c7d54d9f7bce0c5ae9c26e3765e7e62202af9e641d851db6a8e10298"
+      "sha256": "4df421361a45fbc326be4255c16a89c6a85394375d79e438a8c92247fccfdacf"
     },
     {
       "source": "resources/skills/fstar-execute/SKILL.md",
       "destination": "resources/skills/fstar-execute/SKILL.md",
       "kind": "resource",
-      "sha256": "54d672a40cbc18172930b6fcb618270b51b2cabb0960ad9e02e602f34eef4ef7"
+      "sha256": "9e03c61598687eed038fb2839a8ffb61f727cd2eafc3f0aaf84c468b19b7a61d"
     },
     {
       "source": "resources/skills/fstar-help/SKILL.md",
@@ -227,61 +233,37 @@
       "source": "resources/skills/fstar-learn/SKILL.md",
       "destination": "resources/skills/fstar-learn/SKILL.md",
       "kind": "resource",
-      "sha256": "c45a3a5fd78a2355d373cc6e82840171abaa6f8e9dc61b2ee45e8427f9a858ce"
+      "sha256": "dfbfa63a2ed4d5308bc3596734701316cd422f4037d123e2ca16c8eb60340b5e"
     },
     {
       "source": "resources/skills/fstar-plan/SKILL.md",
       "destination": "resources/skills/fstar-plan/SKILL.md",
       "kind": "resource",
-      "sha256": "2a0eda93d4d4d3ef66277c4f024daea0dbc570d0495da445503aa3526241a4c1"
+      "sha256": "6a297cbc2a1b759d5cd21d10bb34da9b6c0df6250298d876e92553d6950a0d2f"
     },
     {
       "source": "resources/agents/fstar-check.md",
       "destination": "resources/agents/fstar-check.md",
       "kind": "resource",
-      "sha256": "5f24bd2259ac94e63f4b008747f3e0474fae37fd3d7fa8cee0e0b95a9ec220e4"
+      "sha256": "e5f3d50ef3abe291a5f137e364b835b489231330f51e2c7baf9293bfdab71e02"
     },
     {
       "source": "resources/agents/fstar-editor.md",
       "destination": "resources/agents/fstar-editor.md",
       "kind": "resource",
-      "sha256": "d0c361f8a50172683f1533217912a24819911a8a9cd68f6c5437f53e60730ed3"
+      "sha256": "83fc191e4c5f7ca15791e6d78a8ef101bcde418816e507ca273432c2235cd18a"
     },
     {
       "source": "resources/agents/fstar-implement.md",
       "destination": "resources/agents/fstar-implement.md",
       "kind": "resource",
-      "sha256": "ac9aad02abea3f3952aed0b8ed5a5347372ea1b2d16c833e18a87c569e626b77"
+      "sha256": "8f9c6bc29a1deff4f38e408f7a92594384ac0a093720e69b70f63ff4aef00c69"
     },
     {
       "source": "resources/agents/fstar-research.md",
       "destination": "resources/agents/fstar-research.md",
       "kind": "resource",
-      "sha256": "40b3af8cca46d50579783f69d3d9fc4e7f4151270a73986f2040bf4ebe266f53"
-    },
-    {
-      "source": "resources/templates/doc/design.mapping.yaml",
-      "destination": "resources/templates/doc/design.mapping.yaml",
-      "kind": "resource",
-      "sha256": "dbcbe7f0fb806e72c47d770f92c362d8ff1ba5519e6cb477d22fc2c556427644"
-    },
-    {
-      "source": "resources/templates/doc/design.md",
-      "destination": "resources/templates/doc/design.md",
-      "kind": "resource",
-      "sha256": "de6baddb795f177d629b1fc30713332abe1124ba58cf8091cce56c66bb320c55"
-    },
-    {
-      "source": "resources/templates/doc/prd.mapping.yaml",
-      "destination": "resources/templates/doc/prd.mapping.yaml",
-      "kind": "resource",
-      "sha256": "9b4c67433f03b7aed2c017dd08ffc18cc2e88590ed9f756a745f3aff01f53048"
-    },
-    {
-      "source": "resources/templates/doc/prd.md",
-      "destination": "resources/templates/doc/prd.md",
-      "kind": "resource",
-      "sha256": "0e1877ca062eb95ed1aa50db0cf3c7341853e87adaa099ebdab99c90e9ba170d"
+      "sha256": "adca793483bad808b62d94ce4bba412722da43995057ed1099f3185da03c7b7b"
     },
     {
       "source": "resources/templates/entry/project-index.md",
@@ -299,7 +281,7 @@
       "source": "resources/templates/knowledge/memory.md",
       "destination": "resources/templates/knowledge/memory.md",
       "kind": "resource",
-      "sha256": "e455e1072c61838f284d0348871c4202a5cc64e8ee4aa767b7d9e1ee6194bcb9"
+      "sha256": "6b5740158aa4d937537bdf77059609fe676dbb3f4ad2972eaef8cc4d7afdc0ba"
     },
     {
       "source": "resources/templates/knowledge/rule.md",
@@ -314,16 +296,52 @@
       "sha256": "e8a5e37354be46a69af7fbcc5224e6726e85e07cc6d8333ece4b4215536dc221"
     },
     {
+      "source": "resources/templates/scenarios/software/design.mapping.yaml",
+      "destination": "resources/templates/scenarios/software/design.mapping.yaml",
+      "kind": "resource",
+      "sha256": "dbcbe7f0fb806e72c47d770f92c362d8ff1ba5519e6cb477d22fc2c556427644"
+    },
+    {
+      "source": "resources/templates/scenarios/software/design.md",
+      "destination": "resources/templates/scenarios/software/design.md",
+      "kind": "resource",
+      "sha256": "de6baddb795f177d629b1fc30713332abe1124ba58cf8091cce56c66bb320c55"
+    },
+    {
+      "source": "resources/templates/scenarios/software/prd.mapping.yaml",
+      "destination": "resources/templates/scenarios/software/prd.mapping.yaml",
+      "kind": "resource",
+      "sha256": "9b4c67433f03b7aed2c017dd08ffc18cc2e88590ed9f756a745f3aff01f53048"
+    },
+    {
+      "source": "resources/templates/scenarios/software/prd.md",
+      "destination": "resources/templates/scenarios/software/prd.md",
+      "kind": "resource",
+      "sha256": "0e1877ca062eb95ed1aa50db0cf3c7341853e87adaa099ebdab99c90e9ba170d"
+    },
+    {
       "source": "resources/templates/task/check.md",
       "destination": "resources/templates/task/check.md",
       "kind": "resource",
-      "sha256": "aa3f32d092cb6aa6985ece0595b0cd35356f0df99afdd476fe5a3deb04d3ef32"
+      "sha256": "a58f449d910f6436234be35e63bdb8447952475ec0ba37b476136483a0721be8"
     },
     {
       "source": "resources/templates/task/clarify.md",
       "destination": "resources/templates/task/clarify.md",
       "kind": "resource",
-      "sha256": "d6e9d1c6843b945038efba3525db58895011809c6ce255acbfda2e015e6de06a"
+      "sha256": "893b7549d04a669936c9e13cdced89d9dc53dc554518717cfa494169f590a03c"
+    },
+    {
+      "source": "resources/templates/task/criteria.mapping.yaml",
+      "destination": "resources/templates/task/criteria.mapping.yaml",
+      "kind": "resource",
+      "sha256": "aaa86e1b52c749940d9ba4c5a1bc0f8907b1d2cea362654f8ac3ab01ad930fe8"
+    },
+    {
+      "source": "resources/templates/task/criteria.md",
+      "destination": "resources/templates/task/criteria.md",
+      "kind": "resource",
+      "sha256": "abf6391ba22064f16a7224210a86f4a55c7bb0e5e59e2a66269b74144fa82a39"
     },
     {
       "source": "resources/templates/task/plan.mapping.yaml",
@@ -335,7 +353,7 @@
       "source": "resources/templates/task/plan.md",
       "destination": "resources/templates/task/plan.md",
       "kind": "resource",
-      "sha256": "738f6dfcab6ed7e2586f6645fd4c0f5a3e2dcdee794a0600a75c8bb64a7f469d"
+      "sha256": "14aa4dd6353f68e5c48acb68b67065a430a793495ef20e7b13bb9618b327637a"
     },
     {
       "source": "resources/templates/task/research.md",
@@ -353,7 +371,7 @@
       "source": "resources/references/knowledge-format.md",
       "destination": "resources/references/knowledge-format.md",
       "kind": "resource",
-      "sha256": "93ace2103128f6330edf9d4d65b7f83c8acbffb119ac5db5ae4ea23501440c9f"
+      "sha256": "a18db9b9932bab84cfdbb4a464f6bf8e3e339fec552da1cfaa7a0aac6c7eeedc"
     },
     {
       "source": "resources/references/technical-design-profiles.md",
@@ -365,19 +383,19 @@
       "source": "resources/runtime/capabilities.md",
       "destination": "resources/runtime/capabilities.md",
       "kind": "resource",
-      "sha256": "45e515de8a984c2d1d268607dfd7aad544ac16465337383ebdb406a60a18128e"
+      "sha256": "8206eb19c666e10b32ee69c1add99dbf8b9d81a0a058b42dca2f4f5d8645db64"
     },
     {
       "source": "resources/runtime/prompt-states.md",
       "destination": "resources/runtime/prompt-states.md",
       "kind": "resource",
-      "sha256": "9a62f6a094108d7dfb65e267a0fc576a68cc815cbe6cdcf2cd48b45398346aad"
+      "sha256": "d8e133471c8ebc78fe66e98ad8438a7327332d911649a14c5454b3886fee2fae"
     },
     {
       "source": "resources/runtime/routing.md",
       "destination": "resources/runtime/routing.md",
       "kind": "resource",
-      "sha256": "348b5a7b1cd3872badfee916d3f89f6ddc5cd3a8a830376ddf0e0d4e9e5c2e86"
+      "sha256": "fb337685fadef256be7c08d27eacaa937991015aaabfb5afc5261b3ef95c5c76"
     }
   ]
 }

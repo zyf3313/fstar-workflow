@@ -908,6 +908,93 @@ class DocChangeTests(HookCase):
 
 
 class PromptContextTests(HookCase):
+    def test_not_initialized_keeps_silent_and_creates_nothing(self):
+        plain = Path(self.tmp.name) / "plain"
+        plain.mkdir()
+        result = hooks.prompt_context({}, start=plain, user_root=self.user_root,
+                                      runtime_root=self.runtime_root, clock=self.clock)
+        self.assertFalse(result["initialized"])
+        # S-5 preserves the outside-project behavior exactly (no reminder, no
+        # project, no write); no_task inside a project carries the reminder.
+        self.assertIsNone(result["text"])
+        self.assertFalse((plain / ".fstar").exists())
+        self.assertIsNone(result["state"])
+
+    def test_skill_reminder_rides_on_every_state(self):
+        # S-5: the shared reminder is present for no_task, planning,
+        # in_progress, and awaiting_acceptance, alongside the state block.
+        states = []
+        states.append(self.run_prompt({"session_id": "s1"}))
+        self.create()
+        states.append(self.run_prompt({"session_id": "s1"}))
+        self.start()
+        states.append(self.run_prompt({"session_id": "s1"}))
+        task_dir = self.store.resolve("root")
+        task = self.store.read("root")
+        task["phase"] = "completed"
+        self.store.write(task_dir, task)
+        states.append(self.run_prompt({"session_id": "s1"}))
+        for result in states:
+            self.assertIn("<skill-reminder>", result["text"], result["state"])
+            self.assertIn("</skill-reminder>", result["text"], result["state"])
+            self.assertIn("skill", result["skill_reminder"])
+        self.assertEqual([item["state"] for item in states],
+                         ["no_task", "planning", "in_progress", "awaiting_acceptance"])
+        # The original state block is still there too.
+        for result in states:
+            self.assertIn("<prompt-state>", result["text"])
+            self.assertIn(result["state"], result["text"])
+
+    def test_skill_reminder_survives_degraded_resource(self):
+        from unittest import mock
+        missing = Path(self.tmp.name) / "no-resources"
+        missing.mkdir()
+        with mock.patch.object(hooks.inject, "resource_root", return_value=missing):
+            result = self.run_prompt({"session_id": "s1"})
+        self.assertTrue(result["degraded"])
+        # Degraded prompt-state line plus the degraded skill reminder.
+        self.assertIn(hooks.PROMPT_STATE_DEGRADED, result["text"])
+        self.assertIn(hooks.SKILL_REMINDER_DEGRADED, result["text"])
+        self.assertEqual(result["skill_reminder"], hooks.SKILL_REMINDER_DEGRADED)
+
+    def test_skill_reminder_is_lightweight_and_read_only(self):
+        self.create()
+        self.start()
+        before = {path: file_digest(path) for path in self.project.rglob("*") if path.is_file()}
+        result = self.run_prompt({"session_id": "s1"})
+        after = {path: file_digest(path) for path in self.project.rglob("*") if path.is_file()}
+        self.assertEqual(before, after)
+        # No full skill bodies are injected: the reminder is a pointer to
+        # routing's selection rules, not the skill text.
+        body = result["text"].split("<skill-reminder>", 1)[1].split("</skill-reminder>", 1)[0]
+        self.assertLessEqual(len(body.splitlines()), 12)
+
+    def test_worker_context_carries_selected_skills(self):
+        self.create()
+        self.start()
+        selected = [{"skill": "user-named-skill", "source": "user-named",
+                     "reason": "user named it", "scope": ["src.py"]}]
+        payload = {"role": "fstar-implement", "task_ref": "root",
+                   "session_id": "s1", "selected_skills": selected}
+        result = hooks.worker_context(payload, role="implement", task_ref="root",
+                                      start=self.project, user_root=self.user_root,
+                                      runtime_root=self.runtime_root, clock=self.clock)
+        self.assertIn("user-named-skill", result["text"])
+        self.assertIn("skill_usage", result["text"])
+        self.assertIn("selection is not execution", result["text"])
+
+    def test_worker_context_without_selected_skills_has_no_section(self):
+        self.create()
+        self.start()
+        result = hooks.worker_context({"role": "fstar-implement", "session_id": "s1"},
+                                      role="implement", task_ref="root",
+                                      start=self.project, user_root=self.user_root,
+                                      runtime_root=self.runtime_root, clock=self.clock)
+        # Routing text mentions selected_skills globally; the footer section
+        # is only added when the dispatch actually carries a selection.
+        self.assertNotIn("selected_skills (invoke the applicable ones", result["text"])
+
+
     def run_prompt(self, payload=None):
         return hooks.prompt_context(payload or {}, start=self.project, user_root=self.user_root,
                                     runtime_root=self.runtime_root, clock=self.clock)
@@ -942,7 +1029,7 @@ class PromptContextTests(HookCase):
         result = self.run_prompt({"session_id": "s1"})
         self.assertEqual(result["state"], "planning")
         self.assertIn("clarify", result["text"])
-        self.assertIn("frontier", result["text"])
+        self.assertIn("criteria", result["text"])
         self.assertIn("plan", result["text"])
 
     def test_in_progress_state_for_started_task(self):
@@ -973,8 +1060,10 @@ class PromptContextTests(HookCase):
             result = self.run_prompt({"session_id": "s1"})
         self.assertTrue(result["initialized"])
         self.assertTrue(result["degraded"])
-        self.assertEqual(result["text"], hooks.PROMPT_STATE_DEGRADED)
+        self.assertTrue(result["text"].startswith(hooks.PROMPT_STATE_DEGRADED))
         self.assertIn("workflow decision", result["text"])
+        # S-5: the shared skill reminder still appears on the degraded path.
+        self.assertIn(hooks.SKILL_REMINDER_DEGRADED, result["text"])
 
     def test_payload_session_isolation(self):
         self.create()
@@ -992,6 +1081,53 @@ class PromptContextTests(HookCase):
         self.run_prompt({"session_id": "s1"})
         after = {path: file_digest(path) for path in self.project.rglob("*") if path.is_file()}
         self.assertEqual(before, after)
+
+    def test_waiting_user_status_surfaces_in_prompt(self):
+        self.create()
+        self.start()
+        self.service.set_status("root", actor=self.agent, status="waiting_user",
+                                reason="needs the target hostname")
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertEqual(result["state"], "in_progress")
+        self.assertIn("waiting for user input", result["text"])
+        self.assertIn("needs the target hostname", result["text"])
+
+    def test_waiting_external_status_surfaces_in_prompt(self):
+        self.create()
+        self.start()
+        self.service.set_status("root", actor=self.agent, status="waiting_external",
+                                 reason="CI pipeline result")
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertIn("waiting for an external result", result["text"])
+        self.assertIn("CI pipeline result", result["text"])
+
+    def test_active_work_item_surfaces_progress_in_prompt(self):
+        self.create()
+        self.start()
+        self.service.set_work_item("root", actor=self.agent,
+                                    item={"id": "S-3", "state": "active",
+                                          "summary": "skills and routing rewrite"})
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertIn("work in progress: skills and routing rewrite", result["text"])
+
+    def test_next_step_pointer_surfaces_in_prompt(self):
+        self.create()
+        self.start()
+        self.service.set_next_step("root", actor=self.agent,
+                                    condition="user replies with the hostname",
+                                    action="resume implementation with S-3")
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertIn("next step when user replies with the hostname", result["text"])
+
+    def test_no_collaboration_fields_add_no_prompt_lines(self):
+        self.create()
+        self.start()
+        result = self.run_prompt({"session_id": "s1"})
+        self.assertIn("fstar prompt state: in_progress", result["text"])
+        self.assertNotIn("waiting for user input", result["text"])
+        self.assertNotIn("work in progress:", result["text"])
+        self.assertNotIn("next step when", result["text"])
+
 
 
 class RegistrationPlanTests(HookCase):

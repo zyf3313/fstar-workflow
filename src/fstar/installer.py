@@ -2714,14 +2714,30 @@ def _resolve_skills_routing(args, roots: Roots, *, dry_run: bool) -> dict:
     Native copies are the installer's own business and are always planned; a
     preview (dry run) never stages, hands over, or writes the record.
     """
+    from .capability_adapters import MagpieDistributionAdapter
     from .magpie import default_agents_source, route_skills
 
     skills_root = _package_root() / "resources" / "skills"
-    return route_skills(skills_root=skills_root,
-                        agents_source=default_agents_source(),
-                        user_root=roots.user_root,
-                        dry_run=dry_run,
-                        native_only=bool(getattr(args, "native_only", False)))
+    # S-5: the existing Magpie hand-over IS the distribution capability's
+    # implementation, reached through the shared adapter interface. The
+    # adapter's probe is the same read-only ``--version`` check route_skills
+    # already performs; the route callable keeps route_skills's signature and
+    # behavior unchanged (native_only is decided by the caller since it is an
+    # avowed no-probe path).
+    adapter = MagpieDistributionAdapter(route=route_skills)
+    if getattr(args, "native_only", False):
+        # native_only must not consult Magpie at all: no probe, no handshake.
+        return route_skills(skills_root=skills_root,
+                            agents_source=default_agents_source(),
+                            user_root=roots.user_root,
+                            dry_run=dry_run,
+                            native_only=True)
+    return adapter.route(
+        skills_root=skills_root,
+        agents_source=default_agents_source(),
+        user_root=roots.user_root,
+        dry_run=dry_run,
+        native_only=False)
 
 
 def _share_instructions(args, roots: Roots, routing: Mapping) -> Optional[dict]:

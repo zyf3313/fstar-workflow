@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,6 +38,66 @@ def _extract_item(text: str, artifact_map: dict, item_id: str) -> Optional[str]:
     if len(before) + len(body) + len(after) + len(start) + len(end) != len(text):
         raise DomainError("mapping_invalid", "Artifact mapping is ambiguous", {"item": item_id})
     return hashlib.sha256(body.encode()).hexdigest()
+
+
+def validate_rework_scope(scope: Optional[dict]) -> dict:
+    """Normalize and validate a rework scope object (S-4 K-1).
+
+    ``None`` means the legacy full invalidation (every valid evidence goes
+    stale). ``mode`` defaults to ``full``. A ``localized`` scope with all
+    three lists empty is REJECTED (``invalid_rework_scope``) rather than
+    silently degrading to full invalidation.
+    """
+    if scope is None:
+        return {"mode": "full", "artifacts": [], "paths": [], "criteria_refs": []}
+    if not isinstance(scope, dict):
+        raise DomainError("invalid_rework_scope", "A rework scope must be an object")
+    mode = scope.get("mode", "full")
+    if mode not in {"full", "localized"}:
+        raise DomainError("invalid_rework_scope", "A rework scope mode must be localized or full", {"mode": mode})
+    normalized = {"mode": mode, "artifacts": [], "paths": [], "criteria_refs": []}
+    for key in ("artifacts", "paths", "criteria_refs"):
+        value = scope.get(key, [])
+        if not isinstance(value, list) or not all(isinstance(entry, str) and entry.strip() for entry in value):
+            raise DomainError("invalid_rework_scope", "Rework scope lists must be arrays of non-empty strings", {"field": key})
+        normalized[key] = list(value)
+    if mode == "localized" and not (normalized["artifacts"] or normalized["paths"] or normalized["criteria_refs"]):
+        raise DomainError("invalid_rework_scope", "A localized rework scope requires at least one artifact, path, or criteria ref")
+    return normalized
+
+
+def _rework_scope_touches(evidence: dict, scope: dict) -> bool:
+    """True when localized rework evidence intersects the scope.
+
+    Intersection rules (S-4 K-1): validates artifact hit; validated item or
+    dependency id hit a criteria ref; delivery/input/report path hit the
+    scope paths or artifacts; a check's requirement ids hit a criteria ref.
+    """
+    artifacts = set(scope.get("artifacts", []))
+    paths = set(scope.get("paths", [])) | artifacts
+    criteria = set(scope.get("criteria_refs", []))
+    for group in evidence.get("validates", []):
+        if group.get("artifact") in artifacts:
+            return True
+        for entry in group.get("items", []):
+            if entry.get("id") in criteria:
+                return True
+        for entry in group.get("dependencies", []):
+            if entry.get("id") in criteria:
+                return True
+    for entry in (evidence.get("delivery") or {}).get("paths", []):
+        if entry.get("path") in paths:
+            return True
+    for entry in evidence.get("input_files", []):
+        if entry.get("path") in paths:
+            return True
+    if (evidence.get("report") or {}).get("path") in paths:
+        return True
+    if criteria and evidence.get("kind") == "check":
+        for entry in evidence.get("items", []):
+            if criteria.intersection(entry.get("requirement_ids", []) or []):
+                return True
+    return False
 
 
 class EvidenceService:
@@ -143,9 +202,9 @@ class EvidenceService:
             entries.append({"path": relative, "exists": path.is_file(), "sha256": file_digest(path) if path.is_file() else None})
         return {"paths": entries, "digest": content_hash(entries)}
 
-    def _validate_current(self, evidence: dict, ref: str) -> list:
+    def _validate_current(self, evidence: dict, ref: str, *, task: Optional[dict] = None) -> list:
         reasons = []
-        task = self.store.read(ref)
+        task = task if task is not None else self.store.read(ref)
         mappings = task.get("meta", {}).get("templates", {}).get("artifact_map", {})
         for validates in evidence.get("validates", []):
             artifact = validates.get("artifact")
@@ -314,6 +373,19 @@ class EvidenceService:
             implementers = {entry.get("producer", {}).get("id") for entry in task.get("evidence", []) if entry.get("kind") == "delivery"}
             if producer.get("id") in implementers:
                 raise DomainError("check_not_independent", "The final check must come from a producer distinct from the delivery implementer", status=3)
+        # S-4 K-2: the final check is read-only. It must declare
+        # read_only=true, and the current delivery baseline must still be
+        # fresh (a changed delivery means the check no longer describes the
+        # work awaiting acceptance). Incremental checks are unaffected.
+        if item.get("scope") == "final":
+            if item.get("read_only") is not True:
+                raise DomainError("invalid_check", "A final check must declare read_only: true")
+            if task is not None:
+                stale_reasons = self.final_delivery_current(task=task)
+                if stale_reasons:
+                    raise DomainError("final_check_stale_delivery",
+                                      "The delivery evidence is no longer current; record a fresh delivery before the final check",
+                                      {"stale_reasons": stale_reasons}, status=3)
 
     def invalidate(self, ref: str, *, file: str, actor: dict) -> dict:
         changed = []
@@ -351,6 +423,69 @@ class EvidenceService:
                 self.store.write(task_dir, task)
         return {"invalidated": changed}
 
+    def invalidate_scope(self, task: dict, *, reason: str, scope: Optional[dict] = None) -> dict:
+        """Invalidate evidence by rework scope (S-4 K-1); shared logic for
+        both rework entry points (report_problem and continue --action rework).
+
+        ``scope=None`` (or ``mode="full"``) keeps the legacy behavior: every
+        valid evidence goes stale. ``mode="localized"`` stales only evidence
+        intersecting the declared artifacts/paths/criteria_refs; untouched
+        evidence stays valid. The task dict is mutated IN PLACE under the
+        caller's own transaction (no nested lock), and the audit split of
+        invalidated and retained ids is returned so the rework event can
+        carry both.
+        """
+        normalized = validate_rework_scope(scope)
+        changed = []
+        retained = []
+        if task.get("meta", {}).get("disposition"):
+            raise DomainError("task_dropped", "Evidence cannot be invalidated on a dropped task", status=3)
+        for evidence in task["evidence"]:
+            if evidence.get("state") != "valid":
+                continue
+            if normalized["mode"] == "full" or _rework_scope_touches(evidence, normalized):
+                evidence["state"] = "stale"
+                evidence["stale_reasons"] = [{"type": "rework_requested", "reason": reason}]
+                changed.append(evidence["id"])
+            else:
+                retained.append(evidence["id"])
+        return {"scope": normalized, "invalidated_evidence_ids": changed, "retained_evidence_ids": retained}
+
+    def final_delivery_current(self, ref: Optional[str] = None, *, task: Optional[dict] = None) -> list:
+        """Staleness reasons across the current effective delivery baseline.
+
+        The baseline is PER PATH (S-4 K-2/coordination): for every delivered
+        path, the newest delivery evidence that covered it is the effective
+        baseline for that path. A repaired path therefore supersedes the older
+        stale snapshot for that path only, so a fix recorded after a failed
+        check is never permanently blocked by the superseded snapshot, while
+        the paths nobody re-delivered still report their drift. Pure read;
+        returns the staleness reasons (empty means fresh).
+        """
+        task = task if task is not None else self.store.read(ref)
+        latest = {}
+        for evidence in task.get("evidence", []):
+            if evidence.get("kind") != "delivery":
+                continue
+            produced = str(evidence.get("produced_at", ""))
+            for entry in (evidence.get("delivery") or {}).get("paths", []):
+                relative = entry.get("path")
+                if relative is None:
+                    continue
+                previous = latest.get(relative)
+                if previous is None or produced >= previous[0]:
+                    latest[relative] = (produced, entry)
+        reasons = []
+        for relative in sorted(latest):
+            _, entry = latest[relative]
+            path = self.store.project_file(relative)
+            exists = path.is_file()
+            current = file_digest(path) if exists else None
+            if exists != bool(entry.get("exists")) or current != entry.get("sha256"):
+                reasons.append({"type": "delivery", "path": relative,
+                                "expected": entry.get("sha256"), "actual": current})
+        return reasons
+
     def freshness(self, ref: Optional[str] = None, *, task: Optional[dict] = None) -> dict:
         task = task if task is not None else self.store.read(ref)
         results = []
@@ -362,6 +497,19 @@ class EvidenceService:
     def acceptance_status(self, ref: Optional[str] = None, *, task: Optional[dict] = None) -> dict:
         task = task if task is not None else self.store.read(ref)
         fresh_results = {x["id"]: x for x in self.freshness(ref, task=task)["evidence"]}
+        # A rework retires the acceptance basis (S-4 K-1). Evidence that a
+        # localized rework retained stays valid AS EVIDENCE (it can still be
+        # cited, re-checked or audited), but it must not by itself re-enable
+        # acceptance: a check recorded BEFORE the rework says nothing about
+        # the repaired work, so the rework loop could otherwise be closed
+        # without a single new check. A final check recorded after the rework
+        # is required to accept again. The retirement is read from the
+        # rework_requested milestone (never compacted away), so a task that
+        # never had a rework is unaffected.
+        retired_by_rework = set()
+        for event in task.get("events", []):
+            if event.get("type") == "rework_requested":
+                retired_by_rework |= set(event.get("data", {}).get("retained_evidence_ids", []))
         final_checks = []
         # Governance (design §5.2): the newest final check for the task governs
         # acceptance; an unresolved fail/blocked/not_run in that latest round
@@ -376,8 +524,9 @@ class EvidenceService:
             states = [entry.get("result", "not_run") for entry in item.get("items", [])]
             current_fresh = bool(fresh_results.get(item.get("id"), {}).get("fresh", False))
             superseded = current_fresh and latest_final is not None and item.get("id") != latest_final.get("id")
-            effective_pass = bool(states) and all(x == "passed" for x in states) and current_fresh and not superseded
-            final_checks.append({"id": item.get("id"), "fresh": current_fresh and not superseded, "superseded": superseded, "results": states, "passed": effective_pass,
+            retired = item.get("id") in retired_by_rework
+            effective_pass = bool(states) and all(x == "passed" for x in states) and current_fresh and not superseded and not retired
+            final_checks.append({"id": item.get("id"), "fresh": current_fresh and not superseded, "superseded": superseded, "retired_by_rework": retired, "results": states, "passed": effective_pass,
                                  "run_id": item.get("run_id"), "environment": item.get("environment"),
                                  "delivery": item.get("delivery"), "items": item.get("items", []),
                                  "validates": item.get("validates", []), "producer": item.get("producer"),
@@ -396,6 +545,10 @@ class EvidenceService:
             if not latest_states or any(state != "passed" for state in latest_states):
                 blockers.append("unresolved_check")
         qualifying = [x for x in final_checks if x["fresh"] and x["passed"]]
+        if retired_by_rework and not qualifying:
+            # The only final checks this task has are pre-rework ones: the
+            # rework loop needs a NEW final check before acceptance.
+            blockers.append("rework_requires_new_check")
         return {"task_id": task["id"], "checks": final_checks, "evidence_refs": [x["id"] for x in qualifying], "awaiting_acceptance": bool(qualifying) and not blockers, "blockers": blockers}
 
 

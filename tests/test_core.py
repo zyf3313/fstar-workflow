@@ -412,7 +412,7 @@ class EvidenceArchiveTests(CoreCase):
     def check_record(self, lease, requirement="R-001", ref="root", producer="checker"):
         snapshot = self.service.evidence.snapshot(ref, artifact="doc/prd.md", items=[requirement])
         delivery = self.service.evidence.delivery_snapshot(["src.py", "test.py", "config.ini"])
-        return self.service.evidence.record(ref, lease_token=lease["token"], evidence={"kind": "check", "producer": {"role": "check", "id": producer, "session_id": "check-1"}, "validates": [snapshot], "run_id": "run-1", "environment": {"python": sys.version.split()[0]}, "report": {"path": "report.md", "sha256": file_digest(self.project / "report.md")}, "delivery": delivery, "scope": "final", "items": [{"requirement_ids": [requirement], "plan_item": "P-1", "test_refs": ["test.py"], "command": "python test.py", "result": "passed", "exit_code": 0, "log_refs": ["report.md"], "duration": 1.0, "retries": 0}]})
+        return self.service.evidence.record(ref, lease_token=lease["token"], evidence={"kind": "check", "producer": {"role": "check", "id": producer, "session_id": "check-1"}, "validates": [snapshot], "run_id": "run-1", "environment": {"python": sys.version.split()[0]}, "report": {"path": "report.md", "sha256": file_digest(self.project / "report.md")}, "delivery": delivery, "scope": "final", "read_only": True, "items": [{"requirement_ids": [requirement], "plan_item": "P-1", "test_refs": ["test.py"], "command": "python test.py", "result": "passed", "exit_code": 0, "log_refs": ["report.md"], "duration": 1.0, "retries": 0}]})
 
     def test_item_and_delivery_freshness(self):
         self.create()
@@ -491,7 +491,7 @@ class EvidenceArchiveTests(CoreCase):
             "kind": "check", "producer": {"role": "check", "id": "checker", "session_id": "c"},
             "validates": [snapshot], "run_id": "run", "environment": {"python": "3.9"},
             "report": {"path": "report.md", "sha256": file_digest(self.project / "report.md")},
-            "delivery": self.service.evidence.delivery_snapshot(["src.py"]), "scope": "final",
+            "delivery": self.service.evidence.delivery_snapshot(["src.py"]), "scope": "final", "read_only": True,
             "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": [], "command": "python test.py", "result": "passed", "exit_code": 0, "log_refs": [], "duration": 0.1, "retries": 0}]})
         self.service.release_lease("root", token=lease["token"], reason="done")
         self.assertTrue(self.service.evidence.acceptance_status("root")["awaiting_acceptance"])
@@ -513,7 +513,7 @@ class EvidenceArchiveTests(CoreCase):
             "run_id": "run-2", "environment": {"python": sys.version.split()[0]},
             "report": {"path": "report.md", "sha256": file_digest(self.project / "report.md")},
             "delivery": self.service.evidence.delivery_snapshot(["src.py", "test.py", "config.ini"]),
-            "scope": "final", "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": ["test.py"], "command": "python test.py", "result": "failed", "exit_code": 1, "log_refs": ["report.md"], "duration": 1.0, "retries": 0}],
+            "scope": "final", "read_only": True, "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": ["test.py"], "command": "python test.py", "result": "failed", "exit_code": 1, "log_refs": ["report.md"], "duration": 1.0, "retries": 0}],
         }
         self.service.evidence.record("root", lease_token=lease["token"], evidence=failed)
         self.service.release_lease("root", token=lease["token"], reason="failed check")
@@ -614,7 +614,7 @@ class EvidenceArchiveTests(CoreCase):
             self.service.evidence.record("root", lease_token=lease["token"], evidence={
                 "kind": "check", "producer": {"role": "check", "id": "same"}, "validates": [snapshot],
                 "run_id": "run", "environment": {"python": "3.9"}, "report": {"path": "report.md", "sha256": file_digest(self.project / "report.md")},
-                "delivery": self.service.evidence.delivery_snapshot(["src.py"]), "scope": "final",
+                "delivery": self.service.evidence.delivery_snapshot(["src.py"]), "scope": "final", "read_only": True,
                 "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": [], "command": "python test.py", "result": "passed", "exit_code": 0, "log_refs": [], "duration": 0.1, "retries": 0}],
             })
 

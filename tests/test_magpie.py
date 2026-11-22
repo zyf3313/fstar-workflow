@@ -605,3 +605,65 @@ class TestInstallMagpieOption(MagpieCase):
         self.assertEqual(payload["magpie"]["skills"][0]["action"], "would_hand_over")
         self.assertFalse(self.agents_source.exists())
         self.assertFalse((self.user_root / "magpie-integration.json").exists())
+
+
+class TestDistributionAdapter(MagpieCase):
+    """S-5: the Magpie distribution through the shared capability adapter.
+
+    The adapter's probe/handshake are read-only (the fake binary is only
+    invoked for --version by the caller-supplied status); the actual
+    hand-over still happens exclusively through route_skills, reached via
+    the injected route callable exactly as the installer wires it.
+    """
+
+    def _record(self) -> dict:
+        return json.loads((self.user_root / "magpie-integration.json").read_text(encoding="utf-8"))
+
+    def _adapter(self, binary):
+        from fstar.capability_adapters import MagpieDistributionAdapter
+
+        return MagpieDistributionAdapter(
+            probe_call=lambda: magpie.probe(binary=str(binary)),
+            route=lambda **kwargs: magpie.route_skills(
+                skills_root=self.skills_root, agents_source=self.agents_source,
+                user_root=self.user_root, binary=str(binary), **kwargs))
+
+    def test_probe_is_available_and_handshake_confirms_distribution(self):
+        adapter = self._adapter(self._fake_binary())
+        status = adapter.probe()
+        self.assertTrue(status.available)
+        self.assertEqual(status.capabilities, ["distribution"])
+        confirmed = adapter.handshake(["distribution"])
+        self.assertTrue(confirmed.available)
+        # Read-only: no hand-over happened, no record was written.
+        self.assertFalse((self.user_root / "magpie-integration.json").exists())
+        self.assertFalse(self.agents_source.exists())
+
+    def test_route_through_the_adapter_hands_skills_over(self):
+        adapter = self._adapter(self._fake_binary())
+        self._stage_skill("fstar-init")
+        report = adapter.route()
+        self.assertEqual(report["status"], "handed_over")
+        self.assertEqual(report["library"]["fstar-init"], "handed_over")
+        self.assertEqual(self._record()["skills"]["fstar-init"]["library"], "handed_over")
+
+    def test_absent_magpie_probe_degrades_to_the_native_fallback(self):
+        from fstar.capability_adapters import CapabilityRegistry, CLASS_FALLBACKS
+
+        adapter = self._adapter(self._fake_binary(fail=True))
+        registry = CapabilityRegistry({"distribution": adapter})
+        result = registry.resolve("distribution")
+        # The fake binary still answers --version (availability), but the
+        # hand-over fails; the class fallback is what the caller uses.
+        self.assertIn(result["fallback"], CLASS_FALLBACKS["distribution"])
+        self.assertEqual(result["capabilities"], ["distribution"])
+        # Nothing was staged or written during a probe/handshake-only path.
+        self.assertFalse((self.user_root / "magpie-integration.json").exists())
+
+    def test_missing_registry_degrades_for_every_class(self):
+        from fstar.capability_adapters import default_registry
+
+        report = default_registry().report()
+        for name, entry in report["classes"].items():
+            self.assertFalse(entry["available"], name)
+            self.assertTrue(entry["fallback"], name)

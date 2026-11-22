@@ -10,7 +10,8 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from .evidence import EvidenceService, file_digest
-from .models import DomainError, new_task, valid_name
+from .models import (DomainError, STATUSES, WORK_ITEM_STATES, deliverable,
+                     new_task, valid_name, work_item)
 from .store import TaskStore, content_hash
 
 LEASE_MINUTES = 30
@@ -33,7 +34,17 @@ def _require_workflow_member(task: dict, member: str) -> None:
                           {"package": "persistent-task", "member": member}, status=3)
 
 
-_REVISIT_DOCS = ("doc/prd.md", "doc/design.md", "plan.md", "clarify.md")
+# Planning documents that a replan must revisit (S-4 K-6).
+#
+# The default template set moved the scenario prd/design to the software
+# scenario templates, but an OLD task on disk can still carry doc/prd.md and
+# doc/design.md: the template migration does not make those files vanish, and
+# dropping them from this list would silently stop surfacing them for the
+# very tasks that still have them. The list therefore keeps the legacy
+# doc/prd.md and doc/design.md entries as COMPATIBILITY recognition
+# (_docs_to_revisit only reports the files that actually exist) and adds
+# criteria.md, the acceptance criteria every task now forms.
+_REVISIT_DOCS = ("doc/prd.md", "doc/design.md", "plan.md", "clarify.md", "criteria.md")
 
 
 def _docs_to_revisit(task_dir: Path) -> list:
@@ -563,6 +574,118 @@ class TaskService:
             self._write(task_dir, task)
             return task
 
+    # -- Optional collaboration fields (design §4, S-2) ---------------------
+    # These fields are descriptive collaboration state, orthogonal to the
+    # phase machine: they never gate lifecycle transitions and never enter
+    # source_snapshot. The project lock inside transaction() still serializes
+    # the write itself, so an active writer lease does not refuse them — a
+    # lease holder must be able to log its own work-item progress.
+
+    def _require_not_dropped(self, task: dict, operation: str) -> None:
+        self._require_active(task, operation)
+
+    def set_status(self, ref: str, *, actor: dict, status: str, reason: Optional[str] = None) -> dict:
+        """Set the collaboration status (active/waiting_user/waiting_external/paused).
+
+        Non-active statuses require a reason; ``status_detail.since`` records
+        when the transition happened. Returning to active clears the detail
+        (the reason no longer applies) but keeps the ``status`` key present.
+        Every change appends one ``status_changed`` event.
+        """
+        if status not in STATUSES:
+            raise DomainError("invalid_status", "status must be active, waiting_user, waiting_external, or paused", {"status": status})
+        if status != "active" and not (isinstance(reason, str) and reason.strip()):
+            raise DomainError("reason_required", "A non-active status requires a reason")
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            self._require_not_dropped(task, "set_status")
+            previous = task.get("status", "active")
+            if status != "active":
+                task["status"] = status
+                task["status_detail"] = {"reason": reason, "since": self.clock()}
+            else:
+                task["status"] = "active"
+                task["status_detail"] = None
+            self._event(task, "status_changed", self._actor_source(actor, "set_status"),
+                        {"from": previous, "to": status, "reason": reason or ""})
+            self._write(task_dir, task)
+            return task
+
+    def set_work_item(self, ref: str, *, actor: dict, item: dict) -> dict:
+        """Upsert one work item by id (done/active/blocked/cancelled).
+
+        The full normalized item lands in the event data so the append-only
+        log carries both old and new state.
+        """
+        if not isinstance(item, dict):
+            raise DomainError("invalid_work_items", "A work item must be an object")
+        try:
+            normalized = work_item(item)
+        except (KeyError, TypeError):
+            raise DomainError("invalid_work_items", "A work item requires an id and a valid state")
+        if normalized["state"] not in WORK_ITEM_STATES:
+            raise DomainError("invalid_work_items", "work item state must be done, active, blocked, or cancelled", {"id": normalized["id"], "state": normalized["state"]})
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            self._require_not_dropped(task, "set_work_item")
+            items = task.setdefault("work_items", [])
+            previous = next((existing for existing in items if existing.get("id") == normalized["id"]), None)
+            if previous is not None:
+                items[items.index(previous)] = normalized
+            else:
+                items.append(normalized)
+            self._event(task, "work_item_updated", self._actor_source(actor, "set_work_item"),
+                        {"old": previous, "new": normalized})
+            self._write(task_dir, task)
+            return task
+
+    def set_next_step(self, ref: str, *, actor: dict, condition: Optional[str], action: Optional[str]) -> dict:
+        """Set (or clear, with None arguments) the explicit next-step pointer."""
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            self._require_not_dropped(task, "set_next_step")
+            previous = task.get("next_step")
+            if condition is None and action is None:
+                task["next_step"] = None
+                updated = None
+            else:
+                if not (isinstance(condition, str) and condition.strip() and isinstance(action, str) and action.strip()):
+                    raise DomainError("invalid_next_step", "next_step requires non-empty condition and action strings")
+                task["next_step"] = {"condition": condition, "action": action}
+                updated = task["next_step"]
+            self._event(task, "next_step_changed", self._actor_source(actor, "set_next_step"),
+                        {"old": previous, "new": updated})
+            self._write(task_dir, task)
+            return task
+
+    def register_deliverable(self, ref: str, *, actor: dict, entry: dict) -> dict:
+        """Register or update one deliverable pointer by name (design §4)."""
+        if not isinstance(entry, dict):
+            raise DomainError("invalid_deliverables", "A deliverable entry must be an object")
+        try:
+            normalized = deliverable(entry)
+        except (KeyError, TypeError):
+            raise DomainError("invalid_deliverables", "A deliverable requires name and path")
+        if not normalized["name"].strip() or not normalized["path"].strip():
+            raise DomainError("invalid_deliverables", "deliverables entries require non-empty name and path")
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref)
+            task = self.store._read_path(task_dir / "task.json")
+            self._require_not_dropped(task, "register_deliverable")
+            entries = task.setdefault("deliverables", [])
+            previous = next((existing for existing in entries if existing.get("name") == normalized["name"]), None)
+            if previous is not None:
+                entries[entries.index(previous)] = normalized
+            else:
+                entries.append(normalized)
+            self._event(task, "deliverable_updated", self._actor_source(actor, "register_deliverable"),
+                        {"old": previous, "new": normalized})
+            self._write(task_dir, task)
+            return task
+
     def set_blocked(self, ref: str, *, actor: dict, reason: Optional[str], workflow_recovery: bool = False) -> dict:
         with self.store.transaction():
             task_dir = self.store.resolve(ref)
@@ -634,14 +757,19 @@ class TaskService:
             self._write(task_dir, task)
             return task
 
-    def report_problem(self, ref: str, *, actor: dict, confirmation: dict, reason: str) -> dict:
+    def report_problem(self, ref: str, *, actor: dict, confirmation: dict, reason: str, scope: Optional[dict] = None) -> dict:
         """User rework during awaiting_acceptance: back to planning.
 
         The user reports a problem with the delivered work while it sits in
-        awaiting_acceptance; the task returns to planning for rework with all
-        currently-valid evidence staled (the old final check no longer
-        describes the next delivery). No auto-transition follows: the normal
-        start -> dispatch/check cycle re-applies. User-initiated only.
+        awaiting_acceptance; the task returns to planning for rework with
+        evidence staled by the rework scope (S-4 K-1). Without an explicit
+        ``scope`` every currently-valid evidence goes stale (the legacy
+        behavior); a ``localized`` scope stales only evidence intersecting
+        the declared artifacts/paths/criteria_refs. Both rework entry
+        points (report_problem and continue --action rework) share
+        invalidate_scope, so the two surfaces cannot diverge. No
+        auto-transition follows: the normal start -> dispatch/check cycle
+        re-applies. User-initiated only.
         """
         with self.store.transaction():
             task_dir = self.store.resolve(ref)
@@ -653,16 +781,18 @@ class TaskService:
             if not reason:
                 raise DomainError("reason_required", "Reporting a problem requires a reason")
             validate_source(confirmation, task, actor=actor)
-            for evidence in task["evidence"]:
-                if evidence.get("state") == "valid":
-                    evidence["state"] = "stale"
-                    evidence["stale_reasons"] = [{"type": "rework_requested", "reason": reason}]
+            invalidation = self.evidence.invalidate_scope(task, reason=reason, scope=scope)
             if task.get("acceptance"):
                 task["acceptance"]["state"] = "stale"
             task["phase"] = "planning"
             task["lease"] = None
             task["completedAt"] = None
-            self._event(task, "rework_requested", confirmation, {"reason": reason})
+            self._event(task, "rework_requested", confirmation, {
+                "reason": reason,
+                "scope": invalidation["scope"],
+                "invalidated_evidence_ids": invalidation["invalidated_evidence_ids"],
+                "retained_evidence_ids": invalidation["retained_evidence_ids"],
+            })
             self._write(task_dir, task)
             return task
 
@@ -731,9 +861,17 @@ class TaskService:
             # in awaiting_acceptance until the user reports the problem or
             # the phase is explicitly re-entered after a fresh check.
             effective = "in_progress"
-        return {"task_id": task["id"], "phase": task["phase"], "effective_phase": effective, "blocked": task["blocked"], "disposition": task.get("meta", {}).get("disposition"), "lease": task["lease"], "evidence": task["evidence"], "extensions": task["extensions"], "children": child_states, "acceptance": acceptance}
+        result = {"task_id": task["id"], "phase": task["phase"], "effective_phase": effective, "blocked": task["blocked"], "disposition": task.get("meta", {}).get("disposition"), "lease": task["lease"], "evidence": task["evidence"], "extensions": task["extensions"], "children": child_states, "acceptance": acceptance}
+        # Optional collaboration fields (design §4): absent fields are omitted
+        # rather than reported as null; status defaults to "active".
+        result["status"] = task.get("status", "active")
+        for field in ("status_detail", "work_items", "next_step", "deliverables"):
+            value = task.get(field)
+            if value is not None:
+                result[field] = value
+        return result
 
-    def continue_task(self, ref: Optional[str], *, session_id: Optional[str] = None, action: Optional[str] = None, actor: Optional[dict] = None, confirmation: Optional[dict] = None, reason: Optional[str] = None, workflow: bool = False) -> dict:
+    def continue_task(self, ref: Optional[str], *, session_id: Optional[str] = None, action: Optional[str] = None, actor: Optional[dict] = None, confirmation: Optional[dict] = None, reason: Optional[str] = None, workflow: bool = False, scope: Optional[dict] = None) -> dict:
         if not ref:
             current = self.current(session_id)
             if not current.get("current"):
@@ -831,21 +969,25 @@ class TaskService:
                 elif action == "rework":
                     # Same transition as report_problem, reachable through
                     # the continue surface: the user reports a problem while
-                    # the task awaits acceptance.
+                    # the task awaits acceptance. Both entry points share
+                    # evidence.invalidate_scope, so a localized scope cannot
+                    # mean one surface locally and the other globally.
                     if actor.get("role") != "user":
                         raise DomainError("rework_forbidden", "Only a user may report a problem on a task awaiting acceptance", status=3)
                     if task["phase"] != "awaiting_acceptance":
                         raise DomainError("rework_forbidden", "Rework applies to a task awaiting acceptance", {"phase": task["phase"]}, status=3)
-                    for evidence in task["evidence"]:
-                        if evidence.get("state") == "valid":
-                            evidence["state"] = "stale"
-                            evidence["stale_reasons"] = [{"type": "rework_requested", "reason": reason}]
+                    invalidation = self.evidence.invalidate_scope(task, reason=reason, scope=scope)
                     if task.get("acceptance"):
                         task["acceptance"]["state"] = "stale"
                     task["phase"] = "planning"
                     task["lease"] = None
                     task["completedAt"] = None
-                    self._event(task, "rework_requested", confirmation or self._actor_source(actor, "continue rework"), {"reason": reason})
+                    self._event(task, "rework_requested", confirmation or self._actor_source(actor, "continue rework"), {
+                        "reason": reason,
+                        "scope": invalidation["scope"],
+                        "invalidated_evidence_ids": invalidation["invalidated_evidence_ids"],
+                        "retained_evidence_ids": invalidation["retained_evidence_ids"],
+                    })
             elif action == "unblock":
                 raise DomainError("use_service", "Unblock requires set_blocked so source rules are enforced")
             else:
@@ -869,6 +1011,56 @@ class TaskService:
                 if not accepted or not accepted <= set(status["evidence_refs"]):
                     raise DomainError("children_incomplete", "Child acceptance evidence is stale", {"child": name}, status=3)
             self._require_children_ready(child_dir, child)
+
+    def _criteria_item_ids(self, task: dict) -> set:
+        """Every item id known to the task's artifact map.
+
+        The union across all mapped artifacts: a rule may cite a criteria
+        item that lives in any artifact the task maps (typically
+        criteria.md), not only in the first one.
+        """
+        mappings = task.get("meta", {}).get("templates", {}).get("artifact_map", {})
+        known = set()
+        for artifact, items in (mappings or {}).items():
+            if artifact == "mode" or not isinstance(items, dict):
+                continue
+            known.update(items.keys())
+        return known
+
+    def _validate_acceptance_rule(self, task: dict, rule: Optional[dict]) -> Optional[dict]:
+        """Validate a rule-driven acceptance citation (S-4 K-3).
+
+        ``rule_ref`` and ``quote`` stay mandatory. ``criteria_refs`` (the
+        criteria items the rule actually judged), ``report`` (the report
+        path) and ``scope`` (the range the rule covered) are optional and
+        only recorded when given, so an OLD rule file keeps working
+        unchanged. A cited criteria item that the task never established is
+        refused: the acceptance record must not claim coverage of an item
+        nobody can audit.
+        """
+        if rule is None:
+            return None
+        for key in ("rule_ref", "quote"):
+            if not isinstance(rule.get(key), str) or not rule[key].strip():
+                raise DomainError("invalid_acceptance_rule", "A rule-driven acceptance requires the rule reference and the user's exact quote")
+        normalized = {"rule_ref": rule["rule_ref"], "quote": rule["quote"]}
+        criteria_refs = rule.get("criteria_refs")
+        if criteria_refs is not None:
+            if not isinstance(criteria_refs, list) or not criteria_refs or not all(isinstance(entry, str) and entry.strip() for entry in criteria_refs):
+                raise DomainError("invalid_acceptance_rule", "Rule criteria_refs must be a non-empty array of criteria item ids")
+            unknown = sorted(set(criteria_refs) - self._criteria_item_ids(task))
+            if unknown:
+                raise DomainError("invalid_acceptance_rule", "Rule criteria_refs cite items the task never established", {"unknown": unknown})
+            normalized["criteria_refs"] = list(criteria_refs)
+        if rule.get("report") is not None:
+            if not isinstance(rule.get("report"), str) or not rule["report"].strip():
+                raise DomainError("invalid_acceptance_rule", "Rule report must be a non-empty path string")
+            normalized["report"] = rule["report"]
+        if rule.get("scope") is not None:
+            if not isinstance(rule.get("scope"), str) or not rule["scope"].strip():
+                raise DomainError("invalid_acceptance_rule", "Rule scope must be a non-empty string")
+            normalized["scope"] = rule["scope"]
+        return normalized
 
     def accept(self, ref: str, *, actor: dict, confirmation: dict, rule: Optional[dict] = None) -> dict:
         with self.store.transaction():
@@ -898,19 +1090,24 @@ class TaskService:
                 if item.get("producer", {}).get("id") in implementers:
                     raise DomainError("check_not_independent", "The final check producer also delivered the implementation", status, status=3)
             delivery_digests = [item.get("delivery", {}).get("digest") for item in qualifying]
-            task["acceptance"] = {"confirmed_at": self.clock(), "confirmed_by": "user", "source": confirmation, "evidence_refs": status["evidence_refs"], "validates": {"task": source_snapshot(task), "delivery": delivery_digests}, "state": "valid"}
+            normalized_rule = self._validate_acceptance_rule(task, rule)
+            acceptance = {"confirmed_at": self.clock(), "confirmed_by": "user", "source": confirmation, "evidence_refs": status["evidence_refs"], "validates": {"task": source_snapshot(task), "delivery": delivery_digests}, "state": "valid"}
+            if normalized_rule is not None:
+                # The acceptance record keeps the rule citation (and the
+                # criteria items it judged) so the exemption is auditable
+                # from the task itself, not only from the event log.
+                acceptance["rule_ref"] = normalized_rule["rule_ref"]
+                acceptance["criteria_refs"] = normalized_rule.get("criteria_refs", [])
+            task["acceptance"] = acceptance
             task["phase"] = "completed"
             task["completedAt"] = self.clock()
             accepted_data = {"evidence_refs": status["evidence_refs"]}
-            if rule is not None:
+            if normalized_rule is not None:
                 # Rule-driven acceptance exemption: the user's recorded rule
                 # delegates acceptance for this class of work. The citation
                 # (rule source + exact quote) lands in the event data so the
                 # exemption always traces to the user's own words.
-                for key in ("rule_ref", "quote"):
-                    if not isinstance(rule.get(key), str) or not rule[key].strip():
-                        raise DomainError("invalid_acceptance_rule", "A rule-driven acceptance requires the rule reference and the user's exact quote")
-                accepted_data["accepted_via_rule"] = {"rule_ref": rule["rule_ref"], "quote": rule["quote"]}
+                accepted_data["accepted_via_rule"] = normalized_rule
             self._event(task, "accepted", confirmation, accepted_data)
             self._write(task_dir, task)
             return task
@@ -1069,20 +1266,22 @@ class TaskService:
             if item.get("producer", {}).get("id") in implementers:
                 raise DomainError("check_not_independent", "The final check producer also delivered the implementation", status, status=3)
         delivery_digests = [item.get("delivery", {}).get("digest") for item in qualifying]
-        task["acceptance"] = {"confirmed_at": self.clock(), "confirmed_by": "user", "source": confirmation,
-                              "evidence_refs": status["evidence_refs"],
-                              "validates": {"task": source_snapshot(task), "delivery": delivery_digests},
-                              "state": "valid"}
+        normalized_rule = self._validate_acceptance_rule(task, rule)
+        acceptance = {"confirmed_at": self.clock(), "confirmed_by": "user", "source": confirmation,
+                      "evidence_refs": status["evidence_refs"],
+                      "validates": {"task": source_snapshot(task), "delivery": delivery_digests},
+                      "state": "valid"}
+        if normalized_rule is not None:
+            acceptance["rule_ref"] = normalized_rule["rule_ref"]
+            acceptance["criteria_refs"] = normalized_rule.get("criteria_refs", [])
+        task["acceptance"] = acceptance
         task["phase"] = "completed"
         task["completedAt"] = self.clock()
         accepted_data = {"evidence_refs": status["evidence_refs"]}
         if accepted_via:
             accepted_data["accepted_via"] = accepted_via
-        if rule is not None:
-            for key in ("rule_ref", "quote"):
-                if not isinstance(rule.get(key), str) or not rule[key].strip():
-                    raise DomainError("invalid_acceptance_rule", "A rule-driven acceptance requires the rule reference and the user's exact quote")
-            accepted_data["accepted_via_rule"] = {"rule_ref": rule["rule_ref"], "quote": rule["quote"]}
+        if normalized_rule is not None:
+            accepted_data["accepted_via_rule"] = normalized_rule
         service = self if store is self.store else TaskService(store, clock=self.clock)
         service._event(task, "unified_acceptance" if accepted_via else "accepted", confirmation, accepted_data)
         service._write(task_dir, task)

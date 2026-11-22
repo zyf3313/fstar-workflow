@@ -1,0 +1,3188 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-22T11:41:41.681912Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "f94af99f-f7de-437c-9d67-28b9c95f5992"
+    ],
+    "source": {
+      "actor": {
+        "id": "FrancisZhang",
+        "role": "user"
+      },
+      "at": "2026-11-22T12:00:00Z",
+      "confirmed_at": "2026-11-22",
+      "consent": "explicit",
+      "disposition": "confirmed",
+      "owners": [
+        "FrancisZhang"
+      ],
+      "quote": "后续当前项目不用找我确认第三个阶段了 直接已完成就好，你验收完就当我验收完了，开发走发版流程吧",
+      "reference": "2026-11-22 对话（会话 0c569c9d）：用户授权协调者按约定完成验收（协调者验收记为用户验收，见 ~/.fstar/rules/self-acceptance.md）",
+      "scope": "accept",
+      "source_id": "conv-0c569c9d-accept-2026-11-22",
+      "source_type": "conversation",
+      "type": "conversation",
+      "user_ref": "FrancisZhang",
+      "validates": "8888d05580f7b4cc47a9781341d1f5ff8c5170b0cd14c459659aa8021f684489"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "d2b3839c9af2d21bb9d6eef5efc99f3618fa9ca8453b0ab2ca593655c912825d"
+      ],
+      "task": "8888d05580f7b4cc47a9781341d1f5ff8c5170b0cd14c459659aa8021f684489"
+    }
+  },
+  "archivedAt": "2026-11-22T11:51:17.040941Z",
+  "assignee": null,
+  "base_branch": "",
+  "blocked": null,
+  "branch": "chore/general-workflow-design",
+  "capabilities": [],
+  "children": [],
+  "commit": "6032b52365926104b07154b1358fd5a733718084",
+  "completedAt": "2026-11-22T11:41:41.682125Z",
+  "createdAt": "2026-11-21T03:19:40.394509Z",
+  "creator": "agent",
+  "deliverables": [
+    {
+      "criteria_refs": [
+        "S5-A01",
+        "S5-A02",
+        "S5-A03",
+        "S5-A04",
+        "S5-A05",
+        "S5-A06",
+        "S5-A07",
+        "S5-A08",
+        "S5-A09",
+        "S5-A10"
+      ],
+      "format": "markdown",
+      "name": "S-5 实施规格",
+      "path": ".fstar/tasks/general-workflow-redesign/s5-spec.md",
+      "version": "1"
+    },
+    {
+      "criteria_refs": [
+        "S6-A01",
+        "S6-A02",
+        "S6-A03",
+        "S6-A04",
+        "S6-A05",
+        "S6-A06",
+        "S6-A07",
+        "S6-A08"
+      ],
+      "format": "markdown",
+      "name": "S-6 实施规格",
+      "path": ".fstar/tasks/general-workflow-redesign/s6-spec.md",
+      "version": "1"
+    },
+    {
+      "criteria_refs": [
+        "A-001",
+        "A-002",
+        "A-003",
+        "A-004",
+        "A-005",
+        "A-006",
+        "A-007",
+        "A-008",
+        "A-009",
+        "A-010",
+        "A-011",
+        "A-012"
+      ],
+      "format": "markdown",
+      "name": "整体验收标准",
+      "path": ".fstar/tasks/general-workflow-redesign/criteria.md",
+      "version": "2"
+    }
+  ],
+  "description": "整理已确认的通用四阶段、意图识别、主动引导、分范围经验沉淀与工具分工；先交付开发和非开发的澄清及计划样稿，经评阅后确定模板与机制整改。当前处于设计阶段，不修改生产实现。",
+  "events": [
+    {
+      "at": "2026-11-21T03:19:40.395087Z",
+      "data": {
+        "parent": null
+      },
+      "id": "783ad2d2-012f-4008-8d07-df1efdc3c988",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-21T03:19:40.395084Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "cf529865-9497-448c-a63f-acbe4ef2e676",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-21T03:20:15.615158Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-21T03:20:15.614369Z",
+          "excluded": [],
+          "id": "planning-review",
+          "included": [
+            "clarify",
+            "design",
+            "doc-check",
+            "editor",
+            "plan",
+            "prd"
+          ],
+          "reason": "用户已认可文档整改建议及先制作样稿再评阅的步骤，原话：可以你提的那几点都没问题。登记本轮设计澄清与文档样稿授权。",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-21T03:20:15.613827Z",
+            "quote": "",
+            "reference": "interactive-cli",
+            "scope": "extension",
+            "source_id": "cli",
+            "type": "command",
+            "validates": "377758f7aa64ea4e52756ff7faba7161cc11b8df6fe40f8b4e2303a59dfa78e1"
+          }
+        },
+        "old": null
+      },
+      "id": "43b2a520-733b-49a1-8d36-671bf33675ba",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-21T03:20:15.613827Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "377758f7aa64ea4e52756ff7faba7161cc11b8df6fe40f8b4e2303a59dfa78e1"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-21T03:28:23.982756Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-21T03:28:23.981468Z",
+          "excluded": [],
+          "id": "planning-review",
+          "included": [
+            "clarify",
+            "design",
+            "doc-check",
+            "editor",
+            "plan",
+            "prd"
+          ],
+          "reason": "以用户实际对话确认替换先前 CLI 快捷确认的来源标识，保留既有事件；授权范围仍为设计澄清与文档样稿，不代表生产实现或最终验收。",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-21T03:19:40Z",
+            "quote": "可以你提的那几点都没问题",
+            "reference": "本次对话：用户在文档职责、样稿优先及整改步骤建议后的答复；at 为本任务建立时的登记时间，不是消息原始时间戳",
+            "scope": "extension",
+            "source_id": "general-workflow-redesign-document-samples-user-approval",
+            "type": "conversation",
+            "validates": "377758f7aa64ea4e52756ff7faba7161cc11b8df6fe40f8b4e2303a59dfa78e1"
+          }
+        },
+        "old": {
+          "enabled_at": "2026-11-21T03:20:15.614369Z",
+          "excluded": [],
+          "id": "planning-review",
+          "included": [
+            "clarify",
+            "design",
+            "doc-check",
+            "editor",
+            "plan",
+            "prd"
+          ],
+          "reason": "用户已认可文档整改建议及先制作样稿再评阅的步骤，原话：可以你提的那几点都没问题。登记本轮设计澄清与文档样稿授权。",
+          "scope": "full",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-21T03:20:15.613827Z",
+            "quote": "",
+            "reference": "interactive-cli",
+            "scope": "extension",
+            "source_id": "cli",
+            "type": "command",
+            "validates": "377758f7aa64ea4e52756ff7faba7161cc11b8df6fe40f8b4e2303a59dfa78e1"
+          }
+        }
+      },
+      "id": "6f3d1ac5-9df8-475e-9740-fb8988e4a447",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-21T03:19:40Z",
+        "quote": "可以你提的那几点都没问题",
+        "reference": "本次对话：用户在文档职责、样稿优先及整改步骤建议后的答复；at 为本任务建立时的登记时间，不是消息原始时间戳",
+        "scope": "extension",
+        "source_id": "general-workflow-redesign-document-samples-user-approval",
+        "type": "conversation",
+        "validates": "377758f7aa64ea4e52756ff7faba7161cc11b8df6fe40f8b4e2303a59dfa78e1"
+      },
+      "type": "extension_changed"
+    },
+    {
+      "at": "2026-11-21T05:00:57.111832Z",
+      "data": {
+        "branch": "chore/general-workflow-design",
+        "detached": false,
+        "snapshot": "cf91c6cfb3b7ce2b5cdc7f15c33dd83f739f79d709305086aa505420b854e3ba",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "5fb7311a-1154-452d-9770-0ebd52162035",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-21T00:00:00Z",
+        "quote": "开始",
+        "reference": "本次对话：设计评审通过（好没问题了）并生成实施计划后，用户启动实施的答复",
+        "scope": "task",
+        "source_id": "general-workflow-redesign-start-user-approval",
+        "type": "conversation",
+        "validates": "963795130debd548cfef2938b308397f1f08b2010cf9ce3ceaf1f65cc18510e3"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-21T07:12:27.364993Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-001.md"
+          ],
+          "id": "S-1",
+          "state": "done",
+          "summary": "模板与验收流程：plan/clarify 重写、criteria 新增、check 增强、prd/design 移入 scenarios/software；check-001 通过"
+        },
+        "old": null
+      },
+      "id": "c4797163-2a48-44f1-bd1b-7e49a2137542",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-21T07:12:27.364702Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "f19f7a60-b881-41bb-80b0-cb160185cc8f",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T07:12:40.819612Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-002.md"
+          ],
+          "id": "S-2",
+          "state": "done",
+          "summary": "task.json schema 扩展：status/work_items/next_step/deliverables + CLI + 17 测试；check-002 通过"
+        },
+        "old": null
+      },
+      "id": "850f0b40-1442-4d92-90fe-bfd4e021ce5c",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-21T07:12:40.819449Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "f2ca16e6-1e58-41bc-8f1e-1fb4617d41b6",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T07:12:40.907246Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-003.md"
+          ],
+          "id": "S-3",
+          "state": "done",
+          "summary": "Skills/角色卡/routing 重写：四条硬规则、五 Skill、prompt-context 增强；check-003 通过"
+        },
+        "old": null
+      },
+      "id": "2fc19b5d-aa9f-4a6c-b021-adb65795f46e",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-21T07:12:40.907072Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "fcf1ce82-5887-4f5f-9e5a-a9d8243ec035",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T07:12:40.994865Z",
+      "data": {
+        "new": {
+          "action": "用户验收后进入 S-4（验收协议改动）",
+          "condition": "S-1..S-3 全部通过独立检查，等待用户对第一版核心的验收"
+        },
+        "old": null
+      },
+      "id": "8e304755-828f-4b1b-b474-5cf5e1c317fb",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-21T07:12:40.994700Z",
+        "quote": "",
+        "reference": "set_next_step",
+        "scope": "set_next_step",
+        "source_id": "08efda4e-bce0-4c27-ade1-fd54da5a33bc",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "next_step_changed"
+    },
+    {
+      "at": "2026-11-21T07:12:41.080734Z",
+      "data": {
+        "from": "active",
+        "reason": "等待用户验收 S-1..S-3 第一版核心交付",
+        "to": "waiting_user"
+      },
+      "id": "97665942-3ea6-4fd6-ad73-8fef06a64f0d",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-21T07:12:41.080730Z",
+        "quote": "",
+        "reference": "set_status",
+        "scope": "set_status",
+        "source_id": "0053be18-5832-4b6c-b7a1-3f8ea11a3915",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "status_changed"
+    },
+    {
+      "at": "2026-11-21T07:40:39.984209Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-21T07:40:39.983129Z",
+          "excluded": [],
+          "id": "project-governance",
+          "included": [
+            "knowledge"
+          ],
+          "reason": "用户已审定自验收规则，原话：确认 但是如果后续开发任务如果涉及到扩展和修复的任务 规则需要一并去兼容。经 learn 流程写入用户规则目录。",
+          "scope": "custom",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-21T07:40:39.982471Z",
+            "quote": "",
+            "reference": "interactive-cli",
+            "scope": "extension",
+            "source_id": "cli",
+            "type": "command",
+            "validates": "cf91c6cfb3b7ce2b5cdc7f15c33dd83f739f79d709305086aa505420b854e3ba"
+          }
+        },
+        "old": null
+      },
+      "id": "f937b7b1-0d07-42de-96f4-9cf23af068b5",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-21T07:40:39.982471Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "cf91c6cfb3b7ce2b5cdc7f15c33dd83f739f79d709305086aa505420b854e3ba"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-21T08:01:13.350428Z",
+      "data": {
+        "new": {
+          "evidence_refs": [],
+          "id": "S-4",
+          "state": "active",
+          "summary": "验收协议改动：rework 局部作废 / final 检查只读 / 规则验收引用 criteria / criteria 判定方式与条目化 / execute 自验收收尾程序 / 遗留路径清理"
+        },
+        "old": null
+      },
+      "id": "f1cc835b-d4a4-4f4b-9fdc-5b0bf019fa9f",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "s4"
+        },
+        "at": "2026-11-21T08:01:13.349932Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "66276dbc-7f95-4790-a1ef-87dbd766cb8b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T08:01:24.675987Z",
+      "data": {
+        "from": "waiting_user",
+        "reason": "",
+        "to": "active"
+      },
+      "id": "557eaa7f-f310-46a7-8c61-6299c41fa95e",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "s4"
+        },
+        "at": "2026-11-21T08:01:24.675818Z",
+        "quote": "",
+        "reference": "set_status",
+        "scope": "set_status",
+        "source_id": "5cc95a92-5ba3-4eb5-b674-aadda1a96b00",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "status_changed"
+    },
+    {
+      "at": "2026-11-21T08:01:24.678100Z",
+      "data": {
+        "new": {
+          "action": "完成 K-1..K-6 后派独立检查，再由用户验收",
+          "condition": "S-4 规格已定，实施与独立检查进行中"
+        },
+        "old": {
+          "action": "用户验收后进入 S-4（验收协议改动）",
+          "condition": "S-1..S-3 全部通过独立检查，等待用户对第一版核心的验收"
+        }
+      },
+      "id": "b36e8095-6078-4c90-9159-ba08bcb122d8",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "s4"
+        },
+        "at": "2026-11-21T08:01:24.678096Z",
+        "quote": "",
+        "reference": "set_next_step",
+        "scope": "set_next_step",
+        "source_id": "1d4d07a5-c06e-4738-882f-d865412fd4dd",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "next_step_changed"
+    },
+    {
+      "at": "2026-11-21T10:26:46.667377Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-004.md"
+          ],
+          "id": "S-4",
+          "state": "done",
+          "summary": "验收协议改动：rework 局部作废（retired_by_rework 防绕过）、final 检查三重只读门禁、规则验收引用 criteria 条目、criteria 判定方式与条目化、execute 自验收收尾程序、routing 同步；check-004 最终检查通过（含两项已评估偏离）"
+        },
+        "old": {
+          "evidence_refs": [],
+          "id": "S-4",
+          "state": "active",
+          "summary": "验收协议改动：rework 局部作废 / final 检查只读 / 规则验收引用 criteria / criteria 判定方式与条目化 / execute 自验收收尾程序 / 遗留路径清理"
+        }
+      },
+      "id": "966ded80-1483-4ec9-905a-7f7666b124ec",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "s4"
+        },
+        "at": "2026-11-21T10:26:46.667061Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "43f4fd79-6004-42ff-8a05-c4e5103224ed",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T10:26:46.670195Z",
+      "data": {
+        "new": {
+          "action": "用户验收 S-4 后启动 S-5（工具适配接口）",
+          "condition": "S-4 通过最终检查，等待用户验收"
+        },
+        "old": {
+          "action": "完成 K-1..K-6 后派独立检查，再由用户验收",
+          "condition": "S-4 规格已定，实施与独立检查进行中"
+        }
+      },
+      "id": "a8a59978-f473-40ab-9e19-ff66591795b5",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "s4"
+        },
+        "at": "2026-11-21T10:26:46.670191Z",
+        "quote": "",
+        "reference": "set_next_step",
+        "scope": "set_next_step",
+        "source_id": "707a6d7c-4625-48b4-ab19-1d83ed2e96c2",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "next_step_changed"
+    },
+    {
+      "at": "2026-11-21T10:26:46.672005Z",
+      "data": {
+        "from": "active",
+        "reason": "等待用户验收 S-4：验收协议改动（accept 语义与 evidence 校验本身被修改，按自验收规则永不覆盖清单需用户亲验）",
+        "to": "waiting_user"
+      },
+      "id": "e55613e9-9cc8-4f17-91dd-5dd08f2d1a09",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "s4"
+        },
+        "at": "2026-11-21T10:26:46.672003Z",
+        "quote": "",
+        "reference": "set_status",
+        "scope": "set_status",
+        "source_id": "36a57d3f-70f3-4dc1-85d2-c94c6aad219a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "status_changed"
+    },
+    {
+      "at": "2026-11-21T12:33:12.879603Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-001.md",
+            "checks/s1-s4-user-confirmation.md"
+          ],
+          "id": "S-1",
+          "state": "done",
+          "summary": "模板与验收流程：plan/clarify 重写、criteria 新增、check 增强、prd/design 移入 scenarios/software；check-001 通过；用户已确认阶段成果（2026-11-21）"
+        },
+        "old": {
+          "evidence_refs": [
+            "checks/check-001.md"
+          ],
+          "id": "S-1",
+          "state": "done",
+          "summary": "模板与验收流程：plan/clarify 重写、criteria 新增、check 增强、prd/design 移入 scenarios/software；check-001 通过"
+        }
+      },
+      "id": "df1e5691-c460-4257-a190-b41537560265",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:33:12.878959Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "8d4325f4-1c0e-4672-bd84-05346bd1cf97",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T12:33:12.882405Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-002.md",
+            "checks/s1-s4-user-confirmation.md"
+          ],
+          "id": "S-2",
+          "state": "done",
+          "summary": "task.json schema 扩展：status/work_items/next_step/deliverables + CLI + 17 测试；check-002 通过；用户已确认阶段成果（2026-11-21）"
+        },
+        "old": {
+          "evidence_refs": [
+            "checks/check-002.md"
+          ],
+          "id": "S-2",
+          "state": "done",
+          "summary": "task.json schema 扩展：status/work_items/next_step/deliverables + CLI + 17 测试；check-002 通过"
+        }
+      },
+      "id": "2d99acfb-64f3-460a-be84-38fe837380b7",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:33:12.882398Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "4e82cb3a-95f2-4c6d-be69-690a055d8a80",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T12:33:12.884513Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-003.md",
+            "checks/s1-s4-user-confirmation.md"
+          ],
+          "id": "S-3",
+          "state": "done",
+          "summary": "Skills/角色卡/routing 重写：四条硬规则、五 Skill、prompt-context 增强；check-003 通过；用户已确认阶段成果（2026-11-21）"
+        },
+        "old": {
+          "evidence_refs": [
+            "checks/check-003.md"
+          ],
+          "id": "S-3",
+          "state": "done",
+          "summary": "Skills/角色卡/routing 重写：四条硬规则、五 Skill、prompt-context 增强；check-003 通过"
+        }
+      },
+      "id": "4ab7ac39-05a6-49a6-98ff-9eaf08c576f7",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:33:12.884509Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "d5185b68-deec-4bc5-b2ae-ea76e4e8f2ca",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T12:33:12.886555Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-004.md",
+            "checks/s1-s4-user-confirmation.md"
+          ],
+          "id": "S-4",
+          "state": "done",
+          "summary": "验收协议改动：rework 局部作废（retired_by_rework 防绕过）、final 检查三重只读门禁、规则验收引用 criteria 条目、criteria 判定方式与条目化、execute 自验收收尾程序、routing 同步；check-004 最终检查通过（含两项已评估偏离）；用户已确认阶段成果（2026-11-21）"
+        },
+        "old": {
+          "evidence_refs": [
+            "checks/check-004.md"
+          ],
+          "id": "S-4",
+          "state": "done",
+          "summary": "验收协议改动：rework 局部作废（retired_by_rework 防绕过）、final 检查三重只读门禁、规则验收引用 criteria 条目、criteria 判定方式与条目化、execute 自验收收尾程序、routing 同步；check-004 最终检查通过（含两项已评估偏离）"
+        }
+      },
+      "id": "a89457a5-9972-419e-b510-db1093c40012",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:33:12.886551Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "e41030c9-138f-46a9-98a4-d2278af016d9",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T12:33:12.888789Z",
+      "data": {
+        "from": "waiting_user",
+        "reason": "",
+        "to": "active"
+      },
+      "id": "17961bfd-f6bf-4bb4-84fb-6abac7f1b422",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:33:12.888784Z",
+        "quote": "",
+        "reference": "set_status",
+        "scope": "set_status",
+        "source_id": "6ed56293-c72c-4173-b940-db487d896cdc",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "status_changed"
+    },
+    {
+      "at": "2026-11-21T12:33:12.890942Z",
+      "data": {
+        "new": {
+          "action": "推进 S-5 工具适配接口，再完成 S-6 经验循环与最终整体检查；暂不发布",
+          "condition": "S-1～S-4 阶段成果已获用户确认；S-5、S-6 尚未完成"
+        },
+        "old": {
+          "action": "用户验收 S-4 后启动 S-5（工具适配接口）",
+          "condition": "S-4 通过最终检查，等待用户验收"
+        }
+      },
+      "id": "57648780-114e-4a60-b1fa-ca25ac003f2b",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:33:12.890936Z",
+        "quote": "",
+        "reference": "set_next_step",
+        "scope": "set_next_step",
+        "source_id": "74188a09-bd09-46d3-8d4c-07a3c469092b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "next_step_changed"
+    },
+    {
+      "at": "2026-11-21T12:40:49.892951Z",
+      "data": {
+        "from": "active",
+        "reason": "",
+        "to": "active"
+      },
+      "id": "73d6eb28-5797-4aca-88bc-6f9647f19b60",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:40:49.892452Z",
+        "quote": "",
+        "reference": "set_status",
+        "scope": "set_status",
+        "source_id": "c55de30f-1117-4241-ad73-3229b790fb41",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "status_changed"
+    },
+    {
+      "at": "2026-11-21T12:40:49.895785Z",
+      "data": {
+        "new": {
+          "evidence_refs": [],
+          "id": "S-5",
+          "state": "active",
+          "summary": "补入用户确认的跨阶段本地技能优先选择，随后实现公共路由、提示与派发联动及四类能力适配接口"
+        },
+        "old": null
+      },
+      "id": "e522863c-b05f-461f-abae-5760d90ca867",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:40:49.895781Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "2de4037e-1fc1-440b-b1a4-42b0c3008890",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T12:40:49.898788Z",
+      "data": {
+        "new": {
+          "action": "完成 S-5 设计补充、实施及独立检查，再推进 S-6；暂不发布",
+          "condition": "用户已明确确认新增技能优先选择方案并授权继续实施"
+        },
+        "old": {
+          "action": "推进 S-5 工具适配接口，再完成 S-6 经验循环与最终整体检查；暂不发布",
+          "condition": "S-1～S-4 阶段成果已获用户确认；S-5、S-6 尚未完成"
+        }
+      },
+      "id": "15efbb51-f88a-4adf-8a10-bd11635a7901",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T12:40:49.898778Z",
+        "quote": "",
+        "reference": "set_next_step",
+        "scope": "set_next_step",
+        "source_id": "4da88e35-0cfd-4248-bbdc-f40664ee866e",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "next_step_changed"
+    },
+    {
+      "at": "2026-11-21T13:00:15.198813Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "S5-A01",
+            "S5-A02",
+            "S5-A03",
+            "S5-A04",
+            "S5-A05",
+            "S5-A06",
+            "S5-A07",
+            "S5-A08",
+            "S5-A09",
+            "S5-A10"
+          ],
+          "format": "markdown",
+          "name": "S-5 实施规格",
+          "path": ".fstar/tasks/general-workflow-redesign/s5-spec.md",
+          "version": "1"
+        },
+        "old": null
+      },
+      "id": "729e397b-76f1-4825-ba02-ec62552b2b4f",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T13:00:15.198143Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "34f6c8c3-a413-4776-8a2f-3aa3bd4bffa7",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-21T13:00:15.201695Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "S6-A01",
+            "S6-A02",
+            "S6-A03",
+            "S6-A04",
+            "S6-A05",
+            "S6-A06",
+            "S6-A07",
+            "S6-A08"
+          ],
+          "format": "markdown",
+          "name": "S-6 实施规格",
+          "path": ".fstar/tasks/general-workflow-redesign/s6-spec.md",
+          "version": "1"
+        },
+        "old": null
+      },
+      "id": "e0554a74-b3e3-4bb6-bce8-49f4918ed7c9",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T13:00:15.201690Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "1d733cf7-a429-40d3-a6a9-06f82b26eeef",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-21T13:50:27.599940Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-005.md",
+            "s5-spec.md"
+          ],
+          "id": "S-5",
+          "state": "done",
+          "summary": "跨阶段本地技能优先选择（公共路由+逐轮提醒+派发传递/回执）与四能力薄接口；Magpie 分发改为适配实现零改动兼容；check-005 通过（协议与可用性已验证，真实宿主语义部分未验证）"
+        },
+        "old": {
+          "evidence_refs": [],
+          "id": "S-5",
+          "state": "active",
+          "summary": "补入用户确认的跨阶段本地技能优先选择，随后实现公共路由、提示与派发联动及四类能力适配接口"
+        }
+      },
+      "id": "840952b4-8243-4dd3-b21c-575f0aaa3c90",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T13:50:27.599431Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "f062e1f8-eb63-4be1-a3fa-f98ed87dced5",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T13:50:27.602834Z",
+      "data": {
+        "new": {
+          "evidence_refs": [],
+          "id": "S-6",
+          "state": "active",
+          "summary": "经验循环增强：条目 scope/置信度/来源/失效条件、按范围过滤、纠正与停用闭环"
+        },
+        "old": null
+      },
+      "id": "40804a35-24f5-45e8-a8f2-1eda6fa23d84",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T13:50:27.602830Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "a3ec9f88-99dd-45a8-896e-f5e3cdcc1d2f",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-21T13:50:27.605276Z",
+      "data": {
+        "new": {
+          "action": "完成 S-6 实施与独立检查后进入整体收尾验收",
+          "condition": "S-5 已通过最终检查；S-6 规格已就绪并派发实施"
+        },
+        "old": {
+          "action": "完成 S-5 设计补充、实施及独立检查，再推进 S-6；暂不发布",
+          "condition": "用户已明确确认新增技能优先选择方案并授权继续实施"
+        }
+      },
+      "id": "4bc7633f-8603-40a7-bf9f-68daae7eb587",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-21T13:50:27.605272Z",
+        "quote": "",
+        "reference": "set_next_step",
+        "scope": "set_next_step",
+        "source_id": "2e027b09-b1e0-4147-8989-d40d824fa8e8",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "next_step_changed"
+    },
+    {
+      "at": "2026-11-22T02:48:03.334834Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006",
+            "A-007",
+            "A-008",
+            "A-009",
+            "A-010",
+            "A-011",
+            "A-012"
+          ],
+          "format": "markdown",
+          "name": "整体验收标准",
+          "path": ".fstar/tasks/general-workflow-redesign/criteria.md",
+          "version": "2"
+        },
+        "old": null
+      },
+      "id": "0a5d455e-3d1c-46c4-a148-2309cf0391f4",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-22T02:48:03.334645Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "f9d3e320-27c1-431f-b547-5958856a5950",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-22T10:30:51.282152Z",
+      "data": {
+        "new": {
+          "evidence_refs": [
+            "checks/check-006.md"
+          ],
+          "id": "S-6",
+          "state": "done",
+          "summary": "经验循环增强：五字段（scope/confidence/source/expires/conditions）+按范围过滤+纠正停用事务闭环+bridge read 真实入口+资源文档；核心库独立审查无缺陷；最终整体检查 A-010 passed"
+        },
+        "old": {
+          "evidence_refs": [],
+          "id": "S-6",
+          "state": "active",
+          "summary": "经验循环增强：条目 scope/置信度/来源/失效条件、按范围过滤、纠正与停用闭环"
+        }
+      },
+      "id": "45770e9b-b3ca-48bc-986b-afadd3dc5d5e",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-22T10:30:51.281868Z",
+        "quote": "",
+        "reference": "set_work_item",
+        "scope": "set_work_item",
+        "source_id": "7915ff40-b297-4d61-963c-d2ef3462fd23",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "work_item_updated"
+    },
+    {
+      "at": "2026-11-22T10:30:51.285482Z",
+      "data": {
+        "from": "active",
+        "reason": "最终整体检查通过（A-001..A-012 全部 passed，无必须修复项），等待用户整体验收",
+        "to": "waiting_user"
+      },
+      "id": "42258e8c-4218-4e30-87bb-f901411110ac",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-22T10:30:51.285480Z",
+        "quote": "",
+        "reference": "set_status",
+        "scope": "set_status",
+        "source_id": "ae52e8c5-ad4a-4b67-be6d-9fefc4e121e2",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "status_changed"
+    },
+    {
+      "at": "2026-11-22T10:30:51.288123Z",
+      "data": {
+        "new": {
+          "action": "用户验收后进入收尾：README 校对留待 release 流程，合并/发布须用户亲验",
+          "condition": "最终整体检查 check-006 通过，等待用户验收整项"
+        },
+        "old": {
+          "action": "完成 S-6 实施与独立检查后进入整体收尾验收",
+          "condition": "S-5 已通过最终检查；S-6 规格已就绪并派发实施"
+        }
+      },
+      "id": "624ef577-ded2-44ad-ab4d-70d09bb64754",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-22T10:30:51.288119Z",
+        "quote": "",
+        "reference": "set_next_step",
+        "scope": "set_next_step",
+        "source_id": "244c194f-cf71-48e1-bcc4-ec801838b9bd",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "next_step_changed"
+    },
+    {
+      "at": "2026-11-22T10:33:06.739801Z",
+      "data": {
+        "new_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "b3e46de2-236b-4712-931d-e5686255f192",
+      "source": {
+        "actor": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "at": "2026-11-22T10:33:06.739798Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "ca99576a-de10-44ad-ab72-b41834df2056",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-22T10:34:17.790741Z",
+      "data": {
+        "new_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "old_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "reason": "先前调用在记录证据前中断，租约遗留；由同一协调会话接管续行"
+      },
+      "id": "f4762a2d-d44a-4b8b-9125-ac591ad2b929",
+      "source": {
+        "actor": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "at": "2026-11-22T10:34:17.790738Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "3bfc3bd8-a4da-4385-a71e-e05e962b4b30",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-22T10:34:54.066483Z",
+      "data": {
+        "new_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "old_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "reason": "续行：租约在前次中断后遗留"
+      },
+      "id": "0461e5b2-c731-4188-85e5-51ab77c90ef3",
+      "source": {
+        "actor": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "at": "2026-11-22T10:34:54.066476Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "96c95b0c-0325-440a-8bcf-775434130719",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-22T10:35:24.116278Z",
+      "data": {
+        "new_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "old_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "reason": "续行：租约在前次中断后遗留"
+      },
+      "id": "5ee66f67-3afb-4b61-89ba-74af4ac661a2",
+      "source": {
+        "actor": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "at": "2026-11-22T10:35:24.116274Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "85ba18d8-f6ae-4e06-adbc-f30123f26eb8",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-22T10:35:24.121656Z",
+      "data": {
+        "evidence_id": "66d11931-5e75-4358-be04-a7a44407afed",
+        "state": "stale"
+      },
+      "id": "ad6aabcf-4b82-4cfa-9279-fedf6a72b152",
+      "source": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-22T10:35:24.124821Z",
+      "data": {
+        "reason": "final check recorded"
+      },
+      "id": "a95770e7-1a7a-450c-a9db-c7eb843a1c30",
+      "source": {
+        "id": "final-check",
+        "role": "check",
+        "session": "final-check-001"
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-22T10:36:23.734440Z",
+      "data": {
+        "new_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "old_holder": null,
+        "reason": "续行"
+      },
+      "id": "56557912-137f-4f26-bf67-5c44002c97ca",
+      "source": {
+        "actor": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "at": "2026-11-22T10:36:23.734437Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "d0064f74-e0d2-45d8-8730-0a946a223e07",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-22T10:36:23.739827Z",
+      "data": {
+        "evidence_id": "7e112b6e-5fcd-4612-936d-122f9908b18e",
+        "state": "stale"
+      },
+      "id": "ca1a5903-8164-4aeb-9242-624058a04551",
+      "source": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-22T10:36:23.743382Z",
+      "data": {
+        "reason": "final check recorded"
+      },
+      "id": "9a73cfa9-49f5-43ee-9d16-6ea5d7edb9e5",
+      "source": {
+        "id": "final-check",
+        "role": "check",
+        "session": "final-check-001"
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-22T10:37:07.078711Z",
+      "data": {
+        "new_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "old_holder": null,
+        "reason": "续行"
+      },
+      "id": "3c159b7c-b77e-48d2-87b6-26883ced32b7",
+      "source": {
+        "actor": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "at": "2026-11-22T10:37:07.078708Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "78f35bc4-3a9f-47f3-8018-13c38d159a44",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-22T10:37:07.084350Z",
+      "data": {
+        "evidence_id": "e8b9431f-a59c-4b8d-b093-95b4b29b7afa",
+        "state": "stale"
+      },
+      "id": "d987e0c1-aafc-45f0-9c91-e24c557c62c7",
+      "source": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-22T10:37:07.088322Z",
+      "data": {
+        "reason": "final check recorded"
+      },
+      "id": "b533028a-916b-443d-9098-7a7d2f67313a",
+      "source": {
+        "id": "final-check",
+        "role": "check",
+        "session": "final-check-001"
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-22T10:38:07.524311Z",
+      "data": {
+        "new_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "old_holder": null,
+        "reason": "续行"
+      },
+      "id": "a6bbd3ad-eed7-4372-b0d5-dc75355a32ad",
+      "source": {
+        "actor": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "at": "2026-11-22T10:38:07.524307Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "187ce14a-13b9-4908-860e-f888f3103feb",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-22T10:38:07.530195Z",
+      "data": {
+        "evidence_id": "12750f4b-ed9e-4325-96cf-7eda05457e96",
+        "state": "stale"
+      },
+      "id": "eafce3f3-4284-4a66-aa13-4d1287fb1ff3",
+      "source": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-22T10:38:07.535285Z",
+      "data": {
+        "reason": "final check recorded"
+      },
+      "id": "673c1bc2-910a-42ab-827f-cecd4a41fcb5",
+      "source": {
+        "id": "final-check",
+        "role": "check",
+        "session": "final-check-001"
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-22T10:39:22.711494Z",
+      "data": {
+        "new_holder": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "old_holder": null,
+        "reason": "续行"
+      },
+      "id": "511dc030-0c5c-4995-a68b-2e11ce99367c",
+      "source": {
+        "actor": {
+          "id": "final-check",
+          "role": "check",
+          "session": "final-check-001"
+        },
+        "at": "2026-11-22T10:39:22.711492Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "278e80b2-2307-40a1-879f-1124c98b3dd4",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-22T10:39:22.718921Z",
+      "data": {
+        "evidence_id": "f94af99f-f7de-437c-9d67-28b9c95f5992",
+        "state": "valid"
+      },
+      "id": "7541c2f5-06b6-426f-96e2-78853ada30e9",
+      "source": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-22T10:39:22.723791Z",
+      "data": {
+        "reason": "final check recorded"
+      },
+      "id": "9ca28dca-760d-405e-80cb-7ddf42f14d52",
+      "source": {
+        "id": "final-check",
+        "role": "check",
+        "session": "final-check-001"
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-22T10:39:22.730245Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "f94af99f-f7de-437c-9d67-28b9c95f5992"
+        ]
+      },
+      "id": "1cd35c2c-e507-4d8f-a34e-dc806be33f8d",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-22T10:39:22.730240Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "bf3e868a-91c8-4c59-bb1c-44fef63f6445",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-22T10:39:52.667606Z",
+      "data": {
+        "from": "waiting_user",
+        "reason": "最终整体检查 check-006 已通过并记录为有效最终检查证据，整项任务进入等待验收：A-001..A-012 全部 passed，无必须修复项；合并与发布按规则需用户亲验",
+        "to": "waiting_user"
+      },
+      "id": "bfb06e65-3219-4183-a10b-32154f694714",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "agent",
+          "session": "general-workflow-redesign"
+        },
+        "at": "2026-11-22T10:39:52.667603Z",
+        "quote": "",
+        "reference": "set_status",
+        "scope": "set_status",
+        "source_id": "d4c81cba-02ed-4dce-8a03-c27d3f59b433",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "status_changed"
+    },
+    {
+      "at": "2026-11-22T11:41:41.682128Z",
+      "data": {
+        "evidence_refs": [
+          "f94af99f-f7de-437c-9d67-28b9c95f5992"
+        ]
+      },
+      "id": "caeaed4f-1ac2-4821-b7cf-08a693cd22f1",
+      "source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-22T12:00:00Z",
+        "confirmed_at": "2026-11-22",
+        "consent": "explicit",
+        "disposition": "confirmed",
+        "owners": [
+          "FrancisZhang"
+        ],
+        "quote": "后续当前项目不用找我确认第三个阶段了 直接已完成就好，你验收完就当我验收完了，开发走发版流程吧",
+        "reference": "2026-11-22 对话（会话 0c569c9d）：用户授权协调者按约定完成验收（协调者验收记为用户验收，见 ~/.fstar/rules/self-acceptance.md）",
+        "scope": "accept",
+        "source_id": "conv-0c569c9d-accept-2026-11-22",
+        "source_type": "conversation",
+        "type": "conversation",
+        "user_ref": "FrancisZhang",
+        "validates": "8888d05580f7b4cc47a9781341d1f5ff8c5170b0cd14c459659aa8021f684489"
+      },
+      "type": "accepted"
+    },
+    {
+      "at": "2026-11-22T11:51:17.040941Z",
+      "data": {
+        "archived_at": "2026-11-22T11:51:17.040941Z",
+        "operation_id": "release-1.0.0-cleanup",
+        "target": ".fstar/archive/2026-11/general-workflow-redesign"
+      },
+      "id": "0ce55b40-5913-4ccf-8d24-f9a2b1ee18b6",
+      "source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-22T12:10:00Z",
+        "quote": "你验收完就当我验收完了，开发走发版流程吧",
+        "reference": "2026-11-22 对话（会话 0c569c9d）：用户授权验收后走发版流程，收尾归档",
+        "scope": "archive",
+        "source_id": "conv-0c569c9d-archive-2026-11-22",
+        "type": "conversation",
+        "validates": "f1c21e929394638280259d3ee36cfa5fc55f4498d260c142be173974e8e32d32"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-22T11:51:17.048731Z",
+      "data": {
+        "operation_id": "release-1.0.0-cleanup",
+        "target": ".fstar/archive/2026-11/general-workflow-redesign"
+      },
+      "id": "b4f100ad-4fbf-40ce-b12d-ed56aa567029",
+      "source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-22T12:10:00Z",
+        "quote": "你验收完就当我验收完了，开发走发版流程吧",
+        "reference": "2026-11-22 对话（会话 0c569c9d）：用户授权验收后走发版流程，收尾归档",
+        "scope": "archive",
+        "source_id": "conv-0c569c9d-archive-2026-11-22",
+        "type": "conversation",
+        "validates": "f1c21e929394638280259d3ee36cfa5fc55f4498d260c142be173974e8e32d32"
+      },
+      "type": "archived"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "b0049ec6468b0cc36ead3e3861d11322170fced4656696860306685cdcdceea3",
+        "paths": [
+          {
+            "path": ".fstar/tasks/general-workflow-redesign/checks/check-006.md",
+            "sha256": "7f876b371e04b4dc8a2f431102e7d00447b23636c16a1c5ae6ef0ac39ac94d48"
+          }
+        ]
+      },
+      "environment": {
+        "host": "darwin",
+        "python": "3.9.6"
+      },
+      "id": "66d11931-5e75-4358-be04-a7a44407afed",
+      "items": [
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-001 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-002 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-003 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-004 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-005 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-006 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-007 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-008 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-009"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-009 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-010"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-010 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-011"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-011 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-012"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-012 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "PLAN-1"
+          ],
+          "result": "passed",
+          "review_method": "计划对照（六步均已实施，状态见 plan.md）"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-22T10:35:24.120291Z",
+      "producer": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "read_only": true,
+      "run_id": "final-check-001",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "artifact": "criteria.md",
+          "reason": "artifact_missing",
+          "type": "artifact"
+        },
+        {
+          "artifact": "plan.md",
+          "reason": "artifact_missing",
+          "type": "artifact"
+        },
+        {
+          "actual": "d2b3839c9af2d21bb9d6eef5efc99f3618fa9ca8453b0ab2ca593655c912825d",
+          "expected": "b0049ec6468b0cc36ead3e3861d11322170fced4656696860306685cdcdceea3",
+          "type": "delivery"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": "criteria.md",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-002",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-003",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-004",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-005",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-006",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-007",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-008",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-009",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-010",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-011",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-012",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            }
+          ]
+        },
+        {
+          "artifact": "plan.md",
+          "items": [
+            {
+              "id": "PLAN-1",
+              "sha256": "509afb7b90f813664a0e2690308b9cd6f99a61131f8f8bfd30fe8b0dc23daa94"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "b95e686037b0c1e379d0ad4a1fe4ad74ff4feca596462bf58ff3c66659401cbf",
+        "paths": [
+          {
+            "path": "tasks/general-workflow-redesign/checks/check-006.md",
+            "sha256": "7f876b371e04b4dc8a2f431102e7d00447b23636c16a1c5ae6ef0ac39ac94d48"
+          }
+        ]
+      },
+      "environment": {
+        "host": "darwin",
+        "python": "3.9.6"
+      },
+      "id": "7e112b6e-5fcd-4612-936d-122f9908b18e",
+      "items": [
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-001 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-002 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-003 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-004 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-005 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-006 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-007 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-008 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-009"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-009 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-010"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-010 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-011"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-011 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-012"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-012 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "PLAN-1"
+          ],
+          "result": "passed",
+          "review_method": "计划对照（六步均已实施）"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-22T10:36:23.738444Z",
+      "producer": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "read_only": true,
+      "run_id": "final-check-001",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "artifact": "criteria.md",
+          "reason": "artifact_missing",
+          "type": "artifact"
+        },
+        {
+          "artifact": "plan.md",
+          "reason": "artifact_missing",
+          "type": "artifact"
+        },
+        {
+          "actual": "f7020ccf8bf9ee47d9bd73651c4da138cb92a457870a4b993f1804fe7b3e0bbc",
+          "expected": "b95e686037b0c1e379d0ad4a1fe4ad74ff4feca596462bf58ff3c66659401cbf",
+          "type": "delivery"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": "criteria.md",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-002",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-003",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-004",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-005",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-006",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-007",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-008",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-009",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-010",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-011",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            },
+            {
+              "id": "A-012",
+              "sha256": "ec14028db9c315b4145a618d668fd5c6e17dc5311bb180566203061e9065ac03"
+            }
+          ]
+        },
+        {
+          "artifact": "plan.md",
+          "items": [
+            {
+              "id": "PLAN-1",
+              "sha256": "509afb7b90f813664a0e2690308b9cd6f99a61131f8f8bfd30fe8b0dc23daa94"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "b0049ec6468b0cc36ead3e3861d11322170fced4656696860306685cdcdceea3",
+        "paths": [
+          {
+            "path": ".fstar/tasks/general-workflow-redesign/checks/check-006.md",
+            "sha256": "7f876b371e04b4dc8a2f431102e7d00447b23636c16a1c5ae6ef0ac39ac94d48"
+          }
+        ]
+      },
+      "environment": {
+        "host": "darwin",
+        "python": "3.9.6"
+      },
+      "id": "e8b9431f-a59c-4b8d-b093-95b4b29b7afa",
+      "items": [
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-001 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-002 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-003 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-004 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-005 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-006 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-007 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-008 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-009"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-009 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-010"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-010 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-011"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-011 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-012"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-012 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "PLAN-1"
+          ],
+          "result": "passed",
+          "review_method": "计划对照（六步均已实施）"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-22T10:37:07.082780Z",
+      "producer": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "read_only": true,
+      "run_id": "final-check-001",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "artifact": "criteria.md",
+          "reason": "artifact_missing",
+          "type": "artifact"
+        },
+        {
+          "artifact": "plan.md",
+          "reason": "artifact_missing",
+          "type": "artifact"
+        },
+        {
+          "actual": "d2b3839c9af2d21bb9d6eef5efc99f3618fa9ca8453b0ab2ca593655c912825d",
+          "expected": "b0049ec6468b0cc36ead3e3861d11322170fced4656696860306685cdcdceea3",
+          "type": "delivery"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": "criteria.md",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "9ddcafb0edf9816d5f1d92d9d0c41896fbfcdb8d93eb89de2269140b87920cea"
+            },
+            {
+              "id": "A-002",
+              "sha256": "94305da36e82c6780f94be7900760fd49b0c8b1f3c1fb628a914ed0537a1a45f"
+            },
+            {
+              "id": "A-003",
+              "sha256": "d5e1acd813dd7d1ab2f8e057718d9487f0fb0b3cdb9c5fbb8a374aebfc849379"
+            },
+            {
+              "id": "A-004",
+              "sha256": "21aa4616560677486662933eb73184f2ced926a23fe4c4ead59da2c5bf27456b"
+            },
+            {
+              "id": "A-005",
+              "sha256": "c49c86581c1d87fd2138b1d00e69361177b09b55cba6df62d4ec367756a91f53"
+            },
+            {
+              "id": "A-006",
+              "sha256": "62eef1bdc88ed508a230393f354330bba443d523b6bdab3e521380c1f15c9a7e"
+            },
+            {
+              "id": "A-007",
+              "sha256": "d96b06e835d22e867d64b40f37e023c1ab071bcd4161593a54343608e07809b2"
+            },
+            {
+              "id": "A-008",
+              "sha256": "c057ecfe65867cc9da3f5fd6ab8e4f50320a3b4846fb4badbdb2c1017d8fd8ae"
+            },
+            {
+              "id": "A-009",
+              "sha256": "7d1dd5265a057c18d353d7e9565c84cfd88c6f0a8e860da1037dbeb13f90fbdb"
+            },
+            {
+              "id": "A-010",
+              "sha256": "83b28323d5943f8c63b14e1a29430130338f831da6e6741b794726c129c2282b"
+            },
+            {
+              "id": "A-011",
+              "sha256": "1931dcff921549f29d948f23042e8df4b6b618be55d6b8ad62688ad584e67552"
+            },
+            {
+              "id": "A-012",
+              "sha256": "6b973481a52d3e41d670134161093dfa2b5eed207cce07febcfc799f6b528f71"
+            }
+          ]
+        },
+        {
+          "artifact": "plan.md",
+          "items": [
+            {
+              "id": "PLAN-1",
+              "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "b0049ec6468b0cc36ead3e3861d11322170fced4656696860306685cdcdceea3",
+        "paths": [
+          {
+            "path": ".fstar/tasks/general-workflow-redesign/checks/check-006.md",
+            "sha256": "7f876b371e04b4dc8a2f431102e7d00447b23636c16a1c5ae6ef0ac39ac94d48"
+          }
+        ]
+      },
+      "environment": {
+        "host": "darwin",
+        "python": "3.9.6"
+      },
+      "id": "12750f4b-ed9e-4325-96cf-7eda05457e96",
+      "items": [
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-001 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-002 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-003 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-004 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-005 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-006 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-007 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-008 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-009"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-009 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-010"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-010 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-011"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-011 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-012"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-012 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "PLAN-1"
+          ],
+          "result": "passed",
+          "review_method": "计划对照（六步均已实施）"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-22T10:38:07.528372Z",
+      "producer": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "read_only": true,
+      "run_id": "final-check-001",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "actual": "d2b3839c9af2d21bb9d6eef5efc99f3618fa9ca8453b0ab2ca593655c912825d",
+          "expected": "b0049ec6468b0cc36ead3e3861d11322170fced4656696860306685cdcdceea3",
+          "type": "delivery"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/general-workflow-redesign/criteria.md",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "9ddcafb0edf9816d5f1d92d9d0c41896fbfcdb8d93eb89de2269140b87920cea"
+            },
+            {
+              "id": "A-002",
+              "sha256": "94305da36e82c6780f94be7900760fd49b0c8b1f3c1fb628a914ed0537a1a45f"
+            },
+            {
+              "id": "A-003",
+              "sha256": "d5e1acd813dd7d1ab2f8e057718d9487f0fb0b3cdb9c5fbb8a374aebfc849379"
+            },
+            {
+              "id": "A-004",
+              "sha256": "21aa4616560677486662933eb73184f2ced926a23fe4c4ead59da2c5bf27456b"
+            },
+            {
+              "id": "A-005",
+              "sha256": "c49c86581c1d87fd2138b1d00e69361177b09b55cba6df62d4ec367756a91f53"
+            },
+            {
+              "id": "A-006",
+              "sha256": "62eef1bdc88ed508a230393f354330bba443d523b6bdab3e521380c1f15c9a7e"
+            },
+            {
+              "id": "A-007",
+              "sha256": "d96b06e835d22e867d64b40f37e023c1ab071bcd4161593a54343608e07809b2"
+            },
+            {
+              "id": "A-008",
+              "sha256": "c057ecfe65867cc9da3f5fd6ab8e4f50320a3b4846fb4badbdb2c1017d8fd8ae"
+            },
+            {
+              "id": "A-009",
+              "sha256": "7d1dd5265a057c18d353d7e9565c84cfd88c6f0a8e860da1037dbeb13f90fbdb"
+            },
+            {
+              "id": "A-010",
+              "sha256": "83b28323d5943f8c63b14e1a29430130338f831da6e6741b794726c129c2282b"
+            },
+            {
+              "id": "A-011",
+              "sha256": "1931dcff921549f29d948f23042e8df4b6b618be55d6b8ad62688ad584e67552"
+            },
+            {
+              "id": "A-012",
+              "sha256": "6b973481a52d3e41d670134161093dfa2b5eed207cce07febcfc799f6b528f71"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/general-workflow-redesign/plan.md",
+          "items": [
+            {
+              "id": "PLAN-1",
+              "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "d2b3839c9af2d21bb9d6eef5efc99f3618fa9ca8453b0ab2ca593655c912825d",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/general-workflow-redesign/checks/check-006.md",
+            "sha256": "7f876b371e04b4dc8a2f431102e7d00447b23636c16a1c5ae6ef0ac39ac94d48"
+          }
+        ]
+      },
+      "environment": {
+        "host": "darwin",
+        "python": "3.9.6"
+      },
+      "id": "f94af99f-f7de-437c-9d67-28b9c95f5992",
+      "items": [
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-001 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-002 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-003 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-004 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-005 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-006 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-007 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-008 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-009"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-009 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-010"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-010 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-011"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-011 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-012"
+          ],
+          "result": "passed",
+          "review_method": "独立最终检查 check-006：A-012 passed"
+        },
+        {
+          "log_refs": [
+            "checks/check-006.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "PLAN-1"
+          ],
+          "result": "passed",
+          "review_method": "计划对照（六步均已实施）"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-22T10:39:22.717045Z",
+      "producer": {
+        "id": "final-check-001",
+        "role": "check",
+        "session_id": "final-check-001"
+      },
+      "read_only": true,
+      "run_id": "final-check-001",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/general-workflow-redesign/criteria.md",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "9ddcafb0edf9816d5f1d92d9d0c41896fbfcdb8d93eb89de2269140b87920cea"
+            },
+            {
+              "id": "A-002",
+              "sha256": "94305da36e82c6780f94be7900760fd49b0c8b1f3c1fb628a914ed0537a1a45f"
+            },
+            {
+              "id": "A-003",
+              "sha256": "d5e1acd813dd7d1ab2f8e057718d9487f0fb0b3cdb9c5fbb8a374aebfc849379"
+            },
+            {
+              "id": "A-004",
+              "sha256": "21aa4616560677486662933eb73184f2ced926a23fe4c4ead59da2c5bf27456b"
+            },
+            {
+              "id": "A-005",
+              "sha256": "c49c86581c1d87fd2138b1d00e69361177b09b55cba6df62d4ec367756a91f53"
+            },
+            {
+              "id": "A-006",
+              "sha256": "62eef1bdc88ed508a230393f354330bba443d523b6bdab3e521380c1f15c9a7e"
+            },
+            {
+              "id": "A-007",
+              "sha256": "d96b06e835d22e867d64b40f37e023c1ab071bcd4161593a54343608e07809b2"
+            },
+            {
+              "id": "A-008",
+              "sha256": "c057ecfe65867cc9da3f5fd6ab8e4f50320a3b4846fb4badbdb2c1017d8fd8ae"
+            },
+            {
+              "id": "A-009",
+              "sha256": "7d1dd5265a057c18d353d7e9565c84cfd88c6f0a8e860da1037dbeb13f90fbdb"
+            },
+            {
+              "id": "A-010",
+              "sha256": "83b28323d5943f8c63b14e1a29430130338f831da6e6741b794726c129c2282b"
+            },
+            {
+              "id": "A-011",
+              "sha256": "1931dcff921549f29d948f23042e8df4b6b618be55d6b8ad62688ad584e67552"
+            },
+            {
+              "id": "A-012",
+              "sha256": "6b973481a52d3e41d670134161093dfa2b5eed207cce07febcfc799f6b528f71"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/general-workflow-redesign/plan.md",
+          "items": [
+            {
+              "id": "PLAN-1",
+              "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-21T03:28:23.981468Z",
+      "excluded": [],
+      "id": "planning-review",
+      "included": [
+        "clarify",
+        "design",
+        "doc-check",
+        "editor",
+        "plan",
+        "prd"
+      ],
+      "reason": "以用户实际对话确认替换先前 CLI 快捷确认的来源标识，保留既有事件；授权范围仍为设计澄清与文档样稿，不代表生产实现或最终验收。",
+      "scope": "full",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-21T03:19:40Z",
+        "quote": "可以你提的那几点都没问题",
+        "reference": "本次对话：用户在文档职责、样稿优先及整改步骤建议后的答复；at 为本任务建立时的登记时间，不是消息原始时间戳",
+        "scope": "extension",
+        "source_id": "general-workflow-redesign-document-samples-user-approval",
+        "type": "conversation",
+        "validates": "377758f7aa64ea4e52756ff7faba7161cc11b8df6fe40f8b4e2303a59dfa78e1"
+      }
+    },
+    {
+      "enabled_at": "2026-11-21T07:40:39.983129Z",
+      "excluded": [],
+      "id": "project-governance",
+      "included": [
+        "knowledge"
+      ],
+      "reason": "用户已审定自验收规则，原话：确认 但是如果后续开发任务如果涉及到扩展和修复的任务 规则需要一并去兼容。经 learn 流程写入用户规则目录。",
+      "scope": "custom",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-21T07:40:39.982471Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "cf91c6cfb3b7ce2b5cdc7f15c33dd83f739f79d709305086aa505420b854e3ba"
+      }
+    }
+  ],
+  "id": "3d233c9f-5182-4a94-a679-e39563635de5",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/general-workflow-redesign/criteria.md": {
+          "A-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-001:end -->",
+            "start_marker": "<!-- fstar:item:A-001:start -->"
+          },
+          "A-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-002:end -->",
+            "start_marker": "<!-- fstar:item:A-002:start -->"
+          },
+          "A-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-003:end -->",
+            "start_marker": "<!-- fstar:item:A-003:start -->"
+          },
+          "A-004": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-004:end -->",
+            "start_marker": "<!-- fstar:item:A-004:start -->"
+          },
+          "A-005": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-005:end -->",
+            "start_marker": "<!-- fstar:item:A-005:start -->"
+          },
+          "A-006": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-006:end -->",
+            "start_marker": "<!-- fstar:item:A-006:start -->"
+          },
+          "A-007": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-007:end -->",
+            "start_marker": "<!-- fstar:item:A-007:start -->"
+          },
+          "A-008": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-008:end -->",
+            "start_marker": "<!-- fstar:item:A-008:start -->"
+          },
+          "A-009": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-009:end -->",
+            "start_marker": "<!-- fstar:item:A-009:start -->"
+          },
+          "A-010": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-010:end -->",
+            "start_marker": "<!-- fstar:item:A-010:start -->"
+          },
+          "A-011": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-011:end -->",
+            "start_marker": "<!-- fstar:item:A-011:start -->"
+          },
+          "A-012": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-012:end -->",
+            "start_marker": "<!-- fstar:item:A-012:start -->"
+          }
+        },
+        ".fstar/tasks/general-workflow-redesign/plan.md": {
+          "PLAN-1": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:PLAN-1:end -->",
+            "start_marker": "<!-- fstar:item:PLAN-1:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "83b568891f97dc44648a6a1e2a0033f86cf3b2df8b744c83ba006f81afe31392",
+      "artifact_map_source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": "final-check"
+        },
+        "at": "2026-11-22T00:00:00Z",
+        "quote": "",
+        "reference": "协调者注册任务根文件条目映射",
+        "scope": "task",
+        "source_id": "criteria-map-v2",
+        "type": "conversation",
+        "validates": ""
+      }
+    }
+  },
+  "name": "general-workflow-redesign",
+  "next_step": {
+    "action": "用户验收后进入收尾：README 校对留待 release 流程，合并/发布须用户亲验",
+    "condition": "最终整体检查 check-006 通过，等待用户验收整项"
+  },
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "status": "waiting_user",
+  "status_detail": {
+    "reason": "最终整体检查 check-006 已通过并记录为有效最终检查证据，整项任务进入等待验收：A-001..A-012 全部 passed，无必须修复项；合并与发布按规则需用户亲验",
+    "since": "2026-11-22T10:39:52.667182Z"
+  },
+  "title": "通用阶段工作流与经验循环重构设计",
+  "work_items": [
+    {
+      "evidence_refs": [
+        "checks/check-001.md",
+        "checks/s1-s4-user-confirmation.md"
+      ],
+      "id": "S-1",
+      "state": "done",
+      "summary": "模板与验收流程：plan/clarify 重写、criteria 新增、check 增强、prd/design 移入 scenarios/software；check-001 通过；用户已确认阶段成果（2026-11-21）"
+    },
+    {
+      "evidence_refs": [
+        "checks/check-002.md",
+        "checks/s1-s4-user-confirmation.md"
+      ],
+      "id": "S-2",
+      "state": "done",
+      "summary": "task.json schema 扩展：status/work_items/next_step/deliverables + CLI + 17 测试；check-002 通过；用户已确认阶段成果（2026-11-21）"
+    },
+    {
+      "evidence_refs": [
+        "checks/check-003.md",
+        "checks/s1-s4-user-confirmation.md"
+      ],
+      "id": "S-3",
+      "state": "done",
+      "summary": "Skills/角色卡/routing 重写：四条硬规则、五 Skill、prompt-context 增强；check-003 通过；用户已确认阶段成果（2026-11-21）"
+    },
+    {
+      "evidence_refs": [
+        "checks/check-004.md",
+        "checks/s1-s4-user-confirmation.md"
+      ],
+      "id": "S-4",
+      "state": "done",
+      "summary": "验收协议改动：rework 局部作废（retired_by_rework 防绕过）、final 检查三重只读门禁、规则验收引用 criteria 条目、criteria 判定方式与条目化、execute 自验收收尾程序、routing 同步；check-004 最终检查通过（含两项已评估偏离）；用户已确认阶段成果（2026-11-21）"
+    },
+    {
+      "evidence_refs": [
+        "checks/check-005.md",
+        "s5-spec.md"
+      ],
+      "id": "S-5",
+      "state": "done",
+      "summary": "跨阶段本地技能优先选择（公共路由+逐轮提醒+派发传递/回执）与四能力薄接口；Magpie 分发改为适配实现零改动兼容；check-005 通过（协议与可用性已验证，真实宿主语义部分未验证）"
+    },
+    {
+      "evidence_refs": [
+        "checks/check-006.md"
+      ],
+      "id": "S-6",
+      "state": "done",
+      "summary": "经验循环增强：五字段（scope/confidence/source/expires/conditions）+按范围过滤+纠正停用事务闭环+bridge read 真实入口+资源文档；核心库独立审查无缺陷；最终整体检查 A-010 passed"
+    }
+  ],
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}

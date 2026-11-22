@@ -512,7 +512,7 @@ class LifecycleAcrossModesTests(StorageModeCase):
             "kind": "check", "producer": {"role": "check", "id": "checker", "session_id": "c"},
             "validates": [snapshot], "run_id": "run", "environment": {"python": sys.version.split()[0]},
             "report": {"path": "report.md", "sha256": file_digest(repo / "report.md")},
-            "delivery": delivery, "scope": "final",
+            "delivery": delivery, "scope": "final", "read_only": True,
             "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": ["src.py"],
                        "command": "python src.py", "result": "passed", "exit_code": 0,
                        "log_refs": ["report.md"], "duration": 0.1, "retries": 0}]})

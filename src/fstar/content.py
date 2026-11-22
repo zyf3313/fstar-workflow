@@ -11,7 +11,8 @@ REQUIRED_SLOTS = ("artifact_type", "version", "review_state", "author", "date", 
 SKILLS = ("init", "clarify", "doc", "plan", "execute", "check", "continue", "archive", "learn", "debug", "help")
 ROLES = ("research", "implement", "check", "editor")
 TEMPLATES = (
-    "doc/prd.md", "doc/design.md", "task/plan.md", "task/clarify.md", "task/research.md", "task/check.md",
+    "task/plan.md", "task/clarify.md", "task/research.md", "task/check.md", "task/criteria.md",
+    "scenarios/software/prd.md", "scenarios/software/design.md",
     "knowledge/rule.md", "knowledge/memory.md", "knowledge/spec.md", "entry/user-index.md", "entry/project-index.md",
 )
 REFERENCES = ("knowledge-format.md", "document-checklist.md", "technical-design-profiles.md")

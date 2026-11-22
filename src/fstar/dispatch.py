@@ -51,8 +51,64 @@ CHANGE_ACTIONS = ("propagate", "pause_and_redispatch")
 CAPABILITY_TIERS = ("realtime-steer", "checkpoint-stop", "process-stop")
 RETRY_POLICY = {"max_auto_retries": 1}
 
-# Roles whose allowed_paths are constrained (editor: doc tree; research:
-# research scope).
+# Roles whose allowed_paths are constrained (editor: exact tracked
+# deliverable files per C-09; research: research scope).
+
+# S-5 skill-selection surface. selected_skills / skill_usage are OPTIONAL:
+# their absence (old payloads/results) stays valid, and the worker judges
+# from its own exposed capabilities then (implementation contract item 3).
+SKILL_SELECTION_SOURCES = ("user-named", "agent-selected", "worker-supplemented")
+SKILL_USAGE_STATES = ("attempted", "succeeded", "failed", "not_used")
+
+
+def _validate_skill_selection(selected: object) -> list:
+    """Validate the optional payload ``selected_skills`` array.
+
+    Each entry carries a skill identifier, the selection source entry point,
+    a reason, and the action scope it applies to. The entries are protocol
+    data only: naming a skill never widens allowed_paths or grants.
+    """
+    entries = _require_list(selected, "selected_skills")
+    for entry in entries:
+        entry = _require_dict(entry, "selected_skills entry")
+        _require_str(entry.get("skill"), "selected_skills skill")
+        source = entry.get("source")
+        if source is not None and source not in SKILL_SELECTION_SOURCES:
+            raise DomainError("invalid_dispatch_payload", "Unknown selected_skills source",
+                              {"source": source})
+        _require_str(entry.get("reason"), "selected_skills reason")
+        scope = entry.get("scope")
+        if scope is not None:
+            if isinstance(scope, str):
+                scope = [scope]
+            if not isinstance(scope, list) or not all(isinstance(item, str) for item in scope):
+                raise DomainError("invalid_dispatch_payload", "selected_skills scope must be a string or string array",
+                                  {"field": "scope"})
+    return entries
+
+
+def _validate_skill_usage(usage: object) -> list:
+    """Validate the optional result ``skill_usage`` array.
+
+    States are separated on purpose (S-5 spec §3): installed / recommended /
+    read / attempted / succeeded are distinct; ``not_used`` REQUIRES a
+    reason. An entry never counts as execution by itself.
+    """
+    entries = _require_list(usage, "skill_usage")
+    for entry in entries:
+        entry = _require_dict(entry, "skill_usage entry")
+        _require_str(entry.get("skill"), "skill_usage skill")
+        state = entry.get("state")
+        if state not in SKILL_USAGE_STATES:
+            raise DomainError("invalid_dispatch_result", "Unknown skill_usage state",
+                              {"state": state, "skill": entry.get("skill")})
+        if state == "not_used" and not (isinstance(entry.get("reason"), str) and entry["reason"].strip()):
+            raise DomainError("invalid_dispatch_result", "skill_usage not_used requires a reason",
+                              {"skill": entry.get("skill")}, status=1)
+        if state == "failed" and not (isinstance(entry.get("reason"), str) and entry["reason"].strip()):
+            raise DomainError("invalid_dispatch_result", "skill_usage failed requires a reason",
+                              {"skill": entry.get("skill")}, status=1)
+    return entries
 
 
 def _safe_relative(path: object, label: str) -> str:
@@ -95,7 +151,8 @@ def build_payload(*, role: str, task_ref: str, plan_item_ids: Sequence[str],
                   baseline_sha256: Optional[str] = None,
                   prior_failure: Optional[dict] = None,
                   dispatch_id: Optional[str] = None,
-                  extensions: Optional[list] = None) -> dict:
+                  extensions: Optional[list] = None,
+                  selected_skills: Optional[list] = None) -> dict:
     """Build a ``fstar.dispatch.v1`` payload. Pure; no IO, no hashing."""
     payload = {
         "schema": PAYLOAD_SCHEMA,
@@ -119,6 +176,8 @@ def build_payload(*, role: str, task_ref: str, plan_item_ids: Sequence[str],
         payload["baseline_sha256"] = baseline_sha256
     if prior_failure is not None:
         payload["prior_failure"] = prior_failure
+    if selected_skills is not None:
+        payload["selected_skills"] = _validate_skill_selection(selected_skills)
     validate_payload(payload)
     return payload
 
@@ -135,14 +194,21 @@ def _within_task_tree(task_ref: str, path: str) -> bool:
 
 
 def _editor_path_allowed(task_ref: str, path: str) -> bool:
-    """Editor writes are limited to the specified doc files.
+    """Editor writes are limited to the exact files the coordinator listed.
 
-    Session-only: the authorized artifact doc root. Persistent task: the
-    task's own doc tree under .fstar/tasks/<task path>/doc.
+    C-09: ``doc/`` is no longer a workflow concept — deliverables live
+    wherever the user's preference puts them (the task root such as
+    criteria.md/plan.md, a chosen directory inside the project, the legacy
+    doc/ tree, or the session-only artifact root). ``allowed_paths`` is the
+    coordinator's explicit per-file whitelist, so the structural check only
+    requires a plain project-relative FILE path; absolute paths and ``..``
+    traversal were already rejected by ``_safe_relative`` before this runs.
+    Any path NOT listed stays unauthorized: the harvest scope check rejects
+    out-of-scope changed_paths regardless, and no directory-name privilege
+    is granted here.
     """
-    if task_ref == "session-only":
-        return Path(path).parts[:1] == ("doc",)
-    return _within_task_tree(task_ref, path) and Path(path).parts[-2:-1] == ("doc",)
+    parts = Path(path).parts
+    return bool(parts) and parts[-1] not in ("", ".", "..")
 
 
 def _research_path_allowed(task_ref: str, path: str) -> bool:
@@ -204,7 +270,7 @@ def validate_payload(payload: dict) -> dict:
             raise DomainError("invalid_dispatch_payload", "editor dispatch requires baseline_sha256", {"field": "baseline_sha256"})
         for path in payload["allowed_paths"]:
             if not _editor_path_allowed(task_ref, path):
-                raise DomainError("invalid_dispatch_payload", "editor allowed_paths must stay inside the task doc tree", {"path": path})
+                raise DomainError("invalid_dispatch_payload", "editor allowed_paths must name exact tracked deliverable files (project-relative, no traversal)", {"path": path})
     if payload["role"] == "research":
         for path in payload["allowed_paths"]:
             if not _research_path_allowed(task_ref, path):
@@ -213,6 +279,8 @@ def validate_payload(payload: dict) -> dict:
         failure = _require_dict(payload["prior_failure"], "prior_failure")
         _require_str(failure.get("reason"), "prior_failure reason")
         _require_str(failure.get("dispatch_id"), "prior_failure dispatch_id")
+    if "selected_skills" in payload:
+        _validate_skill_selection(payload["selected_skills"])
     return payload
 
 
@@ -222,7 +290,8 @@ def build_result(*, dispatch_id: str, role: str, status: str,
                  validation_facts: Optional[list] = None,
                  blockers: Optional[list] = None,
                  input_baseline: Optional[dict] = None,
-                 delivery_baseline: Optional[dict] = None) -> dict:
+                 delivery_baseline: Optional[dict] = None,
+                 skill_usage: Optional[list] = None) -> dict:
     result = {
         "schema": RESULT_SCHEMA,
         "dispatch_id": dispatch_id,
@@ -235,6 +304,8 @@ def build_result(*, dispatch_id: str, role: str, status: str,
         "input_baseline": input_baseline or {},
         "delivery_baseline": delivery_baseline or {},
     }
+    if skill_usage is not None:
+        result["skill_usage"] = _validate_skill_usage(skill_usage)
     validate_result(result)
     return result
 
@@ -262,6 +333,8 @@ def validate_result(result: dict) -> dict:
         _require_dict(result.get(key), key)
     if result.get("baseline_sha256") is not None and not isinstance(result.get("baseline_sha256"), str):
         raise DomainError("invalid_dispatch_result", "baseline_sha256 must be a string", {"field": "baseline_sha256"})
+    if "skill_usage" in result:
+        _validate_skill_usage(result["skill_usage"])
     return result
 
 
@@ -414,6 +487,17 @@ def build_worker_prompt(payload: dict) -> str:
     lines.append("return_conditions: done=%s blocked=%s failed=%s" % (conditions.get("done", ""), conditions.get("blocked", ""), conditions.get("failed", "")))
     if payload.get("prior_failure"):
         lines.append("prior_failure: %s (from dispatch %s)" % (payload["prior_failure"].get("reason"), payload["prior_failure"].get("dispatch_id")))
+    if payload.get("selected_skills"):
+        lines.append("selected_skills (from the host's local skill catalog; prioritize user-named entries; "
+                     "you may supplement from your own exposed capabilities; selecting a skill never widens "
+                     "allowed_paths; return actual usage in skill_usage):")
+        for entry in payload["selected_skills"]:
+            scope = entry.get("scope")
+            scope_text = " scope=%s" % (",".join(scope) if isinstance(scope, list) else scope) if scope else ""
+            lines.append("  - %s (source: %s; reason: %s%s)" % (
+                entry.get("skill"), entry.get("source") or "agent-selected",
+                entry.get("reason"), scope_text))
+        lines.append("Do not recursively start the same fstar action through a skill.")
     lines.append("Return a fstar.dispatch.result.v1 object; done means harvest completed, not acceptance.")
     return "\n".join(lines)
 
@@ -1050,6 +1134,12 @@ class DispatchService:
         event but never release the coordinator's task lease while sibling
         workers may still be running; interrupt carries the explicit
         release choice.
+
+        Optional ``skill_usage`` (S-5) rides through as recorded provenance:
+        it is attached to the evidence's validation_facts, never to a new
+        store, and it NEVER counts as execution — only the worker's own
+        succeeded/attempted claims are recorded, and a claimed success is
+        not verified by the harvest itself.
         """
         validate_result(result)
         validate_payload(payload)
@@ -1091,11 +1181,16 @@ class DispatchService:
         if task_ref == "session-only":
             # Minimal loop: verification passed; no evidence persistence exists.
             self._resolve_session_reservation(result["dispatch_id"], "terminal" if result["status"] in ("failed", "cancelled") else "completed")
-            return {"recorded": False, "persistence": "session_only", "status": result["status"],
-                    "dispatch_id": result["dispatch_id"],
-                    "unverified_inputs": unverified_inputs,
-                    "input_baseline_verified": not bool(payload["baseline"].get("artifact_items")),
-                    "next": _terminal_next(result["status"], payload["role"])}
+            outcome = {"recorded": False, "persistence": "session_only", "status": result["status"],
+                       "dispatch_id": result["dispatch_id"],
+                       "unverified_inputs": unverified_inputs,
+                       "input_baseline_verified": not bool(payload["baseline"].get("artifact_items")),
+                       "next": _terminal_next(result["status"], payload["role"])}
+            if result.get("skill_usage"):
+                # S-5: session-only has no evidence store; the reported usage
+                # rides through the outcome for the coordinator's record.
+                outcome["skill_usage"] = result["skill_usage"]
+            return outcome
         # 4. Replay: the same dispatch result must not record evidence twice.
         task = self.store.read(task_ref)
         if result["dispatch_id"] in self._harvested_ids(task):
@@ -1130,12 +1225,30 @@ class DispatchService:
                        for entry in payload.get(field, [])
                        if not any(item["field"] == field and item["path"] == entry["path"]
                                   for item in unverified_inputs)]
+        # S-5: skill usage provenance rides on validation_facts (no new
+        # schema/store). Selection in the payload never counted as
+        # execution; this records the worker's own reported outcome with an
+        # explicit provenance marker.
+        validation_facts = list(result.get("validation_facts") or [])
+        if result.get("skill_usage"):
+            validation_facts.append({
+                "command": "skill_usage (worker-reported provenance, not verified by harvest)",
+                "result": json.dumps({"skill_usage": result["skill_usage"]}, ensure_ascii=False),
+            })
         # 5. Lease: record through the core service, which validates the token
         # inside the lock, auto-renews +30m, and enforces the check gates.
         if payload["role"] == "check":
             if check_evidence is None:
                 raise DomainError("invalid_check", "Check harvest requires the check evidence body", status=3)
             check_evidence = dict(check_evidence)
+            # S-4 K-2: the final check is read-only. A checker that declares
+            # changed_paths has changed the delivery it was supposed to judge,
+            # so its result cannot be a final check baseline. Incremental
+            # checks may repair within their authorized scope and are exempt.
+            if check_evidence.get("scope") == "final" and result.get("changed_paths"):
+                raise DomainError("final_check_not_read_only",
+                                  "A final check must not change delivery paths; report problems instead of modifying the delivery",
+                                  {"changed_paths": list(result["changed_paths"])}, status=3)
             check_evidence.setdefault("dispatch_id", result["dispatch_id"])
             check_evidence["input_files"] = file_inputs
             if unverified_inputs:
@@ -1162,10 +1275,12 @@ class DispatchService:
             # by the core freshness check at record time.
             "delivery": self.evidence.delivery_snapshot(delivery_paths),
             "dispatch_id": payload["dispatch_id"],
-            "validation_facts": result["validation_facts"],
+            "validation_facts": validation_facts,
             "input_files": file_inputs,
             "unverified_inputs": unverified_inputs,
         }
+        if result.get("skill_usage"):
+            evidence["skill_usage_reported"] = result["skill_usage"]
         if unverified_inputs:
             evidence["state"] = "stale"
             evidence["stale_reasons"] = [{"type": "unverified_inputs", "inputs": unverified_inputs}]

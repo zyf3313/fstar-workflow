@@ -1,0 +1,14 @@
+{
+  "source_id": "general-workflow-redesign-document-samples-user-approval",
+  "type": "conversation",
+  "at": "2026-11-21T03:19:40Z",
+  "actor": {
+    "role": "user",
+    "id": "user",
+    "session": null
+  },
+  "reference": "本次对话：用户在文档职责、样稿优先及整改步骤建议后的答复；at 为本任务建立时的登记时间，不是消息原始时间戳",
+  "quote": "可以你提的那几点都没问题",
+  "scope": "extension",
+  "validates": "377758f7aa64ea4e52756ff7faba7161cc11b8df6fe40f8b4e2303a59dfa78e1"
+}
