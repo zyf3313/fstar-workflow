@@ -480,15 +480,19 @@ class TestResourceVersions(InstallerCase):
     def test_update_from_new_bundle_keeps_old_cache(self):
         # AC-04: a resources-version bump installs a separate cache and must
         # not mutate or delete the old version other projects may pin.
+        # The hypothetical next version must never equal the bundled
+        # version (resource versions are immutable), so derive it from
+        # BUNDLE_VERSION instead of hardcoding a number.
+        new_version = str(int(BUNDLE_VERSION) + 1)
         self.install(hosts=["claude"])
         old_cache = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "routing.md"
         old_bytes = old_cache.read_bytes()
         bundle = self.tmp / "bundle"
         shutil.copytree(BUNDLE_ROOT / "resources", bundle / "resources")
         routing = bundle / "resources" / "runtime" / "routing.md"
-        routing.write_text("routing for version 9\n", encoding="utf-8")
+        routing.write_text(f"routing for version {new_version}\n", encoding="utf-8")
         manifest = json.loads((bundle / "resources" / "package-assets.json").read_text())
-        manifest["resource_version"] = "9"
+        manifest["resource_version"] = new_version
         for record in manifest["files"]:
             if record["source"] == "resources/runtime/routing.md":
                 record["sha256"] = _sha(routing)
@@ -497,11 +501,11 @@ class TestResourceVersions(InstallerCase):
                                 project_root=self.project_root, host_roots={"claude": self.host_root},
                                 bundle_root=bundle)
         plan = installer.plan_install(operation="update", roots=roots)
-        self.assertEqual(plan["version"], "9")
+        self.assertEqual(plan["version"], new_version)
         installer.apply_plan(plan, roots=roots)
-        self.assertEqual((self.user_root / "version").read_text().strip(), "9")
-        self.assertEqual((self.user_root / "resources" / "9" / "runtime" / "routing.md").read_text(),
-                         "routing for version 9\n")
+        self.assertEqual((self.user_root / "version").read_text().strip(), new_version)
+        self.assertEqual((self.user_root / "resources" / new_version / "runtime" / "routing.md").read_text(),
+                         f"routing for version {new_version}\n")
         self.assertEqual(old_cache.read_bytes(), old_bytes)
         selection = installer.resolve_resources(user_root=self.user_root, requested_version=BUNDLE_VERSION)
         self.assertEqual(selection.root, self.user_root / "resources" / BUNDLE_VERSION)
