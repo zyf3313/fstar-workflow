@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import uuid
+from datetime import datetime
 from typing import Any, Dict
 
 TASK_FIELDS = (
@@ -11,6 +12,12 @@ TASK_FIELDS = (
     "worktree_path", "commit", "pr_url", "notes", "meta", "capabilities",
     "extensions", "events",
 )
+# Optional collaboration fields (design §4): all may be absent; absence means
+# the default (status "active", no work items / next step / deliverables).
+# They sit at the top level next to `phase` and never enter source_snapshot.
+OPTIONAL_TASK_FIELDS = ("status", "status_detail", "work_items", "next_step", "deliverables")
+STATUSES = {"active", "waiting_user", "waiting_external", "paused"}
+WORK_ITEM_STATES = {"done", "active", "blocked", "cancelled"}
 PHASES = {"planning", "in_progress", "awaiting_acceptance", "completed"}
 # Order of the lifecycle for effective-state reporting and guards.
 PHASE_ORDER = {"planning": 0, "in_progress": 1, "awaiting_acceptance": 2, "completed": 3}
@@ -55,13 +62,114 @@ def new_task(name: str, title: str, description: str, *, creator: str, now: str)
     return task
 
 
+def _is_iso_timestamp(value: object) -> bool:
+    if not isinstance(value, str) or not value.strip():
+        return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
+
+
+def _string_list(value: object, label: str) -> list:
+    if not isinstance(value, list) or not all(isinstance(x, str) for x in value):
+        raise TypeError("%s must be an array of strings" % label)
+    return list(value)
+
+
+def work_item(item: dict) -> dict:
+    """Normalized work item: id/state/summary/evidence_refs."""
+    return {"id": str(item["id"]), "state": item["state"],
+            "summary": item.get("summary", ""),
+            "evidence_refs": _string_list(item.get("evidence_refs", []), "evidence_refs")}
+
+
+def deliverable(entry: dict) -> dict:
+    """Normalized deliverable registration entry (design §4)."""
+    return {"name": entry["name"], "path": entry["path"],
+            "format": entry.get("format", ""),
+            "criteria_refs": _string_list(entry.get("criteria_refs", []), "criteria_refs"),
+            "version": entry.get("version", "")}
+
+
+def validate_optional_fields(data: dict) -> None:
+    """Validate the optional collaboration fields; absent fields are valid."""
+    status = data.get("status")
+    if status is not None and status not in STATUSES:
+        raise DomainError("invalid_status", "status must be active, waiting_user, waiting_external, or paused", {"status": status})
+    detail = data.get("status_detail")
+    if detail is not None:
+        if not (isinstance(detail, dict)
+                and isinstance(detail.get("reason"), str) and detail["reason"].strip()
+                and _is_iso_timestamp(detail.get("since"))):
+            raise DomainError("invalid_status_detail", "status_detail requires a non-empty reason and an ISO since timestamp")
+        unknown = sorted(set(detail) - {"reason", "since"})
+        if unknown:
+            raise DomainError("invalid_status_detail", "status_detail contains unknown keys", {"unknown": unknown})
+    items = data.get("work_items")
+    if items is not None:
+        if not isinstance(items, list):
+            raise DomainError("invalid_work_items", "work_items must be an array")
+        seen = set()
+        for item in items:
+            if not isinstance(item, dict):
+                raise DomainError("invalid_work_items", "work_items entries must be objects")
+            if not isinstance(item.get("id"), str) or not item["id"].strip():
+                raise DomainError("invalid_work_items", "work_items entries require a non-empty string id")
+            if item["id"] in seen:
+                raise DomainError("invalid_work_items", "work_items ids must be unique", {"id": item["id"]})
+            seen.add(item["id"])
+            if item.get("state") not in WORK_ITEM_STATES:
+                raise DomainError("invalid_work_items", "work item state must be done, active, blocked, or cancelled", {"id": item.get("id"), "state": item.get("state")})
+            if not isinstance(item.get("summary"), str):
+                raise DomainError("invalid_work_items", "work item summary must be a string", {"id": item["id"]})
+            refs = item.get("evidence_refs", [])
+            if not isinstance(refs, list) or not all(isinstance(x, str) for x in refs):
+                raise DomainError("invalid_work_items", "work item evidence_refs must be an array of strings", {"id": item["id"]})
+            unknown = sorted(set(item) - {"id", "state", "summary", "evidence_refs"})
+            if unknown:
+                raise DomainError("invalid_work_items", "work item contains unknown keys", {"id": item["id"], "unknown": unknown})
+    next_step = data.get("next_step")
+    if next_step is not None:
+        if not (isinstance(next_step, dict)
+                and isinstance(next_step.get("condition"), str) and next_step["condition"].strip()
+                and isinstance(next_step.get("action"), str) and next_step["action"].strip()):
+            raise DomainError("invalid_next_step", "next_step requires non-empty condition and action strings")
+        unknown = sorted(set(next_step) - {"condition", "action"})
+        if unknown:
+            raise DomainError("invalid_next_step", "next_step contains unknown keys", {"unknown": unknown})
+    entries = data.get("deliverables")
+    if entries is not None:
+        if not isinstance(entries, list):
+            raise DomainError("invalid_deliverables", "deliverables must be an array")
+        seen = set()
+        for entry in entries:
+            if not isinstance(entry, dict):
+                raise DomainError("invalid_deliverables", "deliverables entries must be objects")
+            for key in ("name", "path", "format", "version"):
+                if not isinstance(entry.get(key), str):
+                    raise DomainError("invalid_deliverables", "deliverable %s must be a string" % key)
+            if not entry["name"].strip() or not entry["path"].strip():
+                raise DomainError("invalid_deliverables", "deliverables entries require non-empty name and path")
+            if entry["name"] in seen:
+                raise DomainError("invalid_deliverables", "deliverables names must be unique", {"name": entry["name"]})
+            seen.add(entry["name"])
+            refs = entry.get("criteria_refs", [])
+            if not isinstance(refs, list) or not all(isinstance(x, str) for x in refs):
+                raise DomainError("invalid_deliverables", "deliverable criteria_refs must be an array of strings", {"name": entry["name"]})
+            unknown = sorted(set(entry) - {"name", "path", "format", "criteria_refs", "version"})
+            if unknown:
+                raise DomainError("invalid_deliverables", "deliverable contains unknown keys", {"name": entry["name"], "unknown": unknown})
+
+
 def validate_task(data: dict) -> None:
     if not isinstance(data, dict):
         raise DomainError("invalid_task", "task.json must contain a JSON object")
-    unknown = sorted(set(data) - set(TASK_FIELDS))
+    unknown = sorted(set(data) - set(TASK_FIELDS) - set(OPTIONAL_TASK_FIELDS))
     missing = sorted(set(TASK_FIELDS) - set(data))
     if unknown or missing:
-        raise DomainError("invalid_task_fields", "task.json must contain exactly 26 top-level fields", {"missing": missing, "unknown": unknown})
+        raise DomainError("invalid_task_fields", "task.json must contain the required top-level fields", {"missing": missing, "unknown": unknown})
     if not isinstance(data["id"], str):
         raise DomainError("invalid_id", "id must be a UUID string")
     try:
@@ -110,3 +218,4 @@ def validate_task(data: dict) -> None:
     for event in data["events"]:
         if set(event) != {"id", "at", "source", "type", "data"} or not isinstance(event.get("source"), dict) or not isinstance(event.get("data"), dict):
             raise DomainError("invalid_event", "event entries do not match the v1 envelope")
+    validate_optional_fields(data)

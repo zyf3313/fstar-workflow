@@ -97,6 +97,9 @@ def register_core_commands(subparsers) -> None:
                                 help="unified cross-project acceptance: one user confirmation completes the master and every linked child task")
             parser.add_argument("--rework", action="store_true",
                                 help="user reports a problem during awaiting_acceptance; the task returns to planning for rework")
+            parser.add_argument("--scope-file",
+                                help="JSON file with the rework scope: {mode: full|localized, artifacts: [], paths: [], criteria_refs: []}. "
+                                     "Omitted means the legacy full invalidation.")
             parser.add_argument("--recheck", action="store_true",
                                 help="the final check behind awaiting_acceptance went stale; send the task back for a fresh check")
             parser.add_argument("--reason", help="reason for the reported problem")
@@ -114,12 +117,36 @@ def register_core_commands(subparsers) -> None:
     state = subparsers.add_parser("state")
     state_sub = state.add_subparsers(dest="state_command", required=True)
     _add_target(state_sub.add_parser("show"))
+    set_status = state_sub.add_parser("set-status")
+    _add_target(set_status)
+    set_status.add_argument("--status", required=True, choices=("active", "waiting_user", "waiting_external", "paused"))
+    set_status.add_argument("--reason", help="required for non-active statuses")
+    set_work_item = state_sub.add_parser("set-work-item")
+    _add_target(set_work_item)
+    set_work_item.add_argument("--id", required=True)
+    set_work_item.add_argument("--state", required=True, choices=("done", "active", "blocked", "cancelled"))
+    set_work_item.add_argument("--summary", default="")
+    set_work_item.add_argument("--evidence", action="append", default=[], help="evidence reference; repeatable")
+    set_next = state_sub.add_parser("set-next")
+    _add_target(set_next)
+    set_next.add_argument("--condition", help="clears next_step when both condition and action are omitted")
+    set_next.add_argument("--action")
+    add_deliverable = state_sub.add_parser("add-deliverable")
+    _add_target(add_deliverable)
+    add_deliverable.add_argument("--name", required=True)
+    add_deliverable.add_argument("--path", required=True)
+    add_deliverable.add_argument("--format", default="")
+    add_deliverable.add_argument("--criteria", action="append", default=[], help="criteria reference; repeatable")
+    add_deliverable.add_argument("--version", default="")
 
     continuation = subparsers.add_parser("continue")
     _add_target(continuation)
     continuation.add_argument("--action", choices=("takeover", "replan", "reopen", "rework", "unblock"))
     continuation.add_argument("--reason")
     continuation.add_argument("--workflow", action="store_true")
+    continuation.add_argument("--scope-file",
+                              help="JSON file with the rework scope (used by --action rework): "
+                                   "{mode: full|localized, artifacts: [], paths: [], criteria_refs: []}")
     _add_confirmation(continuation)
 
     extension = subparsers.add_parser("extension")
@@ -255,8 +282,9 @@ def _dispatch(args):
             return service.request_recheck(ref, actor=_actor(args), reason=args.reason)
         if getattr(args, "rework", False):
             confirmation = _confirmation(args, service, ref)
+            scope = _json_file(args.scope_file, "rework scope") if getattr(args, "scope_file", None) else None
             return service.report_problem(ref, actor=_confirmation_actor(args, confirmation),
-                                         confirmation=confirmation, reason=args.reason)
+                                         confirmation=confirmation, reason=args.reason, scope=scope)
         confirmation = _confirmation(args, service, ref)
         rule = _json_file(args.rule, "acceptance rule") if args.rule else None
         actor = _confirmation_actor(args, confirmation)
@@ -270,12 +298,23 @@ def _dispatch(args):
         confirmation = _confirmation(args, service, ref)
         return service.drop(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, reason=args.reason, disposition=args.disposition, action=args.action)
     if args.command == "state":
-        return service.state(ref)
+        if args.state_command == "show":
+            return service.state(ref)
+        if args.state_command == "set-status":
+            return service.set_status(ref, actor=_actor(args), status=args.status, reason=args.reason)
+        if args.state_command == "set-work-item":
+            return service.set_work_item(ref, actor=_actor(args), item={"id": args.id, "state": args.state, "summary": args.summary, "evidence_refs": args.evidence})
+        if args.state_command == "set-next":
+            return service.set_next_step(ref, actor=_actor(args), condition=args.condition, action=args.action)
+        if args.state_command == "add-deliverable":
+            return service.register_deliverable(ref, actor=_actor(args), entry={"name": args.name, "path": args.path, "format": args.format, "criteria_refs": args.criteria, "version": args.version})
+        raise DomainError("unknown_command", "Unknown state command")
     if args.command == "continue":
         confirmation = _confirmation(args, service, ref) if args.action in {"replan", "reopen", "rework"} else None
         if args.action == "unblock":
             return service.set_blocked(ref, actor=_actor(args), reason=None, workflow_recovery=args.workflow)
-        return service.continue_task(ref, session_id=args.session, action=args.action, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, reason=args.reason, workflow=args.workflow)
+        scope = _json_file(args.scope_file, "rework scope") if args.action == "rework" and getattr(args, "scope_file", None) else None
+        return service.continue_task(ref, session_id=args.session, action=args.action, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, reason=args.reason, workflow=args.workflow, scope=scope)
     if args.command == "extension":
         if args.extension_command == "list":
             return {"available": sorted(EXTENSIONS), "active": store.read(ref)["extensions"] if ref else [], "persistence": "task" if ref else "session_only"}

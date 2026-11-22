@@ -179,7 +179,6 @@ class PayloadValidationTests(DispatchCase):
             validate_payload(broken)
 
     def test_editor_requires_item_ids_and_baseline(self):
-        # session-only editor: doc tree root
         with self.assertRaises(DomainError) as caught:
             self.payload(role="editor", task_ref="session-only", paths=["doc/prd.md"])
         self.assertEqual("item_ids", caught.exception.details.get("field"))
@@ -188,15 +187,21 @@ class PayloadValidationTests(DispatchCase):
         self.assertEqual("baseline_sha256", caught.exception.details.get("field"))
         payload = self.payload(role="editor", task_ref="session-only", paths=["doc/prd.md"], item_ids=["R-001"], baseline_sha256="abc")
         validate_payload(payload)
-        with self.assertRaises(DomainError):
-            self.payload(role="editor", task_ref="session-only", paths=["src.py"], item_ids=["R-001"], baseline_sha256="abc")
 
-    def test_persistent_editor_limited_to_task_doc_tree(self):
+    def test_persistent_editor_accepts_chosen_deliverable_locations(self):
+        # C-09: doc/ is not a workflow concept; the coordinator's explicit
+        # per-file allowed_paths is the whitelist wherever the deliverable
+        # lives (task root, legacy doc tree, or a chosen project directory).
         self.create_started()
-        with self.assertRaises(DomainError):
-            self.payload(role="editor", paths=["doc/prd.md"], item_ids=["R-001"], baseline_sha256="abc")
-        payload = self.payload(role="editor", paths=[".fstar/tasks/root/doc/prd.md"], item_ids=["R-001"], baseline_sha256="abc")
-        validate_payload(payload)
+        for allowed in (
+            ".fstar/tasks/root/criteria.md",
+            ".fstar/tasks/root/plan.md",
+            ".fstar/tasks/root/doc/prd.md",          # legacy layout still fine
+            "docs/product/handbook.md",              # user-chosen project dir
+        ):
+            with self.subTest(path=allowed):
+                payload = self.payload(role="editor", paths=[allowed], item_ids=["A001"], baseline_sha256="abc")
+                validate_payload(payload)
 
     def test_research_scope_restricted(self):
         with self.assertRaises(DomainError):
@@ -880,6 +885,91 @@ class HarvestTests(DispatchCase):
     def lease(self, ref="root"):
         return self.service.acquire_lease(ref, holder="coordinator", role="coordinator", actor=self.agent)
 
+    def test_skill_usage_session_only_round_trip(self):
+        # Session-only surfaces: the selection rides in the worker prompt and
+        # the reported usage rides back out of harvest for the coordinator.
+        selection = [{"skill": "user-named-skill", "source": "user-named",
+                      "reason": "user named it"}]
+        payload = self.payload(task_ref="session-only", selected_skills=selection)
+        prompt = build_worker_prompt(payload)
+        self.assertIn("user-named-skill", prompt)
+        result = self.result(payload, skill_usage=[{"skill": "user-named-skill", "state": "succeeded"}])
+        outcome = self.dispatch.harvest(result, payload, lease_token="none")
+        self.assertFalse(outcome["recorded"])
+        self.assertEqual(outcome["skill_usage"],
+                         [{"skill": "user-named-skill", "state": "succeeded"}])
+        # Without usage fields the outcome shape is unchanged (old surface).
+        plain = self.payload(task_ref="session-only")
+        plain_result = self.result(plain)
+        self.assertNotIn("skill_usage",
+                         self.dispatch.harvest(plain_result, plain, lease_token="none"))
+
+    def test_skill_usage_rides_through_harvest_as_provenance(self):
+        # S-5: worker-reported skill usage is recorded as provenance on the
+        # delivery evidence (validation_facts + a reported marker), never as
+        # a verified execution claim.
+        self.create_started()
+        self.prepare_artifacts()
+        selection = [{"skill": "user-named-skill", "source": "user-named",
+                      "reason": "user named it", "scope": ["src.py"]}]
+        payload = self.payload(selected_skills=selection)
+        lease = self.lease()
+        usage = [
+            {"skill": "user-named-skill", "state": "succeeded"},
+            {"skill": "extra-worker-skill", "state": "not_used", "reason": "not applicable"},
+        ]
+        result = self.result(payload, skill_usage=usage)
+        outcome = self.dispatch.harvest(result, payload, lease_token=lease["token"])
+        self.assertTrue(outcome["recorded"])
+        evidence = self.store.read("root")["evidence"][-1]
+        self.assertEqual(evidence["skill_usage_reported"], usage)
+        facts = [fact for fact in evidence["validation_facts"]
+                 if fact["command"].startswith("skill_usage")]
+        self.assertEqual(len(facts), 1)
+        self.assertIn("not verified by harvest", facts[0]["command"])
+        import json as _json
+        self.assertEqual(_json.loads(facts[0]["result"])["skill_usage"], usage)
+
+    def test_harvest_without_skill_fields_unchanged(self):
+        self.create_started()
+        self.prepare_artifacts()
+        payload = self.payload()
+        lease = self.lease()
+        outcome = self.dispatch.harvest(self.result(payload), payload, lease_token=lease["token"])
+        self.assertTrue(outcome["recorded"])
+        evidence = self.store.read("root")["evidence"][-1]
+        self.assertNotIn("skill_usage_reported", evidence)
+        self.assertFalse([fact for fact in evidence["validation_facts"]
+                          if "skill_usage" in fact["command"]])
+
+    def test_skill_selection_is_inert_for_registration(self):
+        # Selecting a skill changes nothing about authorization, scope, or
+        # registration: the same register outcome with or without it.
+        self.create_started()
+        self.prepare_artifacts()
+        plain = self.payload()
+        with_selection = self.payload(selected_skills=[
+            {"skill": "any-skill", "reason": "fixture selection"}])
+        self.assertEqual(plain["allowed_paths"], with_selection["allowed_paths"])
+        self.assertTrue(self.dispatch.register(plain)["registered"])
+        token = self.store.read("root")["lease"]["token"]
+        self.service.release_lease("root", token=token, reason="test")
+        self.assertTrue(self.dispatch.register(with_selection)["registered"])
+
+    def test_invalid_skill_usage_rejected_at_harvest(self):
+        self.create_started()
+        self.prepare_artifacts()
+        payload = self.payload()
+        lease = self.lease()
+        # Bypass build_result's own validation: the harvest path must
+        # independently reject a malformed skill_usage result.
+        result = self.result(payload)
+        result["skill_usage"] = [{"skill": "a", "state": "not_used"}]
+        with self.assertRaises(DomainError) as caught:
+            self.dispatch.harvest(result, payload, lease_token=lease["token"])
+        self.assertEqual("invalid_dispatch_result", caught.exception.code)
+        self.assertEqual([], self.store.read("root")["evidence"])
+
     def test_identity_mismatch_rejected(self):
         self.create_started()
         self.prepare_artifacts()
@@ -1160,11 +1250,15 @@ class HarvestTests(DispatchCase):
         snapshot = self.service.evidence.snapshot("root", artifact="doc/prd.md", items=["R-001"])
         check = {"kind": "check", "producer": {"role": "check", "id": "checker"},
                  "validates": [snapshot], "run_id": "run-1", "environment": {"python": "test"},
-                 "delivery": self.service.evidence.delivery_snapshot(["src.py"]), "scope": "final",
+                 "delivery": self.service.evidence.delivery_snapshot(["src.py"]), "scope": "final", "read_only": True,
                  "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "command": "check", "result": "passed"}]}
-        outcome = self.dispatch.harvest(self.result(payload, changed=["src.py"]), payload,
-                                        lease_token=lease["token"], check_evidence=check)
-        self.assertEqual("stale", outcome["state"])
+        # S-4 K-2: a final check that changed paths is now rejected at
+        # record time by the read-only gate (final_check_not_read_only),
+        # before the original overlapping-input staleness rule applies.
+        with self.assertRaises(DomainError) as caught:
+            self.dispatch.harvest(self.result(payload, changed=["src.py"]), payload,
+                                   lease_token=lease["token"], check_evidence=check)
+        self.assertEqual("final_check_not_read_only", caught.exception.code)
         self.service.release_lease("root", token=lease["token"], reason="test")
         self.assertFalse(self.service.evidence.acceptance_status("root")["awaiting_acceptance"])
 
@@ -1179,7 +1273,7 @@ class HarvestTests(DispatchCase):
         check_evidence = {
             "kind": "check", "producer": {"role": "check", "id": "checker", "session_id": "c1"},
             "validates": [snapshot], "run_id": "run-1", "environment": {"python": sys.version.split()[0]},
-            "delivery": self.service.evidence.delivery_snapshot(["src.py"]), "scope": "final",
+            "delivery": self.service.evidence.delivery_snapshot(["src.py"]), "scope": "final", "read_only": True,
             "items": [{"requirement_ids": ["R-001"], "plan_item": "P-1", "test_refs": [], "command": "python -m unittest", "result": "passed", "exit_code": 0, "log_refs": [], "duration": 0.1, "retries": 0}],
         }
         outcome = self.dispatch.harvest(self.result(check_payload, changed=[]), check_payload, lease_token=lease["token"], check_evidence=check_evidence)
@@ -1269,10 +1363,14 @@ class HarvestTests(DispatchCase):
         payload = self.payload(role="editor", task_ref="root/subtasks/child", paths=[nested],
                               item_ids=["R-001"], baseline_sha256="abc")
         validate_payload(payload)
-        # A flat-ref check must not substring-match a sibling path.
-        with self.assertRaises(DomainError):
-            self.payload(role="editor", task_ref="child2", paths=[".fstar/tasks/child2-extra/doc/prd.md"],
-                         item_ids=["R-001"], baseline_sha256="abc")
+        # C-09: a nested-subtask deliverable outside doc/ is equally valid;
+        # task_ref no longer gates the editor path (the per-file whitelist
+        # does), so a sibling task's file passes STRUCTURAL validation but is
+        # still only writable when the coordinator explicitly listed it — and
+        # the harvest scope check rejects anything else.
+        sibling = self.payload(role="editor", task_ref="child2", paths=[".fstar/tasks/child2-extra/criteria.md"],
+                               item_ids=["R-001"], baseline_sha256="abc")
+        validate_payload(sibling)
         research = self.payload(role="research", task_ref="root/subtasks/child",
                                paths=[".fstar/tasks/root/subtasks/child/research/notes.md"])
         validate_payload(research)

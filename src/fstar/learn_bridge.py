@@ -28,6 +28,101 @@ def _construct(cls, value, name):
         raise DomainError("knowledge_invalid_schema", "Invalid " + name, {"reason": str(exc)})
 
 
+def _read_selection(request):
+    """Build one validated ReadSelection from a JSON request.
+
+    Strings never silently iterate as scope tags or paths, every applicability
+    entry must carry an explicit state, and the production request exposes no
+    clock override: ``now`` stays a unit-test-only parameter of the provider.
+    """
+
+    raw = request.get("selection")
+    if raw is None:
+        raise DomainError("knowledge_invalid_schema", "read requires a selection object")
+    if not isinstance(raw, dict):
+        raise DomainError("knowledge_invalid_schema", "selection must be an object")
+    selection = {}
+    for field in ("topics", "documents", "dependencies", "global_constraints", "excluded", "scope"):
+        values = raw.get(field, [])
+        if not isinstance(values, list):
+            raise DomainError("knowledge_invalid_schema",
+                              "selection.%s must be a list of strings" % field)
+        for value in values:
+            if not isinstance(value, str) or not value.strip():
+                raise DomainError("knowledge_invalid_schema",
+                                  "selection.%s must be a list of non-empty strings" % field)
+        selection[field] = tuple(values)
+    applicability = raw.get("applicability", {})
+    if not isinstance(applicability, dict):
+        raise DomainError("knowledge_invalid_schema", "selection.applicability must be an object")
+    states = {}
+    for key, value in applicability.items():
+        if not isinstance(value, dict) or value.get("state") not in ("include", "exclude", "unknown"):
+            raise DomainError("knowledge_invalid_schema",
+                              "applicability entries must carry an explicit include/exclude/unknown state")
+        reason = value.get("reason", "")
+        if not isinstance(reason, str):
+            raise DomainError("knowledge_invalid_schema", "applicability reason must be a string")
+        states[key] = k.Applicability(value["state"], reason)
+    selection["applicability"] = states
+    snapshot = raw.get("snapshot_hash", "")
+    if not isinstance(snapshot, str):
+        raise DomainError("knowledge_invalid_schema", "snapshot_hash must be a string")
+    selection["snapshot_hash"] = snapshot
+    return k.ReadSelection(**selection)
+
+
+def _read_result(catalog, bundle):
+    def exclusion(item):
+        return {"key": item.key, "owner": item.owner, "relative": item.relative,
+                "role": item.role, "reason": item.reason}
+
+    def unloaded(item):
+        return {"key": item.key, "owner": item.owner, "relative": item.relative,
+                "role": item.role, "reason": item.reason}
+
+    return {
+        "snapshot_hash": bundle.snapshot_hash,
+        "complete": bundle.complete,
+        "conflicts_pending": bundle.conflicts_pending,
+        "documents": [{"key": document.key, "owner": document.owner,
+                       "relative": document.relative, "role": document.role,
+                       "digest": document.digest, "size": document.size,
+                       "language": document.language, "tier": document.tier,
+                       "confidence": document.confidence, "text": document.text}
+                      for document in bundle.full_documents],
+        "excluded": [exclusion(item) for item in bundle.excluded],
+        "required_unloaded": [unloaded(item) for item in bundle.required_unloaded],
+        "language": dict(bundle.language),
+    }
+
+
+def _read(request):
+    """Read the applicable knowledge for one selection.
+
+    Reads follow the ordinary read-only policy: no grant is required or
+    consulted, nothing is written, and no write grant is implied.  The caller
+    gets the injected bodies with their confidence and every exclusion with its
+    reason, plus the catalog snapshot hash a later assessment must carry.
+    """
+
+    project = Path(request["project_root"]).expanduser().resolve()
+    user = Path(request["user_root"]).expanduser().resolve()
+    max_bytes = request.get("max_bytes")
+    if max_bytes is not None and (not isinstance(max_bytes, int) or isinstance(max_bytes, bool)
+                                  or max_bytes < 0):
+        raise DomainError("knowledge_invalid_schema", "max_bytes must be a non-negative integer")
+    # The production request exposes no clock override: expiry always follows
+    # the real clock; ``now`` stays a unit-test-only provider parameter.
+    if "now" in request:
+        raise DomainError("knowledge_invalid_schema",
+                          "read does not accept a clock override; expiry follows the real date")
+    catalog = k.load_catalog(user_root=user, project_root=project)
+    bundle = k.load_context(catalog, selection=_read_selection(request),
+                            max_bytes=max_bytes)
+    return _read_result(catalog, bundle)
+
+
 def _prepare(request):
     project = Path(request["project_root"]).expanduser().resolve()
     user = Path(request["user_root"]).expanduser().resolve()
@@ -94,8 +189,10 @@ def _authorize(request, project, user, proposal, requested_edits, store=None):
 def run(request):
     request = _object(request, "request")
     action = request.get("action")
-    if action not in ("prepare", "apply"):
-        raise DomainError("knowledge_invalid_schema", "action must be prepare or apply")
+    if action not in ("read", "prepare", "apply"):
+        raise DomainError("knowledge_invalid_schema", "action must be read, prepare or apply")
+    if action == "read":
+        return _read(request)
     project, user, proposal, edits = _prepare(request)
     if action == "prepare":
         required = _authorize(request, project, user, proposal, edits)

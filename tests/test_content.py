@@ -39,9 +39,9 @@ class InventoryTests(unittest.TestCase):
     def test_exact_inventory_and_validator(self):
         self.assertEqual(11, len(SKILLS))
         self.assertEqual(4, len(ROLES))
-        self.assertEqual(11, len(TEMPLATES))
+        self.assertEqual(12, len(TEMPLATES))
         self.assertEqual([], list(validate_resources(RESOURCES)))
-        self.assertEqual(3, len(list((RESOURCES / "templates").rglob("*.mapping.yaml"))))
+        self.assertEqual(4, len(list((RESOURCES / "templates").rglob("*.mapping.yaml"))))
 
     def test_descriptions_and_frontmatter(self):
         descriptions = []
@@ -200,7 +200,7 @@ class ValidatorCoverageTests(unittest.TestCase):
 
     def test_broken_mapping_surfaces_as_diagnostic(self):
         root = self.copy_resources()
-        (root / "templates" / "doc" / "prd.mapping.yaml").write_text(
+        (root / "templates" / "scenarios" / "software" / "prd.mapping.yaml").write_text(
             '{"schema": "fstar.template-map.v1", "schema": "duplicate"}', encoding="utf-8")
         codes = {item.code for item in validate_resources(root)}
         self.assertIn("MAPPING_DUPLICATE_KEY", codes)
@@ -219,23 +219,35 @@ class SemanticContentTests(unittest.TestCase):
         self.assertIn("later writes to specs, knowledge, rules, or memory still require", text)
         self.assertNotIn("tool-capability", text)
         # User-supplied planning material must be stored before implement dispatch.
-        self.assertIn("A user-supplied planning document (PRD/design/clarify content) must be stored", text)
+        self.assertIn("A user-supplied planning document must be stored", text)
         self.assertIn("Never dispatch implement while user-supplied planning material is still unstored", text)
         self.assertIn("negotiate that grant first when absent", text)
-        # Clarify gates handoff on an empty design-tree frontier.
-        self.assertIn("design-tree frontier is empty", text)
+        # Clarify hands off when nothing blocking is left open (C-16).
+        self.assertIn("可边做边确认", text)
+        self.assertIn("do not block the hand-off", text)
 
     def test_clarify_uses_frontier_rounds_and_fact_ownership(self):
         text = (RESOURCES / "skills/fstar-clarify/SKILL.md").read_text()
         for phrase in ("design tree", "frontier", "Ask the whole frontier in one round",
                        "Never ask the user for something you can look up yourself",
-                       "Stop when the frontier is empty", "nothing silently assumed",
+                       "nothing silently assumed",
                        "word the question so \"yes\" accepts the recommendation",
                        "recommended answer", "exact quote"):
             self.assertIn(phrase, text)
+        # The empty-frontier hard gate is relaxed: non-blocking open questions
+        # may carry a confirm-as-you-go marker (C-16); criteria and delivery
+        # preference guidance happen at clarification close (C-09, C-13).
+        self.assertIn("可边做边确认", text)
+        self.assertIn("form the acceptance criteria (criteria.md)", text)
+        self.assertIn("delivery preference", text)
+        self.assertIn("preference clue", text)
+        self.assertNotIn("Do not pass a non-empty frontier", text)
         template = (RESOURCES / "templates/task/clarify.md").read_text()
-        self.assertIn("决策树与前沿", template)
-        self.assertIn("前沿为空才交付 plan", template)
+        for heading in ("## 背景与目标", "## 已核实事实与来源", "## 已确认结论", "## 假设与未知",
+                        "## 候选方案与取舍", "## 开放问题", "## 被替代结论及原因", "## 下一步", "## 相关资料"):
+            self.assertIn(heading, template)
+        criteria = (RESOURCES / "templates/task/criteria.md").read_text()
+        self.assertIn("A-001", criteria)
 
     def test_every_skill_declares_do_not_use_when(self):
         for skill_dir in sorted((RESOURCES / "skills").iterdir()):
@@ -337,12 +349,14 @@ class SemanticContentTests(unittest.TestCase):
         # replan; replan applies to in-progress, reopen to completed tasks.
         continuing = (RESOURCES / "skills/fstar-continue/SKILL.md").read_text()
         self.assertIn("a problem reported during awaiting-acceptance is handled by the rework transition", continuing)
-        # fstar-plan boundary: the plan runs after user review of documents;
-        # it is not gated on the task already being in_progress (the plan is
-        # formed while the task is still planning).
+        # fstar-plan boundary: the plan runs after user review of the settled
+        # basis; it is not gated on the task already being in_progress (the
+        # plan is formed while the task is still planning).
         plan = (RESOURCES / "skills/fstar-plan/SKILL.md").read_text()
-        self.assertIn("the plan runs only after the user reviews the planning documents", plan)
+        self.assertIn("the plan runs only after the user reviews the settled requirements", plan)
         self.assertNotIn("not in `in_progress` with user-reviewed", plan)
+        # Simple items may skip a plan entirely (C-15 recommended-not-mandatory).
+        self.assertIn("A one-line goal plus its acceptance conditions (criteria.md)", plan)
 
     def test_knowledge_spec_reading_stays_authorized(self):
         # Wording changes must not bypass authorization: discovery/reading
@@ -394,23 +408,66 @@ class SemanticContentTests(unittest.TestCase):
         all_text = self.all_text()
         self.assertNotIn("language.task", all_text)
 
-    def test_template_source_and_design_chapters(self):
-        design = (RESOURCES / "templates/doc/design.md").read_text()
+    def test_scenario_design_template_keeps_chapter_profile(self):
+        design = (RESOURCES / "templates/scenarios/software/design.md").read_text()
         self.assertIn("674bea37cf2f6f25cd20dab93e1a54ae1f13ce66", design)
         for heading in ("## 7. 影响范围", "## 8. 配置与字典", "## 9. 附录、评审与版本"):
             self.assertIn(heading, design)
         self.assertNotIn("## 7. 测试与验收", design)
 
-    def test_plan_seven_sections_and_no_second_approval(self):
+    def test_plan_structure_and_no_second_approval(self):
         plan = (RESOURCES / "templates/task/plan.md").read_text()
-        for heading in ("Summary", "Patterns to Mirror", "Files to Change", "Tasks", "Validation", "Risks", "Acceptance"):
-            self.assertIn("## " + heading, plan)
+        for heading in ("## 整体思路：目标与交付", "## 步骤", "## 验证与交付",
+                        "## 实际执行时如何维护", "## 有价值时再沉淀"):
+            self.assertIn(heading, plan)
+        self.assertIn("<!-- fstar:item:P-001:start -->", plan)
+        for field in ("目的", "输入", "行动", "产出", "完成判据", "遇阻处理", "依赖与调整"):
+            self.assertIn("- %s：" % field, plan)
+        self.assertNotIn("Patterns to Mirror", plan)
+        self.assertNotIn("Files to Change", plan)
         skill = (RESOURCES / "skills/fstar-plan/SKILL.md").read_text()
         self.assertIn("do not request a second plan approval", skill)
         # Execute must stop before implement dispatch on unstored user planning material.
         execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
         self.assertIn("stop before dispatching implement", execute)
         self.assertIn("route through fstar-doc storage first", execute)
+
+    def test_criteria_template_declares_verdict_mode(self):
+        criteria = (RESOURCES / "templates/task/criteria.md").read_text()
+        self.assertIn("- 判定方式：machine / user-judgment", criteria)
+        # A task with any user-judgment item may not use self-acceptance (S-4 K-4).
+        self.assertIn("含任何 `user-judgment` 条目的任务不得走自验收规则", criteria)
+
+    def test_criteria_mapping_extracts_items(self):
+        mapping = load_mapping(RESOURCES / "templates/task/criteria.mapping.yaml")
+        self.assertEqual("criteria", mapping["artifact_type"])
+        self.assertEqual("markers", mapping["items"]["mode"])
+        extraction = extract_artifact(
+            (RESOURCES / "templates/task/criteria.md").read_text(encoding="utf-8"),
+            mapping, artifact="criteria.md")
+        self.assertTrue(extraction.ok, extraction.diagnostics)
+        self.assertEqual(["A-001", "A-002"], [item.id for item in extraction.items])
+
+    def test_execute_skill_self_acceptance_procedure(self):
+        execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
+        for phrase in ("Self-acceptance closing procedure",
+                       "active/enforced user rule",
+                       "user-judgment`",
+                       "Gate check",
+                       "checks/self-acceptance.md",
+                       "`fstar accept <task> --rule RULE.json --confirmation SOURCE.json`",
+                       "`rule_ref`", "`quote`", "`criteria_refs`", "`report`", "`scope`",
+                       "Never-covered list",
+                       "Anti-drift",
+                       "returns to awaiting-acceptance",
+                       "priority or risk level alone never waives acceptance"):
+            self.assertIn(phrase, execute, phrase)
+
+    def test_check_role_card_final_check_is_read_only(self):
+        text = (RESOURCES / "agents/fstar-check.md").read_text()
+        self.assertIn("allowed_paths must be empty", text)
+        self.assertIn("report problems back to the producer instead of modifying the delivery", text)
+        self.assertIn("if you notice the delivery has been changed, state that fact", text)
 
 
 if __name__ == "__main__":

@@ -611,6 +611,22 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
         {key: sorted(value) for key, value in context.items()}, sort_keys=True)]
     footer.append("Role: %s. Read complete applicable context; summaries do not replace source bodies." % role)
     footer.append("If any input is listed under 'Unloaded inputs', you MUST read it in full before executing.")
+    # S-5: the dispatch's selected skills ride along so the worker actually
+    # sees them. Optional; old payloads have none. The worker may supplement
+    # from its own exposed catalog and reports usage in its result.
+    selected = payload.get("selected_skills")
+    if isinstance(selected, list) and selected:
+        lines = []
+        for entry in selected:
+            if not isinstance(entry, dict) or not entry.get("skill"):
+                continue
+            lines.append("  - %s (source: %s; reason: %s)" % (
+                entry.get("skill"), entry.get("source") or "agent-selected",
+                entry.get("reason") or ""))
+        if lines:
+            footer.append("selected_skills (invoke the applicable ones; selection is not execution; "
+                          "no recursive fstar action; report skill_usage):")
+            footer.extend(lines)
 
     if as_json:
         rendered = inject.render_json("fstar worker context (%s)" % role, inputs, budgets, footer="\n".join(footer))
@@ -943,6 +959,14 @@ PROMPT_STATE_TAG = re.compile(r"\[prompt-state:(?P<tag>[a-z_]+)\](?P<body>.*?)\[
 PROMPT_STATE_NAMES = ("no_task", "planning", "in_progress", "awaiting_acceptance")
 PROMPT_STATE_DEGRADED = ("fstar: prompt-states unavailable; make a workflow decision "
                          "before acting and refer to routing.")
+# S-5: the shared lightweight skill-intent reminder. One short block for
+# every state (including no_task); the per-state block above stays. When the
+# reminder cannot be read it degrades to this single line, so the reminder
+# never silently disappears when resources are missing.
+SKILL_REMINDER_TAG = re.compile(r"^\[skill-reminder\]\s*$(?P<body>.*?)^\[/skill-reminder\]\s*$",
+                                re.DOTALL | re.MULTILINE)
+SKILL_REMINDER_DEGRADED = ("fstar: check the local skill catalog for an applicable skill "
+                           "before acting (routing has the rules); no match is fine.")
 
 
 def _prompt_state_name(service: TaskService, session_id: Optional[str]) -> str:
@@ -969,6 +993,21 @@ def _prompt_state_name(service: TaskService, session_id: Optional[str]) -> str:
     return "awaiting_acceptance"
 
 
+def _skill_reminder(root: Path) -> Optional[str]:
+    """The shared skill-intent reminder from prompt-states.md, or its fixed
+    degraded line when the tag/file is missing. Never a disk scan of skill
+    directories; the reminder only points at routing's selection rules."""
+    try:
+        text = (root / "runtime" / "prompt-states.md").read_text(encoding="utf-8")
+    except OSError:
+        text = None
+    if text is not None:
+        match = SKILL_REMINDER_TAG.search(text)
+        if match:
+            return match.group("body").strip()
+    return SKILL_REMINDER_DEGRADED
+
+
 def prompt_context(payload: Optional[dict] = None, *, start: Optional[Path] = None,
                    user_root: Optional[Path] = None, runtime_root: Optional[Path] = None,
                    clock: Optional[Callable[[], str]] = None, passive: bool = True) -> dict:
@@ -986,8 +1025,10 @@ def prompt_context(payload: Optional[dict] = None, *, start: Optional[Path] = No
     located = inject.locate(start, user_root=user_root, runtime_root=runtime_root)
     project_root = located["project_root"]
     if project_root is None:
-        # Outside an initialized project there is nothing to remind about:
-        # routing was injected at session start and no task state exists.
+        # Outside an initialized project the previous behavior is preserved:
+        # nothing is emitted (routing was injected at session start and no
+        # task state exists; the skill reminder is a per-prompt project-state
+        # feature). This path creates no project and writes nothing.
         return {"text": None, "initialized": False, "state": None,
                 "degraded": False, "session_id": session_id}
     store = located["store"]
@@ -1004,18 +1045,65 @@ def prompt_context(payload: Optional[dict] = None, *, start: Optional[Path] = No
             if match.group("tag") == state:
                 body = match.group("body").strip()
                 break
+    reminder = _skill_reminder(root)
     if body is None:
-        # Degraded single line, never silent (PRD acceptance condition).
-        return {"text": PROMPT_STATE_DEGRADED, "initialized": True, "state": state,
-                "degraded": True, "session_id": session_id}
+        # Degraded single line, never silent (PRD acceptance condition). The
+        # skill reminder still rides along in its own degraded form.
+        return {"text": "\n".join([PROMPT_STATE_DEGRADED, "", reminder]),
+                "initialized": True, "state": state,
+                "degraded": True, "session_id": session_id,
+                "skill_reminder": reminder}
     text_out = "\n".join([
         "fstar prompt state: %s" % state,
         "<prompt-state>",
         body,
         "</prompt-state>",
+        "",
+        "<skill-reminder>",
+        reminder,
+        "</skill-reminder>",
     ])
+    # Task-level waiting/progress line from the optional collaboration fields
+    # (design §4): the state block above carries the phase reminder; these
+    # lines add why the task waits and where work stands. Read-only; absent
+    # fields add nothing (old tasks stay valid).
+    detail = _prompt_task_detail(service, session_id)
+    if detail:
+        text_out = "\n".join([text_out, "", detail])
     return {"text": text_out, "initialized": True, "state": state,
-            "degraded": False, "session_id": session_id}
+            "degraded": False, "session_id": session_id,
+            "skill_reminder": reminder}
+
+
+def _prompt_task_detail(service: TaskService, session_id: Optional[str]) -> Optional[str]:
+    """Waiting/progress breadcrumbs from status/work_items (no tag, no file)."""
+    current = service.current(session_id)
+    task = current.get("current")
+    if task is None or task.get("meta", {}).get("disposition"):
+        return None
+    lines = []
+    status = task.get("status")
+    if status in ("waiting_user", "waiting_external"):
+        reason = (task.get("status_detail") or {}).get("reason") or ""
+        if status == "waiting_user":
+            lines.append("fstar: task is waiting for user input (%s); "
+                         "gather the user's reply and resume work." % reason)
+        else:
+            lines.append("fstar: task is waiting for an external result (%s); "
+                         "do not claim the result; verify timeliness when it arrives." % reason)
+    active = [item for item in (task.get("work_items") or [])
+              if isinstance(item, dict) and item.get("state") == "active"]
+    if active:
+        summary = active[0].get("summary") or active[0].get("id")
+        others = len(active) - 1
+        lines.append("fstar: work in progress: %s%s; update the work item "
+                     "state in task.json when it settles." % (
+                         summary, " (+%d more)" % others if others else ""))
+    next_step = task.get("next_step")
+    if isinstance(next_step, dict) and next_step.get("condition") and next_step.get("action"):
+        lines.append("fstar: next step when %s: %s" % (
+            next_step["condition"], next_step["action"]))
+    return "\n".join(lines) or None
 
 
 # ---------------------------------------------------------------------------

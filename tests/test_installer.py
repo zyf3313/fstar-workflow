@@ -1481,7 +1481,7 @@ class TestDoctor(InstallerCase):
         report = installer.doctor(roots=self.roots())
         self.assertEqual(report["counts"]["skills"], 11)
         self.assertEqual(report["counts"]["roles"], 4)
-        self.assertEqual(report["counts"]["templates"], 11)
+        self.assertEqual(report["counts"]["templates"], 12)
         self.assertNotIn("capabilities", report["counts"])
         self.assertEqual(report["counts"]["hooks"], 5)
         self.assertEqual(_tree_snapshot(self.user_root), before)

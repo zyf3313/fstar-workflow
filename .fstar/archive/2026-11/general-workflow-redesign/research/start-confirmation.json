@@ -1,0 +1,14 @@
+{
+  "source_id": "general-workflow-redesign-start-user-approval",
+  "type": "conversation",
+  "at": "2026-11-21T00:00:00Z",
+  "actor": {
+    "role": "user",
+    "id": "user",
+    "session": null
+  },
+  "reference": "本次对话：设计评审通过（好没问题了）并生成实施计划后，用户启动实施的答复",
+  "quote": "开始",
+  "scope": "task",
+  "validates": "963795130debd548cfef2938b308397f1f08b2010cf9ce3ceaf1f65cc18510e3"
+}

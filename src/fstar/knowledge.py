@@ -30,6 +30,7 @@ Guarantees
 
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import re
@@ -58,6 +59,15 @@ STATUS_VALUES = ("active", "superseded")
 STRENGTH_VALUES = ("enforced", "default")
 KIND_VALUES = ("preference", "lesson")
 TRUST_VALUES = ("confirmed", "unreviewed")
+
+# Experience-loop fields (memory documents only, all optional).  Old documents
+# without them keep parsing: an absent scope applies broadly (personal), an
+# absent confidence stays unspecified and an absent expiry never expires.
+CONFIDENCE_VALUES = ("explicit-request", "inferred", "verified")
+MEMORY_SCOPE_FIELDS = ("scope", "confidence", "source", "expires", "conditions")
+_SCOPE_TAG_RE = re.compile(
+    r"\A(?:personal|scenario:[A-Za-z0-9_][A-Za-z0-9._/-]*|item:[A-Za-z0-9_][A-Za-z0-9._/-]*)\Z")
+_EXPIRES_RE = re.compile(r"\A\d{4}-\d{2}-\d{2}\Z")
 
 OWNER_USER = "user"
 OWNER_PROJECT = "project"
@@ -334,10 +344,30 @@ class KnowledgeDocument:
     def trust(self) -> Optional[str]:
         return self.metadata.get("trust")
 
+    @property
+    def scope(self) -> Optional[str]:
+        return self.metadata.get("scope")
+
+    @property
+    def confidence(self) -> Optional[str]:
+        return self.metadata.get("confidence")
+
+    @property
+    def source(self) -> Optional[str]:
+        return self.metadata.get("source")
+
+    @property
+    def expires(self) -> Optional[str]:
+        return self.metadata.get("expires")
+
+    @property
+    def conditions(self) -> Optional[str]:
+        return self.metadata.get("conditions")
+
 
 _ALLOWED_KEYS = {
     "rule": {"schema", "type", "status", "strength"},
-    "memory": {"schema", "type", "status", "kind", "trust"},
+    "memory": {"schema", "type", "status", "kind", "trust"} | set(MEMORY_SCOPE_FIELDS),
     "spec": {"schema", "type", "status"},
 }
 _REQUIRED_KEYS = {
@@ -345,7 +375,7 @@ _REQUIRED_KEYS = {
     "memory": {"schema", "type", "status", "kind", "trust"},
     "spec": {"schema", "type", "status"},
 }
-_TYPE_SPECIFIC = ("strength", "kind", "trust")
+_TYPE_SPECIFIC = ("strength", "kind", "trust") + MEMORY_SCOPE_FIELDS
 
 
 def _split_frontmatter(text: str, path: Path) -> Tuple[str, str, int]:
@@ -361,6 +391,52 @@ def _split_frontmatter(text: str, path: Path) -> Tuple[str, str, int]:
             return frontmatter, body, index + 2
     raise _fail("knowledge_invalid_schema", "Frontmatter is not terminated by a standalone --- line",
                 {"path": str(path), "line": 1, "expected": "closing ---"})
+
+
+def _validate_scope_tag(tag: object, *, field: str, path) -> str:
+    """Validate one ``personal`` / ``scenario:<id>`` / ``item:<id>`` tag."""
+
+    if not isinstance(tag, str) or not _SCOPE_TAG_RE.match(tag):
+        raise _fail("knowledge_invalid_schema", "Unknown scope tag",
+                    {"path": str(path), "line": 1, "field": field,
+                     "expected": ["personal", "scenario:<id>", "item:<id>"], "actual": tag})
+    return tag
+
+
+def _validate_memory_experience_fields(metadata: Mapping[str, str], path) -> None:
+    """Validate the optional experience-loop fields of one memory document.
+
+    All fields are optional and default to broad, honest semantics: absent
+    scope applies broadly (like ``personal``), absent confidence stays
+    unspecified, absent expiry never expires and absent conditions never
+    block.  ``expires`` is machine-judgeable (a calendar date); ``conditions``
+    is natural language and is never auto-judged.
+    """
+
+    if "scope" in metadata:
+        _validate_scope_tag(metadata["scope"], field="scope", path=path)
+    if "confidence" in metadata and metadata["confidence"] not in CONFIDENCE_VALUES:
+        raise _fail("knowledge_invalid_schema", "Unknown memory confidence",
+                    {"path": str(path), "line": 1, "field": "confidence",
+                     "expected": list(CONFIDENCE_VALUES), "actual": metadata["confidence"]})
+    if "source" in metadata and not metadata["source"].strip():
+        raise _fail("knowledge_invalid_schema", "Memory source reference must not be empty",
+                    {"path": str(path), "line": 1, "field": "source"})
+    if "expires" in metadata:
+        value = metadata["expires"]
+        if not _EXPIRES_RE.match(value):
+            raise _fail("knowledge_invalid_schema", "Unknown memory expiry date",
+                        {"path": str(path), "line": 1, "field": "expires",
+                         "expected": "YYYY-MM-DD", "actual": value})
+        try:
+            datetime.date.fromisoformat(value)
+        except ValueError:
+            raise _fail("knowledge_invalid_schema", "Unknown memory expiry date",
+                        {"path": str(path), "line": 1, "field": "expires",
+                         "expected": "a valid calendar date", "actual": value})
+    if "conditions" in metadata and not metadata["conditions"].strip():
+        raise _fail("knowledge_invalid_schema", "Memory applicability conditions must not be empty",
+                    {"path": str(path), "line": 1, "field": "conditions"})
 
 
 def parse_knowledge(text: str, *, path, expected_type: Optional[str] = None) -> KnowledgeDocument:
@@ -439,6 +515,7 @@ def parse_knowledge(text: str, *, path, expected_type: Optional[str] = None) -> 
             raise _fail("knowledge_invalid_schema", "Unknown memory trust",
                         {"path": str(target), "line": 1, "field": "trust",
                          "expected": list(TRUST_VALUES), "actual": metadata["trust"]})
+        _validate_memory_experience_fields(metadata, target)
     if expected_type is not None and document_type != expected_type:
         raise _fail("knowledge_invalid_schema", "Document type does not match its category",
                     {"path": str(target), "line": 1, "field": "type",
@@ -572,6 +649,26 @@ class CatalogDocument:
     @property
     def trust(self) -> Optional[str]:
         return self.metadata.get("trust")
+
+    @property
+    def scope(self) -> Optional[str]:
+        return self.metadata.get("scope")
+
+    @property
+    def confidence(self) -> Optional[str]:
+        return self.metadata.get("confidence")
+
+    @property
+    def source(self) -> Optional[str]:
+        return self.metadata.get("source")
+
+    @property
+    def expires(self) -> Optional[str]:
+        return self.metadata.get("expires")
+
+    @property
+    def conditions(self) -> Optional[str]:
+        return self.metadata.get("conditions")
 
 
 @dataclass(frozen=True)
@@ -1068,7 +1165,13 @@ class Applicability:
 
 @dataclass(frozen=True)
 class ReadSelection:
-    """What the caller wants to read.  Paths use the ``owner:relative`` form."""
+    """What the caller wants to read.  Paths use the ``owner:relative`` form.
+
+    ``scope`` carries the scope tags in effect for the current reading, for
+    example ``("scenario:fstar-workflow", "item:s6-correction")``.  A memory
+    scoped to ``scenario:<id>`` or ``item:<id>`` is injected only when its tag
+    is listed here; ``personal`` (or absent) memories apply broadly as before.
+    """
 
     topics: Tuple[str, ...] = ()
     documents: Tuple[str, ...] = ()
@@ -1077,6 +1180,7 @@ class ReadSelection:
     excluded: Tuple[str, ...] = ()
     applicability: Mapping[str, Applicability] = field(default_factory=dict)
     snapshot_hash: str = ""
+    scope: Tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -1092,6 +1196,7 @@ class ContextDocument:
     tier: Optional[int]
     rank: int
     key: str
+    confidence: Optional[str] = None  # memory confidence, honestly carried through
 
 
 @dataclass(frozen=True)
@@ -1168,8 +1273,42 @@ def _tier_for(document: CatalogDocument) -> Tuple[Optional[int], int]:
     return None, 0
 
 
+def _memory_read_blocker(document: CatalogDocument, scope_tags: "frozenset",
+                         now: str, selection: ReadSelection) -> Optional[str]:
+    """Why one document must not be injected, or ``None`` when it may be.
+
+    Machine-judgeable checks only: status, trust, the ``expires`` calendar
+    date and scope tag matching.  Natural-language ``conditions`` are never
+    auto-judged: without an explicit caller judgement the document stays
+    excluded with an ``unknown`` reason instead of silently defaulting to
+    applicable.  The same gate covers every injection path, so a stopped or
+    expired document cannot be smuggled in through a direct selection or a
+    dependency; it always surfaces as an explicit exclusion with its reason.
+    """
+
+    if not document.active:
+        return "document is superseded"
+    if document.category == CATEGORY_MEMORY:
+        if document.trust != "confirmed":
+            return "memory trust is not confirmed"
+        expires = document.metadata.get("expires")
+        if expires is not None and now > expires:
+            return "memory expired on %s" % expires
+        scope_value = document.metadata.get("scope")
+        if scope_value is not None and scope_value != "personal" and scope_value not in scope_tags:
+            return "memory scope %s does not match the current reading scope" % scope_value
+        conditions = document.metadata.get("conditions")
+        if conditions is not None:
+            state = selection.applicability.get(document.key)
+            if state is None or state.state == APPLICABILITY_UNKNOWN:
+                return ("applicability conditions are natural language and not "
+                        "machine-judgeable; the judgement is unknown (conditions: %s)"
+                        % conditions)
+    return None
+
+
 def load_context(catalog: Catalog, *, selection: ReadSelection,
-                 max_bytes: Optional[int] = None) -> ContextBundle:
+                 max_bytes: Optional[int] = None, now: Optional[str] = None) -> ContextBundle:
     """Read the complete applicable knowledge for one selection.
 
     The reading order is overview, complete indexes, global constraints and
@@ -1177,6 +1316,12 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
     upstream/downstream/shared contracts.  Bodies are never sliced or
     summarised: a body that does not fit the budget is deferred whole and
     itemized, and the bundle then reports ``complete=False``.
+
+    Experience-loop gating applies on every injection path: superseded,
+    unconfirmed, expired, out-of-scope or unjudged natural-language-condition
+    documents never enter the reading, not even through a direct selection or
+    a dependency, and each one surfaces as an explicit exclusion with its
+    reason.  ``now`` (an ISO date) overrides the expiry clock for testing.
     """
 
     if not isinstance(selection, ReadSelection):
@@ -1188,6 +1333,20 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
     if max_bytes is not None and (not isinstance(max_bytes, int) or max_bytes < 0):
         raise _fail("knowledge_invalid_schema", "max_bytes must be a non-negative integer",
                     {"field": "max_bytes", "actual": max_bytes})
+    if now is None:
+        now = datetime.date.today().isoformat()
+    else:
+        if not isinstance(now, str) or not _EXPIRES_RE.match(now):
+            raise _fail("knowledge_invalid_schema", "now must be an ISO calendar date",
+                        {"field": "now", "expected": "YYYY-MM-DD", "actual": now})
+        try:
+            datetime.date.fromisoformat(now)
+        except ValueError:
+            raise _fail("knowledge_invalid_schema", "now must be an ISO calendar date",
+                        {"field": "now", "expected": "a valid calendar date", "actual": now})
+    scope_tags = frozenset(_validate_scope_tag(tag, field="selection.scope",
+                                               path=Path("<selection>"))
+                           for tag in selection.scope)
 
     documents = {document.key: document for document in catalog.documents}
     effective = {key: document for key, document in documents.items() if document.effective}
@@ -1214,6 +1373,8 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
          if document.category in (CATEGORY_RULES, CATEGORY_MEMORY)),
         key=lambda document: (_tier_for(document)[0] or 0, document.key))
     for document in user_guidance:
+        if _memory_read_blocker(document, scope_tags, now, selection) is not None:
+            continue
         if document.strength == "enforced":
             push(document.key, ROLE_GLOBAL_CONSTRAINT)
         elif document.category == CATEGORY_RULES:
@@ -1251,7 +1412,8 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
             unloaded.append(RequiredUnloaded(key, OWNER_PROJECT, relative, None, ROLE_TOPIC,
                                              "topic body is missing"))
             continue
-        if key in effective:
+        if key in effective and _memory_read_blocker(documents[key], scope_tags, now,
+                                                      selection) is None:
             push(key, ROLE_TOPIC)
 
     for key in selection.documents:
@@ -1264,6 +1426,8 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
             unloaded.append(RequiredUnloaded(key, owner, relative, None, ROLE_TOPIC,
                                              "selected document is missing"))
             continue
+        if _memory_read_blocker(documents[key], scope_tags, now, selection) is not None:
+            continue
         push(key, ROLE_TOPIC)
 
     for key in selection.global_constraints:
@@ -1271,6 +1435,8 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
         if key not in documents:
             unloaded.append(RequiredUnloaded(key, owner, relative, None, ROLE_GLOBAL_CONSTRAINT,
                                              "global constraint is missing"))
+            continue
+        if _memory_read_blocker(documents[key], scope_tags, now, selection) is not None:
             continue
         push(key, ROLE_GLOBAL_CONSTRAINT)
 
@@ -1294,6 +1460,8 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
             owner, relative = _split_key(key)
             unloaded.append(RequiredUnloaded(key, owner, relative, None, ROLE_DEPENDENCY,
                                              "dependency body is missing"))
+            continue
+        if _memory_read_blocker(document, scope_tags, now, selection) is not None:
             continue
         push(key, ROLE_DEPENDENCY)
         for link in scan_links(document.body):
@@ -1332,14 +1500,12 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
     for document in sorted(documents.values(), key=lambda item: item.key):
         if document.key in seen:
             continue
-        if not document.active:
-            reason = "document is superseded"
-        elif document.category == CATEGORY_MEMORY and document.trust != "confirmed":
-            reason = "memory trust is not confirmed"
-        elif document.category == CATEGORY_SPECS and document.key not in topic_keys:
-            reason = "specification is not referenced by a selected topic"
-        else:
-            reason = "not selected"
+        reason = _memory_read_blocker(document, scope_tags, now, selection)
+        if reason is None:
+            if document.category == CATEGORY_SPECS and document.key not in topic_keys:
+                reason = "specification is not referenced by a selected topic"
+            else:
+                reason = "not selected"
         excluded.append(Exclusion(document.key, document.owner, document.relative, document.path,
                                   document.role, reason))
 
@@ -1347,12 +1513,14 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
     used = 0
     for key, role in applicable:
         document = documents.get(key)
+        confidence = None
         if document is not None:
             text = document.body
             digest = document.digest
             size = len(text.encode("utf-8"))
             path = document.path
             language = document.language
+            confidence = document.metadata.get("confidence")
         else:
             index = catalog.index_by_owner(_split_key(key)[0])
             if index is None:
@@ -1373,7 +1541,7 @@ def load_context(catalog: Catalog, *, selection: ReadSelection,
             tier, rank = _tier_for(document)
         full.append(ContextDocument(owner=_split_key(key)[0], relative=_split_key(key)[1], path=path,
                                     role=role, digest=digest, size=size, text=text, language=language,
-                                    tier=tier, rank=rank, key=key))
+                                    tier=tier, rank=rank, key=key, confidence=confidence))
 
     complete = not unloaded and not catalog.blocking_diagnostics
     conflicts_pending = (not complete) or unknown_applicability or broadened or bool(catalog.blocking_diagnostics)
