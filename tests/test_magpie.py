@@ -528,7 +528,7 @@ class TestInstallMagpieOption(MagpieCase):
         for skill in ("fstar-init", "fstar-plan", "fstar-execute"):
             self.assertTrue((host_skills / skill / "SKILL.md").is_file(),
                             "missing native copy for %s" % skill)
-        self.assertEqual(len(list(host_skills.glob("fstar-*/SKILL.md"))), 11)
+        self.assertEqual(len(list(host_skills.glob("fstar-*/SKILL.md"))), 10)
         # Role cards are not a Magpie capability: they stay native too.
         self.assertTrue((self.tmp / "host" / "claude" / "agents" / "fstar-implement.md").is_file())
 
@@ -541,7 +541,7 @@ class TestInstallMagpieOption(MagpieCase):
         self.assertEqual(payload["magpie"]["status"], "degraded")
         # The native install still happened, in full.
         host_skills = self.tmp / "host" / "claude" / "skills"
-        self.assertEqual(len(list(host_skills.glob("fstar-*/SKILL.md"))), 11)
+        self.assertEqual(len(list(host_skills.glob("fstar-*/SKILL.md"))), 10)
         # The library share is reported missing for every skill.
         self.assertEqual(set(payload["magpie"]["library"].values()), {"handover_failed"})
         record = json.loads((self.user_root / "magpie-integration.json").read_text(encoding="utf-8"))
@@ -555,7 +555,7 @@ class TestInstallMagpieOption(MagpieCase):
         payload = json.loads(output)
         self.assertEqual(payload["magpie"]["status"], "native_only")
         self.assertFalse(payload["magpie"]["magpie"]["consulted"])
-        self.assertEqual(len(list((self.tmp / "host" / "claude" / "skills").glob("fstar-*/SKILL.md"))), 11)
+        self.assertEqual(len(list((self.tmp / "host" / "claude" / "skills").glob("fstar-*/SKILL.md"))), 10)
         self.assertFalse(self.agents_source.exists())
         self.assertFalse((self.user_root / "magpie-integration.json").exists())
 
@@ -583,7 +583,7 @@ class TestInstallMagpieOption(MagpieCase):
         # Informational only: the report is still healthy.
         self.assertTrue(report["healthy"])
         # Native copies untouched.
-        self.assertEqual(len(list((self.tmp / "host" / "claude" / "skills").glob("fstar-*/SKILL.md"))), 11)
+        self.assertEqual(len(list((self.tmp / "host" / "claude" / "skills").glob("fstar-*/SKILL.md"))), 10)
 
     def test_install_publishes_the_shared_workflow_entry(self):
         binary = self._fake_binary()

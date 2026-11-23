@@ -1,0 +1,76 @@
+{
+  "schema": "fstar.dispatch.v1",
+  "dispatch_id": "merge-fstar-doc-implement-001",
+  "task_ref": "merge-fstar-doc",
+  "role": "implement",
+  "plan_item_ids": [
+    "PLAN-1"
+  ],
+  "baseline": {
+    "commit": "2c86f0f17772b9aff2683ceb276e7607fe9c8b71"
+  },
+  "input_versions": [
+    {
+      "path": ".fstar/tasks/merge-fstar-doc/criteria.md",
+      "sha256": "cf3f3d254339ec9cd8b31e30cb1e90e763d07009f87d8af9d5a117c9fdaadcf5"
+    },
+    {
+      "path": ".fstar/tasks/merge-fstar-doc/plan.md",
+      "sha256": "121cf5e9880ccc57a54637b9874396e1ed6c52a814c090a2c54d9a2d60bc7e66"
+    },
+    {
+      "path": "resources/skills/fstar-doc/SKILL.md",
+      "sha256": "4df421361a45fbc326be4255c16a89c6a85394375d79e438a8c92247fccfdacf"
+    },
+    {
+      "path": "resources/skills/fstar-plan/SKILL.md",
+      "sha256": "6a297cbc2a1b759d5cd21d10bb34da9b6c0df6250298d876e92553d6950a0d2f"
+    },
+    {
+      "path": "resources/skills/fstar-execute/SKILL.md",
+      "sha256": "9e03c61598687eed038fb2839a8ffb61f727cd2eafc3f0aaf84c468b19b7a61d"
+    },
+    {
+      "path": "resources/skills/fstar-clarify/SKILL.md",
+      "sha256": "5312d1ddf9aca7b2e18f33e1edda4ed8ff4cfc167f25cc9ea281fd4f50582853"
+    },
+    {
+      "path": "resources/runtime/routing.md",
+      "sha256": "fb337685fadef256be7c08d27eacaa937991015aaabfb5afc5261b3ef95c5c76"
+    },
+    {
+      "path": "README.md",
+      "sha256": "592709b9cc48f5dc9a67169eaf3c76daaf6daa4453ab01d45edb12d7482ba5fa"
+    },
+    {
+      "path": "resources/package-assets.json",
+      "sha256": "e170d2d9853c0f5c494e76b7971790994e473deb281028bb59abe192831ef664"
+    }
+  ],
+  "allowed_paths": [
+    "resources/skills/fstar-doc/SKILL.md",
+    "resources/skills/fstar-plan/SKILL.md",
+    "resources/skills/fstar-execute/SKILL.md",
+    "resources/skills/fstar-clarify/SKILL.md",
+    "resources/runtime/routing.md",
+    "README.md",
+    "resources/package-assets.json",
+    "src/fstar/tasks.py",
+    "src/fstar/installer.py",
+    "src/fstar/global_resources.py",
+    "tests/test_installer.py",
+    "tests/test_content.py",
+    "tests/test_doc_retirement.py"
+  ],
+  "read_context": [],
+  "required_validations": [
+    "PYTHONPATH=src python3 -m unittest tests.test_doc_retirement tests.test_installer tests.test_content",
+    "node scripts/build-package.cjs"
+  ],
+  "return_conditions": {
+    "done": "A-001..A-003 implemented with targeted tests green; return changed paths and evidence",
+    "blocked": "need to modify files outside allowed paths",
+    "failed": "targeted tests fail"
+  },
+  "prompt_first_line": "Active task: merge-fstar-doc"
+}

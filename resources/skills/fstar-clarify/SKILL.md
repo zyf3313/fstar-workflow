@@ -8,7 +8,7 @@ description: "Explore evidence and decision dependencies. 依据证据和决策�
 ## Do NOT use when
 - The goal and its acceptance conditions are already settled and no open decision depends on this discussion: go to `fstar-plan` (only when the item needs one) or `fstar-execute`.
 - The user asks to resume interrupted work: use `fstar-continue`.
-- The user asks to store an existing planning document: use `fstar-doc`.
+- The user asks to store an existing planning document: use `fstar-plan` (planning-document storage is a plan duty).
 
 Use when the goal still carries unresolved decisions that affect what gets built or accepted. The interview protocol below is a structural adaptation of the `grilling` skill in mattpocock/skills (MIT); this is not a verbatim copy.
 

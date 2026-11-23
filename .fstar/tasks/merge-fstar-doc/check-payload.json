@@ -1,0 +1,35 @@
+{
+  "schema": "fstar.dispatch.v1",
+  "dispatch_id": "merge-fstar-doc-final-check-001",
+  "task_ref": "merge-fstar-doc",
+  "role": "check",
+  "plan_item_ids": ["PLAN-1"],
+  "baseline": {
+    "commit": "2b8a505",
+    "delivery": {
+      "paths": [
+        {"path": "README.md", "sha256": "d74674b08b173e153f87ca07bdef4631e90b99041392fe3b95c04e475ced7619"},
+        {"path": "resources/package-assets.json", "sha256": "15f4ece30a92cc338ad72fd3693fc137c4283a554891e342ee5cfc4250c06991"},
+        {"path": "resources/runtime/routing.md", "sha256": "1712f116853abebcbe7f1a922cbad88b4268198df5b47450107d592fe93fa192"},
+        {"path": "resources/skills/fstar-clarify/SKILL.md", "sha256": "9c214f98f7fb9c740c572f260ada0b967e283ed4049d102bd3e9d95cc31bf1cc"},
+        {"path": "resources/skills/fstar-execute/SKILL.md", "sha256": "c9c3a01e155b7806fd103da7293375d58054fb4a13a586dcc398a156adc7ee25"},
+        {"path": "resources/skills/fstar-plan/SKILL.md", "sha256": "17b55c3ecd57c5870ad09e987700a9a3c3586c57ff3e8c7571c698bd82aaaee1"},
+        {"path": "src/fstar/content.py", "sha256": "ccd4b68b09e03df387a899634e807226b710c593d68a395cb195c56c7b8cd877"},
+        {"path": "src/fstar/installer.py", "sha256": "debcb8ac0f2f26122c15af62a40008fe908ade98be6f1d191da2c0d011f77d24"},
+        {"path": "src/fstar/runtime/hooks.py", "sha256": "412cecb43c48a2c68d5ab5b0caed8de309099c7e1afa5e38a0285ec1b36ba410"},
+        {"path": "tests/test_doc_retirement.py", "sha256": "54864bb688d683b0271242f9624fc9821c3dfda374a46505d9d918bb6aba6b81"}
+      ],
+      "digest": ""
+    }
+  },
+  "allowed_paths": [],
+  "read_context": [{"path": ".fstar/tasks/merge-fstar-doc/criteria.md", "sha256": "cf3f3d254339ec9cd8b31e30cb1e90e763d07009f87d8af9d5a117c9fdaadcf5"}, {"path": ".fstar/tasks/merge-fstar-doc/plan.md", "sha256": "121cf5e9880ccc57a54637b9874396e1ed6c52a814c090a2c54d9a2d60bc7e66"}],
+  "required_validations": [],
+  "return_conditions": {
+    "done": "Independent final check covering A-001..A-004 recorded; per-criterion verdicts with evidence; delivery hashes verified",
+    "blocked": "Inputs changed or cannot be validated",
+    "failed": "Reproducible defect in delivered scope"
+  },
+  "prompt_first_line": "Active task: merge-fstar-doc",
+  "extensions": []
+}

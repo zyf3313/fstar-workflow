@@ -1,0 +1,156 @@
+{
+  "kind": "check",
+  "producer": {
+    "role": "check",
+    "id": "a202d8deb99da0970",
+    "session_id": "a202d8deb99da0970"
+  },
+  "validates": [
+    {
+      "artifact": ".fstar/tasks/fix-user-directory-resolution/criteria.md",
+      "items": [
+        {
+          "id": "A-001",
+          "sha256": "59db0f9458639fd9b214c52d48a15e7b698b6cbed564e3284a79efaa9d216719"
+        },
+        {
+          "id": "A-002",
+          "sha256": "b2d5077da0de89ec313fb3de4aa2f86e7a956fe5feb0b852d85ec7b2f59c904a"
+        },
+        {
+          "id": "A-003",
+          "sha256": "e92fb1e7aafc53b3a1b89da5afb44e0b54291b95865f8ddacd2840839ca46fa5"
+        },
+        {
+          "id": "A-004",
+          "sha256": "56cbad49e5cd7ae42216ad60a8b207ed713ce584ee50bb3a48e8534b26df3ed5"
+        }
+      ],
+      "dependencies": [
+        {
+          "id": "A-001",
+          "sha256": "59db0f9458639fd9b214c52d48a15e7b698b6cbed564e3284a79efaa9d216719"
+        },
+        {
+          "id": "A-002",
+          "sha256": "b2d5077da0de89ec313fb3de4aa2f86e7a956fe5feb0b852d85ec7b2f59c904a"
+        },
+        {
+          "id": "A-003",
+          "sha256": "e92fb1e7aafc53b3a1b89da5afb44e0b54291b95865f8ddacd2840839ca46fa5"
+        },
+        {
+          "id": "A-004",
+          "sha256": "56cbad49e5cd7ae42216ad60a8b207ed713ce584ee50bb3a48e8534b26df3ed5"
+        }
+      ],
+      "granularity": "item"
+    }
+  ],
+  "run_id": "fix-user-directory-resolution-final-run",
+  "environment": {
+    "python": "3.9.6"
+  },
+  "report": {
+    "path": ".fstar/tasks/fix-user-directory-resolution/checks/final-check.md",
+    "sha256": "7982ec918d7c529c4451117dfde51ddb70b04e187ae9d684c000db5b0081b2b3"
+  },
+  "delivery": {
+    "paths": [
+      {
+        "path": "src/fstar/learn_bridge.py",
+        "exists": true,
+        "sha256": "b02e52f33956098b92dfb84eff54756e59711e256ac6542abbfafb39f5bbe2e5"
+      },
+      {
+        "path": "src/fstar/store.py",
+        "exists": true,
+        "sha256": "ec08db52eecc1c77df5d3833c6a55b79fd3c34a9dbeb4e4aab9a1fb07fe4184b"
+      },
+      {
+        "path": "tests/test_user_directory_resolution.py",
+        "exists": true,
+        "sha256": "b8e0af09f67470081ac19ac21d7e503a6465b2de0f3ea366f831a36ac1fc176e"
+      },
+      {
+        "path": "tests/test_worktree_shared_root.py",
+        "exists": true,
+        "sha256": "91b1809617978305877604d552d137d92364988d9b0c87ee1e50bc61a07afff0"
+      }
+    ],
+    "digest": "cf232f3487454c52c61b7409382ce4f2223aec4c6a42c4997488a0b6277b4a92"
+  },
+  "scope": "final",
+  "read_only": true,
+  "items": [
+    {
+      "requirement_ids": [
+        "A-001"
+      ],
+      "plan_item": "PLAN-1",
+      "test_refs": [
+        "tests/test_user_directory_resolution.py"
+      ],
+      "command": "python3 -m unittest tests.test_user_directory_resolution tests.test_worktree_shared_root",
+      "result": "passed",
+      "exit_code": 0,
+      "log_refs": [
+        ".fstar/tasks/fix-user-directory-resolution/checks/final-check.md"
+      ],
+      "duration": 3.3,
+      "retries": 0
+    },
+    {
+      "requirement_ids": [
+        "A-002"
+      ],
+      "plan_item": "PLAN-1",
+      "test_refs": [
+        "tests/test_user_directory_resolution.py"
+      ],
+      "command": "python3 -m unittest tests.test_user_directory_resolution tests.test_worktree_shared_root",
+      "result": "passed",
+      "exit_code": 0,
+      "log_refs": [
+        ".fstar/tasks/fix-user-directory-resolution/checks/final-check.md"
+      ],
+      "duration": 3.3,
+      "retries": 0
+    },
+    {
+      "requirement_ids": [
+        "A-003"
+      ],
+      "plan_item": "PLAN-1",
+      "test_refs": [
+        "/tmp/fstar-python-011.log"
+      ],
+      "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t . -q",
+      "result": "passed",
+      "exit_code": 0,
+      "log_refs": [
+        "/tmp/fstar-python-011.log"
+      ],
+      "duration": 120.3,
+      "retries": 0
+    },
+    {
+      "requirement_ids": [
+        "A-004"
+      ],
+      "plan_item": "PLAN-1",
+      "test_refs": [
+        "README.md"
+      ],
+      "command": "read-only review of delivery diff and README",
+      "result": "passed",
+      "exit_code": 0,
+      "log_refs": [
+        ".fstar/tasks/fix-user-directory-resolution/checks/final-check.md"
+      ],
+      "duration": 92.0,
+      "retries": 0,
+      "review_method": "independent read-only review"
+    }
+  ]
+}

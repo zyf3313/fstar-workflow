@@ -1,0 +1,68 @@
+# Independent final check: merge-fstar-doc (fstar-doc retirement)
+
+```json
+{
+  "schema": "fstar.dispatch.result.v1",
+  "dispatch_id": "merge-fstar-doc-final-check-001",
+  "task_ref": "merge-fstar-doc",
+  "status": "passed",
+  "role": "check",
+  "baseline": {"commit": "2b8a505ec6d0c9999abf9a5eaa306e4ff5e750a3"},
+  "changed_paths": [],
+  "read_only": true,
+  "findings": [
+    {
+      "criterion": "A-001",
+      "verdict": "passed",
+      "evidence": [
+        "resources/skills/fstar-doc/ does not exist (directory listing; tests/test_doc_retirement.py::test_skill_directory_removed_and_checklist_kept asserts the exact 10-skill inventory).",
+        "Duties relocated: resources/skills/fstar-plan/SKILL.md 'Storing user-supplied planning documents' section (user content as authority, template mapping, author = the user, 待确认 for unknowns, meta.templates registration, storage before implement dispatch); resources/skills/fstar-execute/SKILL.md 'Multi-file document-edit coordination' section (queue same-file edits via background fstar-editor dispatches, stale-baseline rejection, document-checklist.md check, deliverables registry in task.json).",
+        "No dangling references: exact string search for 'fstar-doc' across resources/ and README.md returns zero hits. routing.md:70 now grants storage via the document-kind member; fstar-clarify/SKILL.md:11 routes storage to fstar-plan; fstar-execute/SKILL.md:13 routes unstored material through fstar-plan storage.",
+        "resources/references/document-checklist.md retained and still referenced by resources/skills/fstar-check/SKILL.md:12 and resources/agents/fstar-editor.md:10 (asserted by targeted test).",
+        "Prior routing authorization conflict (storage requiring plan) was repaired and re-verified: routing.md:70 explicitly states a prd/design document does not require the plan member; fstar-plan/SKILL.md documents the storage duty separately from plan creation, including simple tasks and pre-review storage. Targeted test test_document_storage_with_custom_grant_does_not_require_plan verifies the custom grant records and the routing text."
+      ]
+    },
+    {
+      "criterion": "A-002",
+      "verdict": "passed",
+      "evidence": [
+        "src/fstar/tasks.py:22-24 EXTENSIONS['planning-review'] = {clarify, prd, design, plan, editor, doc-check} — identical to baseline commit 2c86f0f; fstar-doc was never a member (verified against baseline and initial-commit history), so no member mapping change was required.",
+        "Extension enable/list works with full and custom scopes over retained members: tests/test_doc_retirement.py::test_planning_review_enables_and_lists_retained_members passes.",
+        "Old task with historical planning-review grant loads and archives through the full lifecycle without forced schema migration: tests/test_doc_retirement.py::test_old_task_with_historical_grant_loads_and_archives passes.",
+        "src/fstar/extensions.py grants/includes logic unchanged; no schema migration introduced in src/fstar/tasks.py."
+      ]
+    },
+    {
+      "criterion": "A-003",
+      "verdict": "passed",
+      "evidence": [
+        "resources/package-assets.json (sha256 15f4ece30a92cc338ad72fd3693fc137c4283a554891e342ee5cfc4250c06991, 63 entries) contains zero fstar-doc entries and every declared source file exists with a matching sha256 (independently recomputed all 63).",
+        "Manifest rebuild idempotence verified in a temp copy: node scripts/build-package.cjs run twice produced byte-identical manifest matching the checked-in file.",
+        "src/fstar/installer.py:58 EXPECTED_COUNTS['skills'] now 10, matching the real inventory; doctor reports counts.skills = 10 and expected_counts.skills = 10 with healthy=true (tests/test_doc_retirement.py::test_doctor_reports_current_and_expected_skill_count).",
+        "Update from an old install carrying a fstar-doc record: unmodified copy removed (action remove_owned, manifest and entry-index pruned, doctor healthy), user-modified copy kept and reported (action keep_modified, doctor HOST_FILE_MODIFIED), missing file drops its record (remove_missing) — tests/test_doc_retirement.py::TestManifestAndStaleRetirement. Stale copy is never silently kept active. Uninstall path for the retired skill is covered by the existing generic stale-record retirement tests (tests/test_installer.py TestStaleHostFileRetirement, count-adjusted to 10/14)."
+      ]
+    },
+    {
+      "criterion": "A-004",
+      "verdict": "passed",
+      "evidence": [
+        "Full suites after the version bump were run by the coordinator at delivery commit 2b8a505: Python 992 tests OK, Node 16 tests OK (per dispatch instructions these were not rerun by the checker; the four earlier TestProjectDefaultHome failures were diagnosed as a pre-existing test-order/Magpie-symlink-environment interaction present at baseline, not introduced by this change, and the project-prescribed 'discover -s tests -t .' invocation passed 982/982 at the interim state).",
+        "Targeted coverage re-executed read-only at final state: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B -m unittest tests.test_doc_retirement → 12/12 OK in 0.353s.",
+        "README.md updated: skill counts read 10 at lines 428 and 649; no stale fstar-doc references.",
+        "No unrelated changes: delivery diff (2c86f0f → 2b8a505) contains the doc-retirement scope plus the disclosed parallel user-directory/worktree fix (src/fstar/store.py, src/fstar/learn_bridge.py, tests/test_user_directory_resolution.py, tests/test_worktree_shared_root.py), which is a separate tracked task fix-user-directory-resolution and was excluded from this check's judgment.",
+        "No npm publication by the checker; coordinator states publication stays with the user."
+      ]
+    }
+  ],
+  "delivery_hash_verification": {
+    "method": "All 10 payload-declared delivery paths hashed from the working tree and from commit 2b8a505 via git show; both match the payload sha256 values. Scoped paths (README.md, resources/package-assets.json, resources/runtime/routing.md, fstar-clarify/execute/plan SKILL.md, src/fstar/content.py, src/fstar/installer.py, src/fstar/runtime/hooks.py, tests/test_doc_retirement.py) show no diff between working tree and 2b8a505. resources/skills/fstar-doc/SKILL.md absent (deleted) as expected.",
+    "all_match": true
+  },
+  "limitations": [
+    "Full Python/Node suites were not re-executed by this checker; their green status at 2b8a505 is coordinator-reported.",
+    "The A-002 custom-grant routing test verifies grant records and routing text, not an end-to-end execution of the storage flow.",
+    "Live upgrade from an actually installed previous published version was simulated via manifest/index fixtures, not performed against a real prior install."
+  ],
+  "duration_note": "Targeted test run 0.353s; checker wall-clock not measured."
+}
+```

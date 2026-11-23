@@ -1,0 +1,43 @@
+{
+  "dispatch_id": "fix-user-directory-implement-001",
+  "task_ref": "fix-user-directory-resolution",
+  "role": "implement",
+  "plan_item_ids": ["PLAN-1"],
+  "baseline": {
+    "branch": "feat/fix-user-directory-resolution",
+    "base_commit": "2c86f0f17772b9aff2683ceb276e7607fe9c8b71",
+    "note": "The branch starts from main after the merge-fstar-doc delivery is merged; the coordinator records the exact base commit at dispatch time."
+  },
+  "allowed_paths": [
+    "src/fstar/learn_bridge.py",
+    "src/fstar/store.py",
+    "tests/test_user_directory_resolution.py",
+    "README.md"
+  ],
+  "read_context": [
+    ".fstar/tasks/fix-user-directory-resolution/criteria.md",
+    ".fstar/tasks/fix-user-directory-resolution/plan.md",
+    "src/fstar/learn_bridge.py",
+    "src/fstar/knowledge.py",
+    "src/fstar/store.py"
+  ],
+  "required_validation": [
+    "python3 -m unittest tests.test_user_directory_resolution -v (or the project's equivalent module path) — new regression tests green",
+    "PYTHONPATH=src python3 -m unittest discover -s tests -q — full suite green",
+    "node --test <the project's node test target> — Node suite green"
+  ],
+  "scope": [
+    "learn_bridge._prepare: resolve the project's data root through the pointer (.fstar-pointer.json / catalog.data_root) before the initialization pre-check, so user-directory projects are accepted; keep refusing uninitialized and nonexistent project roots with the documented error codes and messages.",
+    "store.find_project_root: extend the linked-git-worktree fallback to follow the main worktree's pointer file (same corrupt/symlink/path-mismatch refusals as the in-tree pointer branch), so a linked worktree of a user-directory main repository resolves to the main project root.",
+    "New regression test file tests/test_user_directory_resolution.py covering: bridge prepare/apply for a user-directory project (user-level rule write and project-level write), the still-refused uninitialized and nonexistent project cases, find_project_root from a linked worktree of a user-directory repo, the unchanged project-shared worktree case, and the uninitialized-repo case.",
+    "README and packaged skill text updated where they state the old limitation."
+  ],
+  "out_of_scope": [
+    "Any change to acceptance semantics, evidence validation or routing hard rules.",
+    "Any schema migration.",
+    "npm publication.",
+    "Writes to the real ~/.claude, ~/.fstar or any host configuration; all test roots must be temporary.",
+    "Unrelated refactoring of store.py, knowledge.py or the installer."
+  ],
+  "completion": "Deliver the implemented changes with the changed paths, the exact test commands and their output, and a short note on how each of A-001..A-004 is met. If a needed change falls outside allowed_paths, stop and return a blocked report naming the path and the reason instead of editing it."
+}

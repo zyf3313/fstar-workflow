@@ -275,7 +275,7 @@ class TestSettingsOwnership(InstallerCase):
                                                       "SubagentStart", "SubagentStop",
                                                       "UserPromptSubmit"])
         skills = sorted(p.name for p in (codex_root / "skills").glob("fstar-*/SKILL.md"))
-        self.assertEqual(len(skills), 11)
+        self.assertEqual(len(skills), 10)
         # Codex has no fstar role cards: the matrix marks agents unsupported.
         self.assertFalse((codex_root / "agents").exists())
         skipped = {(item["host"], item["capability"]) for item in plan["skipped_capabilities"]}
@@ -552,7 +552,7 @@ class TestHostEntryDetails(InstallerCase):
         hooks = [entry for entry in index["entries"] if entry["kind"] == "hook"]
         host_files = [entry for entry in index["entries"] if entry["kind"] in ("skill", "agent")]
         self.assertEqual(len(hooks), 5)
-        self.assertEqual(len(host_files), 15)
+        self.assertEqual(len(host_files), 14)
         for entry in index["entries"]:
             self.assertTrue(Path(entry["installed_path"]).is_file())
             self.assertEqual(entry["ownership"], "owned")
@@ -587,7 +587,7 @@ class TestMultiRootUpdate(InstallerCase):
         self.assertEqual("uninstall_host_root_mismatch", caught.exception.code)
         # An explicit --host-root is the user's selection and is authoritative.
         plan = self.plan_update_at(self.host_root, explicit=True)
-        self.assertEqual(15, len(plan["host_files"]))
+        self.assertEqual(14, len(plan["host_files"]))
 
     def test_implicit_update_passes_when_host_file_records_own_the_root(self):
         other = self.tmp / "host" / "other-claude"
@@ -603,7 +603,7 @@ class TestMultiRootUpdate(InstallerCase):
                                         if Path(record["settings_path"]).parent.resolve() == other.resolve()]
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
         plan = self.plan_update_at(self.host_root, explicit=False)
-        self.assertEqual(15, len(plan["host_files"]))
+        self.assertEqual(14, len(plan["host_files"]))
         self.assertTrue(all(entry["host"] == "claude" for entry in plan["host_files"]))
 
     def test_settings_records_are_kept_per_host_root(self):
@@ -651,7 +651,7 @@ class TestHostSkillAdaptation(InstallerCase):
         self.install(hosts=["claude"])
         skills = sorted(p.name for p in (self.host_root / "skills").glob("fstar-*/SKILL.md"))
         agents = sorted(p.name for p in (self.host_root / "agents").glob("fstar-*.md"))
-        self.assertEqual(len(skills), 11)
+        self.assertEqual(len(skills), 10)
         self.assertEqual(agents, ["fstar-check.md", "fstar-editor.md",
                                   "fstar-implement.md", "fstar-research.md"])
         for record in installer.plan_install(operation="install", roots=self.roots())["host_files"]:
@@ -664,7 +664,7 @@ class TestHostSkillAdaptation(InstallerCase):
             host_roots={"codex": self.tmp / "host" / "codex"}), hosts=["codex"])
         kinds = sorted({record["kind"] for record in plan["host_files"]})
         self.assertEqual(kinds, ["skill"])
-        self.assertEqual(len(plan["host_files"]), 11)
+        self.assertEqual(len(plan["host_files"]), 10)
         self.assertFalse(any(record["kind"] == "agent" for record in plan["host_files"]))
 
     def test_foreign_host_files_are_untouched(self):
@@ -764,7 +764,7 @@ class TestHostSkillAdaptation(InstallerCase):
         before = _tree_snapshot(self.host_root)
         plan = installer.plan_install(operation="install", roots=self.roots(), hosts=["claude"])
         self.assertEqual(_tree_snapshot(self.host_root), before)
-        self.assertEqual(len(plan["host_files"]), 15)
+        self.assertEqual(len(plan["host_files"]), 14)
 
     def test_mid_transaction_failure_rolls_back_host_files(self):
         plan = installer.plan_install(operation="install", roots=self.roots(), hosts=["claude"])
@@ -992,14 +992,14 @@ class TestStaleHostFileRetirement(InstallerCase):
         self.install(hosts=["claude"])
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots)
-        self.assertEqual(len(plan["host_files"]), 15)
+        self.assertEqual(len(plan["host_files"]), 14)
         self.assertFalse(any(entry.get("stale") for entry in plan["host_files"]))
         self.assertTrue(all(entry["action"] == "reuse_owned" for entry in plan["host_files"]))
         installer.apply_plan(plan, roots=roots)
         self.assertTrue(installer.doctor(roots=roots)["healthy"])
         # Uninstall still removes exactly the declared 15 files.
         skills = sorted(p.name for p in (self.host_root / "skills").glob("fstar-*/SKILL.md"))
-        self.assertEqual(len(skills), 11)
+        self.assertEqual(len(skills), 10)
 
     def test_stale_entry_symlinked_ancestor_is_refused(self):
         target = self._add_stale_record()
@@ -1483,7 +1483,7 @@ class TestDoctor(InstallerCase):
         self.install(hosts=["claude"])
         before = _tree_snapshot(self.user_root)
         report = installer.doctor(roots=self.roots())
-        self.assertEqual(report["counts"]["skills"], 11)
+        self.assertEqual(report["counts"]["skills"], 10)
         self.assertEqual(report["counts"]["roles"], 4)
         self.assertEqual(report["counts"]["templates"], 12)
         self.assertNotIn("capabilities", report["counts"])

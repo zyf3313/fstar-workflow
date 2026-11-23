@@ -37,7 +37,7 @@ def artifact_text(item_id="需求一", reference=None):
 
 class InventoryTests(unittest.TestCase):
     def test_exact_inventory_and_validator(self):
-        self.assertEqual(11, len(SKILLS))
+        self.assertEqual(10, len(SKILLS))
         self.assertEqual(4, len(ROLES))
         self.assertEqual(12, len(TEMPLATES))
         self.assertEqual([], list(validate_resources(RESOURCES)))
@@ -378,17 +378,22 @@ class SemanticContentTests(unittest.TestCase):
         self.assertIn("do not search history or issue archive reminders", continuing)
 
     def test_editor_background_conflict_and_ownership(self):
-        doc = (RESOURCES / "skills/fstar-doc/SKILL.md").read_text()
+        plan = (RESOURCES / "skills/fstar-plan/SKILL.md").read_text()
+        execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
         editor = (RESOURCES / "agents/fstar-editor.md").read_text()
-        self.assertIn("background fstar-editor", doc)
-        self.assertIn("Queue edits", doc)
-        self.assertIn("stale-baseline", doc)
+        # Multi-file document-edit coordination lives in fstar-execute since
+        # the fstar-doc skill was retired.
+        self.assertIn("background fstar-editor", execute)
+        self.assertIn("Queue edits to the same file", execute)
+        self.assertIn("stale-baseline", execute)
+        self.assertIn("document-checklist.md", execute)
+        self.assertIn("deliverables", execute)
         # User-supplied documents are ingested with user content as authority.
-        self.assertIn("When the user supplies a planning document", doc)
-        self.assertIn("map it onto the template structure", doc)
-        self.assertIn("Mark origin as user-supplied", doc)
-        self.assertIn("never drafted-by-agent", doc)
-        self.assertIn("meta.templates", doc)
+        self.assertIn("preserve their content as the authority", plan)
+        self.assertIn("map it onto the applicable task template structure", plan)
+        self.assertIn("Mark origin as user-supplied", plan)
+        self.assertIn("never drafted-by-agent", plan)
+        self.assertIn("meta.templates", plan)
         self.assertIn("Never add/delete IDs", editor)
         self.assertIn("protocol, not a security sandbox", editor)
 
@@ -430,7 +435,7 @@ class SemanticContentTests(unittest.TestCase):
         # Execute must stop before implement dispatch on unstored user planning material.
         execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
         self.assertIn("stop before dispatching implement", execute)
-        self.assertIn("route through fstar-doc storage first", execute)
+        self.assertIn("route it through fstar-plan storage first", execute)
 
     def test_criteria_template_declares_verdict_mode(self):
         criteria = (RESOURCES / "templates/task/criteria.md").read_text()
