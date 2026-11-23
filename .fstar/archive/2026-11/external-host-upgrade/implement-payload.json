@@ -1,0 +1,56 @@
+{
+  "schema": "fstar.dispatch.v1",
+  "dispatch_id": "external-upgrade-implement-001",
+  "task_ref": "external-host-upgrade",
+  "role": "implement",
+  "plan_item_ids": [
+    "PLAN-1"
+  ],
+  "baseline": {
+    "commit": "ab95e363c1895159e68c3d634c16ba980ae5ffde"
+  },
+  "input_versions": [
+    {
+      "path": "src/fstar/installer.py",
+      "sha256": "842c5552bfdc95256af77d653dc5541434e87e9acdccf4dbe8f11e6979d9218f"
+    },
+    {
+      "path": "tests/test_installer.py",
+      "sha256": "c4623030df8621a1532325eb791e506e0f58c28b25f59fcfa4ffc849aa38a70c"
+    },
+    {
+      "path": "README.md",
+      "sha256": "46456ad5298d70b3a595085b05109b591aa07c02c00e2d6d8477ff7ce5d75924"
+    },
+    {
+      "path": "resources/package-assets.json",
+      "sha256": "d454acef0e14b2d992926bce154cdb7e0b35bcf6bdaf336d593ea3faf067b215"
+    },
+    {
+      "path": ".fstar/tasks/external-host-upgrade/criteria.md",
+      "sha256": "898b806890b982d1b65ba3b4905b0c9eb0468f9752b63c1bfa14ae63c5c26e03"
+    },
+    {
+      "path": ".fstar/tasks/external-host-upgrade/plan.md",
+      "sha256": "8c0c2dd62b7aa3168657074868bc1f658fae53e6f83574e2b25f6e18fe6d281d"
+    }
+  ],
+  "allowed_paths": [
+    "src/fstar/installer.py",
+    "tests/test_installer.py",
+    "README.md",
+    "resources/package-assets.json",
+    "tests/test_external_host_upgrade.py"
+  ],
+  "read_context": [],
+  "required_validations": [
+    "PYTHONPATH=src python3 -m unittest tests.test_installer tests.test_external_host_upgrade",
+    "node scripts/build-package.cjs"
+  ],
+  "return_conditions": {
+    "done": "A-001..A-004 repair and targeted tests pass; return actual changed paths and evidence",
+    "blocked": "need scope outside authorized files",
+    "failed": "tests fail"
+  },
+  "prompt_first_line": "Active task: external-host-upgrade"
+}

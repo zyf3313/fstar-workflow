@@ -1,0 +1,241 @@
+........................................................................................................................................................................................................................................................../Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow/src/fstar/crossproject.py:108: ResourceWarning: unclosed file <_io.TextIOWrapper name='/private/var/folders/jc/_t2cms2s37g2qgn6rst44x000000gn/T/tmp7buakzo3/runtime/projects/609faa80549ed6317e21ed419b4f491672f53d21ff13ac3cde97ea5a2cfa053b/project.lock' mode='a+' encoding='UTF-8'>
+  for stream in reversed(streams):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+............................................................................................................................................................................................................{"error": {"code": "file_required", "message": "doc-change requires a changed file path", "details": {}}}
+...usage: fstar hook plan [-h] --host {claude,codex}
+fstar hook plan: error: argument --host: invalid choice: 'nope' (choose from 'claude', 'codex')
+......{"error": {"code": "payload_required", "message": "worker-result recovery requires the registered dispatch payload; use fstar dispatch harvest", "details": {}}}
+.............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 972 tests in 116.718s
+
+OK
+{
+  "recorded": true,
+  "persistence": "task",
+  "evidence_id": "d7d8924c-8cc5-4a9e-87d3-985761558ff1",
+  "state": "valid",
+  "dispatch_id": "3fc33046-1427-4b1a-808d-b3e56348276e",
+  "unverified_inputs": [],
+  "next": "check_dispatch"
+}
+{
+  "dispatch_id": "d1",
+  "reason": "user update",
+  "mode": "checkpoint_stop",
+  "intent_registered": true,
+  "propagation": {
+    "tier": "checkpoint-stop",
+    "action": "pause_and_redispatch",
+    "change": {
+      "schema": "fstar.change.v1",
+      "change_id": "6efd97fc-00d8-44ac-afa2-073a158b52f5",
+      "source": "file",
+      "origin": "user update",
+      "affected": {
+        "plan_item_ids": [],
+        "artifact_items": []
+      },
+      "old_fingerprints": {},
+      "new_fingerprints": {},
+      "action": "pause_and_redispatch"
+    },
+    "note": "Interrupt the affected scope; harvest at the checkpoint and redispatch under a new dispatch_id with the new baseline."
+  }
+}
+{
+  "payload": {
+    "schema": "fstar.dispatch.v1",
+    "dispatch_id": "31921649-de59-4288-8fa7-e134d683f4f7",
+    "task_ref": "session-only",
+    "role": "editor",
+    "plan_item_ids": [],
+    "baseline": {
+      "artifact_items": [],
+      "delivery": {
+        "paths": [],
+        "digest": ""
+      }
+    },
+    "input_versions": [],
+    "allowed_paths": [
+      "doc/prd.md"
+    ],
+    "read_context": [],
+    "required_validations": [],
+    "return_conditions": {
+      "done": "",
+      "blocked": "",
+      "failed": ""
+    },
+    "prompt_first_line": "Active task: session-only",
+    "extensions": [
+      {
+        "enabled_at": "2026-10-29T10:00:00Z",
+        "excluded": [],
+        "id": "planning-review",
+        "included": [
+          "editor"
+        ],
+        "reason": "",
+        "scope": "custom",
+        "source": {
+          "type": "test"
+        }
+      }
+    ],
+    "item_ids": [
+      "R-001"
+    ],
+    "baseline_sha256": "abc"
+  },
+  "adapter": {
+    "dispatch_mode": "adapter",
+    "note": "This CLI prepared, validated, and registered the payload only. No worker was started from the shell: a shell command cannot invoke the current session's native Agent tool. The host adapter (main agent) performs the actual dispatch via the host's native Agent tool and harvests the result.",
+    "steps": [
+      "Render the worker prompt with fstar.dispatch.build_worker_prompt(payload).",
+      "Dispatch through the host-native Agent tool with the rendered prompt.",
+      "Collect the worker's fstar.dispatch.result.v1 object.",
+      "Run `fstar dispatch harvest --result FILE --payload FILE` to verify and record evidence through the core services."
+    ]
+  }
+}
+{
+  "registered": true,
+  "persistence": "task",
+  "lease_token": "83abc029-5ab1-4ec0-9e08-630a79e5e4b9",
+  "dispatch_id": "3bd4f323-35c1-42f7-bbfe-4415228279df",
+  "payload": {
+    "schema": "fstar.dispatch.v1",
+    "dispatch_id": "3bd4f323-35c1-42f7-bbfe-4415228279df",
+    "task_ref": "root",
+    "role": "implement",
+    "plan_item_ids": [
+      "P-1"
+    ],
+    "baseline": {
+      "artifact_items": [
+        {
+          "artifact": "doc/prd.md",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "47471c97c516b8c58bd67ef5f0ea8560de234f743a6fc4b90c929602fa83235a"
+            }
+          ],
+          "dependencies": [
+            {
+              "id": "R-001",
+              "sha256": "47471c97c516b8c58bd67ef5f0ea8560de234f743a6fc4b90c929602fa83235a"
+            }
+          ],
+          "granularity": "item"
+        }
+      ],
+      "delivery": {
+        "paths": [
+          {
+            "path": "src.py",
+            "exists": true,
+            "sha256": "585c93666fcb046b7b264d3fa73202aa2a38254ae82a4b3ba19e873c2d5a9886"
+          }
+        ],
+        "digest": "44ceb39402d14ac69c188cd54b05261d7b321db91a466a8f251f13e08a142c7c"
+      }
+    },
+    "input_versions": [],
+    "allowed_paths": [
+      "src.py"
+    ],
+    "read_context": [],
+    "required_validations": [],
+    "return_conditions": {
+      "done": "",
+      "blocked": "",
+      "failed": ""
+    },
+    "prompt_first_line": "Active task: root",
+    "extensions": []
+  },
+  "adapter": {
+    "dispatch_mode": "adapter",
+    "note": "This CLI prepared, validated, and registered the payload only. No worker was started from the shell: a shell command cannot invoke the current session's native Agent tool. The host adapter (main agent) performs the actual dispatch via the host's native Agent tool and harvests the result.",
+    "steps": [
+      "Render the worker prompt with fstar.dispatch.build_worker_prompt(payload).",
+      "Dispatch through the host-native Agent tool with the rendered prompt.",
+      "Collect the worker's fstar.dispatch.result.v1 object.",
+      "Run `fstar dispatch harvest --result FILE --payload FILE` to verify and record evidence through the core services."
+    ]
+  }
+}
+{
+  "registered": false,
+  "persistence": "session_only",
+  "payload": {
+    "schema": "fstar.dispatch.v1",
+    "dispatch_id": "518508ea-24b4-48d9-a5cb-93ec450bccab",
+    "task_ref": "session-only",
+    "role": "implement",
+    "plan_item_ids": [
+      "P-1"
+    ],
+    "baseline": {
+      "artifact_items": [
+        {
+          "artifact": "doc/prd.md",
+          "items": [
+            {
+              "id": "R-001",
+              "sha256": "x"
+            }
+          ],
+          "dependencies": [],
+          "granularity": "item"
+        }
+      ],
+      "delivery": {
+        "paths": [
+          {
+            "path": "src.py",
+            "exists": true,
+            "sha256": "y"
+          }
+        ],
+        "digest": "d"
+      }
+    },
+    "input_versions": [],
+    "allowed_paths": [
+      "src.py"
+    ],
+    "read_context": [],
+    "required_validations": [],
+    "return_conditions": {
+      "done": "",
+      "blocked": "",
+      "failed": ""
+    },
+    "prompt_first_line": "Active task: session-only"
+  },
+  "adapter": {
+    "dispatch_mode": "adapter",
+    "note": "This CLI prepared, validated, and registered the payload only. No worker was started from the shell: a shell command cannot invoke the current session's native Agent tool. The host adapter (main agent) performs the actual dispatch via the host's native Agent tool and harvests the result.",
+    "steps": [
+      "Render the worker prompt with fstar.dispatch.build_worker_prompt(payload).",
+      "Dispatch through the host-native Agent tool with the rendered prompt.",
+      "Collect the worker's fstar.dispatch.result.v1 object.",
+      "Run `fstar dispatch harvest --result FILE --payload FILE` to verify and record evidence through the core services."
+    ]
+  }
+}
+{
+  "recorded": false,
+  "replayed": true,
+  "dispatch_id": "fa5cc78f-d675-4335-9a61-2fb2890a7ad1",
+  "note": "This dispatch result was already harvested; replay records nothing."
+}
+fstar install will write to the following host roots:
+  claude: /Users/zhangyangfan/.claude
+  codex: /Users/zhangyangfan/.codex
+fstar install will write to the following host roots:
+  claude: /var/folders/jc/_t2cms2s37g2qgn6rst44x000000gn/T/fstar-installer-vww0si0v/proj/.claude

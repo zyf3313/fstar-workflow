@@ -1,0 +1,27 @@
+[
+  {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-t",
+      "."
+    ],
+    "exit_code": 0,
+    "duration": 116.9,
+    "log": ".fstar/tasks/external-host-upgrade/checks/python.log"
+  },
+  {
+    "command": [
+      "node",
+      "--test",
+      "tests/test_package.cjs"
+    ],
+    "exit_code": 0,
+    "duration": 7.63,
+    "log": ".fstar/tasks/external-host-upgrade/checks/node.log"
+  }
+]

@@ -474,6 +474,21 @@ install lives in another host root the command refuses
 (`uninstall_host_root_mismatch`) and asks for `--host-root claude=PATH` (or
 `--user-level`) instead of touching the wrong root.
 
+One narrow upgrade exception applies to files an older install **reused**
+rather than authored (recorded as `externally_owned`, because identical bytes
+were already present at install time). `fstar update` (since 0.10.1)
+refreshes such a host skill/agent file when the whole historical record is
+consistent (same host, kind, package source, destination, version, and
+recorded hash) and the file's content is still byte-for-byte the recorded
+baseline. Matching bytes alone never prove the old install authored the
+file, so anything weaker — a modified file (even with `--modified
+overwrite`), a symlink, a missing or inconsistent record, an unrecorded
+file, or a path outside the selected host root — stays yours and is
+reported as a conflict. A successful refresh backs up the replaced bytes
+and re-records the file as installer-owned, so later updates and later
+edits follow the normal ownership rules; `fstar uninstall` still never
+deletes an externally reused file.
+
 ## Host support
 
 One capability matrix (in `src/fstar/runtime/registration.py`) is the single

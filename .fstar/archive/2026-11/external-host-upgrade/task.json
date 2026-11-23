@@ -1,0 +1,604 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-23T03:21:38.935520Z",
+    "confirmed_by": "user",
+    "criteria_refs": [
+      "A-001",
+      "A-002",
+      "A-003",
+      "A-004"
+    ],
+    "evidence_refs": [
+      "31184051-1f76-4260-b728-1fd8b7e88163"
+    ],
+    "rule_ref": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md",
+    "source": {
+      "actor": {
+        "id": "FrancisZhang",
+        "role": "user"
+      },
+      "at": "2026-11-23T03:21:38.932326+00:00",
+      "quote": "后续当前项目不用找我确认第三个阶段了 直接已完成就好，你验收完就当我验收完了，开发走发版流程吧",
+      "reference": "Conversation 0c569c9d, user project acceptance delegation on 2026-11-22; original development self-acceptance rule 2026-11-21",
+      "scope": "external-host-upgrade delegated acceptance",
+      "source_id": "288c0083-4ad9-4445-93ea-6a7f1743ca79",
+      "type": "conversation",
+      "validates": "448e9d1da1bf834022dca2363215a638c6da01d22e82f9bce2593a0745378b16"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "ee5f615bcc5d7c8890ac928ea59ba82dd31062b4966aa5643052d503b6fc6394"
+      ],
+      "task": "448e9d1da1bf834022dca2363215a638c6da01d22e82f9bce2593a0745378b16"
+    }
+  },
+  "archivedAt": "2026-11-23T03:21:38.937016Z",
+  "assignee": null,
+  "base_branch": "origin/main",
+  "blocked": null,
+  "branch": "fix/external-host-upgrade",
+  "capabilities": [],
+  "children": [],
+  "commit": "ab95e363c1895159e68c3d634c16ba980ae5ffde",
+  "completedAt": "2026-11-23T03:21:38.935542Z",
+  "createdAt": "2026-11-23T02:30:17.105784Z",
+  "creator": "agent",
+  "description": "用户已同意修复 0.10.0 全局升级遇到的旧版外部复用 host 文件冲突；仅升级有记录且内容未改动的文件，保护无记录、用户修改、符号链接、非目标 host；独立验收后合并同步 Git，0.10.1 npm 发布由用户执行。",
+  "events": [
+    {
+      "at": "2026-11-23T02:30:17.106072Z",
+      "data": {
+        "parent": null
+      },
+      "id": "a3512b05-3fef-4505-9fdb-91bf0ed6d531",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-23T02:30:17.106068Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "65223d65-f76b-4938-9410-b03791fa3527",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-23T02:31:22.669493Z",
+      "data": {
+        "branch": "fix/external-host-upgrade",
+        "detached": false,
+        "snapshot": "e3a31e0f2fe05a26f3d0f55da185de558b877a33169147f58dbb58f6b1db9ae2",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "e817beeb-207b-474a-afd9-258efa7d5038",
+      "source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-23T02:31:22.298636+00:00",
+        "quote": "可以",
+        "reference": "Conversation 0c569c9d, 2026-11-23: approval of unchanged externally_owned host upgrade fix",
+        "scope": "start external-host-upgrade",
+        "source_id": "ee4929ae-5697-4807-9314-4b0452a97cba",
+        "type": "conversation",
+        "validates": "28af647dbc566dc5b0d43f444387b5a638fd6e39fb675a81b08580f4ae1bb40d"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-23T03:16:45.391215Z",
+      "data": {
+        "new_holder": {
+          "id": "release-coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "e6dc8806-f952-4dca-91de-1924254d5826",
+      "source": {
+        "actor": {
+          "id": "release-coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-23T03:16:45.391210Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "014e0d45-5e77-42e0-9fdf-a3b183ddf41d",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-23T03:16:45.393876Z",
+      "data": {
+        "evidence_id": "bc695ac4-aeb0-473a-a807-fe46a43c4db8",
+        "state": "valid"
+      },
+      "id": "36733b94-1287-4871-af74-197145c023d4",
+      "source": {
+        "id": "a105248821c92857b",
+        "role": "implement"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-23T03:16:45.395050Z",
+      "data": {
+        "reason": "Coordinator evidence registration finished"
+      },
+      "id": "a885ff04-7148-4b48-8178-211972c45fce",
+      "source": {
+        "id": "release-coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-23T03:21:38.865905Z",
+      "data": {
+        "new_holder": {
+          "id": "release-coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "59da4b03-1ce4-46fe-be5e-dbcbcf621b39",
+      "source": {
+        "actor": {
+          "id": "release-coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-23T03:21:38.865902Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "96e5bf82-2b72-42d2-a12f-1873ba02af9a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-23T03:21:38.869492Z",
+      "data": {
+        "evidence_id": "31184051-1f76-4260-b728-1fd8b7e88163",
+        "state": "valid"
+      },
+      "id": "d7b481b9-bf4f-4b53-8921-0b12743a3bcf",
+      "source": {
+        "id": "aaae28549ca477197",
+        "role": "check"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-23T03:21:38.871034Z",
+      "data": {
+        "reason": "Coordinator evidence registration finished"
+      },
+      "id": "af36b1bf-21a6-4639-80e4-c54437a64aa9",
+      "source": {
+        "id": "release-coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-23T03:21:38.927781Z",
+      "data": {
+        "from": "active",
+        "reason": "Independent check and full regression complete; delegated acceptance",
+        "to": "active"
+      },
+      "id": "2c67429c-d5eb-483e-8ffd-7bab151a1056",
+      "source": {
+        "actor": {
+          "id": "release-coordinator",
+          "role": "agent"
+        },
+        "at": "2026-11-23T03:21:38.927601Z",
+        "quote": "",
+        "reference": "set_status",
+        "scope": "set_status",
+        "source_id": "12167ac9-ed47-45d0-bd05-c4a5046ab4a9",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "status_changed"
+    },
+    {
+      "at": "2026-11-23T03:21:38.931409Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "31184051-1f76-4260-b728-1fd8b7e88163"
+        ]
+      },
+      "id": "a269a49d-793e-4a5e-8167-7cda764e14a4",
+      "source": {
+        "actor": {
+          "id": "release-coordinator",
+          "role": "agent"
+        },
+        "at": "2026-11-23T03:21:38.931405Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "292b0b72-862a-4828-855e-71c6c0c9aa32",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-23T03:21:38.935545Z",
+      "data": {
+        "accepted_via_rule": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004"
+          ],
+          "quote": "以后开发完某项任务时都走这个自验收流程就代表我已经验收通过",
+          "report": ".fstar/tasks/external-host-upgrade/checks/self-acceptance.md",
+          "rule_ref": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md",
+          "scope": "Development fix; excludes npm publication"
+        },
+        "evidence_refs": [
+          "31184051-1f76-4260-b728-1fd8b7e88163"
+        ]
+      },
+      "id": "14c020b2-673b-4954-8c12-c7465329786b",
+      "source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-23T03:21:38.932326+00:00",
+        "quote": "后续当前项目不用找我确认第三个阶段了 直接已完成就好，你验收完就当我验收完了，开发走发版流程吧",
+        "reference": "Conversation 0c569c9d, user project acceptance delegation on 2026-11-22; original development self-acceptance rule 2026-11-21",
+        "scope": "external-host-upgrade delegated acceptance",
+        "source_id": "288c0083-4ad9-4445-93ea-6a7f1743ca79",
+        "type": "conversation",
+        "validates": "448e9d1da1bf834022dca2363215a638c6da01d22e82f9bce2593a0745378b16"
+      },
+      "type": "accepted"
+    },
+    {
+      "at": "2026-11-23T03:21:38.937016Z",
+      "data": {
+        "archived_at": "2026-11-23T03:21:38.937016Z",
+        "operation_id": "f8484749-4701-45a4-9820-760c00c5e817",
+        "target": ".fstar/archive/2026-11/external-host-upgrade"
+      },
+      "id": "eceb912e-f637-4a3c-ab03-dc68a93609be",
+      "source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-23T03:21:38.932326+00:00",
+        "quote": "后续当前项目不用找我确认第三个阶段了 直接已完成就好，你验收完就当我验收完了，开发走发版流程吧",
+        "reference": "Conversation 0c569c9d, user project acceptance delegation on 2026-11-22; original development self-acceptance rule 2026-11-21",
+        "scope": "Archive completed external-host-upgrade task",
+        "source_id": "839744ec-7e31-4538-aa47-4b3c9f44e64e",
+        "type": "conversation",
+        "validates": "b65400e6bcc5cd44d4c2288a529cffdf89e77ef5385eadcdde138b7c2805ce39"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-23T03:21:38.939086Z",
+      "data": {
+        "operation_id": "f8484749-4701-45a4-9820-760c00c5e817",
+        "target": ".fstar/archive/2026-11/external-host-upgrade"
+      },
+      "id": "f9c98403-98ef-4c9e-9d2c-fcf33bafc806",
+      "source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-23T03:21:38.932326+00:00",
+        "quote": "后续当前项目不用找我确认第三个阶段了 直接已完成就好，你验收完就当我验收完了，开发走发版流程吧",
+        "reference": "Conversation 0c569c9d, user project acceptance delegation on 2026-11-22; original development self-acceptance rule 2026-11-21",
+        "scope": "Archive completed external-host-upgrade task",
+        "source_id": "839744ec-7e31-4538-aa47-4b3c9f44e64e",
+        "type": "conversation",
+        "validates": "b65400e6bcc5cd44d4c2288a529cffdf89e77ef5385eadcdde138b7c2805ce39"
+      },
+      "type": "archived"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "ee5f615bcc5d7c8890ac928ea59ba82dd31062b4966aa5643052d503b6fc6394",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "592709b9cc48f5dc9a67169eaf3c76daaf6daa4453ab01d45edb12d7482ba5fa"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "ab3e3932702fa0cd67331f82b5bf049b5382f5451d7fd37d5b1d7783aacd5da4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "64a0f3b6faa112182e03b7efd5c16dfab4b2ed61b42e31bf7c685ccd2d0d9c0f"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_external_host_upgrade.py",
+            "sha256": "d4ed200b772b5500c9f51097251412b36894f9c1d8924f6e8d8bf1cc4113e109"
+          }
+        ]
+      },
+      "id": "bc695ac4-aeb0-473a-a807-fe46a43c4db8",
+      "kind": "delivery",
+      "produced_at": "2026-11-23T03:16:45.392896Z",
+      "producer": {
+        "id": "a105248821c92857b",
+        "role": "implement"
+      },
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/external-host-upgrade/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "03d4395a3d726a814fde1e4d2f542f0df9a6cbe488db6b3c4514ebde5896f443"
+            },
+            {
+              "id": "A-002",
+              "sha256": "54259f81b9c0c6367adc04f0ad24970f6f85aafa57742467c75f97d96c529e1d"
+            },
+            {
+              "id": "A-003",
+              "sha256": "15c1419838ea2b3ecb711eabe46426d51d09e2d7cd8937a1754dac411cebfb09"
+            },
+            {
+              "id": "A-004",
+              "sha256": "21d874c73649763c2e973319cf029ff7fcf64c298d58b6896440592f4950f457"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "03d4395a3d726a814fde1e4d2f542f0df9a6cbe488db6b3c4514ebde5896f443"
+            },
+            {
+              "id": "A-002",
+              "sha256": "54259f81b9c0c6367adc04f0ad24970f6f85aafa57742467c75f97d96c529e1d"
+            },
+            {
+              "id": "A-003",
+              "sha256": "15c1419838ea2b3ecb711eabe46426d51d09e2d7cd8937a1754dac411cebfb09"
+            },
+            {
+              "id": "A-004",
+              "sha256": "21d874c73649763c2e973319cf029ff7fcf64c298d58b6896440592f4950f457"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "changed_paths": [],
+      "delivery": {
+        "digest": "ee5f615bcc5d7c8890ac928ea59ba82dd31062b4966aa5643052d503b6fc6394",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "592709b9cc48f5dc9a67169eaf3c76daaf6daa4453ab01d45edb12d7482ba5fa"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "ab3e3932702fa0cd67331f82b5bf049b5382f5451d7fd37d5b1d7783aacd5da4"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "64a0f3b6faa112182e03b7efd5c16dfab4b2ed61b42e31bf7c685ccd2d0d9c0f"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_external_host_upgrade.py",
+            "sha256": "d4ed200b772b5500c9f51097251412b36894f9c1d8924f6e8d8bf1cc4113e109"
+          }
+        ]
+      },
+      "environment": {
+        "platform": "macOS-27.2.1-arm64-arm-64bit",
+        "python": "3.9.6"
+      },
+      "id": "31184051-1f76-4260-b728-1fd8b7e88163",
+      "items": [
+        {
+          "log_refs": [
+            ".fstar/tasks/external-host-upgrade/checks/check-001.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "Independent final read-only check; see recorded report and logs"
+        },
+        {
+          "log_refs": [
+            ".fstar/tasks/external-host-upgrade/checks/check-001.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "Independent final read-only check; see recorded report and logs"
+        },
+        {
+          "log_refs": [
+            ".fstar/tasks/external-host-upgrade/checks/check-001.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "Independent final read-only check; see recorded report and logs"
+        },
+        {
+          "log_refs": [
+            ".fstar/tasks/external-host-upgrade/checks/check-001.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "Independent final read-only check; see recorded report and logs"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-23T03:21:38.867917Z",
+      "producer": {
+        "id": "aaae28549ca477197",
+        "role": "check"
+      },
+      "read_only": true,
+      "report": {
+        "path": ".fstar/tasks/external-host-upgrade/checks/check-001.md",
+        "sha256": "0459b2680487bed5369e4267c6ead2ddce5e4fc22e24a6f16fffd17c1445c65d"
+      },
+      "run_id": "external-upgrade-final-001",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/external-host-upgrade/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "03d4395a3d726a814fde1e4d2f542f0df9a6cbe488db6b3c4514ebde5896f443"
+            },
+            {
+              "id": "A-002",
+              "sha256": "54259f81b9c0c6367adc04f0ad24970f6f85aafa57742467c75f97d96c529e1d"
+            },
+            {
+              "id": "A-003",
+              "sha256": "15c1419838ea2b3ecb711eabe46426d51d09e2d7cd8937a1754dac411cebfb09"
+            },
+            {
+              "id": "A-004",
+              "sha256": "21d874c73649763c2e973319cf029ff7fcf64c298d58b6896440592f4950f457"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "03d4395a3d726a814fde1e4d2f542f0df9a6cbe488db6b3c4514ebde5896f443"
+            },
+            {
+              "id": "A-002",
+              "sha256": "54259f81b9c0c6367adc04f0ad24970f6f85aafa57742467c75f97d96c529e1d"
+            },
+            {
+              "id": "A-003",
+              "sha256": "15c1419838ea2b3ecb711eabe46426d51d09e2d7cd8937a1754dac411cebfb09"
+            },
+            {
+              "id": "A-004",
+              "sha256": "21d874c73649763c2e973319cf029ff7fcf64c298d58b6896440592f4950f457"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "id": "d458e781-8222-4a03-8f2e-1a38a960f350",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/external-host-upgrade/criteria.md": {
+          "A-001": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-001:end -->",
+            "start_marker": "<!-- fstar:item:A-001:start -->"
+          },
+          "A-002": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-002:end -->",
+            "start_marker": "<!-- fstar:item:A-002:start -->"
+          },
+          "A-003": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-003:end -->",
+            "start_marker": "<!-- fstar:item:A-003:start -->"
+          },
+          "A-004": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:A-004:end -->",
+            "start_marker": "<!-- fstar:item:A-004:start -->"
+          }
+        },
+        ".fstar/tasks/external-host-upgrade/plan.md": {
+          "PLAN-1": {
+            "dependencies": [],
+            "end_marker": "<!-- fstar:item:PLAN-1:end -->",
+            "start_marker": "<!-- fstar:item:PLAN-1:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "e7d542be947b1b47bf3028d8770781974058b028996eb5c6067646d79b8a3b9c",
+      "artifact_map_source": {
+        "reference": "Approved repair criteria; criteria.md and plan.md",
+        "type": "system"
+      }
+    }
+  },
+  "name": "external-host-upgrade",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "status": "active",
+  "status_detail": null,
+  "title": "Upgrade unchanged externally reused host files",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}
