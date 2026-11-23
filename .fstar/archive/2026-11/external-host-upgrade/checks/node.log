@@ -1,0 +1,24 @@
+✔ build script produces a manifest whose hashes are truthful (46.364333ms)
+✔ build manifest excludes private and development artifacts (37.735875ms)
+✔ npm pack produces a tarball without private artifacts (525.414708ms)
+✔ npm pack excludes bytecode artifacts even when __pycache__ exists in tree (356.634209ms)
+✔ packed CLI runs from an unpacked tarball without a checkout or PYTHONPATH (662.024292ms)
+✔ tarball preserves launcher exec bits and hosts can execute the hook directly (943.036583ms)
+✔ packed hook launcher emits host text on stdin (616.813959ms)
+✔ local prefix install creates working bin links without network or global install (1236.093916ms)
+✔ wrapper forwards unusual argv verbatim (340.293792ms)
+✔ wrapper reports a missing interpreter and does not fall back silently (32.116958ms)
+✔ wrapper propagates a non-zero exit status (310.233583ms)
+✔ package.json declares no install lifecycle scripts (0.223584ms)
+✔ wrapper re-raises the terminating signal instead of reporting success (363.069875ms)
+✔ wrapper forwards termination signals to the Python child (431.146375ms)
+✔ packed launcher works from a path containing spaces, quotes, and CJK characters (656.946541ms)
+✔ packed CLI exposes machine hook and dispatch helper entry points (981.259125ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7589.032584

@@ -604,6 +604,15 @@ def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = 
     settings_entries = []
     target_hosts = list(hosts)
     owned_roots = _manifest_owned_roots(manifest)
+    # An update also reaches roots whose content was historically reused
+    # (externally_owned) with a valid recorded baseline: the upgrade may
+    # refresh an unchanged recorded reuse there (external-host-upgrade,
+    # 2026-11-23). Uninstall never gains deletion rights from a reuse
+    # record, so its discovery scope stays exactly the owned roots.
+    recorded_roots = dict(owned_roots)
+    if operation == "update":
+        for host, roots_set in _manifest_external_roots(manifest).items():
+            recorded_roots.setdefault(host, set()).update(roots_set)
     if operation in ("update", "uninstall") and manifest:
         # Update re-verifies and uninstall removes the host entries this
         # installation itself owns, but only where the resolved host root
@@ -612,10 +621,10 @@ def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = 
         # the mismatch refusal only guards implicit resolution (the current
         # project's .claude), where acting on the wrong root would silently
         # refresh the cache while leaving the live host entries stale.
-        matching = {host for host, roots_set in owned_roots.items()
+        matching = {host for host, roots_set in recorded_roots.items()
                     if host in resolved.host_roots and resolved.host_roots[host] in roots_set}
-        if owned_roots and not matching and not explicit_roots:
-            recorded = {str(root) for roots_set in owned_roots.values() for root in roots_set}
+        if recorded_roots and not matching and not explicit_roots:
+            recorded = {str(root) for roots_set in recorded_roots.values() for root in roots_set}
             raise DomainError(
                 "uninstall_host_root_mismatch",
                 "The recorded install targets other host roots than the ones "
@@ -633,7 +642,7 @@ def plan_install(*, operation: str, roots: Roots, bundle_root: Optional[Path] = 
             else:
                 target_hosts = [host for host in sorted(resolved.host_roots) if host in SUPPORTED_HOSTS]
         elif manifest:
-            target_hosts = [host for host, roots_set in sorted(owned_roots.items())
+            target_hosts = [host for host, roots_set in sorted(recorded_roots.items())
                             if host in resolved.host_roots and resolved.host_roots[host] in roots_set]
     skipped_capabilities = []
     for host in target_hosts:
@@ -831,8 +840,8 @@ def _host_file_kinds() -> Dict[str, tuple]:
 HOST_FILE_KINDS = _host_file_kinds()
 
 
-def _manifest_owned_roots(manifest: Optional[dict]) -> Dict[str, set]:
-    """Every host root this installation owns content in, per host.
+def _recorded_roots(manifest: Optional[dict], ownership: str) -> Dict[str, set]:
+    """Host roots carrying records with the given ownership, per host.
 
     Settings records alone are not enough: older manifests collapsed
     same-host records by a ``host:event`` key, so an installation at a
@@ -844,10 +853,10 @@ def _manifest_owned_roots(manifest: Optional[dict]) -> Dict[str, set]:
     """
     roots: Dict[str, set] = {}
     for record in (manifest or {}).get("settings_entries", []):
-        if record.get("ownership") == "owned" and record.get("host") and record.get("settings_path"):
+        if record.get("ownership") == ownership and record.get("host") and record.get("settings_path"):
             roots.setdefault(record["host"], set()).add(Path(record["settings_path"]).parent)
     for record in (manifest or {}).get("host_file_entries", []):
-        if record.get("ownership") != "owned" or not record.get("host"):
+        if record.get("ownership") != ownership or not record.get("host"):
             continue
         source = record.get("source") or ""
         destination = record.get("destination")
@@ -863,6 +872,23 @@ def _manifest_owned_roots(manifest: Optional[dict]) -> Dict[str, set]:
         if root is not None:
             roots.setdefault(record["host"], set()).add(root)
     return roots
+
+
+def _manifest_owned_roots(manifest: Optional[dict]) -> Dict[str, set]:
+    """Every host root this installation owns content in, per host."""
+    return _recorded_roots(manifest, "owned")
+
+
+def _manifest_external_roots(manifest: Optional[dict]) -> Dict[str, set]:
+    """Host roots carrying historically reused (externally_owned) content.
+
+    Mirrors ``_manifest_owned_roots`` for reuse records: an update may
+    refresh an unchanged recorded reuse (external-host-upgrade) at the same
+    recorded root, while uninstall never gains deletion rights from it and
+    a changed or unrecorded file stays the user's. Roots are derived
+    exactly from the recorded settings path and destination, never guessed.
+    """
+    return _recorded_roots(manifest, "externally_owned")
 
 
 def _skill_name(relative: str) -> Optional[str]:
@@ -893,6 +919,11 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
     bundle_hashes = {record.get("source"): record.get("sha256") for record in bundle.get("files", [])}
     owned = {record.get("destination"): record for record in (manifest or {}).get("host_file_entries", [])
              if record.get("ownership") == "owned"}
+    # Historical reuse records: an update may refresh one only when the whole
+    # recorded identity is consistent and the current bytes are unchanged
+    # (external-host-upgrade). Uninstall never reads this index.
+    external = {record.get("destination"): record for record in (manifest or {}).get("host_file_entries", [])
+                 if record.get("ownership") == "externally_owned"}
     for kind, relative in HOST_FILE_KINDS[host]:
         source = "resources/%s" % relative
         expected_hash = bundle_hashes.get(source)
@@ -924,6 +955,14 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
                 action = "remove_owned"
         elif current_hash == expected_hash:
             action = "reuse_owned" if record_owned is not None else "reuse_external"
+        elif (operation == "update" and record_owned is None
+              and _upgradeable_external(external.get(str(destination)), current_hash, host, kind,
+                                        source, str(destination))):
+            # Unchanged historically reused file: refresh it under upgrade
+            # authorization. Identical bytes are not authorship evidence; a
+            # consistent historical record plus unchanged bytes is the only
+            # key that opens this path.
+            action = "upgrade_external"
         elif record_owned is not None and current_hash != record_owned.get("installed_hash"):
             # Owned but modified by the user: honor the same conflict policy
             # as cache files (_file_action) — keep by default, overwrite or
@@ -961,6 +1000,33 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
     entries.extend(_plan_stale_host_files(host, roots, operation, manifest, bundle_hashes,
                                           {entry["destination"] for entry in entries}))
     return entries
+
+
+def _upgradeable_external(record: Optional[dict], current_hash: Optional[str], host: str,
+                          kind: str, source: str, destination: str) -> bool:
+    """Whether an historically reused (externally_owned) file may be refreshed.
+
+    The narrow key the approved external-host-upgrade repair opens (user
+    authorization 2026-11-23): every part of the recorded identity must be
+    consistent — host, kind, package-relative source, destination, a valid
+    historical version id — and the bytes on disk must still match the
+    recorded baseline. Identical bytes alone never prove the old install
+    authored the file; a tampered, partial, or inconsistent record keeps the
+    file the user's, so this returns False and the caller reports a conflict
+    instead of taking the path over.
+    """
+    if not isinstance(record, dict):
+        return False
+    if record.get("host") != host or record.get("kind") != kind:
+        return False
+    if record.get("source") != source or record.get("destination") != destination:
+        return False
+    installed_hash = record.get("installed_hash")
+    if not isinstance(installed_hash, str) or not installed_hash:
+        return False
+    if not _valid_version(record.get("version")):
+        return False
+    return current_hash == installed_hash
 
 
 def _plan_stale_host_files(host: str, roots: Roots, operation: str, manifest: Optional[dict],
@@ -1572,7 +1638,7 @@ def _apply_host_file(entry: dict, roots: Roots, backup_root: Path, applied: dict
         _prune_empty_host_dir(destination.parent, roots)
         _prune_empty_host_dir(destination.parent.parent, roots)
         return
-    if action == "write" or (action == "overwrite" and destination.exists()):
+    if action == "write" or (action in ("overwrite", "upgrade_external") and destination.exists()):
         # Host files live under the HOST root, not the user data root; the
         # symlink-ancestor boundary is the host root that owns this file.
         _reject_symlink_ancestors(destination, roots.host_roots[entry["host"]])
@@ -1593,7 +1659,12 @@ def _apply_host_file(entry: dict, roots: Roots, backup_root: Path, applied: dict
     if action == "overwrite" and not destination.exists():
         # Nothing to overwrite: fall through to a plain write.
         action = "write"
-    if action in ("write", "overwrite"):
+    if action == "upgrade_external" and not destination.exists():
+        # The plan saw unchanged recorded bytes; the file vanished between
+        # plan and apply. _reverify above already refuses that as a changed
+        # target, so this branch is defense in depth only.
+        action = "write"
+    if action in ("write", "overwrite", "upgrade_external"):
         payload = _source_bytes(entry)
         if entry.get("expected_hash") is not None and _sha256_bytes(payload) != entry["expected_hash"]:
             raise DomainError("resource_integrity", "Source file no longer matches its planned hash",
@@ -1780,10 +1851,12 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
             if entry["action"] in ("remove_owned", "remove_missing"):
                 host_files.pop(entry["destination"], None)
             continue
-        if entry["action"] in ("write", "overwrite"):
-            # An overwritten file now carries the incoming content, so the
-            # recorded baseline must move with it; keeping the old hash
-            # would report the refreshed file as user-modified forever.
+        if entry["action"] in ("write", "overwrite", "upgrade_external"):
+            # An overwritten or upgraded file now carries the incoming
+            # content, so the recorded baseline must move with it; keeping
+            # the old hash would report the refreshed file as user-modified
+            # forever. An upgraded external reuse becomes owned: this
+            # installation is the one that wrote the new bytes.
             host_files[entry["destination"]] = {
                 "host": entry["host"],
                 "kind": entry["kind"],
@@ -1954,15 +2027,20 @@ def _write_entry_index(roots: Roots, plan: dict, applied: dict, operation_id: st
             if entry["destination"] in retired_host_files:
                 entries.pop(identifier, None)
             continue
-        if entry["action"] not in ("write", "reuse_owned", "reuse_external"):
+        if entry["action"] not in ("write", "overwrite", "upgrade_external",
+                                   "reuse_owned", "reuse_external"):
             continue
+        # The refresh path (overwrite/upgrade_external) previously skipped the
+        # index, leaving the old operation_id, version, and ownership in place
+        # after the bytes were replaced; the index now follows the write.
         entries[identifier] = {
             "id": identifier,
             "host": entry["host"],
             "kind": "skill" if entry["kind"] == "skill" else "agent",
             "source": "package",
             "installed_path": entry["destination"],
-            "ownership": "owned" if entry["action"] in ("write", "reuse_owned") else "externally_owned",
+            "ownership": "owned" if entry["action"] in ("write", "overwrite", "upgrade_external",
+                                                        "reuse_owned") else "externally_owned",
             "status": "active",
             "version": plan["version"],
             "operation_id": operation_id,
