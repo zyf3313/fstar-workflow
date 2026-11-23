@@ -1,0 +1,84 @@
+{
+  "acceptance": null,
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "origin/main",
+  "blocked": null,
+  "branch": "feat/merge-fstar-doc",
+  "capabilities": [],
+  "children": [],
+  "commit": "2c86f0f17772b9aff2683ceb276e7607fe9c8b71",
+  "completedAt": null,
+  "createdAt": "2026-11-23T06:38:15.388293Z",
+  "creator": "agent",
+  "description": "用户已确认合并删除 fstar-doc：其剩余职责（用户规划文档入库、deliverables 登记、多文件文档编辑协调）并入 fstar-plan 与 fstar-execute，同步清理 routing/clarify/execute 引用与扩展成员映射，保持文档一致性检查引用不变。",
+  "events": [
+    {
+      "at": "2026-11-23T06:38:15.388508Z",
+      "data": {
+        "parent": null
+      },
+      "id": "bac2666d-5db1-4390-8bea-38ce602c1e47",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-23T06:38:15.388505Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "c5756965-6de7-400a-bc0b-f03f2e6c886f",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-23T06:38:29.254739Z",
+      "data": {
+        "branch": "feat/merge-fstar-doc",
+        "detached": false,
+        "snapshot": "fb6328d59530c7016a92b18e810178ecfd73c012e619969ffc46e2ff7038b281",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "832359fd-4c75-4cec-98ad-f0b08c28927a",
+      "source": {
+        "actor": {
+          "id": "FrancisZhang",
+          "role": "user"
+        },
+        "at": "2026-11-23T06:38:28.893967+00:00",
+        "quote": "我觉得可以合并删除就好",
+        "reference": "Conversation 0c569c9d, 2026-11-23",
+        "scope": "start merge-fstar-doc",
+        "source_id": "d871000a-9103-414f-8f18-a39a7563a828",
+        "type": "conversation",
+        "validates": "85618cb5937843ed6ac7eefbfeaab7083523cc1599c68403bb9963e6aef76d19"
+      },
+      "type": "started"
+    }
+  ],
+  "evidence": [],
+  "extensions": [],
+  "id": "994ac617-8af4-4d67-948f-9c2681db5df1",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {}
+  },
+  "name": "merge-fstar-doc",
+  "notes": "",
+  "phase": "in_progress",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "Merge and retire the fstar-doc skill",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}

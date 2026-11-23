@@ -51,28 +51,35 @@ def atomic_write_json(path: Path, data: dict) -> None:
             os.unlink(temporary)
 
 
+def _initialized_at(candidate: Path) -> bool:
+    marker = candidate / ".fstar" / ".schema-version"
+    if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
+        return True
+    pointer = candidate / POINTER_FILE
+    if pointer.is_file() and not pointer.is_symlink():
+        record = _read_pointer(pointer)
+        if _pointer_path_matches(candidate, record):
+            marker = _safe_pointer_data_root(candidate, record) / ".schema-version"
+            return marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION
+    return False
+
+
 def find_project_root(start: Path) -> Optional[Path]:
     current = start.resolve()
     if current.is_file():
         current = current.parent
     for candidate in (current,) + tuple(current.parents):
-        marker = candidate / ".fstar" / ".schema-version"
-        if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
+        if _initialized_at(candidate):
             return candidate
-        pointer = candidate / POINTER_FILE
-        if pointer.is_file() and not pointer.is_symlink():
-            record = _read_pointer(pointer)
-            if _pointer_path_matches(candidate, record):
-                data = _safe_pointer_data_root(candidate, record)
-                marker = data / ".schema-version"
-                if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
-                    return candidate
-        # Linked git worktree: share the main worktree's .fstar data root
-        # (specs, index, identity, tasks) when the main tree is initialized.
+        # A linked worktree shares the main tree's initialized data root.
         main_root = _linked_worktree_main_root(candidate)
         if main_root is not None:
-            marker = main_root / ".fstar" / ".schema-version"
-            if marker.is_file() and marker.read_text(encoding="utf-8").strip() == SCHEMA_VERSION:
+            pointer = candidate / POINTER_FILE
+            # A worktree's own unusable pointer must not silently switch it
+            # to the main project, or to an initialized ancestor.
+            if pointer.is_file() or pointer.is_symlink():
+                return None
+            if _initialized_at(main_root):
                 return main_root
     return None
 
@@ -155,7 +162,7 @@ def _read_pointer(path: Path) -> Optional[dict]:
     try:
         with path.open("r", encoding="utf-8") as stream:
             record = json.load(stream)
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise DomainError("corrupt_pointer", "Project pointer file is corrupt; repair or remove it",
                           {"path": str(path), "reason": str(exc)})
     if not isinstance(record, dict) or record.get("schema") != POINTER_SCHEMA \

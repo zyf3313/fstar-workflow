@@ -200,21 +200,16 @@ class DoctorWorktreeReportTests(WorktreeCase):
 
 class ModeRegressionTests(WorktreeCase):
     def test_user_directory_mode_unaffected_by_worktrees(self):
-        import json
         main = self._main_repo(storage="user-directory")
         worktree = self._worktree(main)
-        # user-directory mode: the pointer lives in the MAIN tree and binds
-        # to it; the linked worktree has no pointer of its own, so its own
-        # find_project_root walk does not resolve through the pointer.
+        # The main pointer stays bound to the main tree; discovery from the
+        # linked worktree resolves that main tree and shares its data root.
         self.assertTrue((main / POINTER_FILE).is_file())
         main_store = self._store(main)
         self.assertEqual("user-directory", main_store.storage_mode)
         self.assertEqual(main, find_project_root(main))
-        # The worktree resolves through the shared main .fstar data root
-        # only when the main tree carries an in-repo marker; user-directory
-        # mode keeps the pointer as the single source, so the worktree stays
-        # uninitialized rather than gaining a phantom binding.
-        self.assertIsNone(find_project_root(worktree))
+        self.assertEqual(main, find_project_root(worktree))
+        self.assertEqual(main_store.fstar_root, self._store(find_project_root(worktree)).fstar_root)
 
     def test_tracked_project_shared_mode_worktree_shares(self):
         """This repo's own pattern: tracked .fstar (project-shared)."""

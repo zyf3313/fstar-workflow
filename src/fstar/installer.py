@@ -55,7 +55,7 @@ HOOK_SEMANTICS = ("session-context", "worker-context", "worker-result", "doc-cha
 CONFLICT_POLICIES = ("keep", "overwrite", "new")
 # Capability/resource invariants reported by doctor (parent design §4.4).
 EXPECTED_COUNTS = {
-    "skills": 11,
+    "skills": 10,
     "roles": 4,
     "hooks": 5,
     "templates": 11,

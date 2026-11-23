@@ -184,7 +184,7 @@ INIT_PROMPT = ("This directory is inside a git project but is not yet an initial
 
 REPLAN_HINT = ("This task was replanned and the following planning documents were produced "
                "BEFORE the replan: %s. Before any implement dispatch, reconcile them against "
-               "the new clarification: update each via fstar-doc (editor dispatches) or "
+               "the new clarification: update each via fstar-plan storage or "
                "re-confirm it explicitly as still valid; never dispatch on unreviewed "
                "pre-replan conclusions. The replan event records the baseline git commit.")
 

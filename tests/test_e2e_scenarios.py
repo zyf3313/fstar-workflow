@@ -1958,7 +1958,7 @@ class S6TwoHost(ScenarioCase):
                   check=self.expect_ok(lambda p: (
                       "counts=%s healthy=%s" % (p["counts"], p["healthy"]))))
         report = json.loads(self.last_stdout)
-        self.assertEqual({"skills": 11, "roles": 4, "templates": 12,
+        self.assertEqual({"skills": 10, "roles": 4, "templates": 12,
                           "hooks": 5}, report["counts"])
         self.assertTrue(report["healthy"])
         # Stale entry index: remove an installed entry file, doctor must flag it.

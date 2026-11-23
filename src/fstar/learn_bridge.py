@@ -127,7 +127,7 @@ def _prepare(request):
     project = Path(request["project_root"]).expanduser().resolve()
     user = Path(request["user_root"]).expanduser().resolve()
     # Governance, including personal knowledge, requires an initialized project.
-    k._require_initialized_project(project)
+    k._require_initialized_project(project, data_root=k._project_data_root(project))
     raw_intent = dict(_object(request.get("intent"), "intent"))
     raw_intent["source"] = _construct(k.SourceRecord, raw_intent.get("source"), "source")
     if raw_intent.get("topic") is not None:

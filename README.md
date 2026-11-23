@@ -301,31 +301,35 @@ fstar rebind /new/path/to/project     # rebind the project to its new location
 mode, and additionally checks that a user-directory project folder and its
 registered UUID agree.
 
-### Linked git worktrees share the main worktree's data root
+### Linked git worktree project resolution
 
-In `project-shared` and `project-local` mode the data root lives in the
-repository, so a linked git worktree (`git worktree add`) would otherwise
-start empty and lose every task, spec, and identity the main tree
-accumulated. fstar resolves this automatically: inside a linked worktree,
-project resolution follows the worktree's `commondir` back to the main
-worktree and uses the main tree's `.fstar/` as the shared data root —
-specs, index, identity, and tasks are all shared, exactly as if you were
-working in the main tree. No pointer or registration file is written into
-the worktree; the sharing is pure resolution and takes effect immediately.
+Inside a linked git worktree (`git worktree add`), an initialized local
+`.fstar/` marker or valid local pointer takes precedence and resolves the
+worktree itself. For example, a tracked `project-shared` `.fstar/` can make
+the linked worktree locally initialized.
 
-If the main worktree is not yet initialized, worktree commands fail with
-`project_not_initialized` and never write anything implicitly — run
-`fstar init` in the main worktree first, and every linked worktree picks
-the shared data root up on its next command. `fstar doctor` run inside a
-linked worktree reports the sharing:
+When the linked worktree has no local initialization or pointer, project
+resolution can follow its `commondir` back to the initialized main worktree.
+For `project-shared` and `project-local` storage, this uses the main tree's
+`.fstar/` data root. For `user-directory` storage, it resolves the main tree's
+pointer and uses its data root under the user root. In this fallback, specs,
+index, identity, and tasks are shared with the main tree; no pointer or
+registration file is written into the linked worktree.
+
+A main-tree pointer remains bound to the main path, including when it is
+used from a linked worktree. Corrupt, symlinked, or path-mismatched pointers
+are not followed; an unusable local pointer prevents fallback to the main
+project. Moving a project still requires an explicit rebind.
+
+If neither the linked worktree nor the main worktree is initialized,
+worktree commands fail with `project_not_initialized` and never write
+anything implicitly. Run `fstar init` in the main worktree first, and linked
+worktrees can use the shared data root on their next command. When a linked
+worktree uses the main tree, `fstar doctor` reports the sharing:
 
 ```json
 "worktree": {"shared": true, "main_root": "/path/to/main", "message": "当前 worktree 共享自 /path/to/main"}
 ```
-
-`user-directory` mode is unaffected: its pointer file binds to the main
-worktree path, so a linked worktree without its own pointer stays
-uninitialized rather than gaining a phantom binding.
 
 ## Cross-project tasks (master + child in different repositories)
 
@@ -425,7 +429,7 @@ explicit, one-time, user-initiated, and traceable in the event log.
                    structure, error handling, quality/logging guidelines;
                    UI topics get component/state/type-safety) — user-authored
                    specs are never overwritten
-~/.claude/         hooks (settings.json), 11 skills, 4 agent cards   [global by default]
+~/.claude/         hooks (settings.json), 10 skills, 4 agent cards   [global by default]
 ~/.fstar/          user-level resource cache (shared, versioned) — never host config
 ```
 
@@ -646,7 +650,7 @@ build script regenerates it and the tests verify it is truthful.
 ```
 bin/         Node launchers + Python bootstrap
 src/fstar/   the kernel (install, tasks, dispatch, evidence, hooks runtime)
-resources/   11 skills, 4 role cards, templates (task/ + scenario references), routing
+resources/   10 skills, 4 role cards, templates (task/ + scenario references), routing
 scripts/     package build
 tests/       Python and Node suites
 ```
