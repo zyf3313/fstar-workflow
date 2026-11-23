@@ -1,5 +1,38 @@
 {
-  "acceptance": null,
+  "acceptance": {
+    "confirmed_at": "2026-11-23T14:33:44.573445Z",
+    "confirmed_by": "user",
+    "criteria_refs": [
+      "A-001",
+      "A-002",
+      "A-003",
+      "A-004"
+    ],
+    "evidence_refs": [
+      "780fabb5-7297-4f60-981f-294c18b3fcf2"
+    ],
+    "rule_ref": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md",
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user"
+      },
+      "at": "2026-11-23T14:32:30Z",
+      "quote": "确认 自动验收自动审批 是我让执行的",
+      "reference": "Current conversation: user confirmed that project self-acceptance was authorized",
+      "scope": "delegated self-acceptance for fix-user-directory-resolution",
+      "source_id": "fix-accept-user-confirmation-1432",
+      "type": "conversation",
+      "validates": "2f8897769a8db8ac4aa95327ce21815f7c31bf26d503c5a5998a381d756ce781"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "cf232f3487454c52c61b7409382ce4f2223aec4c6a42c4997488a0b6277b4a92"
+      ],
+      "task": "2f8897769a8db8ac4aa95327ce21815f7c31bf26d503c5a5998a381d756ce781"
+    }
+  },
   "archivedAt": null,
   "assignee": null,
   "base_branch": "origin/main",
@@ -8,7 +41,7 @@
   "capabilities": [],
   "children": [],
   "commit": "2c86f0f17772b9aff2683ceb276e7607fe9c8b71",
-  "completedAt": null,
+  "completedAt": "2026-11-23T14:33:44.573648Z",
   "createdAt": "2026-11-23T08:59:00.300507Z",
   "creator": "agent",
   "description": "用户级 uTools 笔记报告的两个阻断级硬伤：learn_bridge._prepare 用只查 <project>/.fstar 的 _require_initialized_project(project) 拒绝 pointer 解析，user-directory 模式下 rules/memory/specs 写入全失败；store.find_project_root 的 linked-worktree 回退分支只看主仓 .fstar/.schema-version，不跟随 pointer，user-directory 主仓的 worktree 识别不到项目。已复现确认与宿主工具无关。",
@@ -58,10 +91,421 @@
         "validates": "5b3f6167a24fc0b976e591fcfa21564f9c1515b7bbf958f4a940ed2a4c389b3f"
       },
       "type": "started"
+    },
+    {
+      "at": "2026-11-23T13:29:07.759699Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "c43d7f53-8a88-48b4-b3fb-f5a0acf1feef",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-23T13:29:07.759696Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "e6472b58-06ab-48f8-9753-ff7ebd53657a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-23T13:29:07.760967Z",
+      "data": {
+        "dispatch_id": "fix-user-directory-final-check-001",
+        "plan_item_ids": [
+          "PLAN-1"
+        ],
+        "role": "check"
+      },
+      "id": "b55f99c3-8462-49f0-adf6-aeb714e7bee6",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-23T13:29:07.760963Z",
+        "quote": "",
+        "reference": "dispatch fix-user-directory-final-check-001",
+        "scope": "dispatch",
+        "source_id": "da72830c-5723-4bb7-ae33-9c80fa175f00",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-23T13:36:08.941239Z",
+      "data": {
+        "evidence_id": "780fabb5-7297-4f60-981f-294c18b3fcf2",
+        "state": "valid"
+      },
+      "id": "5b271a7f-6a94-4952-9a99-05bba3619114",
+      "source": {
+        "id": "a202d8deb99da0970",
+        "role": "check",
+        "session_id": "a202d8deb99da0970"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-23T14:25:26.750493Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-23T14:25:26.749469Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "recovery"
+          ],
+          "reason": "User confirmed recovery for this release",
+          "scope": "custom",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user"
+            },
+            "at": "2026-11-23T14:24:27Z",
+            "quote": "确认",
+            "reference": "Current conversation: user confirmed persistent-task/recovery authorization for both tasks",
+            "scope": "enable persistent-task recovery for fix-user-directory-resolution",
+            "source_id": "recovery-confirmation-fix-20261123",
+            "type": "conversation",
+            "validates": "5c8102900b2b81e518cf058cc96c3ec7657dc66a97395a6d8d07bd67c414b414"
+          }
+        },
+        "old": null
+      },
+      "id": "bc5edd18-871d-4600-b84a-276fce019b63",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-23T14:24:27Z",
+        "quote": "确认",
+        "reference": "Current conversation: user confirmed persistent-task/recovery authorization for both tasks",
+        "scope": "enable persistent-task recovery for fix-user-directory-resolution",
+        "source_id": "recovery-confirmation-fix-20261123",
+        "type": "conversation",
+        "validates": "5c8102900b2b81e518cf058cc96c3ec7657dc66a97395a6d8d07bd67c414b414"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-23T14:26:53.863772Z",
+      "data": {
+        "new_holder": {
+          "id": "release-coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "Previous coordinator lease expired; final checks harvested and no workers active"
+      },
+      "id": "17402093-9cbc-4466-bbd9-86a5c3f99168",
+      "source": {
+        "actor": {
+          "id": "release-coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-23T14:26:53.863769Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "a0b5c1cd-5388-44fa-8a6d-7e98c483e8c5",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-23T14:26:53.865266Z",
+      "data": {
+        "reason": "Recovery complete; ready for acceptance"
+      },
+      "id": "fc694cab-7200-4194-8e6a-9b3a8fcee112",
+      "source": {
+        "id": "release-coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-23T14:27:16.662370Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "780fabb5-7297-4f60-981f-294c18b3fcf2"
+        ]
+      },
+      "id": "9adbf646-5e7b-4140-8edd-5bf7864ab825",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-23T14:27:16.662176Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "47c50033-a61a-4f94-8b7d-f912ea9c8d36",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-23T14:33:44.573651Z",
+      "data": {
+        "accepted_via_rule": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004"
+          ],
+          "quote": "以后开发完某项任务时都走这个自验收流程就代表我已经验收通过",
+          "report": ".fstar/tasks/fix-user-directory-resolution/checks/self-acceptance.md",
+          "rule_ref": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md",
+          "scope": "Development task: user-directory fix; excludes npm publish and Git release actions"
+        },
+        "evidence_refs": [
+          "780fabb5-7297-4f60-981f-294c18b3fcf2"
+        ]
+      },
+      "id": "48e2c866-4871-484b-83ca-3fefcfa0620c",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-23T14:32:30Z",
+        "quote": "确认 自动验收自动审批 是我让执行的",
+        "reference": "Current conversation: user confirmed that project self-acceptance was authorized",
+        "scope": "delegated self-acceptance for fix-user-directory-resolution",
+        "source_id": "fix-accept-user-confirmation-1432",
+        "type": "conversation",
+        "validates": "2f8897769a8db8ac4aa95327ce21815f7c31bf26d503c5a5998a381d756ce781"
+      },
+      "type": "accepted"
     }
   ],
-  "evidence": [],
-  "extensions": [],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "cf232f3487454c52c61b7409382ce4f2223aec4c6a42c4997488a0b6277b4a92",
+        "paths": [
+          {
+            "exists": true,
+            "path": "src/fstar/learn_bridge.py",
+            "sha256": "b02e52f33956098b92dfb84eff54756e59711e256ac6542abbfafb39f5bbe2e5"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "ec08db52eecc1c77df5d3833c6a55b79fd3c34a9dbeb4e4aab9a1fb07fe4184b"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_user_directory_resolution.py",
+            "sha256": "b8e0af09f67470081ac19ac21d7e503a6465b2de0f3ea366f831a36ac1fc176e"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_worktree_shared_root.py",
+            "sha256": "91b1809617978305877604d552d137d92364988d9b0c87ee1e50bc61a07afff0"
+          }
+        ]
+      },
+      "dispatch_id": "fix-user-directory-final-check-001",
+      "environment": {
+        "python": "3.9.6"
+      },
+      "id": "780fabb5-7297-4f60-981f-294c18b3fcf2",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/fix-user-directory-resolution/criteria.md",
+          "sha256": "575e90b43f47368498e0ffaaf1ff33f2874ef6f69756e118e2e4b64ead8a8800"
+        },
+        {
+          "path": ".fstar/tasks/fix-user-directory-resolution/plan.md",
+          "sha256": "3680ece7a5132ee1a5605cdaeb73012fb3d103a8f1a6fba7abd104337400c59c"
+        }
+      ],
+      "items": [
+        {
+          "command": "python3 -m unittest tests.test_user_directory_resolution tests.test_worktree_shared_root",
+          "duration": 3.3,
+          "exit_code": 0,
+          "log_refs": [
+            ".fstar/tasks/fix-user-directory-resolution/checks/final-check.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "retries": 0,
+          "test_refs": [
+            "tests/test_user_directory_resolution.py"
+          ]
+        },
+        {
+          "command": "python3 -m unittest tests.test_user_directory_resolution tests.test_worktree_shared_root",
+          "duration": 3.3,
+          "exit_code": 0,
+          "log_refs": [
+            ".fstar/tasks/fix-user-directory-resolution/checks/final-check.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "retries": 0,
+          "test_refs": [
+            "tests/test_user_directory_resolution.py"
+          ]
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t . -q",
+          "duration": 120.3,
+          "exit_code": 0,
+          "log_refs": [
+            "/tmp/fstar-python-011.log"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "retries": 0,
+          "test_refs": [
+            "/tmp/fstar-python-011.log"
+          ]
+        },
+        {
+          "command": "read-only review of delivery diff and README",
+          "duration": 92.0,
+          "exit_code": 0,
+          "log_refs": [
+            ".fstar/tasks/fix-user-directory-resolution/checks/final-check.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "retries": 0,
+          "review_method": "independent read-only review",
+          "test_refs": [
+            "README.md"
+          ]
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-23T13:36:08.939529Z",
+      "producer": {
+        "id": "a202d8deb99da0970",
+        "role": "check",
+        "session_id": "a202d8deb99da0970"
+      },
+      "read_only": true,
+      "report": {
+        "path": ".fstar/tasks/fix-user-directory-resolution/checks/final-check.md",
+        "sha256": "7982ec918d7c529c4451117dfde51ddb70b04e187ae9d684c000db5b0081b2b3"
+      },
+      "run_id": "fix-user-directory-resolution-final-run",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/fix-user-directory-resolution/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "59db0f9458639fd9b214c52d48a15e7b698b6cbed564e3284a79efaa9d216719"
+            },
+            {
+              "id": "A-002",
+              "sha256": "b2d5077da0de89ec313fb3de4aa2f86e7a956fe5feb0b852d85ec7b2f59c904a"
+            },
+            {
+              "id": "A-003",
+              "sha256": "e92fb1e7aafc53b3a1b89da5afb44e0b54291b95865f8ddacd2840839ca46fa5"
+            },
+            {
+              "id": "A-004",
+              "sha256": "56cbad49e5cd7ae42216ad60a8b207ed713ce584ee50bb3a48e8534b26df3ed5"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "59db0f9458639fd9b214c52d48a15e7b698b6cbed564e3284a79efaa9d216719"
+            },
+            {
+              "id": "A-002",
+              "sha256": "b2d5077da0de89ec313fb3de4aa2f86e7a956fe5feb0b852d85ec7b2f59c904a"
+            },
+            {
+              "id": "A-003",
+              "sha256": "e92fb1e7aafc53b3a1b89da5afb44e0b54291b95865f8ddacd2840839ca46fa5"
+            },
+            {
+              "id": "A-004",
+              "sha256": "56cbad49e5cd7ae42216ad60a8b207ed713ce584ee50bb3a48e8534b26df3ed5"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-23T14:25:26.749469Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "recovery"
+      ],
+      "reason": "User confirmed recovery for this release",
+      "scope": "custom",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-23T14:24:27Z",
+        "quote": "确认",
+        "reference": "Current conversation: user confirmed persistent-task/recovery authorization for both tasks",
+        "scope": "enable persistent-task recovery for fix-user-directory-resolution",
+        "source_id": "recovery-confirmation-fix-20261123",
+        "type": "conversation",
+        "validates": "5c8102900b2b81e518cf058cc96c3ec7657dc66a97395a6d8d07bd67c414b414"
+      }
+    }
+  ],
   "id": "7b7ad6a1-dac6-4dcb-815a-192f4148c864",
   "lease": null,
   "meta": {
@@ -72,11 +516,36 @@
     },
     "related_tasks": [],
     "reminders": {},
-    "templates": {}
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/fix-user-directory-resolution/criteria.md": {
+          "A-001": {
+            "end_marker": "<!-- fstar:item:A-001:end -->",
+            "start_marker": "### A-001 "
+          },
+          "A-002": {
+            "end_marker": "<!-- fstar:item:A-002:end -->",
+            "start_marker": "### A-002 "
+          },
+          "A-003": {
+            "end_marker": "<!-- fstar:item:A-003:end -->",
+            "start_marker": "### A-003 "
+          },
+          "A-004": {
+            "end_marker": "<!-- fstar:item:A-004:end -->",
+            "start_marker": "### A-004 "
+          }
+        },
+        "mode": "item"
+      },
+      "dispatch_harvested": [
+        "fix-user-directory-final-check-001"
+      ]
+    }
   },
   "name": "fix-user-directory-resolution",
   "notes": "",
-  "phase": "in_progress",
+  "phase": "completed",
   "pr_url": "",
   "priority": "P2",
   "title": "Fix user-directory project resolution gaps",

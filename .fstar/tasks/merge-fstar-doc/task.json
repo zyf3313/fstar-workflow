@@ -1,5 +1,38 @@
 {
-  "acceptance": null,
+  "acceptance": {
+    "confirmed_at": "2026-11-23T14:33:30.171394Z",
+    "confirmed_by": "user",
+    "criteria_refs": [
+      "A-001",
+      "A-002",
+      "A-003",
+      "A-004"
+    ],
+    "evidence_refs": [
+      "a8b553fc-8a59-46e8-aa73-2c2b4ad88b51"
+    ],
+    "rule_ref": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md",
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user"
+      },
+      "at": "2026-11-23T14:32:30Z",
+      "quote": "确认 自动验收自动审批 是我让执行的",
+      "reference": "Current conversation: user confirmed that project self-acceptance was authorized",
+      "scope": "delegated self-acceptance for merge-fstar-doc",
+      "source_id": "doc-accept-user-confirmation-1432",
+      "type": "conversation",
+      "validates": "84daeda84a3851f49f2f3682bbb83eb25de621db59173db6d0ba57c6d41760bc"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "7208438ff5af28ee82d75676f3a9fb4aa6be6813bdf112046505b6f68657a86a"
+      ],
+      "task": "84daeda84a3851f49f2f3682bbb83eb25de621db59173db6d0ba57c6d41760bc"
+    }
+  },
   "archivedAt": null,
   "assignee": null,
   "base_branch": "origin/main",
@@ -8,7 +41,7 @@
   "capabilities": [],
   "children": [],
   "commit": "2c86f0f17772b9aff2683ceb276e7607fe9c8b71",
-  "completedAt": null,
+  "completedAt": "2026-11-23T14:33:30.171583Z",
   "createdAt": "2026-11-23T06:38:15.388293Z",
   "creator": "agent",
   "description": "用户已确认合并删除 fstar-doc：其剩余职责（用户规划文档入库、deliverables 登记、多文件文档编辑协调）并入 fstar-plan 与 fstar-execute，同步清理 routing/clarify/execute 引用与扩展成员映射，保持文档一致性检查引用不变。",
@@ -58,10 +91,450 @@
         "validates": "85618cb5937843ed6ac7eefbfeaab7083523cc1599c68403bb9963e6aef76d19"
       },
       "type": "started"
+    },
+    {
+      "at": "2026-11-23T13:30:31.910802Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "13a03426-81f7-4679-b261-e8a7ec0b40b4",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-23T13:30:31.910799Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "a45c618f-f953-4f42-924c-73f491a70f40",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-23T13:30:31.912130Z",
+      "data": {
+        "dispatch_id": "merge-fstar-doc-final-check-001",
+        "plan_item_ids": [
+          "PLAN-1"
+        ],
+        "role": "check"
+      },
+      "id": "16763d47-ca6c-472f-9972-b6d752299426",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-23T13:30:31.912126Z",
+        "quote": "",
+        "reference": "dispatch merge-fstar-doc-final-check-001",
+        "scope": "dispatch",
+        "source_id": "20d11eff-03d2-4b8f-acc1-5a1c50a50642",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-23T13:36:48.789800Z",
+      "data": {
+        "evidence_id": "a8b553fc-8a59-46e8-aa73-2c2b4ad88b51",
+        "state": "valid"
+      },
+      "id": "c3d6980d-cca0-4f02-8cfc-ec0d5eff0d0a",
+      "source": {
+        "id": "a2980d0150d79639f",
+        "role": "check",
+        "session_id": "a2980d0150d79639f"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-23T14:25:15.908093Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-23T14:25:15.906452Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "recovery"
+          ],
+          "reason": "User confirmed recovery for this release",
+          "scope": "custom",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user"
+            },
+            "at": "2026-11-23T14:24:27Z",
+            "quote": "确认",
+            "reference": "Current conversation: user confirmed persistent-task/recovery authorization for both tasks",
+            "scope": "enable persistent-task recovery for merge-fstar-doc",
+            "source_id": "recovery-confirmation-doc-20261123",
+            "type": "conversation",
+            "validates": "e99fd8ea9bbd350475abe9f92b36cc5adbdd63c3bd8f80ddfc1cbd9bab71dce7"
+          }
+        },
+        "old": null
+      },
+      "id": "14015f59-354b-4aa6-82e4-fb5f151d0917",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-23T14:24:27Z",
+        "quote": "确认",
+        "reference": "Current conversation: user confirmed persistent-task/recovery authorization for both tasks",
+        "scope": "enable persistent-task recovery for merge-fstar-doc",
+        "source_id": "recovery-confirmation-doc-20261123",
+        "type": "conversation",
+        "validates": "e99fd8ea9bbd350475abe9f92b36cc5adbdd63c3bd8f80ddfc1cbd9bab71dce7"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-23T14:26:53.860397Z",
+      "data": {
+        "new_holder": {
+          "id": "release-coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "Previous coordinator lease expired; final checks harvested and no workers active"
+      },
+      "id": "65653d00-c977-4600-ad6f-b7659170538f",
+      "source": {
+        "actor": {
+          "id": "release-coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-23T14:26:53.860394Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "00b71fd3-e680-43fb-8249-05fac36fb74a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-23T14:26:53.862176Z",
+      "data": {
+        "reason": "Recovery complete; ready for acceptance"
+      },
+      "id": "f44de589-9fdb-4577-a620-563d24e4dfb0",
+      "source": {
+        "id": "release-coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-23T14:27:09.486910Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "a8b553fc-8a59-46e8-aa73-2c2b4ad88b51"
+        ]
+      },
+      "id": "3058548d-f315-4d72-bde6-3c05b544dd4d",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-23T14:27:09.486715Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "4eff7593-8166-4acd-8665-db36f1a2312f",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-23T14:33:30.171586Z",
+      "data": {
+        "accepted_via_rule": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004"
+          ],
+          "quote": "以后开发完某项任务时都走这个自验收流程就代表我已经验收通过",
+          "report": ".fstar/tasks/merge-fstar-doc/checks/self-acceptance.md",
+          "rule_ref": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md",
+          "scope": "Development task: fstar-doc retirement; excludes npm publish and Git release actions"
+        },
+        "evidence_refs": [
+          "a8b553fc-8a59-46e8-aa73-2c2b4ad88b51"
+        ]
+      },
+      "id": "5aea76c7-9d95-4ed9-b3ae-76dd5475e463",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-23T14:32:30Z",
+        "quote": "确认 自动验收自动审批 是我让执行的",
+        "reference": "Current conversation: user confirmed that project self-acceptance was authorized",
+        "scope": "delegated self-acceptance for merge-fstar-doc",
+        "source_id": "doc-accept-user-confirmation-1432",
+        "type": "conversation",
+        "validates": "84daeda84a3851f49f2f3682bbb83eb25de621db59173db6d0ba57c6d41760bc"
+      },
+      "type": "accepted"
     }
   ],
-  "evidence": [],
-  "extensions": [],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "7208438ff5af28ee82d75676f3a9fb4aa6be6813bdf112046505b6f68657a86a",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "d74674b08b173e153f87ca07bdef4631e90b99041392fe3b95c04e475ced7619"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "15f4ece30a92cc338ad72fd3693fc137c4283a554891e342ee5cfc4250c06991"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "1712f116853abebcbe7f1a922cbad88b4268198df5b47450107d592fe93fa192"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-clarify/SKILL.md",
+            "sha256": "9c214f98f7fb9c740c572f260ada0b967e283ed4049d102bd3e9d95cc31bf1cc"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-execute/SKILL.md",
+            "sha256": "c9c3a01e155b7806fd103da7293375d58054fb4a13a586dcc398a156adc7ee25"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-plan/SKILL.md",
+            "sha256": "17b55c3ecd57c5870ad09e987700a9a3c3586c57ff3e8c7571c698bd82aaaee1"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/content.py",
+            "sha256": "ccd4b68b09e03df387a899634e807226b710c593d68a395cb195c56c7b8cd877"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "debcb8ac0f2f26122c15af62a40008fe908ade98be6f1d191da2c0d011f77d24"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "412cecb43c48a2c68d5ab5b0caed8de309099c7e1afa5e38a0285ec1b36ba410"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_doc_retirement.py",
+            "sha256": "54864bb688d683b0271242f9624fc9821c3dfda374a46505d9d918bb6aba6b81"
+          }
+        ]
+      },
+      "dispatch_id": "merge-fstar-doc-final-check-001",
+      "environment": {
+        "python": "3.9.6"
+      },
+      "id": "a8b553fc-8a59-46e8-aa73-2c2b4ad88b51",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/merge-fstar-doc/criteria.md",
+          "sha256": "cf3f3d254339ec9cd8b31e30cb1e90e763d07009f87d8af9d5a117c9fdaadcf5"
+        },
+        {
+          "path": ".fstar/tasks/merge-fstar-doc/plan.md",
+          "sha256": "121cf5e9880ccc57a54637b9874396e1ed6c52a814c090a2c54d9a2d60bc7e66"
+        }
+      ],
+      "items": [
+        {
+          "command": "python3 -m unittest tests.test_doc_retirement",
+          "duration": 0.35,
+          "exit_code": 0,
+          "log_refs": [
+            ".fstar/tasks/merge-fstar-doc/checks/final-check.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "retries": 0,
+          "test_refs": [
+            "tests/test_doc_retirement.py"
+          ]
+        },
+        {
+          "command": "python3 -m unittest tests.test_doc_retirement",
+          "duration": 0.35,
+          "exit_code": 0,
+          "log_refs": [
+            ".fstar/tasks/merge-fstar-doc/checks/final-check.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "retries": 0,
+          "test_refs": [
+            "tests/test_doc_retirement.py"
+          ]
+        },
+        {
+          "command": "node scripts/build-package.cjs (x2, temp copy) + hash compare",
+          "duration": 12.0,
+          "exit_code": 0,
+          "log_refs": [
+            ".fstar/tasks/merge-fstar-doc/checks/final-check.md"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "retries": 0,
+          "test_refs": [
+            "resources/package-assets.json"
+          ]
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t . -q",
+          "duration": 120.3,
+          "exit_code": 0,
+          "log_refs": [
+            "/tmp/fstar-python-011.log"
+          ],
+          "plan_item": "PLAN-1",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "retries": 0,
+          "test_refs": [
+            "/tmp/fstar-python-011.log"
+          ]
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-23T13:36:48.787199Z",
+      "producer": {
+        "id": "a2980d0150d79639f",
+        "role": "check",
+        "session_id": "a2980d0150d79639f"
+      },
+      "read_only": true,
+      "report": {
+        "path": ".fstar/tasks/merge-fstar-doc/checks/final-check.md",
+        "sha256": "b0944211fc00df4c753eeef5ca3119807855659da3e9fa359b222e5565fced53"
+      },
+      "run_id": "merge-fstar-doc-final-run",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/merge-fstar-doc/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "37c94108a8bb6dacccd2c3d9ccd6342214ef56b0912ed41eb2119622596737a5"
+            },
+            {
+              "id": "A-002",
+              "sha256": "702a007566471dfd3bcbd7410bdfe0a585b45986e2fee71818f31f586ae52b36"
+            },
+            {
+              "id": "A-003",
+              "sha256": "68622f894d03c484b9aa199b1d4e33db6cefb58c6b2bb137b817b157d000310f"
+            },
+            {
+              "id": "A-004",
+              "sha256": "250d59faba6950b4f351b0c55f0eb09a25d8e9673062ab0ba691b9be0b1b3dea"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "37c94108a8bb6dacccd2c3d9ccd6342214ef56b0912ed41eb2119622596737a5"
+            },
+            {
+              "id": "A-002",
+              "sha256": "702a007566471dfd3bcbd7410bdfe0a585b45986e2fee71818f31f586ae52b36"
+            },
+            {
+              "id": "A-003",
+              "sha256": "68622f894d03c484b9aa199b1d4e33db6cefb58c6b2bb137b817b157d000310f"
+            },
+            {
+              "id": "A-004",
+              "sha256": "250d59faba6950b4f351b0c55f0eb09a25d8e9673062ab0ba691b9be0b1b3dea"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-23T14:25:15.906452Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "recovery"
+      ],
+      "reason": "User confirmed recovery for this release",
+      "scope": "custom",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-23T14:24:27Z",
+        "quote": "确认",
+        "reference": "Current conversation: user confirmed persistent-task/recovery authorization for both tasks",
+        "scope": "enable persistent-task recovery for merge-fstar-doc",
+        "source_id": "recovery-confirmation-doc-20261123",
+        "type": "conversation",
+        "validates": "e99fd8ea9bbd350475abe9f92b36cc5adbdd63c3bd8f80ddfc1cbd9bab71dce7"
+      }
+    }
+  ],
   "id": "994ac617-8af4-4d67-948f-9c2681db5df1",
   "lease": null,
   "meta": {
@@ -72,11 +545,36 @@
     },
     "related_tasks": [],
     "reminders": {},
-    "templates": {}
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/merge-fstar-doc/criteria.md": {
+          "A-001": {
+            "end_marker": "<!-- fstar:item:A-001:end -->",
+            "start_marker": "### A-001 "
+          },
+          "A-002": {
+            "end_marker": "<!-- fstar:item:A-002:end -->",
+            "start_marker": "### A-002 "
+          },
+          "A-003": {
+            "end_marker": "<!-- fstar:item:A-003:end -->",
+            "start_marker": "### A-003 "
+          },
+          "A-004": {
+            "end_marker": "<!-- fstar:item:A-004:end -->",
+            "start_marker": "### A-004 "
+          }
+        },
+        "mode": "item"
+      },
+      "dispatch_harvested": [
+        "merge-fstar-doc-final-check-001"
+      ]
+    }
   },
   "name": "merge-fstar-doc",
   "notes": "",
-  "phase": "in_progress",
+  "phase": "completed",
   "pr_url": "",
   "priority": "P2",
   "title": "Merge and retire the fstar-doc skill",

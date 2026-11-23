@@ -1,0 +1,29 @@
+{
+  "schema": "fstar.dispatch.v1",
+  "dispatch_id": "fix-user-directory-final-check-001",
+  "task_ref": "fix-user-directory-resolution",
+  "role": "check",
+  "plan_item_ids": ["PLAN-1"],
+  "baseline": {
+    "commit": "2b8a505",
+    "delivery": {
+      "paths": [
+        {"path": "src/fstar/learn_bridge.py", "sha256": "b02e52f33956098b92dfb84eff54756e59711e256ac6542abbfafb39f5bbe2e5"},
+        {"path": "src/fstar/store.py", "sha256": "ec08db52eecc1c77df5d3833c6a55b79fd3c34a9dbeb4e4aab9a1fb07fe4184b"},
+        {"path": "tests/test_user_directory_resolution.py", "sha256": "b8e0af09f67470081ac19ac21d7e503a6465b2de0f3ea366f831a36ac1fc176e"},
+        {"path": "tests/test_worktree_shared_root.py", "sha256": "91b1809617978305877604d552d137d92364988d9b0c87ee1e50bc61a07afff0"}
+      ],
+      "digest": ""
+    }
+  },
+  "allowed_paths": [],
+  "read_context": [{"path": ".fstar/tasks/fix-user-directory-resolution/criteria.md", "sha256": "575e90b43f47368498e0ffaaf1ff33f2874ef6f69756e118e2e4b64ead8a8800"}, {"path": ".fstar/tasks/fix-user-directory-resolution/plan.md", "sha256": "3680ece7a5132ee1a5605cdaeb73012fb3d103a8f1a6fba7abd104337400c59c"}],
+  "required_validations": [],
+  "return_conditions": {
+    "done": "Independent final check covering A-001..A-004 recorded; per-criterion verdicts with evidence; delivery hashes verified",
+    "blocked": "Inputs changed or cannot be validated",
+    "failed": "Reproducible defect in delivered scope"
+  },
+  "prompt_first_line": "Active task: fix-user-directory-resolution",
+  "extensions": []
+}
