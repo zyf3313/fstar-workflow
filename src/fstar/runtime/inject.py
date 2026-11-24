@@ -15,6 +15,7 @@ All state reads go through core APIs; this module performs no writes.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import List, Optional
 from ..config import ConfigError, load_config
@@ -156,6 +157,42 @@ def index_inputs(project_root: Optional[Path], user_root: Path) -> List[Injected
     found = _fingerprinted("user_index", path, relative="~/.fstar/index.md") if _safe_context_path(user_root, path) else None
     if found:
         inputs.append(found)
+    return inputs
+
+
+RULE_LINE = re.compile(r"^\s*-\s*\[[^\]]+\]\(([^)]+)\)\s*[—-]+\s*strength:\s*(\w+)", re.MULTILINE)
+
+
+def enforced_rule_inputs(user_root: Path) -> List[InjectedInput]:
+    """Full bodies of user rules marked ``strength: enforced`` (B-10).
+
+    Parses ``user_root/index.md`` for list lines of the form
+    ``- [title](rules/<name>.md) — strength: enforced``; each linked rule
+    file under ``user_root/`` is read in full and fingerprinted. Alias and
+    escape rejection matches index injection. Default-strength rules are
+    NOT loaded here.
+    """
+    index_path = user_root / "index.md"
+    try:
+        text = _load_text(index_path)
+    except OSError:
+        return []
+    inputs: List[InjectedInput] = []
+    seen = set()
+    for match in RULE_LINE.finditer(text):
+        link, strength = match.group(1), match.group(2).lower()
+        if strength != "enforced":
+            continue
+        candidate = Path(link)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            continue
+        path = user_root / candidate
+        if link in seen or not _safe_context_path(user_root, path) or not path.is_file():
+            continue
+        seen.add(link)
+        found = _fingerprinted("user_rule", path, relative="~/.fstar/%s" % link)
+        if found:
+            inputs.append(found)
     return inputs
 
 

@@ -1367,6 +1367,78 @@ class CliHookTests(HookCase):
         self.assertEqual(list(subparsers.choices), [])
 
 
+class EnforcedRuleTests(HookCase):
+    """B-10/B-17: enforced user rules inject in full; status line on stderr."""
+
+    def _write_rules_index(self):
+        rules = self.user_root / "rules"
+        rules.mkdir(exist_ok=True)
+        (rules / "enforced.md").write_text("# enforced rule\n\nNEVER skip final checks.\n", encoding="utf-8")
+        (rules / "default.md").write_text("# default rule\n", encoding="utf-8")
+        (self.user_root / "index.md").write_text(
+            "# fstar User Index\n\n## Rules\n\n"
+            "- [enforced](rules/enforced.md) — strength: enforced\n"
+            "- [default](rules/default.md) — strength: default\n", encoding="utf-8")
+
+    def test_enforced_rule_inputs_load_only_enforced_bodies(self):
+        self._write_rules_index()
+        rules = inject.enforced_rule_inputs(self.user_root)
+        self.assertEqual(1, len(rules))
+        self.assertEqual("user_rule", rules[0].kind)
+        self.assertIn("NEVER skip final checks", rules[0].text)
+
+    def test_missing_index_and_traversal_are_skipped(self):
+        self.assertEqual([], inject.enforced_rule_inputs(self.user_root))
+        (self.user_root / "index.md").write_text(
+            "- [bad](../escape.md) — strength: enforced\n"
+            "- [missing](rules/missing.md) — strength: enforced\n", encoding="utf-8")
+        self.assertEqual([], inject.enforced_rule_inputs(self.user_root))
+
+    def test_session_context_injects_enforced_rule_full_text(self):
+        self._write_rules_index()
+        result = hooks.session_context({}, start=self.project, user_root=self.user_root,
+                                       runtime_root=self.runtime_root, clock=self.clock)
+        self.assertEqual(1, result["enforced_rule_count"])
+        self.assertIn("NEVER skip final checks", result["text"])
+
+    def test_session_context_counts_zero_without_rules(self):
+        result = hooks.session_context({}, start=self.project, user_root=self.user_root,
+                                       runtime_root=self.runtime_root, clock=self.clock)
+        self.assertEqual(0, result["enforced_rule_count"])
+
+    def test_host_entry_prints_status_line_to_stderr_only(self):
+        import os
+        import subprocess
+        import sys
+        self._write_rules_index()
+        src = str(Path(__file__).resolve().parents[1] / "src")
+        env = dict(os.environ)
+        env["PYTHONPATH"] = src + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
+        env["FSTAR_USER_ROOT"] = str(self.user_root)
+        env["FSTAR_RUNTIME_ROOT"] = str(self.runtime_root)
+        env.pop("FSTAR_PROJECT", None)
+        empty = Path(self.tmp.name) / "empty"
+        empty.mkdir()
+        process = subprocess.run([sys.executable, "-m", "fstar.runtime", "session-context"],
+                                 input=json.dumps({"session_id": "s1"}), text=True,
+                                 capture_output=True, cwd=str(self.project), env=env, timeout=30)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertIn("⏺ fstar SessionStart", process.stderr)
+        self.assertIn("rules=1", process.stderr)
+        self.assertRegex(process.stderr, r"project=%s rules=1 \d+ms" % self.project.name)
+        # Not initialized: the project field stays "-".
+        empty = Path(self.tmp.name) / "empty2"
+        empty.mkdir()
+        process = subprocess.run([sys.executable, "-m", "fstar.runtime", "session-context"],
+                                 input=json.dumps({"session_id": "s1"}), text=True,
+                                 capture_output=True, cwd=str(empty), env=env, timeout=30)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertIn("project=- rules=", process.stderr)
+        # The status line must never enter the injection body (stdout).
+        self.assertNotIn("SessionStart", process.stdout)
+        self.assertIn("fstar routing", process.stdout)
+
+
 class HostEntryTests(HookCase):
     """python3 -m fstar.runtime <hook> with host payload on stdin."""
 

@@ -240,10 +240,17 @@ class TaskService:
     def _event(self, task: dict, event_type: str, source: dict, data: dict) -> None:
         task["events"].append(make_event(event_type, source, data, self.clock()))
 
+    @staticmethod
+    def _lease_hint(lease: Optional[dict]) -> str:
+        expires = (lease or {}).get("expires_at") or "unknown"
+        return ("release via 'fstar interrupt <task> --release-lease-token <token>' or wait for expiry at %s" % expires)
+
     def _require_unleased(self, task: dict, operation: str) -> None:
         lease = task.get("lease")
         if lease and lease.get("expires_at", "") > self.clock():
-            raise DomainError("lease_conflict", "%s cannot mutate a task with an active writer" % operation, {"holder": lease.get("holder")}, status=4)
+            raise DomainError("lease_conflict", "%s cannot mutate a task with an active writer" % operation,
+                              {"holder": lease.get("holder"), "expires_at": lease.get("expires_at"),
+                               "hint": self._lease_hint(lease)}, status=4)
 
     def _require_active(self, task: dict, operation: str) -> None:
         if task.get("meta", {}).get("disposition"):
@@ -681,6 +688,26 @@ class TaskService:
                 entries[entries.index(previous)] = normalized
             else:
                 entries.append(normalized)
+            # B-11: the deliverable's path becomes an (empty) artifact-map
+            # entry in the SAME transaction, reusing persist_artifact_map's
+            # normalize shape so later check evidence can establish scope
+            # against it. Existing entries are merged, never deleted; a full
+            # mapping with markers still goes through EvidenceService.
+            templates = task.setdefault("meta", {}).setdefault("templates", {})
+            artifact_map = dict(templates.get("artifact_map", {}) or {})
+            resolvable = True
+            try:
+                self.store.project_file(normalized["path"])
+            except DomainError:
+                # An unresolvable deliverable path must not poison the map:
+                # the deliverable is recorded, the map stays untouched.
+                resolvable = False
+            if resolvable and not isinstance(artifact_map.get(normalized["path"]), dict):
+                # Merge-only: an existing mapped artifact keeps its items.
+                artifact_map[normalized["path"]] = {}
+                templates["artifact_map"] = artifact_map
+                templates["artifact_map_sha256"] = content_hash(artifact_map)
+                templates["artifact_map_source"] = self._actor_source(actor, "register_deliverable")
             self._event(task, "deliverable_updated", self._actor_source(actor, "register_deliverable"),
                         {"old": previous, "new": normalized})
             self._write(task_dir, task)
@@ -724,6 +751,10 @@ class TaskService:
             task = self.store._read_path(task_dir / "task.json")
             if task.get("meta", {}).get("disposition"):
                 raise DomainError("task_dropped", "A dropped task cannot enter awaiting_acceptance; revive it explicitly", status=3)
+            if task["phase"] == "awaiting_acceptance":
+                raise DomainError("phase_transition_forbidden",
+                                  "Task is already in awaiting_acceptance; use `fstar accept <task>` to accept it",
+                                  {"phase": task["phase"]}, status=3)
             if task["phase"] != "in_progress":
                 raise DomainError("phase_transition_forbidden",
                                   "Only an in-progress task may enter awaiting_acceptance; "
@@ -732,7 +763,8 @@ class TaskService:
             if lease and lease.get("expires_at", "") > self.clock():
                 raise DomainError("lease_conflict",
                                   "Release the writer lease before entering awaiting_acceptance",
-                                  {"holder": lease.get("holder")}, status=4)
+                                  {"holder": lease.get("holder"), "expires_at": lease.get("expires_at"),
+                                   "hint": self._lease_hint(lease)}, status=4)
             status = self.evidence.acceptance_status(ref, task=task)
             if not status["awaiting_acceptance"]:
                 raise DomainError("acceptance_blocked",
