@@ -1,0 +1,994 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-24T11:21:38.584719Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "d18c76e8-9a78-4014-9684-3c2ade68f002"
+    ],
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user",
+        "session": null
+      },
+      "at": "2026-11-24T11:21:38.576224Z",
+      "quote": "",
+      "reference": "user:2026-11-24 你走完check 相当于验收通过 走commit 合并流程吧",
+      "scope": "accept",
+      "source_id": "user:2026-11-24 你走完check 相当于验收通过 走commit 合并流程吧",
+      "type": "command",
+      "validates": "658f47092a841ab5a5b60c6f2ccd7b6e808f192fffe7ee786708836ad62ac043"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "434ca9131d98b47ba9ce8f9327e67db2b036c4f9c5e17e70f8520d3d48dee66d"
+      ],
+      "task": "658f47092a841ab5a5b60c6f2ccd7b6e808f192fffe7ee786708836ad62ac043"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "origin/main",
+  "blocked": null,
+  "branch": "fix/defect-report-batch1",
+  "capabilities": [],
+  "children": [],
+  "commit": "feb59fcb3a7d5009ce6dd478a1dbffa10b447f17",
+  "completedAt": "2026-11-24T11:21:38.584745Z",
+  "createdAt": "2026-11-24T09:35:04.695185Z",
+  "creator": "agent",
+  "deliverables": [
+    {
+      "criteria_refs": [],
+      "format": "",
+      "name": "plan",
+      "path": ".fstar/tasks/defect-report-batch1/plan.md",
+      "version": ""
+    }
+  ],
+  "description": "落实已确认高性价比缺陷修复：B-02/B-04 lease释放与错误信息、B-11 add-deliverable写artifact_map、B-10/B-17 enforced规则注入与可见状态行、B-03 schema命令、B-14 --version别名",
+  "events": [
+    {
+      "at": "2026-11-24T09:35:04.695560Z",
+      "data": {
+        "parent": null
+      },
+      "id": "5910f642-e953-41ba-9b22-ece039fce9d0",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-24T09:35:04.695556Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "8f37b7ae-ff71-4381-b83d-e26b791021d6",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-24T09:35:18.316161Z",
+      "data": {
+        "branch": "fix/defect-report-batch1",
+        "detached": false,
+        "snapshot": "455007383f376b807ce252550f5d5dc136589f2f1c79bd235af94eebe64e65f1",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "2f89ac0e-6dba-4490-a734-60b090669aed",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-24T09:35:18.279679Z",
+        "quote": "",
+        "reference": "session:claude-main",
+        "scope": "start",
+        "source_id": "session:claude-main",
+        "type": "command",
+        "validates": "5bf7372c49861baec2a89754601f0c3d94b320ce8640eb9b46bb5b62e622b166"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-24T09:36:03.231243Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "18882583-3d07-4030-b79c-90014582baed",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T09:36:03.231240Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "fe3c997a-a614-4921-80cb-ed43edcbb75e",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-24T09:36:03.232799Z",
+      "data": {
+        "dispatch_id": "dc93f171-e690-456c-bb24-bf2abdcd2c40",
+        "plan_item_ids": [
+          "A1-lease-errors",
+          "A2-deliverable-artifact-map",
+          "A3-rule-injection-status-line",
+          "A4-schema-command",
+          "A5-version-alias"
+        ],
+        "role": "implement"
+      },
+      "id": "73273fad-3ba9-4275-8396-d419fe3f3ec6",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T09:36:03.232796Z",
+        "quote": "",
+        "reference": "dispatch dc93f171-e690-456c-bb24-bf2abdcd2c40",
+        "scope": "dispatch",
+        "source_id": "f059c670-b81e-477b-9ebf-386b2db6e0cd",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-24T09:37:00.812218Z",
+      "data": {
+        "dispatch_id": "421ac41f-4a3e-4645-866a-324809cdf16e",
+        "plan_item_ids": [
+          "A1-lease-errors",
+          "A2-deliverable-artifact-map",
+          "A3-rule-injection-status-line",
+          "A4-schema-command",
+          "A5-version-alias"
+        ],
+        "role": "implement"
+      },
+      "id": "6529011b-65dc-44bf-b270-c08b4337a1e3",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T09:37:00.812213Z",
+        "quote": "",
+        "reference": "dispatch 421ac41f-4a3e-4645-866a-324809cdf16e",
+        "scope": "dispatch",
+        "source_id": "1b08d67e-d7a6-4470-9534-011adcc56ddb",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-24T09:54:51.213479Z",
+      "data": {
+        "evidence_id": "249c1c12-ff50-4351-91f2-f9c53d07b143",
+        "state": "valid"
+      },
+      "id": "54b05ea7-9d67-4bf9-b3e3-fb130bb6ee29",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-24T09:55:16.927172Z",
+      "data": {
+        "dispatch_id": "7d8287b2-1672-446d-987d-cdd8f63e06d2",
+        "plan_item_ids": [
+          "A1-lease-errors",
+          "A2-deliverable-artifact-map",
+          "A3-rule-injection-status-line",
+          "A4-schema-command",
+          "A5-version-alias"
+        ],
+        "role": "check"
+      },
+      "id": "6b1356e1-8d32-4f9c-a220-d76671ef1b63",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T09:55:16.927168Z",
+        "quote": "",
+        "reference": "dispatch 7d8287b2-1672-446d-987d-cdd8f63e06d2",
+        "scope": "dispatch",
+        "source_id": "4edbe52c-b130-4e78-b0ac-0f10e5cc7196",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-24T10:09:19.909078Z",
+      "data": {
+        "new": {
+          "criteria_refs": [],
+          "format": "",
+          "name": "plan",
+          "path": ".fstar/tasks/defect-report-batch1/plan.md",
+          "version": ""
+        },
+        "old": null
+      },
+      "id": "c7fdb071-7d3a-41a3-8b00-2c1b54fbb655",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-24T10:09:19.909074Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "8161b43a-819a-4af3-93eb-ca0c840e8599",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-24T10:10:42.630600Z",
+      "data": {
+        "reason": "interrupt: check complete; releasing coordinator lease for artifact map preparation"
+      },
+      "id": "a2e26058-d21a-47ef-aad3-4fad6498f6e6",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-24T10:11:28.573239Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "24e5d917-7275-43db-b91c-855f934d550b",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-24T10:11:28.573237Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "9d832753-3f76-41c0-8e14-f98f6f76b238",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-24T10:11:40.255546Z",
+      "data": {
+        "evidence_id": "640831a1-306d-48b0-9e47-f6213cb7d964",
+        "state": "stale"
+      },
+      "id": "650165fa-33cc-433a-b349-2801c798c0d3",
+      "source": {
+        "id": "fstar-check-worker",
+        "role": "check",
+        "session_id": "check-7d8287b2"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-24T10:12:23.556336Z",
+      "data": {
+        "dispatch_id": "14d01c17-992c-4284-8dc1-c2a70051bb99",
+        "plan_item_ids": [
+          "A1-lease-errors",
+          "A2-deliverable-artifact-map",
+          "A3-rule-injection-status-line",
+          "A4-schema-command",
+          "A5-version-alias"
+        ],
+        "role": "check"
+      },
+      "id": "fd2f098e-7409-4158-abc6-b0345269f1d6",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T10:12:23.556332Z",
+        "quote": "",
+        "reference": "dispatch 14d01c17-992c-4284-8dc1-c2a70051bb99",
+        "scope": "dispatch",
+        "source_id": "fb4889e4-3a9d-4f23-9eb5-43e09994f4cc",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-24T10:12:33.145716Z",
+      "data": {
+        "evidence_id": "26b864ce-6f56-48ba-a513-0542872dfa90",
+        "state": "stale"
+      },
+      "id": "85af5b8d-160b-4032-95df-fc3d04d26372",
+      "source": {
+        "id": "fstar-check-worker",
+        "role": "check",
+        "session_id": "check-7d8287b2"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-24T10:12:52.187599Z",
+      "data": {
+        "dispatch_id": "55dba4ec-b449-40bd-b3ff-b2f749e7292c",
+        "plan_item_ids": [
+          "A1-lease-errors"
+        ],
+        "role": "check"
+      },
+      "id": "7c53bd14-acc8-4337-971a-f05fd58fc384",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T10:12:52.187594Z",
+        "quote": "",
+        "reference": "dispatch 55dba4ec-b449-40bd-b3ff-b2f749e7292c",
+        "scope": "dispatch",
+        "source_id": "cccfd529-0842-49e8-afa4-ce01a5c715bf",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-24T10:13:00.762242Z",
+      "data": {
+        "evidence_id": "d18c76e8-9a78-4014-9684-3c2ade68f002",
+        "state": "valid"
+      },
+      "id": "84d7d45e-4cf9-4bfe-916e-a0ad0a4ccd5c",
+      "source": {
+        "id": "fstar-check-worker",
+        "role": "check",
+        "session_id": "check-7d8287b2"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-24T10:13:09.904259Z",
+      "data": {
+        "reason": "interrupt: final check harvested and valid; releasing coordinator lease for awaiting_acceptance"
+      },
+      "id": "19cad43a-8055-4b80-ba69-e6d17b56e825",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-24T10:13:10.230546Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "d18c76e8-9a78-4014-9684-3c2ade68f002"
+        ]
+      },
+      "id": "92e8c797-5c23-452f-bb3e-84dd708924c1",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-24T10:13:10.230359Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "7a2c83d6-9b16-4cf4-8f12-5766b7c581fb",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-24T11:21:38.584749Z",
+      "data": {
+        "evidence_refs": [
+          "d18c76e8-9a78-4014-9684-3c2ade68f002"
+        ]
+      },
+      "id": "8e3503dd-45dc-45c6-9e77-9c8e43156105",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-24T11:21:38.576224Z",
+        "quote": "",
+        "reference": "user:2026-11-24 你走完check 相当于验收通过 走commit 合并流程吧",
+        "scope": "accept",
+        "source_id": "user:2026-11-24 你走完check 相当于验收通过 走commit 合并流程吧",
+        "type": "command",
+        "validates": "658f47092a841ab5a5b60c6f2ccd7b6e808f192fffe7ee786708836ad62ac043"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "434ca9131d98b47ba9ce8f9327e67db2b036c4f9c5e17e70f8520d3d48dee66d",
+        "paths": [
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "4d322c9c65d31576e16a794b157a1240761171eb1ef0bc14e9ebbc67d3f77135"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "cc6193649d7532b31b3d9e60076f5e3c0550cdcf0cf2a9bbea18c271631fa41a"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/__main__.py",
+            "sha256": "4366c5fff1c7add5b969ed7004481898a6afb6e1b3ac68435187e5762264013d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "912cd1c3facbd7d8800cc5ebfb1272d775c38ea970e960ba7a0951f923cdd0fb"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "eac949c6c57718f175c47065e90aa09da6b20e701298bfe2216b6a13a734681e"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "7d7769059dace8ed0b6913c01737b029c57a284359459b9c6fbe1a85aed7e247"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "bdfcf22947002c091837761dec9d0621f5ae5f50f18c8350d3c1fe1fb838e534"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "da10ee3f43c5a5fc41c3b4ee7067e546748b728606d1e4e7404c9b3d62bde533"
+          }
+        ]
+      },
+      "dispatch_id": "421ac41f-4a3e-4645-866a-324809cdf16e",
+      "id": "249c1c12-ff50-4351-91f2-f9c53d07b143",
+      "input_files": [],
+      "kind": "delivery",
+      "produced_at": "2026-11-24T09:54:51.211635Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "state": "valid",
+      "unverified_inputs": [],
+      "validates": [],
+      "validation_facts": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .",
+          "result": "pass"
+        },
+        {
+          "command": "node --test tests/test_package.cjs",
+          "result": "pass"
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "172a5c2da50d4df7b4b5fa9994757d44",
+        "paths": [
+          {
+            "path": "src/fstar/tasks.py",
+            "sha256": "7d7769059dace8ed0b6913c01737b029c57a284359459b9c6fbe1a85aed7e247"
+          },
+          {
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "eac949c6c57718f175c47065e90aa09da6b20e701298bfe2216b6a13a734681e"
+          },
+          {
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "912cd1c3facbd7d8800cc5ebfb1272d775c38ea970e960ba7a0951f923cdd0fb"
+          },
+          {
+            "path": "src/fstar/runtime/__main__.py",
+            "sha256": "4366c5fff1c7add5b969ed7004481898a6afb6e1b3ac68435187e5762264013d"
+          },
+          {
+            "path": "src/fstar/dispatch.py",
+            "sha256": "cc6193649d7532b31b3d9e60076f5e3c0550cdcf0cf2a9bbea18c271631fa41a"
+          },
+          {
+            "path": "src/fstar/cli.py",
+            "sha256": "4d322c9c65d31576e16a794b157a1240761171eb1ef0bc14e9ebbc67d3f77135"
+          },
+          {
+            "path": "tests/test_core.py",
+            "sha256": "bdfcf22947002c091837761dec9d0621f5ae5f50f18c8350d3c1fe1fb838e534"
+          },
+          {
+            "path": "tests/test_hooks.py",
+            "sha256": "da10ee3f43c5a5fc41c3b4ee7067e546748b728606d1e4e7404c9b3d62bde533"
+          }
+        ]
+      },
+      "dispatch_id": "7d8287b2-1672-446d-987d-cdd8f63e06d2",
+      "environment": {
+        "host": "local",
+        "python": "3.9.6"
+      },
+      "id": "640831a1-306d-48b0-9e47-f6213cb7d964",
+      "input_files": [],
+      "items": [
+        {
+          "command": "temp-store repro + tests",
+          "plan_item": "A1-lease-errors",
+          "requirement_ids": [
+            "A1-lease-errors"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "artifact_map merge verification",
+          "plan_item": "A2-deliverable-artifact-map",
+          "requirement_ids": [
+            "A2-deliverable-artifact-map"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "hook stdout/stderr live run",
+          "plan_item": "A3-rule-injection-status-line",
+          "requirement_ids": [
+            "A3-rule-injection-status-line"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar schema payload|result|change exit 0",
+          "plan_item": "A4-schema-command",
+          "requirement_ids": [
+            "A4-schema-command"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar --version exit 0 + edge cases",
+          "plan_item": "A5-version-alias",
+          "requirement_ids": [
+            "A5-version-alias"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-24T10:11:40.252361Z",
+      "producer": {
+        "id": "fstar-check-worker",
+        "role": "check",
+        "session_id": "check-7d8287b2"
+      },
+      "read_only": true,
+      "run_id": "check-7d8287b2",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "actual": "434ca9131d98b47ba9ce8f9327e67db2b036c4f9c5e17e70f8520d3d48dee66d",
+          "expected": "172a5c2da50d4df7b4b5fa9994757d44",
+          "type": "delivery"
+        }
+      ],
+      "state": "stale",
+      "summary": "A1-A5 all pass via independent execution; regressions green (1004 py, 16 node). One info finding: package-assets.json sha256 refresh, verified correct.",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/defect-report-batch1/plan.md",
+          "dependencies": [],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A1-lease-errors",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A2-deliverable-artifact-map",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A3-rule-injection-status-line",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A4-schema-command",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A5-version-alias",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "5245763f26254d2c57d97bb448328173cfee9ecc42ab601c291c35ec05c7c74c",
+        "paths": [
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "7d7769059dace8ed0b6913c01737b029c57a284359459b9c6fbe1a85aed7e247"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "eac949c6c57718f175c47065e90aa09da6b20e701298bfe2216b6a13a734681e"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "912cd1c3facbd7d8800cc5ebfb1272d775c38ea970e960ba7a0951f923cdd0fb"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/__main__.py",
+            "sha256": "4366c5fff1c7add5b969ed7004481898a6afb6e1b3ac68435187e5762264013d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "cc6193649d7532b31b3d9e60076f5e3c0550cdcf0cf2a9bbea18c271631fa41a"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "4d322c9c65d31576e16a794b157a1240761171eb1ef0bc14e9ebbc67d3f77135"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "bdfcf22947002c091837761dec9d0621f5ae5f50f18c8350d3c1fe1fb838e534"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "da10ee3f43c5a5fc41c3b4ee7067e546748b728606d1e4e7404c9b3d62bde533"
+          }
+        ]
+      },
+      "dispatch_id": "14d01c17-992c-4284-8dc1-c2a70051bb99",
+      "environment": {
+        "host": "local",
+        "python": "3.9.6"
+      },
+      "id": "26b864ce-6f56-48ba-a513-0542872dfa90",
+      "input_files": [],
+      "items": [
+        {
+          "command": "temp-store repro + tests",
+          "plan_item": "A1-lease-errors",
+          "requirement_ids": [
+            "A1-lease-errors"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "artifact_map merge verification",
+          "plan_item": "A2-deliverable-artifact-map",
+          "requirement_ids": [
+            "A2-deliverable-artifact-map"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "hook stdout/stderr live run",
+          "plan_item": "A3-rule-injection-status-line",
+          "requirement_ids": [
+            "A3-rule-injection-status-line"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar schema payload|result|change exit 0",
+          "plan_item": "A4-schema-command",
+          "requirement_ids": [
+            "A4-schema-command"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar --version exit 0 + edge cases",
+          "plan_item": "A5-version-alias",
+          "requirement_ids": [
+            "A5-version-alias"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-24T10:12:33.142747Z",
+      "producer": {
+        "id": "fstar-check-worker",
+        "role": "check",
+        "session_id": "check-7d8287b2"
+      },
+      "read_only": true,
+      "run_id": "check-14d01c17",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "actual": "434ca9131d98b47ba9ce8f9327e67db2b036c4f9c5e17e70f8520d3d48dee66d",
+          "expected": "5245763f26254d2c57d97bb448328173cfee9ecc42ab601c291c35ec05c7c74c",
+          "type": "delivery"
+        }
+      ],
+      "state": "stale",
+      "summary": "A1-A5 all pass via independent execution; regressions green (1004 py, 16 node). One info finding: package-assets.json sha256 refresh, verified correct.",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/defect-report-batch1/plan.md",
+          "dependencies": [],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A1-lease-errors",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A2-deliverable-artifact-map",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A3-rule-injection-status-line",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A4-schema-command",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A5-version-alias",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "434ca9131d98b47ba9ce8f9327e67db2b036c4f9c5e17e70f8520d3d48dee66d",
+        "paths": [
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "4d322c9c65d31576e16a794b157a1240761171eb1ef0bc14e9ebbc67d3f77135"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "cc6193649d7532b31b3d9e60076f5e3c0550cdcf0cf2a9bbea18c271631fa41a"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/__main__.py",
+            "sha256": "4366c5fff1c7add5b969ed7004481898a6afb6e1b3ac68435187e5762264013d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "912cd1c3facbd7d8800cc5ebfb1272d775c38ea970e960ba7a0951f923cdd0fb"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "eac949c6c57718f175c47065e90aa09da6b20e701298bfe2216b6a13a734681e"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "7d7769059dace8ed0b6913c01737b029c57a284359459b9c6fbe1a85aed7e247"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "bdfcf22947002c091837761dec9d0621f5ae5f50f18c8350d3c1fe1fb838e534"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "da10ee3f43c5a5fc41c3b4ee7067e546748b728606d1e4e7404c9b3d62bde533"
+          }
+        ]
+      },
+      "dispatch_id": "55dba4ec-b449-40bd-b3ff-b2f749e7292c",
+      "environment": {
+        "host": "local",
+        "python": "3.9.6"
+      },
+      "id": "d18c76e8-9a78-4014-9684-3c2ade68f002",
+      "input_files": [],
+      "items": [
+        {
+          "command": "temp-store repro + tests",
+          "plan_item": "A1-lease-errors",
+          "requirement_ids": [
+            "A1-lease-errors"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "artifact_map merge verification",
+          "plan_item": "A2-deliverable-artifact-map",
+          "requirement_ids": [
+            "A2-deliverable-artifact-map"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "hook stdout/stderr live run",
+          "plan_item": "A3-rule-injection-status-line",
+          "requirement_ids": [
+            "A3-rule-injection-status-line"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar schema payload|result|change exit 0",
+          "plan_item": "A4-schema-command",
+          "requirement_ids": [
+            "A4-schema-command"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar --version exit 0 + edge cases",
+          "plan_item": "A5-version-alias",
+          "requirement_ids": [
+            "A5-version-alias"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-24T10:13:00.759099Z",
+      "producer": {
+        "id": "fstar-check-worker",
+        "role": "check",
+        "session_id": "check-7d8287b2"
+      },
+      "read_only": true,
+      "run_id": "check-55dba4ec",
+      "scope": "final",
+      "state": "valid",
+      "summary": "A1-A5 all pass via independent execution; regressions green (1004 py, 16 node). One info finding: package-assets.json sha256 refresh, verified correct.",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/defect-report-batch1/plan.md",
+          "dependencies": [],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A1-lease-errors",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A2-deliverable-artifact-map",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A3-rule-injection-status-line",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A4-schema-command",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            },
+            {
+              "id": "A5-version-alias",
+              "sha256": "04254579567fe4c122da9e93b364deb5663420496a97880049a1a395546a1d4c"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "id": "a9f7127b-e37d-4976-913b-d25e9c6e8079",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/defect-report-batch1/plan.md": {},
+        "mode": "file"
+      },
+      "artifact_map_sha256": "c8999bf4ca973d10266b6541d4fb39233bab9110bde0135cedaba8115cefd981",
+      "artifact_map_source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-24T10:10:58.638082Z",
+        "quote": "",
+        "reference": "prepare check scope",
+        "scope": "prepare",
+        "source_id": "f3c4be9b-4790-4712-ab93-94e0fae76e3b",
+        "type": "system",
+        "validates": ""
+      },
+      "dispatch_harvested": [
+        "14d01c17-992c-4284-8dc1-c2a70051bb99",
+        "421ac41f-4a3e-4645-866a-324809cdf16e",
+        "55dba4ec-b449-40bd-b3ff-b2f749e7292c",
+        "7d8287b2-1672-446d-987d-cdd8f63e06d2"
+      ]
+    }
+  },
+  "name": "defect-report-batch1",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "defect-report-batch1",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}

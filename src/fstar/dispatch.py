@@ -1401,6 +1401,11 @@ def register_commands(subparsers) -> None:
     """Register dispatch/interrupt/doc-edit on the CLI (AC-12)."""
     from .cli import OPTIONAL_HANDLER_ATTR
 
+    # B-03: read-only schema reference; never touches tasks or the project.
+    schema = subparsers.add_parser("schema", help="show a dispatch protocol schema and a minimal example")
+    schema.add_argument("name", choices=("payload", "result", "change"))
+    schema.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_schema})
+
     dispatch = subparsers.add_parser("dispatch")
     dispatch.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_dispatch_usage})
     dispatch_sub = dispatch.add_subparsers(dest="dispatch_command", required=True)
@@ -1483,6 +1488,106 @@ def register_commands(subparsers) -> None:
     orphan.add_argument("task")
     orphan.add_argument("--workflow", action="store_true")
     orphan.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_orphan})
+
+
+SCHEMA_REFERENCE = {
+    "payload": {
+        "schema": PAYLOAD_SCHEMA,
+        "validator": "validate_payload",
+        "fields": [
+            ("schema", "string", "must be %s" % PAYLOAD_SCHEMA),
+            ("dispatch_id", "string", "required; unique per dispatch"),
+            ("task_ref", "string", "required; project-relative task path or 'session-only'"),
+            ("role", "string", "required; one of %s" % ", ".join(ROLES)),
+            ("plan_item_ids", "string[]", "plan items this dispatch covers"),
+            ("baseline", "object", "required; input fingerprints (artifact_items, delivery)"),
+            ("input_versions", "object[]", "optional; {path, sha256} file inputs"),
+            ("allowed_paths", "string[]", "required; writable project-relative paths"),
+            ("read_context", "object[]", "optional; {path, sha256} files read in full"),
+            ("required_validations", "string[]", "validations the worker must actually run"),
+            ("return_conditions", "object", "{done, blocked, failed} strings"),
+            ("prompt_first_line", "string", "required; 'Active task: <task_ref>'"),
+            ("extensions", "object[]", "optional; extension authorization records"),
+            ("selected_skills", "object[]", "optional; S-5 skill selection entries"),
+        ],
+        "example": {
+            "schema": PAYLOAD_SCHEMA,
+            "dispatch_id": "<uuid>",
+            "task_ref": "session-only",
+            "role": "implement",
+            "plan_item_ids": [],
+            "baseline": {"artifact_items": [], "delivery": {"paths": [], "digest": ""}},
+            "allowed_paths": [],
+            "return_conditions": {"done": "", "blocked": "", "failed": ""},
+            "prompt_first_line": "Active task: session-only",
+        },
+    },
+    "result": {
+        "schema": RESULT_SCHEMA,
+        "validator": "validate_result",
+        "fields": [
+            ("schema", "string", "must be %s" % RESULT_SCHEMA),
+            ("dispatch_id", "string", "required; must match the payload"),
+            ("role", "string", "required; one of %s" % ", ".join(ROLES)),
+            ("status", "string", "required; one of %s" % ", ".join(STATUSES)),
+            ("changed_paths", "string[]", "project-relative files the worker wrote"),
+            ("artifact_refs", "object[]", "pointers to produced artifacts"),
+            ("validation_facts", "object[]", "required entries; each needs {command, result}"),
+            ("blockers", "string[]", "why the dispatch is blocked, if it is"),
+            ("input_baseline", "object", "input fingerprints the worker observed"),
+            ("delivery_baseline", "object", "post-work delivery snapshot"),
+            ("skill_usage", "object[]", "optional; S-5 usage entries"),
+        ],
+        "example": {
+            "schema": RESULT_SCHEMA,
+            "dispatch_id": "<same as payload>",
+            "role": "implement",
+            "status": "done",
+            "changed_paths": [],
+            "artifact_refs": [],
+            "validation_facts": [{"command": "python3 -m unittest discover -s tests -t .", "result": "pass"}],
+            "blockers": [],
+            "input_baseline": {},
+            "delivery_baseline": {},
+        },
+    },
+    "change": {
+        "schema": CHANGE_SCHEMA,
+        "validator": "validate_change",
+        "fields": [
+            ("schema", "string", "must be %s" % CHANGE_SCHEMA),
+            ("change_id", "string", "required; unique change id"),
+            ("source", "string", "required; one of %s" % ", ".join(CHANGE_SOURCES)),
+            ("origin", "string", "required; what changed (path or reason)"),
+            ("affected", "object", "{plan_item_ids, artifact_items}"),
+            ("old_fingerprints", "object", "fingerprints before the change"),
+            ("new_fingerprints", "object", "fingerprints after the change"),
+            ("action", "string", "required; one of %s" % ", ".join(CHANGE_ACTIONS)),
+        ],
+        "example": {
+            "schema": CHANGE_SCHEMA,
+            "change_id": "<uuid>",
+            "source": "file",
+            "origin": ".fstar/tasks/<task>/plan.md",
+            "affected": {"plan_item_ids": [], "artifact_items": []},
+            "old_fingerprints": {},
+            "new_fingerprints": {},
+            "action": "pause_and_redispatch",
+        },
+    },
+}
+
+
+def schema_reference(name: str) -> dict:
+    """Read-only schema field table plus a minimal runnable example (B-03)."""
+    entry = SCHEMA_REFERENCE.get(name)
+    if entry is None:
+        raise DomainError("unknown_schema", "Unknown schema name", {"name": name, "choices": sorted(SCHEMA_REFERENCE)})
+    return dict(entry)
+
+
+def _handle_schema(args):
+    return schema_reference(args.name)
 
 
 def _handle_dispatch_usage(args):

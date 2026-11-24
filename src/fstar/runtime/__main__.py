@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from pathlib import Path
 from typing import List, Optional
 
@@ -69,7 +70,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     runtime_root = _runtime_root()
     try:
         if name == "session-context":
+            # B-17: one user-visible status line on STDERR. stdout stays the
+            # pure injection body (the host hook protocol injects stdout into
+            # the model channel); stderr is terminal-only.
+            started = time.perf_counter()
             result = hooks.session_context(payload, start=start, user_root=user_root, runtime_root=runtime_root)
+            elapsed_ms = int(round((time.perf_counter() - started) * 1000))
+            project = "-" if not result.get("initialized") else (Path(str(start)).name or "-")
+            print("⏺ fstar SessionStart ✓ project=%s rules=%s %sms"
+                  % (project, result.get("enforced_rule_count", 0), elapsed_ms), file=sys.stderr)
             if result.get("text"):
                 print(result["text"])
             return 0

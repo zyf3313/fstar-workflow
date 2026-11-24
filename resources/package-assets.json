@@ -53,7 +53,7 @@
       "source": "src/fstar/cli.py",
       "destination": "src/fstar/cli.py",
       "kind": "python",
-      "sha256": "d1f8dbd1bee49c474d712a78a3e83983936e12ccd20d98234ff9a76dfd7e5c75"
+      "sha256": "4d322c9c65d31576e16a794b157a1240761171eb1ef0bc14e9ebbc67d3f77135"
     },
     {
       "source": "src/fstar/config.py",
@@ -77,7 +77,7 @@
       "source": "src/fstar/dispatch.py",
       "destination": "src/fstar/dispatch.py",
       "kind": "python",
-      "sha256": "d0e2725fa7cf5b1c3a31464d17087a520c2aaf3f022b405447171e6b0a389a4e"
+      "sha256": "cc6193649d7532b31b3d9e60076f5e3c0550cdcf0cf2a9bbea18c271631fa41a"
     },
     {
       "source": "src/fstar/evidence.py",
@@ -143,19 +143,19 @@
       "source": "src/fstar/runtime/__main__.py",
       "destination": "src/fstar/runtime/__main__.py",
       "kind": "python",
-      "sha256": "69adba8ee99cecbe32bd7fa058da497b154db9e0c015ec8213371202530686b9"
+      "sha256": "4366c5fff1c7add5b969ed7004481898a6afb6e1b3ac68435187e5762264013d"
     },
     {
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "412cecb43c48a2c68d5ab5b0caed8de309099c7e1afa5e38a0285ec1b36ba410"
+      "sha256": "912cd1c3facbd7d8800cc5ebfb1272d775c38ea970e960ba7a0951f923cdd0fb"
     },
     {
       "source": "src/fstar/runtime/inject.py",
       "destination": "src/fstar/runtime/inject.py",
       "kind": "python",
-      "sha256": "e5a0eb8e5409087a22b603417645d1d3f60e9e7bb8b919196ae148009f845406"
+      "sha256": "eac949c6c57718f175c47065e90aa09da6b20e701298bfe2216b6a13a734681e"
     },
     {
       "source": "src/fstar/runtime/registration.py",
@@ -173,7 +173,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "f4b5873e08034d98fad22db33ba297f152d585b14fbc5595bb7e1ddbeb0d2937"
+      "sha256": "7d7769059dace8ed0b6913c01737b029c57a284359459b9c6fbe1a85aed7e247"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",

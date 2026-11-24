@@ -55,7 +55,7 @@ npm install -g <the-produced-tarball>.tgz
 Verify:
 
 ```bash
-fstar version    # CLI, resource, and data schema versions
+fstar version    # CLI, resource, and data schema versions (alias: fstar --version)
 fstar doctor     # read-only install and host health report
 ```
 
@@ -116,7 +116,10 @@ A coordinator hands **bounded scope** to implement and check roles. Every
 dispatch carries per-input path, hash, and version, so the harvest step can
 verify what the worker actually read. Sub-agents only touch their authorized
 scope; the main session integrates and inspects consequential changes.
-Editor dispatches accept any project-relative delivery path (not just a
+`fstar schema payload|result|change` prints each dispatch document's required
+fields plus a minimal runnable example, so payloads no longer have to be
+reverse-engineered from source. Editor dispatches accept any project-relative
+delivery path (not just a
 fixed `doc/` directory) — the guard is the explicit per-file
 `allowed_paths` whitelist plus the harvest scope check, so authorization is
 listed per file, never inferred from a directory convention.

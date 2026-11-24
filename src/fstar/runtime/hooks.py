@@ -297,6 +297,10 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     # and project knowledge stay visible without an extension grant. Writing to
     # these surfaces still requires project-governance and explicit confirmation.
     inputs.extend(inject.index_inputs(project_root, user))
+    # B-10: enforced user rules load in full (index lines never substitute the
+    # source body); they ride under the same budgets as every other input.
+    enforced_rules = inject.enforced_rule_inputs(user)
+    inputs.extend(enforced_rules)
     rejected_hint = _rejected_ledger_hint(project_root)
 
     grant_text = "Extension members in this context: %s" % json.dumps(
@@ -311,6 +315,7 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
         result["current_task"] = task_summary
         result["learn_hint"] = learn_hint
         result["rejected_ledger"] = rejected_hint
+        result["enforced_rule_count"] = len(enforced_rules)
         return result
     lines = [inject.render("fstar session context", inputs, budgets, footer=grant_text)]
     if rejected_hint:
@@ -345,7 +350,8 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     lines.append(learn_hint)
     lines.extend(_migration_hint(located, session_id, runtime_root=runtime_root))
     return {"text": "\n".join(lines), "session_id": session_id,
-            "initialized": project_root is not None, "current_task": task_summary}
+            "initialized": project_root is not None, "current_task": task_summary,
+            "enforced_rule_count": len(enforced_rules)}
 
 
 def _migration_hint(located: dict, session_id: Optional[str], *,

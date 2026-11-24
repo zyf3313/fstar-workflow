@@ -24,6 +24,7 @@ These guides help you **ask the right questions before coding**.
 | [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md) | Identify patterns and reduce duplication | When you notice repeated patterns |
 | [Cross-Layer Thinking Guide](./cross-layer-thinking-guide.md) | Think through data flow across layers | Features spanning multiple layers |
 | [Impact Check Guide](./impact-check-guide.md) | 两层影响面检查(调用方 + 机制间交互) | 每次修复/功能开发完成之后,报告完成之前;发版合并时附加 README 检查 |
+| [Defect Report Verification Guide](./defect-report-verification.md) | 逐条核对缺陷/优化报告是否真实存在 | 收到缺陷报告、AI review、优化建议,准备采纳或改代码之前 |
 
 ---
 
@@ -51,6 +52,15 @@ These guides help you **ask the right questions before coding**.
 - [ ] Multiple branches update the same derived state from `kind` / `action`
 
 → Read [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md)
+
+### When Verifying a Defect / Optimization Report
+
+- [ ] 报告是否来自另一台机器或另一个版本？→ 数据类结论标「无法核实」
+- [ ] 每条是机制、数据还是建议？
+- [ ] 当前版本是否已有命令/字段/错误信息替代？
+- [ ] 结论是否分成「已确认 / 部分成立 / 不成立 / 无法核实 / 已过时」并附证据？
+
+→ Read [Defect Report Verification Guide](./defect-report-verification.md)
 
 ### When Verifying AI Cross-Review Results
 

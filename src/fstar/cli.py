@@ -382,7 +382,50 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _version_requested(argv: Optional[list]) -> bool:
+    """True when argv asks for --version as the top-level flag (B-14).
+
+    Only a bare ``--version`` counts; occurrences after a subcommand keyword
+    (or after ``--``) may belong to that subcommand's own arguments and are
+    ignored, so ``--version`` values of subcommand flags never trigger it.
+    """
+    tokens = list(sys.argv[1:] if argv is None else argv)
+    for token in tokens:
+        if token == "--":
+            return False
+        if token.startswith("-") and token != "-":
+            if token == "--version":
+                return True
+            continue
+        # First positional token: a subcommand keyword; --version after it
+        # belongs to the subcommand's own parser.
+        return False
+    return False
+
+
 def main(argv=None) -> int:
+    if _version_requested(argv):
+        # B-14: `fstar --version` is an alias for `fstar version`. The flag is
+        # intercepted BEFORE argparse because the subparsers are required and
+        # would otherwise exit 2; argparse's action="version" has the same
+        # conflict. Equivalent output to the installer's version command.
+        from .installer import roots_from_args, version_report
+
+        tokens = list(sys.argv[1:] if argv is None else argv)
+        overrides = {}
+        for index in range(len(tokens) - 1):
+            if tokens[index] in ("--project", "--user-data-root", "--runtime-root"):
+                overrides[tokens[index][2:].replace("-", "_")] = tokens[index + 1]
+
+        class _VersionArgs:
+            user_data_root = overrides.get("user_data_root")
+            runtime_root = overrides.get("runtime_root")
+            project = overrides.get("project")
+            host_root = []
+            user_level = False
+
+        print(json.dumps(version_report(roots=roots_from_args(_VersionArgs())), ensure_ascii=False, indent=2, default=str))
+        return 0
     parser = build_parser()
     args = parser.parse_args(argv)
     try:

@@ -1072,6 +1072,77 @@ class LifecycleMemberBoundaryTests(EvidenceArchiveTests):
         self.assertTrue(Path(archived2["path"]).is_dir())
 
 
+class LeaseHintTests(CoreCase):
+    """B-02/B-04: lease errors carry an actionable release hint."""
+
+    def test_require_unleased_hint(self):
+        self.create()
+        self.start()
+        lease = self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
+        with self.assertRaises(DomainError) as blocked:
+            self.service.set_blocked("root", actor={"role": "agent", "id": "other"}, reason="race")
+        details = blocked.exception.details or {}
+        self.assertEqual("lease_conflict", blocked.exception.code)
+        self.assertIn("release-lease-token", details.get("hint", ""))
+        self.assertIn("wait for expiry at", details.get("hint", ""))
+        self.assertEqual(lease["expires_at"], details.get("expires_at"))
+
+    def test_enter_awaiting_acceptance_lease_hint_and_phase_branch(self):
+        self.create()
+        self.start()
+        self.service.acquire_lease("root", holder="coordinator", role="coordinator", actor=self.agent)
+        with self.assertRaises(DomainError) as leased:
+            self.service.enter_awaiting_acceptance("root", actor=self.agent)
+        details = leased.exception.details or {}
+        self.assertEqual("lease_conflict", leased.exception.code)
+        self.assertIn("release-lease-token", details.get("hint", ""))
+        self.assertEqual(self.store.read("root")["lease"]["expires_at"], details.get("expires_at"))
+
+
+class AwaitingAcceptanceBranchTests(CoreCase):
+    def test_already_awaiting_acceptance_points_to_accept(self):
+        self.create()
+        self.start()
+        # Forge a task directly in awaiting_acceptance with a fresh final check.
+        task_dir = self.store.resolve("root")
+        task = self.store._read_path(task_dir / "task.json")
+        task["phase"] = "awaiting_acceptance"
+        self.store.write(task_dir, task)
+        with self.assertRaises(DomainError) as forbidden:
+            self.service.enter_awaiting_acceptance("root", actor=self.agent)
+        self.assertEqual("phase_transition_forbidden", forbidden.exception.code)
+        self.assertIn("fstar accept", forbidden.exception.message)
+
+
+class DeliverableArtifactMapTests(CoreCase):
+    """B-11: add-deliverable writes an artifact_map entry in the same transaction."""
+
+    def test_deliverable_merges_artifact_map_entry(self):
+        self.create()
+        self.service.register_deliverable("root", actor=self.agent, entry={"name": "report", "path": "report.md"})
+        templates = self.store.read("root")["meta"]["templates"]
+        self.assertIn("report.md", templates["artifact_map"])
+        self.assertEqual({}, templates["artifact_map"]["report.md"])
+        self.assertIn("artifact_map_sha256", templates)
+        self.assertEqual("register_deliverable", templates["artifact_map_source"]["reference"])
+        # Merge-only: a pre-existing mapped artifact keeps its items.
+        task_dir = self.store.resolve("root")
+        task = self.store._read_path(task_dir / "task.json")
+        task["meta"]["templates"]["artifact_map"]["report.md"] = {"R-1": {"start_marker": "a", "end_marker": "b", "dependencies": []}}
+        self.store.write(task_dir, task)
+        self.service.register_deliverable("root", actor=self.agent, entry={"name": "other", "path": "other.md"})
+        mapping = self.store.read("root")["meta"]["templates"]["artifact_map"]
+        self.assertIn("R-1", mapping["report.md"])
+        self.assertEqual({}, mapping["other.md"])
+
+    def test_deliverable_outside_project_skips_map(self):
+        self.create()
+        self.service.register_deliverable("root", actor=self.agent, entry={"name": "bad", "path": "../escape.md"})
+        task = self.store.read("root")
+        self.assertEqual(["bad"], [d["name"] for d in task["deliverables"]])
+        self.assertNotIn("artifact_map", task["meta"].get("templates", {}) or {})
+
+
 class CliTests(CoreCase):
     def run_cli(self, *args, cwd=None):
         env = dict(os.environ)
@@ -1099,6 +1170,25 @@ class CliTests(CoreCase):
         acceptance = self.run_cli("--project", str(self.project), "--runtime-root", runtime, "--json", "acceptance", "status", "root")
         self.assertEqual(0, acceptance.returncode, acceptance.stderr)
         self.assertFalse(json.loads(acceptance.stdout)["awaiting_acceptance"])
+
+    def test_version_flag_aliases_version_command(self):
+        # B-14: `fstar --version` must exit 0 (the required subparser used to
+        # make argparse exit 2 before the flag could be honored).
+        result = self.run_cli("--version")
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual("fstar.version.v1", payload["schema"])
+
+    def test_schema_command_prints_reference(self):
+        for name, schema in (("payload", "fstar.dispatch.v1"), ("result", "fstar.dispatch.result.v1"), ("change", "fstar.change.v1")):
+            result = self.run_cli("schema", name)
+            self.assertEqual(0, result.returncode, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(schema, payload["schema"])
+            self.assertTrue(payload["fields"])
+            self.assertIn("schema", payload["example"])
+        bad = self.run_cli("schema", "nope")
+        self.assertNotEqual(0, bad.returncode)
 
     def test_workflow_lifecycle_cli_reloads_grants(self):
         self.create()
