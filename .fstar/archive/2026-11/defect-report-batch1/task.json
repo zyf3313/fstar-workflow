@@ -27,7 +27,7 @@
       "task": "658f47092a841ab5a5b60c6f2ccd7b6e808f192fffe7ee786708836ad62ac043"
     }
   },
-  "archivedAt": null,
+  "archivedAt": "2026-11-24T11:24:33.810109Z",
   "assignee": null,
   "base_branch": "origin/main",
   "blocked": null,
@@ -455,6 +455,53 @@
         "validates": "658f47092a841ab5a5b60c6f2ccd7b6e808f192fffe7ee786708836ad62ac043"
       },
       "type": "accepted"
+    },
+    {
+      "at": "2026-11-24T11:24:33.810109Z",
+      "data": {
+        "archived_at": "2026-11-24T11:24:33.810109Z",
+        "operation_id": "890017c8-5256-49bb-a1ab-bf30d8b6bbcd",
+        "target": ".fstar/archive/2026-11/defect-report-batch1"
+      },
+      "id": "f07494fe-a6f0-413e-8800-07cf7a42f44d",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-24T11:24:33.809840Z",
+        "quote": "",
+        "reference": "user:2026-11-24 走commit 合并流程",
+        "scope": "archive",
+        "source_id": "user:2026-11-24 走commit 合并流程",
+        "type": "command",
+        "validates": "a73d51c25fdc092c212406a0a50c04e32ce171db669bcd8a198eb293d79c0c41"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-24T11:24:33.813716Z",
+      "data": {
+        "operation_id": "890017c8-5256-49bb-a1ab-bf30d8b6bbcd",
+        "target": ".fstar/archive/2026-11/defect-report-batch1"
+      },
+      "id": "72e88fc9-8de0-4735-974c-50534fc1c268",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-24T11:24:33.809840Z",
+        "quote": "",
+        "reference": "user:2026-11-24 走commit 合并流程",
+        "scope": "archive",
+        "source_id": "user:2026-11-24 走commit 合并流程",
+        "type": "command",
+        "validates": "a73d51c25fdc092c212406a0a50c04e32ce171db669bcd8a198eb293d79c0c41"
+      },
+      "type": "archived"
     }
   ],
   "evidence": [
