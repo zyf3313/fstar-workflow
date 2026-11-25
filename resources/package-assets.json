@@ -1,7 +1,7 @@
 {
   "schema": "fstar.package-assets.v1",
   "generated_by": "scripts/build-package.cjs",
-  "cli_version": "0.11.1",
+  "cli_version": "0.11.2",
   "resource_version": "10",
   "supported_data_schemas": [
     1
