@@ -33,7 +33,7 @@
       "task": "84daeda84a3851f49f2f3682bbb83eb25de621db59173db6d0ba57c6d41760bc"
     }
   },
-  "archivedAt": null,
+  "archivedAt": "2026-11-25T13:28:06.815098Z",
   "assignee": null,
   "base_branch": "origin/main",
   "blocked": null,
@@ -307,6 +307,53 @@
         "validates": "84daeda84a3851f49f2f3682bbb83eb25de621db59173db6d0ba57c6d41760bc"
       },
       "type": "accepted"
+    },
+    {
+      "at": "2026-11-25T13:28:06.815098Z",
+      "data": {
+        "archived_at": "2026-11-25T13:28:06.815098Z",
+        "operation_id": "28cd4890-3294-48b1-be9e-22954b3fa5c2",
+        "target": ".fstar/archive/2026-11/merge-fstar-doc"
+      },
+      "id": "d72cf04a-0751-4f4d-baff-f6a3c52225f0",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T13:28:06.814790Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "f244b8b03185142693facc79cf23b4c4979eef335133204b5abf948197b48720"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-25T13:28:06.817692Z",
+      "data": {
+        "operation_id": "28cd4890-3294-48b1-be9e-22954b3fa5c2",
+        "target": ".fstar/archive/2026-11/merge-fstar-doc"
+      },
+      "id": "9d72fa7d-f9c5-430a-803f-6891df31f3cc",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T13:28:06.814790Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "f244b8b03185142693facc79cf23b4c4979eef335133204b5abf948197b48720"
+      },
+      "type": "archived"
     }
   ],
   "evidence": [

@@ -33,7 +33,7 @@
       "task": "2f8897769a8db8ac4aa95327ce21815f7c31bf26d503c5a5998a381d756ce781"
     }
   },
-  "archivedAt": null,
+  "archivedAt": "2026-11-25T13:28:01.381774Z",
   "assignee": null,
   "base_branch": "origin/main",
   "blocked": null,
@@ -307,6 +307,53 @@
         "validates": "2f8897769a8db8ac4aa95327ce21815f7c31bf26d503c5a5998a381d756ce781"
       },
       "type": "accepted"
+    },
+    {
+      "at": "2026-11-25T13:28:01.381774Z",
+      "data": {
+        "archived_at": "2026-11-25T13:28:01.381774Z",
+        "operation_id": "e3c36b8c-cf02-4ad5-934b-33edd3cead03",
+        "target": ".fstar/archive/2026-11/fix-user-directory-resolution"
+      },
+      "id": "8fc11f8a-fe8e-4da6-9753-1c3d8f5b0118",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T13:28:01.381479Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "142b022beb0166506ce4c55357f8f1255a8f85d95388d7d89f8bf18fea70daef"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-25T13:28:01.384438Z",
+      "data": {
+        "operation_id": "e3c36b8c-cf02-4ad5-934b-33edd3cead03",
+        "target": ".fstar/archive/2026-11/fix-user-directory-resolution"
+      },
+      "id": "893a418d-ce03-464e-bede-ca61924da865",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T13:28:01.381479Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "142b022beb0166506ce4c55357f8f1255a8f85d95388d7d89f8bf18fea70daef"
+      },
+      "type": "archived"
     }
   ],
   "evidence": [

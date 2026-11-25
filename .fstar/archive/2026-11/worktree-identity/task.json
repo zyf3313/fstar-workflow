@@ -34,7 +34,7 @@
       "task": "c7da4cc6bc09b5ac51b3e7fb7f7f414a071745d392e4093bae5a483abaedafba"
     }
   },
-  "archivedAt": null,
+  "archivedAt": "2026-11-25T13:27:49.152196Z",
   "assignee": null,
   "base_branch": "origin/main",
   "blocked": null,
@@ -572,6 +572,53 @@
         "validates": "c7da4cc6bc09b5ac51b3e7fb7f7f414a071745d392e4093bae5a483abaedafba"
       },
       "type": "accepted"
+    },
+    {
+      "at": "2026-11-25T13:27:49.152196Z",
+      "data": {
+        "archived_at": "2026-11-25T13:27:49.152196Z",
+        "operation_id": "5fe6a97e-bf41-45ce-b026-f640fc460578",
+        "target": ".fstar/archive/2026-11/worktree-identity"
+      },
+      "id": "0ff28ad6-cefb-4218-86f2-c5ce344c5bd4",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T13:27:49.151827Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "d6681e8adb1b28026e921a20843e93324e72074b3c2235972431d30310134f89"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-25T13:27:49.156753Z",
+      "data": {
+        "operation_id": "5fe6a97e-bf41-45ce-b026-f640fc460578",
+        "target": ".fstar/archive/2026-11/worktree-identity"
+      },
+      "id": "a5ae66f5-b8a0-4015-9437-0fceca97c56a",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T13:27:49.151827Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "archive",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "d6681e8adb1b28026e921a20843e93324e72074b3c2235972431d30310134f89"
+      },
+      "type": "archived"
     }
   ],
   "evidence": [
