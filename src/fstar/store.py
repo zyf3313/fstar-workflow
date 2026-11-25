@@ -64,20 +64,36 @@ def _initialized_at(candidate: Path) -> bool:
     return False
 
 
-def find_project_root(start: Path) -> Optional[Path]:
+def find_project_root(start: Path, *, strict_worktree_errors: bool = False) -> Optional[Path]:
     current = start.resolve()
     if current.is_file():
         current = current.parent
     for candidate in (current,) + tuple(current.parents):
-        if _initialized_at(candidate):
-            return candidate
-        # A linked worktree shares the main tree's initialized data root.
         main_root = _linked_worktree_main_root(candidate)
+        try:
+            if _initialized_at(candidate):
+                return candidate
+        except (DomainError, OSError, UnicodeError, ValueError, RuntimeError):
+            if main_root is None or strict_worktree_errors:
+                raise
+            # Reporting callers can leave unreadable worktree identities
+            # unresolved; ordinary CLI commands request the original error.
+            return None
+        # A linked worktree shares the main tree's initialized data root.
         if main_root is not None:
             pointer = candidate / POINTER_FILE
-            # A worktree's own unusable pointer must not silently switch it
-            # to the main project, or to an initialized ancestor.
-            if pointer.is_file() or pointer.is_symlink():
+            # An unusable local pointer blocks all fallback, including
+            # initialized ancestors. Doctor can report it read-only.
+            if pointer.exists() or pointer.is_symlink():
+                if strict_worktree_errors:
+                    if pointer.is_symlink():
+                        raise DomainError("corrupt_pointer", "Worktree pointer is a symbolic link",
+                                          {"path": str(pointer)})
+                    # Preserve the existing moved-pointer diagnostic and details.
+                    _resolve_project_layout(candidate)
+                    raise DomainError("project_not_initialized",
+                                      "Worktree pointer does not resolve to an initialized project",
+                                      {"path": str(pointer), "project_root": str(candidate)})
                 return None
             if _initialized_at(main_root):
                 return main_root

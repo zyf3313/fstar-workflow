@@ -53,7 +53,7 @@
       "source": "src/fstar/cli.py",
       "destination": "src/fstar/cli.py",
       "kind": "python",
-      "sha256": "2265c6f2beabc19105a293e527b80b0a361cc809ae4cad0cd0167baa796a559d"
+      "sha256": "224e6a04bf2933eba3f7f2d08e7165c28f77909c30f8d478435e0a680440db7e"
     },
     {
       "source": "src/fstar/config.py",
@@ -107,13 +107,13 @@
       "source": "src/fstar/knowledge.py",
       "destination": "src/fstar/knowledge.py",
       "kind": "python",
-      "sha256": "98a40c161b8e1b0bb8209e789be947898701a4e65f1d7953cf3002470e3bb895"
+      "sha256": "408c66a39160482eee2797161c8148ef84c0a5cbd0a7706eb17c277914c30760"
     },
     {
       "source": "src/fstar/learn_bridge.py",
       "destination": "src/fstar/learn_bridge.py",
       "kind": "python",
-      "sha256": "b02e52f33956098b92dfb84eff54756e59711e256ac6542abbfafb39f5bbe2e5"
+      "sha256": "a56fde131ba4c4e2c7e1007ddd4bac7c54d6f5cba7d3e856a6a5570a81219723"
     },
     {
       "source": "src/fstar/magpie.py",
@@ -131,7 +131,7 @@
       "source": "src/fstar/project.py",
       "destination": "src/fstar/project.py",
       "kind": "python",
-      "sha256": "b534caba13f602126c53a0e3ced589c11fbf6919742afaeb00734a5e4ffa65a4"
+      "sha256": "bcd1c911bd8b4fcd2e26e310a9ee9a668c9800fd2eed0afd42da246b308e8f81"
     },
     {
       "source": "src/fstar/runtime/__init__.py",
@@ -167,7 +167,7 @@
       "source": "src/fstar/store.py",
       "destination": "src/fstar/store.py",
       "kind": "python",
-      "sha256": "ec08db52eecc1c77df5d3833c6a55b79fd3c34a9dbeb4e4aab9a1fb07fe4184b"
+      "sha256": "2fceeecaa2b8a1b627b3ede889f8518a95b7250872e91c2f132ad923b25aff94"
     },
     {
       "source": "src/fstar/tasks.py",

@@ -73,9 +73,11 @@ class BridgeResolutionTests(unittest.TestCase):
                     request = self.request("project", ".fstar/knowledge/context/note.md", "# Note\n", "knowledge")
                     rc, result = self.call(dict(request, action=action, project_root=str(root)))
                     self.assertNotEqual(0, rc)
-                    self.assertEqual({"code": "knowledge_invalid_schema",
-                                      "message": "Project writes require an initialized project (schema 1)",
-                                      "details": {"path": str(root / ".fstar/.schema-version"), "expected": "1", "actual": None}}, result["error"])
+                    self.assertEqual("knowledge_invalid_schema", result["error"]["code"])
+                    self.assertIn("Cannot resolve supplied project_root", result["error"]["message"])
+                    self.assertIn(str(root), result["error"]["message"])
+                    self.assertEqual({"project_root": str(root), "resolved_project_root": None},
+                                     result["error"]["details"])
         self.assertFalse((self.base / "missing").exists())
 
     def test_moved_and_corrupt_pointer_refused_by_bridge(self):

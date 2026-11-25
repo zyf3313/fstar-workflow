@@ -2048,17 +2048,20 @@ def _prose_preserved(before: str, after: str, markers: Sequence[str]) -> bool:
 
 def _require_initialized_project(project_root: Path, *, data_root: Optional[Path] = None) -> None:
     marker = (data_root or (project_root / ".fstar")) / ".schema-version"
+    message = ("Project writes require an initialized project (schema 1); "
+               "project root %s, data root %s. Check project resolution with fstar doctor "
+               "or supply the intended initialized main project root." % (project_root, marker.parent))
     if not marker.is_file():
-        raise _fail("knowledge_invalid_schema", "Project writes require an initialized project (schema 1)",
-                    {"path": str(marker), "expected": "1", "actual": None})
+        raise _fail("knowledge_invalid_schema", message,
+                    {"path": str(marker), "project_root": str(project_root), "expected": "1", "actual": None})
     try:
         value = marker.read_text(encoding="utf-8").strip()
     except (OSError, UnicodeError) as exc:
         raise _fail("knowledge_read_error", "Schema marker cannot be read",
                     {"path": str(marker), "reason": str(exc)})
     if value != "1":
-        raise _fail("knowledge_invalid_schema", "Project writes require an initialized project (schema 1)",
-                    {"path": str(marker), "expected": "1", "actual": value})
+        raise _fail("knowledge_invalid_schema", message,
+                    {"path": str(marker), "project_root": str(project_root), "expected": "1", "actual": value})
 
 
 def prepare_change(catalog: Catalog, *, edits: Sequence[KnowledgeEdit], intent: ChangeIntent,
