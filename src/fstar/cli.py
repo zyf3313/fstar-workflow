@@ -17,9 +17,40 @@ def _actor(args, default_role="agent") -> dict:
     return {"role": getattr(args, "actor_role", None) or default_role, "id": getattr(args, "actor", None) or default_role, "session": getattr(args, "session", None)}
 
 
+_STDIN_DOCUMENT = {"consumed": False, "value": None}
+
+
+def _read_stdin_json(label: str) -> dict:
+    """Read ONE JSON object from stdin for a ``-`` path argument (A-004).
+
+    The document is read and parsed once per process. A second consumer in
+    the same invocation gets a deterministic ``stdin_document_reuse`` error
+    instead of blocking on an already-drained stdin or silently receiving
+    another flag's document. Empty, invalid, or non-object input fails with
+    the same invalid-json error shape as a bad file.
+    """
+    if _STDIN_DOCUMENT["consumed"]:
+        raise DomainError("stdin_document_reuse",
+                          "Only one JSON document may be read from stdin per invocation; "
+                          "give each '-' argument its own file", {"label": label}, status=2)
+    _STDIN_DOCUMENT["consumed"] = True
+    try:
+        text = sys.stdin.read()
+        value = json.loads(text)
+    except (OSError, ValueError) as exc:
+        raise DomainError("invalid_json_file", "Cannot read %s document from stdin" % label,
+                          {"path": "-", "reason": str(exc)})
+    if not isinstance(value, dict):
+        raise DomainError("invalid_json_file", "%s document must be an object" % label, {"path": "-"})
+    _STDIN_DOCUMENT["value"] = value
+    return value
+
+
 def _json_file(path: Optional[str], label: str) -> dict:
     if not path:
         raise DomainError("file_required", "%s file is required" % label)
+    if path == "-":
+        return _read_stdin_json(label)
     try:
         with Path(path).open("r", encoding="utf-8") as stream:
             value = json.load(stream)
@@ -211,6 +242,43 @@ def _service(args) -> TaskService:
 
 
 OPTIONAL_HANDLER_ATTR = "_fstar_module_handler"
+
+
+def _attach_foreign_candidates(args, exc: DomainError) -> None:
+    """Attach foreign-project candidate hints to a local task_not_found (A-005).
+
+    The failure keeps its original code, message, and status: only advisory
+    detail is added. Candidates come from the configured user project
+    registry alone (read-only); no project is switched and no filesystem-wide
+    scan happens.
+    """
+    if getattr(exc, "code", None) != "task_not_found":
+        return
+    details = exc.details if isinstance(exc.details, dict) else {}
+    task_ref = details.get("task")
+    if not task_ref:
+        return
+    try:
+        store = _service(args).store
+    except DomainError:
+        return
+    try:
+        from .crossproject import foreign_task_candidates
+
+        found = foreign_task_candidates(store, task_ref)
+    except Exception:
+        return
+    candidates = found.get("candidates") or []
+    if not candidates:
+        return
+    enriched = dict(details)
+    enriched["foreign_candidates"] = candidates
+    skipped = found.get("skipped") or []
+    if skipped:
+        enriched["foreign_candidates_skipped"] = skipped
+    enriched["hint"] = ("Task not found in this project; use --project PATH to target "
+                        "another registered project.")
+    exc.details = enriched
 
 
 def _static_clock():
@@ -428,11 +496,26 @@ def main(argv=None) -> int:
         return 0
     parser = build_parser()
     args = parser.parse_args(argv)
+    _STDIN_DOCUMENT.update(consumed=False, value=None)
     try:
+        json_fields = ("payload", "result", "confirmation", "check_evidence",
+                       "record", "scope_file", "rule", "plan_items")
+        consumers = sum((value.count("-") if isinstance(value, list) else value == "-")
+                        for value in (getattr(args, field, None) for field in json_fields))
+        if consumers > 1:
+            raise DomainError("stdin_document_reuse",
+                              "Only one JSON input may use '-' per invocation; use files for the others",
+                              {"consumers": consumers}, status=2)
         result = _dispatch(args)
         print(json.dumps(result, ensure_ascii=False, indent=2, default=str) if args.json else _human(result))
         return 0
     except DomainError as exc:
+        try:
+            _attach_foreign_candidates(args, exc)
+        except Exception:
+            # Hint enrichment is advisory: a failure to collect candidates
+            # must never change the original error code, message, or status.
+            pass
         if args.json:
             print(json.dumps(exc.as_dict(), ensure_ascii=False), file=sys.stderr)
         else:

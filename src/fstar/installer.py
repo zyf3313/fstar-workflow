@@ -899,6 +899,34 @@ def _skill_name(relative: str) -> Optional[str]:
     return None
 
 
+def _link_state(destination: Path, host_root: Path) -> Optional[dict]:
+    """Symlink classification for a declared adaptation path (A-002).
+
+    Detects a link at the destination OR at any ancestor between the host
+    root and the destination (a whole skill directory replaced by a link).
+    Returns ``{"link": path, "target": str}`` for the OUTERMOST link in
+    that chain, or ``None`` when no link is involved. The link's resolved
+    content (when it is a file) is reported as ``linked_hash`` so planning
+    can classify reuse/replacement without ever writing through the link.
+    """
+    chain = []
+    current = destination
+    root = host_root
+    while current != root and current != current.parent:
+        chain.append(current)
+        current = current.parent
+    for path in reversed(chain):
+        if path.is_symlink():
+            try:
+                target = os.readlink(str(path))
+                resolved = path.resolve()
+                linked_hash = _sha256(destination) if destination.is_file() else None
+            except (OSError, RuntimeError):
+                return {"link": path, "target": None, "linked_hash": None}
+            return {"link": path, "target": target, "linked_hash": linked_hash}
+    return None
+
+
 def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional[dict],
                      bundle: Mapping, conflict_policy: str = "keep") -> List[dict]:
     """Plan the per-file adaptation of bundled skills/agents into the host root.
@@ -934,16 +962,63 @@ def _plan_host_files(host: str, roots: Roots, operation: str, manifest: Optional
                               {"source": source})
         destination = roots.host_roots[host] / relative
         skill_name = _skill_name(relative) if kind == "skill" else None
+        record_owned = owned.get(str(destination))
         current_hash = None
+        link_state = _link_state(destination, roots.host_roots[host])
+        if link_state is not None:
+            # A-002: a symlink at (or above) a declared adaptation path. The
+            # link's resolved file content classifies the entry; the plan
+            # NEVER writes through the link. Identical bundle content is a
+            # safe reuse in BOTH preview and apply. An installer-owned path
+            # whose linked content drifted is an explicit managed link
+            # replacement (backup + journal); an unowned link is the user's
+            # and stays a conflict. Uninstall removes only a link whose
+            # content matches the RECORDED baseline (the link itself is
+            # unlinked; the external target is untouched); any other link is
+            # kept.
+            linked_hash = link_state.get("linked_hash")
+            # A per-file ownership record cannot authorize replacing a shared
+            # skills/ or agents/ ancestor, nor any unknown ancestor link.
+            individual_link = (link_state["link"] == destination or
+                               (kind == "skill" and link_state["link"] == destination.parent))
+            if not individual_link:
+                action = "reuse_external" if linked_hash == expected_hash and operation != "uninstall" else "conflict"
+            elif operation == "uninstall":
+                if record_owned is not None and linked_hash is not None \
+                        and linked_hash == record_owned.get("installed_hash"):
+                    action = "remove_owned_link"
+                elif record_owned is not None:
+                    action = "keep_modified"
+                else:
+                    action = "keep"
+            elif linked_hash == expected_hash:
+                action = "reuse_owned" if record_owned is not None else "reuse_external"
+            elif record_owned is not None and linked_hash == record_owned.get("installed_hash"):
+                action = "replace_owned_link"
+            elif record_owned is not None:
+                action = "keep_modified"
+            else:
+                action = "conflict"
+            entries.append({"host": host, "kind": kind, "source": source,
+                            "destination": str(destination), "expected_hash": expected_hash,
+                            "current_hash": None, "action": action,
+                            "owned": record_owned is not None,
+                            "symlink": True,
+                            "managed_link": action in ("replace_owned_link", "remove_owned_link"),
+                            "managed_link_path": str(link_state["link"]),
+                            "managed_link_target": link_state.get("target"),
+                            "linked_hash": linked_hash,
+                            "skill": skill_name,
+                            "bundle_root": str(roots.bundle_root) if roots.bundle_root else str(_package_root())})
+            continue
         if destination.exists() or destination.is_symlink():
-            if destination.is_symlink() or not destination.is_file():
+            if not destination.is_file():
                 entries.append({"host": host, "kind": kind, "source": source,
                                 "destination": str(destination), "expected_hash": expected_hash,
                                 "current_hash": None, "action": "conflict", "owned": False,
                                 "bundle_root": str(roots.bundle_root) if roots.bundle_root else str(_package_root())})
                 continue
             current_hash = _sha256(destination)
-        record_owned = owned.get(str(destination))
         if operation == "uninstall":
             if record_owned is None:
                 action = "keep"
@@ -1231,6 +1306,19 @@ class _Journal:
         self._append({"path": str(path),
                       "before": base64.b64encode(before).decode("ascii"), "after_sha": None})
 
+    def record_link_remove(self, path: Path) -> None:
+        """Journal a symlink removal so restore recreates the exact link.
+
+        The external target is never read; only the link's own target string
+        is recorded (A-002).
+        """
+        try:
+            target = os.readlink(str(path))
+        except OSError:
+            target = None
+        self.entries.append({"path": path, "link_target": target, "after_sha": None})
+        self._append({"path": str(path), "link_target": target, "after_sha": None})
+
     def record_mkdir(self, path: Path, ancestors: Optional[Sequence[Path]] = None) -> None:
         """Remember directories this transaction created.
 
@@ -1258,43 +1346,116 @@ class _Journal:
             self.entries.append({"mkdir": str(directory), "existed": existed})
 
     def restore(self) -> None:
-        _restore_entries(self.entries)
-        self.path.unlink(missing_ok=True)
+        if _restore_entries(self.entries, self.roots):
+            self.path.unlink(missing_ok=True)
 
     def complete(self) -> None:
         self.path.unlink(missing_ok=True)
 
 
-def _restore_entries(entries: Sequence[Mapping]) -> None:
-    """Undo recorded writes in reverse, never clobbering later user edits."""
+def _restore_entries(entries: Sequence[Mapping], roots: Roots) -> bool:
+    """Undo recorded writes, returning false when any entry needs retry."""
+    boundaries = (roots.user_root, *roots.host_roots.values())
+
+    def unsafe_parent(path: Path) -> bool:
+        matching = [root for root in boundaries if _within(path, root)]
+        if not matching:
+            return True
+        root = max(matching, key=lambda value: len(value.parts))
+        parent = path.parent
+        while parent != root:
+            if parent.is_symlink():
+                return True
+            parent = parent.parent
+        return False
+
     blocked = set()
+    incomplete = False
+    # A previous replay may have restored all writes to a path before a
+    # different path blocked. Recognize its original state on retry.
+    first = {}
+    for item in entries:
+        if "path" in item:
+            first.setdefault(Path(item["path"]), item)
+    restored = set()
+    for path, item in first.items():
+        if unsafe_parent(path):
+            continue
+        try:
+            if "link_target" in item:
+                if path.is_symlink() and os.readlink(str(path)) == item["link_target"]:
+                    restored.add(path)
+            elif not path.is_symlink() and (not path.exists() or path.is_file()):
+                current = path.read_bytes() if path.is_file() else None
+                if current == item.get("before"):
+                    restored.add(path)
+        except OSError:
+            pass
     for item in reversed(list(entries)):
         if "mkdir" in item:
             directory = Path(item["mkdir"])
             if not item.get("existed"):
                 try:
-                    if directory.is_dir() and not any(directory.iterdir()):
-                        directory.rmdir()
+                    if unsafe_parent(directory) or directory.is_symlink():
+                        incomplete = True
+                    elif directory.is_dir():
+                        if any(directory.iterdir()):
+                            incomplete = True
+                        else:
+                            directory.rmdir()
+                    elif directory.exists():
+                        incomplete = True
                 except OSError:
-                    pass
+                    incomplete = True
             continue
         path = Path(item["path"])
-        if path in blocked:
+        if path in restored:
+            continue
+        if path in blocked or unsafe_parent(path):
+            incomplete = True
+            continue
+        # A later symlink or directory is user state, not a missing file.
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            blocked.add(path)
+            incomplete = True
+            continue
+        if "link_target" in item:
+            # A-002: restore a removed managed link. Only when the current
+            # state is still the file this transaction wrote (the planned
+            # payload hash) or already absent (an earlier reversed entry
+            # removed it): a later user edit at the path is kept, never
+            # clobbered. The external target is never written through.
+            try:
+                current = path.read_bytes() if path.is_file() and not path.is_symlink() else None
+            except OSError:
+                incomplete = True
+                continue
+            if current is not None and not _matches_written_state(current, item):
+                blocked.add(path)
+                incomplete = True
+                continue
+            target = item.get("link_target")
+            path.unlink(missing_ok=True)
+            if isinstance(target, str) and target:
+                os.symlink(target, str(path))
             continue
         try:
             current = path.read_bytes() if path.is_file() else None
         except OSError:
+            incomplete = True
             continue
         before = item.get("before")
         if current == before:
             continue  # the journaled write never landed
         if not _matches_written_state(current, item):
             blocked.add(path)  # changed after our write: keep it
+            incomplete = True
             continue
         if before is None:
             path.unlink(missing_ok=True)
         else:
             _atomic_write_bytes(path, before)
+    return not incomplete
 
 
 def _matches_written_state(current: Optional[bytes], item: Mapping) -> bool:
@@ -1341,19 +1502,35 @@ def _recover_abandoned_transactions(roots: Roots) -> None:
                         skipped = True
                     continue
                 path = Path(record["path"])
-                resolved_path = path.resolve()
+                # Older journals can use an alias above the managed root
+                # (for example macOS /var -> /private/var).
+                if not any(_within(path, root) for root in (roots.user_root, *roots.host_roots.values())):
+                    path = path.parent.resolve() / path.name
+                resolved_path = path if "link_target" in record else path.resolve()
                 if not (_within(resolved_path, roots.user_root)
                         or any(_within(resolved_path, root) for root in roots.host_roots.values())):
                     skipped = True
                     continue
                 before = (base64.b64decode(record["before"])
                           if record.get("before") is not None else None)
+                if "link_target" in record:
+                    # A-002: a journaled managed-link replacement. The link
+                    # target string is the restore record; the path's own
+                    # containment (not the link's resolution) decides
+                    # replayability, because the recorded target may point
+                    # anywhere.
+                    if not any(_within(path, root) for root in roots.host_roots.values()):
+                        skipped = True
+                        continue
+                    entries.append({"path": path, "link_target": record["link_target"],
+                                    "after_sha": record.get("after_sha")})
+                    continue
                 entries.append({"path": path, "before": before,
                                 "after_sha": record.get("after_sha")})
             except (ValueError, KeyError, TypeError):
-                continue  # torn tail line from the crash
-        _restore_entries(entries)
-        if not skipped:
+                skipped = True  # Preserve an unreadable journal for inspection.
+        complete = _restore_entries(entries, roots)
+        if not skipped and complete:
             journal.unlink(missing_ok=True)
 
 
@@ -1372,7 +1549,9 @@ def recover_pending(roots: Roots) -> dict:
     with _Lock(resolved.user_root / ".install.lock"):
         pending = pending_transactions(resolved.user_root)
         _recover_abandoned_transactions(resolved)
-    return {"recovered": pending}
+        remaining = pending_transactions(resolved.user_root)
+    return {"recovered": [item for item in pending if item not in remaining],
+            "pending": remaining}
 
 
 def _validate_plan_paths(plan: dict, roots: Roots) -> None:
@@ -1427,11 +1606,18 @@ def _validate_plan_paths(plan: dict, roots: Roots) -> None:
             raise DomainError("unsafe_path", "Host file target does not match the declared host adaptation",
                               {"destination": entry.get("destination")})
         _safe_relative(expected_relative, "host file")
-        if entry.get("action") not in ("conflict", "keep", "keep_modified", "remove_missing"):
+        if entry.get("action") not in ("conflict", "keep", "keep_modified", "remove_missing",
+                                       "reuse_owned", "reuse_external"):
             # Entries that will never be written (a user's symlink or modified
-            # file at the path) are only reported; the symlink check applies
-            # to paths the transaction will actually touch.
-            _reject_symlink_ancestors(Path(entry["destination"]), roots.host_roots[host])
+            # file at the path, or content already matching the bundle through
+            # a link) are only reported; the symlink check applies to paths
+            # the transaction will actually touch. A managed link action
+            # unlinks the link itself (a real path inside the host root), so
+            # only the chain ABOVE that link must be symlink-free.
+            if entry.get("action") in ("replace_owned_link", "remove_owned_link"):
+                _reject_symlink_ancestors(Path(entry["managed_link_path"]).parent, roots.host_roots[host])
+            else:
+                _reject_symlink_ancestors(Path(entry["destination"]), roots.host_roots[host])
         _safe_relative(entry["source"], "source")
     for path in (roots.user_root / ".install.lock", roots.user_root / "install-backups",
                  roots.user_root / ".install-manifest.json", roots.user_root / ".asset-hashes.json",
@@ -1462,6 +1648,20 @@ def _reverify(plan: dict) -> None:
         # is_symlink() check matters). Only a real change from the planned
         # state (regular file replaced, or hash drift) is stale.
         actual = _sha256(path) if path.is_file() and not path.is_symlink() else None
+        if entry.get("symlink"):
+            # The planned state was a symlink at (or above) the destination
+            # with a recorded target; a real change is that link no longer
+            # existing or pointing elsewhere.
+            link = Path(entry["managed_link_path"])
+            try:
+                target = os.readlink(str(link)) if link.is_symlink() else None
+            except OSError:
+                target = None
+            linked_hash = _sha256(path) if path.is_file() else None
+            if target != entry.get("managed_link_target") or linked_hash != entry.get("linked_hash"):
+                raise DomainError("installer_plan_stale", "Host file changed after the plan was built",
+                                  {"path": str(link)})
+            continue
         if entry.get("current_hash") != actual:
             raise DomainError("installer_plan_stale", "Host file changed after the plan was built",
                               {"path": str(path)})
@@ -1546,6 +1746,25 @@ def _backup(backup_root: Path, path: Path, user_root: Path) -> Optional[str]:
     return str(target)
 
 
+def _backup_link(backup_root: Path, path: Path) -> Optional[str]:
+    """Back up a symlink itself (the link, not the target content).
+
+    A JSON sidecar records the link target so a manual restore can recreate
+    the exact link; the backup never reads or copies the external target.
+    """
+    if not path.is_symlink():
+        return None
+    relative = Path("_links") / (str(path).replace(os.sep, "__"))
+    target = backup_root / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        record = {"path": str(path), "target": os.readlink(str(path))}
+    except OSError:
+        record = {"path": str(path), "target": None}
+    target.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    return str(target)
+
+
 def _atomic_write_bytes(path: Path, payload: bytes) -> None:
     journal = _TRANSACTION.get()
     if journal is not None:
@@ -1626,6 +1845,68 @@ def _apply_host_file(entry: dict, roots: Roots, backup_root: Path, applied: dict
         # to the user (or is already gone) and is reported, never faked.
         applied["reused" if action.startswith("reuse") else "kept"].append(
             {"path": str(destination), "action": action, "host": entry["host"], "kind": entry["kind"]})
+        return
+    if action == "remove_owned_link":
+        # A-002 (uninstall): the installer owns this path and the link's
+        # content matches the recorded baseline. Only the LINK is removed
+        # (backed up and journaled for recovery); the external target is
+        # never written, moved, or deleted.
+        link = Path(entry["managed_link_path"])
+        host_root = roots.host_roots[entry["host"]]
+        _reject_symlink_ancestors(link.parent, host_root)
+        if not link.is_symlink():
+            raise DomainError("installer_plan_stale", "Planned link is no longer a symlink",
+                              {"path": str(link)})
+        backup = _backup_link(backup_root, link)
+        journal = _TRANSACTION.get()
+        if journal is not None:
+            journal.record_link_remove(link)
+        link.unlink()
+        applied["removed"].append({"path": str(link), "backup": backup,
+                                   "replaced_link_target": entry.get("managed_link_target"),
+                                   "host": entry["host"], "kind": entry["kind"]})
+        _prune_empty_host_dir(link.parent, roots)
+        _prune_empty_host_dir(link.parent.parent, roots)
+        return
+    if action == "replace_owned_link":
+        # A-002: the installer owns this path, but the current state is a
+        # user-made symlink whose content drifted. The link is removed and a
+        # regular file written in its place — the link itself is backed up
+        # and journaled (as a symlink record, so rollback restores the link
+        # rather than deleting user content) and the EXTERNAL target is never
+        # written through.
+        link = Path(entry["managed_link_path"])
+        host_root = roots.host_roots[entry["host"]]
+        # Only the chain above the link must be symlink-free; the link itself
+        # is the thing being replaced.
+        _reject_symlink_ancestors(link.parent, host_root)
+        if not link.is_symlink():
+            raise DomainError("installer_plan_stale", "Planned link is no longer a symlink",
+                              {"path": str(link)})
+        backup = _backup_link(backup_root, link)
+        journal = _TRANSACTION.get()
+        if journal is not None:
+            journal.record_link_remove(link)
+        link.unlink()
+        payload = _source_bytes(entry)
+        if entry.get("expected_hash") is not None and _sha256_bytes(payload) != entry["expected_hash"]:
+            raise DomainError("resource_integrity", "Source file no longer matches its planned hash",
+                              {"source": entry["source"]})
+        destination = Path(entry["destination"])
+        if journal is not None:
+            missing = []
+            current = destination.parent
+            while current != host_root and current != current.parent:
+                if not current.is_dir():
+                    missing.append(current)
+                current = current.parent
+            journal.record_mkdir(destination.parent, ancestors=missing)
+        _atomic_write_bytes(destination, payload)
+        applied["files"].append({"path": str(destination), "action": action, "backup": backup,
+                                 "written_hash": _sha256_bytes(payload),
+                                 "replaced_link": str(link),
+                                 "replaced_link_target": entry.get("managed_link_target"),
+                                 "host": entry["host"], "kind": entry["kind"]})
         return
     if action == "remove_owned":
         backup = _backup(backup_root, destination, roots.user_root)
@@ -1851,12 +2132,12 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
             if entry["action"] in ("remove_owned", "remove_missing"):
                 host_files.pop(entry["destination"], None)
             continue
-        if entry["action"] in ("write", "overwrite", "upgrade_external"):
-            # An overwritten or upgraded file now carries the incoming
-            # content, so the recorded baseline must move with it; keeping
-            # the old hash would report the refreshed file as user-modified
-            # forever. An upgraded external reuse becomes owned: this
-            # installation is the one that wrote the new bytes.
+        if entry["action"] in ("write", "overwrite", "upgrade_external", "replace_owned_link"):
+            # An overwritten, upgraded, or link-replaced file now carries the
+            # incoming content, so the recorded baseline must move with it;
+            # keeping the old hash would report the refreshed file as
+            # user-modified forever. An upgraded external reuse becomes owned:
+            # this installation is the one that wrote the new bytes.
             host_files[entry["destination"]] = {
                 "host": entry["host"],
                 "kind": entry["kind"],
@@ -1867,6 +2148,10 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
                 "operation_id": operation_id,
                 "ownership": "owned",
             }
+        elif entry["action"] == "remove_owned_link":
+            # The link left the manifest (uninstall): the record must not
+            # keep pointing at a path this installation no longer manages.
+            host_files.pop(entry["destination"], None)
         elif entry["action"] in ("reuse_external", "reuse_owned"):
             existing = host_files.get(entry["destination"])
             if existing is None:
@@ -1884,10 +2169,10 @@ def _commit_manifest(roots: Roots, plan: dict, applied: dict, operation_id: str,
                 # recorded baseline must follow it; otherwise doctor keeps
                 # reporting a file the installer itself refreshed.
                 existing["installed_hash"] = entry["expected_hash"]
-        elif entry["action"] in ("remove_owned", "remove_missing"):
-            # The file left the manifest (uninstall, or a resource that left
-            # the bundle). The record must not keep pointing at a file this
-            # installation no longer owns.
+        elif entry["action"] in ("remove_owned", "remove_missing", "remove_owned_link"):
+            # The file (or managed link) left the manifest (uninstall, or a
+            # resource that left the bundle). The record must not keep
+            # pointing at a path this installation no longer owns.
             host_files.pop(entry["destination"], None)
     manifest["host_file_entries"] = sorted(host_files.values(), key=lambda record: record["destination"])
     manifest["version"] = version
@@ -2027,7 +2312,7 @@ def _write_entry_index(roots: Roots, plan: dict, applied: dict, operation_id: st
             if entry["destination"] in retired_host_files:
                 entries.pop(identifier, None)
             continue
-        if entry["action"] not in ("write", "overwrite", "upgrade_external",
+        if entry["action"] not in ("write", "overwrite", "upgrade_external", "replace_owned_link",
                                    "reuse_owned", "reuse_external"):
             continue
         # The refresh path (overwrite/upgrade_external) previously skipped the
@@ -2040,7 +2325,7 @@ def _write_entry_index(roots: Roots, plan: dict, applied: dict, operation_id: st
             "source": "package",
             "installed_path": entry["destination"],
             "ownership": "owned" if entry["action"] in ("write", "overwrite", "upgrade_external",
-                                                        "reuse_owned") else "externally_owned",
+                                                        "replace_owned_link", "reuse_owned") else "externally_owned",
             "status": "active",
             "version": plan["version"],
             "operation_id": operation_id,
@@ -2416,6 +2701,45 @@ def _doctor_magpie_ownership(resolved: Roots, status=None) -> List[dict]:
              "details": {"skills": handed_over, "reason": status.reason}}]
 
 
+def _doctor_resource_extra_hints(resolved: Roots, diagnostics: List[dict]) -> None:
+    """A-004: link a RESOURCE_EXTRA skill to the Magpie hand-over ledger.
+
+    A skill that is absent from the current inventory but still recorded as
+    handed over in the ledger is reported by install or update and retained
+    when library content cannot be verified. The hint is added
+    in place; every unrelated diagnostic keeps its exact bytes. The agent
+    count is not available cheaply (it would need a Magpie query), so it is
+    omitted rather than guessed.
+    """
+    from . import magpie as magpie_module
+
+    resource_extra = [item for item in diagnostics if item.get("code") == "RESOURCE_EXTRA"]
+    if not resource_extra:
+        return
+    record = magpie_module.load_record(resolved.user_root)
+    handed_over = set()
+    for name, entry in (record.get("skills") or {}).items():
+        state, _ = magpie_module._library_state(entry or {})
+        if state == "handed_over":
+            handed_over.add(name)
+    if not handed_over:
+        return
+    for item in resource_extra:
+        path = str(item.get("path") or "")
+        if not path.endswith("SKILL.md"):
+            continue
+        name = Path(path).parent.name
+        if name not in handed_over:
+            continue
+        item["message"] = (item["message"] + "; the skill is still handed over to the "
+                            "Magpie library - `fstar install` or `fstar update` reports it; "
+                            "it is retained when library content cannot be verified")
+        details = dict(item.get("details") or {})
+        details["magpie_handed_over"] = True
+        details["prune_hint"] = "fstar install / fstar update reports the stale library entry"
+        item["details"] = details
+
+
 def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None,
            magpie_status=None) -> dict:
     """Read-only structural health report (PI-06)."""
@@ -2451,6 +2775,12 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None,
     host_file_diagnostics = _doctor_host_files(resolved)
     magpie_diagnostics = _doctor_magpie_ownership(resolved, magpie_status)
     capability_report = _capability_report(resolved)
+    resource_diagnostics = [{"code": d.code, "path": d.path, "line": d.line,
+                              "message": d.message} for d in diagnostics]
+    # A-004: a RESOURCE_EXTRA skill that is still handed over to the Magpie
+    # library gains a hint pointing at the update path that prunes it. The
+    # hint is added in place; unrelated diagnostics keep their exact bytes.
+    _doctor_resource_extra_hints(resolved, resource_diagnostics)
     return {
         "schema": "fstar.doctor.v1",
         "resource_version": selection.version,
@@ -2458,8 +2788,7 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None,
         "resource_root": str(selection.root),
         "counts": counts,
         "expected_counts": EXPECTED_COUNTS,
-        "diagnostics": ([{"code": d.code, "path": d.path, "line": d.line, "message": d.message}
-                         for d in diagnostics]
+        "diagnostics": (resource_diagnostics
                         + [{"code": p["code"], "path": "", "line": 1, "message": p["message"],
                             "details": p.get("details")} for p in selection.problems]
                         + ([{"code": manifest_problem["code"], "path": str(resolved.user_root / ".install-manifest.json"),
@@ -2974,9 +3303,9 @@ def _handle_uninstall(args):
     if args.dry_run:
         return {"dry_run": True, **plan}
     result = {"dry_run": False, **apply_plan(plan, roots=roots), "warnings": plan["warnings"]}
-    # Skills handed over to the Magpie library are not ours to remove: there
-    # is no verified public removal API, so they are reported instead of
-    # deleted. Native copies were removed by the plan like any owned file.
+    # Uninstall does not consult or remove Magpie library skills. The public
+    # rm command exists, but current library content cannot be verified via
+    # a known public reader, so install/update retain stale entries too.
     from .magpie import load_record, _library_state
 
     record = load_record(roots.user_root)
@@ -2984,8 +3313,9 @@ def _handle_uninstall(args):
                          if _library_state(entry or {})[0] == "handed_over")
     if handed_over:
         result["magpie"] = {"status": "kept_in_library", "skills": handed_over,
-                            "reason": "handed over to the Magpie library; remove them through Magpie "
-                                      "(the native entries were removed by this uninstall)"}
+                            "reason": "handed over to the Magpie library; this uninstall "
+                                      "does not consult Magpie; install/update report stale "
+                                      "entries and retain them when content cannot be verified"}
     return result
 
 

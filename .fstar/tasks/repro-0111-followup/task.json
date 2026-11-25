@@ -1,0 +1,765 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-25T03:39:06.036299Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "2e900246-b428-4c10-9405-33d721243baa"
+    ],
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user",
+        "session": null
+      },
+      "at": "2026-11-25T03:30:00Z",
+      "quote": "行可以",
+      "reference": "conversation:2026-11-25 行可以 (approve commit and merge after report of verified delivery and the documented A-002 limitation)",
+      "scope": "accept",
+      "source_id": "conversation:2026-11-25 user approved commit and merge",
+      "type": "conversation",
+      "validates": "19d8b0cdc01990e6bcba2ae7f0ad2db1f6d042690032848feeab1997ea3a68f2"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "7b0394536cb3218f27e48e44ef3dc1e3451e96ccf30ee0a6ac7a2c780ef677d6"
+      ],
+      "task": "19d8b0cdc01990e6bcba2ae7f0ad2db1f6d042690032848feeab1997ea3a68f2"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "origin/main",
+  "blocked": null,
+  "branch": "fix/repro-0111-followup",
+  "capabilities": [],
+  "children": [],
+  "commit": "9e980e1d2e256acfa4afb938f5543491a670900b",
+  "completedAt": "2026-11-25T03:39:06.036485Z",
+  "createdAt": "2026-11-24T12:28:35.880671Z",
+  "creator": "agent",
+  "description": "B-11 evidence mapping end-to-end, safe symlink update, B-07 idempotent dispatch; stdin inputs and cross-project not-found hints. User approved verified follow-up scope.",
+  "events": [
+    {
+      "at": "2026-11-24T12:28:35.880915Z",
+      "data": {
+        "parent": null
+      },
+      "id": "faf39bf2-2baa-402a-acbe-0e2d6e6e039d",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-24T12:28:35.880912Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "c8fdd782-4c91-4cf7-8ea1-2f1e7aed2f15",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-24T12:30:30.137192Z",
+      "data": {
+        "branch": "fix/repro-0111-followup",
+        "detached": false,
+        "snapshot": "888589bafb8cf744fa977b1d34cf3a4bf78c4d90a5d234bd186e836f86c01a25",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "0fdc7b70-1930-4199-8aa5-caa27b2481fc",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-24T12:30:30.098518Z",
+        "quote": "",
+        "reference": "conversation:2026-11-24 user approved verified follow-up proposal 行",
+        "scope": "start",
+        "source_id": "conversation:2026-11-24 user approved verified follow-up proposal 行",
+        "type": "command",
+        "validates": "2cb5a733b269dd616f196cb4996e63ef75a63151a8b20ce57555a29e49bfa473"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-24T12:30:30.457979Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "be4abfd6-b1c5-485c-85ae-ff2561a9c1e4",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T12:30:30.457976Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "ec22cc23-5113-41fc-967b-4750a3d77e9b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-24T12:30:30.460281Z",
+      "data": {
+        "dispatch_id": "c2dc9d9a-feea-412f-abf8-e528e8dcf5ac",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004"
+        ],
+        "role": "implement"
+      },
+      "id": "b2fbe44e-d01a-4c10-9b66-e588193f7ac0",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T12:30:30.460272Z",
+        "quote": "",
+        "reference": "dispatch c2dc9d9a-feea-412f-abf8-e528e8dcf5ac",
+        "scope": "dispatch",
+        "source_id": "93660a0d-cc81-4daa-9cf0-4176136eda47",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-24T14:36:24.185005Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-24T14:36:24.183966Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "recovery"
+          ],
+          "reason": "User explicitly authorized recovery of both interrupted tasks",
+          "scope": "custom",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-24T14:36:24.183753Z",
+            "quote": "",
+            "reference": "interactive-cli",
+            "scope": "extension",
+            "source_id": "cli",
+            "type": "command",
+            "validates": "888589bafb8cf744fa977b1d34cf3a4bf78c4d90a5d234bd186e836f86c01a25"
+          }
+        },
+        "old": null
+      },
+      "id": "9d35a4d5-e201-4340-994e-f012fab1187a",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-24T14:36:24.183753Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "888589bafb8cf744fa977b1d34cf3a4bf78c4d90a5d234bd186e836f86c01a25"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-24T14:37:34.732276Z",
+      "data": {
+        "new_holder": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "old_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "Resume authorized work after expired lease and stopped worker"
+      },
+      "id": "e558b9d8-ed0b-4a66-94b4-ba2c76d0ea72",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-24T14:37:34.732273Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "4ba87bb8-be06-4491-8030-b38e8302fc0c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-24T14:42:31.020681Z",
+      "data": {
+        "dispatch_id": "883612e1-8f7e-47c0-907f-6339ebe5124c",
+        "plan_item_ids": [
+          "P-001",
+          "P-003",
+          "P-004"
+        ],
+        "role": "implement"
+      },
+      "id": "a34e4723-27db-4033-8404-9c1871162199",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T14:42:31.020673Z",
+        "quote": "",
+        "reference": "dispatch 883612e1-8f7e-47c0-907f-6339ebe5124c",
+        "scope": "dispatch",
+        "source_id": "c81afb03-57a1-44a9-b462-4d3a1bff742f",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-24T15:08:13.532183Z",
+      "data": {
+        "new_holder": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "2bbc8014-6349-464f-a577-eef38dda45bb",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T15:08:13.532180Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "dc0f6a02-568d-4ea2-bdd0-77f46afec298",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-24T15:08:13.536757Z",
+      "data": {
+        "dispatch_id": "878c12b6-82c4-46cd-9b80-41ac8ccd8d26",
+        "plan_item_ids": [
+          "P-006"
+        ],
+        "role": "implement"
+      },
+      "id": "9d9eb457-275c-4453-9255-a5e438818afe",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T15:08:13.536752Z",
+        "quote": "",
+        "reference": "dispatch 878c12b6-82c4-46cd-9b80-41ac8ccd8d26",
+        "scope": "dispatch",
+        "source_id": "0840019a-07fb-4576-ab80-71bdd057432c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-24T15:09:04.614615Z",
+      "data": {
+        "dispatch_id": "43617253-b4d0-4f0d-a4b5-fa0f70818bde",
+        "plan_item_ids": [
+          "P-006"
+        ],
+        "role": "implement"
+      },
+      "id": "e021aed0-739c-45f5-a9fb-c59350af1efb",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-24T15:09:04.614608Z",
+        "quote": "",
+        "reference": "dispatch 43617253-b4d0-4f0d-a4b5-fa0f70818bde",
+        "scope": "dispatch",
+        "source_id": "b0e96f34-909f-4bd7-9f01-1410f3373609",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T02:12:15.330993Z",
+      "data": {
+        "new_holder": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "ea9e5118-9a55-45da-9ce9-5e60e03dab3b",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T02:12:15.330990Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "be385bc5-c085-46b2-b9f2-7c8c826e1e2c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-25T02:12:15.333615Z",
+      "data": {
+        "dispatch_id": "f2fee6b6-e201-4688-be5a-4189c4f18c2b",
+        "plan_item_ids": [
+          "P-005"
+        ],
+        "role": "check"
+      },
+      "id": "7988236f-f8d8-43f9-9894-2238e50f67ce",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T02:12:15.333611Z",
+        "quote": "",
+        "reference": "dispatch f2fee6b6-e201-4688-be5a-4189c4f18c2b",
+        "scope": "dispatch",
+        "source_id": "448b51a2-346a-43fa-825b-e157d87c4ccc",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T03:20:07.681135Z",
+      "data": {
+        "new_holder": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "old_holder": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "Renew coordinator lease to record the independent final check"
+      },
+      "id": "5bd37dff-9a0c-474b-8380-5e187b38ef09",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-25T03:20:07.681132Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "bc831e56-86b1-467d-b2b4-ce5d8717f09d",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-25T03:20:34.314512Z",
+      "data": {
+        "evidence_id": "2e900246-b428-4c10-9405-33d721243baa",
+        "state": "valid"
+      },
+      "id": "88136746-5ace-4bca-9e04-9a38a9f06feb",
+      "source": {
+        "id": "independent-checker-20261125",
+        "role": "check"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-25T03:22:54.163044Z",
+      "data": {
+        "reason": "final check recorded; releasing writer lease before awaiting_acceptance"
+      },
+      "id": "7659ff9a-7096-4014-bcac-d299e6f97dc0",
+      "source": {
+        "id": "agent",
+        "role": "agent",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-25T03:23:19.834418Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "2e900246-b428-4c10-9405-33d721243baa"
+        ]
+      },
+      "id": "5faf0d4b-c10c-4722-93c3-899b65269113",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-25T03:23:19.834218Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "e5ea6abb-923d-4e47-8845-0df172362e16",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-25T03:39:06.036489Z",
+      "data": {
+        "evidence_refs": [
+          "2e900246-b428-4c10-9405-33d721243baa"
+        ]
+      },
+      "id": "6ef3494a-d602-4ca0-b432-50be759c054d",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T03:30:00Z",
+        "quote": "行可以",
+        "reference": "conversation:2026-11-25 行可以 (approve commit and merge after report of verified delivery and the documented A-002 limitation)",
+        "scope": "accept",
+        "source_id": "conversation:2026-11-25 user approved commit and merge",
+        "type": "conversation",
+        "validates": "19d8b0cdc01990e6bcba2ae7f0ad2db1f6d042690032848feeab1997ea3a68f2"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "7b0394536cb3218f27e48e44ef3dc1e3451e96ccf30ee0a6ac7a2c780ef677d6",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/repro-0111-followup/checks/final.md",
+            "sha256": "7d8db1a741c451139ce44dc5044c6edeec0910d2bed96373431132e3fccd865f"
+          },
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "033fe77d176fbc97a5492a5136adbe89c09e11938f27e2283ef5ecd154f4ad66"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "480753b61e0dbf4b1f25b559f2689a07d588bd1a4b262a16676dfd5ba5c66742"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "2265c6f2beabc19105a293e527b80b0a361cc809ae4cad0cd0167baa796a559d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/crossproject.py",
+            "sha256": "b904a05eaa8c98eacca7574d2ad97e1211e1345130e21c1b1ae3feeb41c01f14"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "df2c6fde2fbf6c9e0a89a7af4db05705d4aa88ae01ac73ef639c8f21a04474d8"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/evidence.py",
+            "sha256": "53b8e6304181203b05b4359487523234136bc408fb59d31f7d0cce20146821b5"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "798a5d6e5670013dc9d9d89f60e8a1ad0e77f3665a17ad57ef7eb8e9ca2bc858"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/magpie.py",
+            "sha256": "7a57175ec7cd5961674051f36c4249245ffe691aec8074a2e819ea256c9b5072"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "15473a6bf2f0332a2ee874615d350553fb26cb95032497916a6e244c6d540abb"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "ebd39ccb4560a21a0dacf8e1239d11d87fb9cc70a5a4c3bd2ef4c05e0d58603d"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_dispatch.py",
+            "sha256": "efa0aa13fb0a1ad542f0d13fb67ba566eed1aeb85e8623dc0f0912778e29ed00"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "30acddb2ade77b61f677808ca7fce1de746563b0f124446f7c3555dbc219f0be"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_magpie.py",
+            "sha256": "5627d41386b201b7618030ea7630e7995376979738de2c246a06704ab5d73716"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_repro_followup.py",
+            "sha256": "6396a91f6c80ebab206728704f114e23356844c5eec4133c6c4a67901d453d4a"
+          }
+        ]
+      },
+      "dispatch_id": "f2fee6b6-e201-4688-be5a-4189c4f18c2b",
+      "environment": {
+        "python": "stdlib 3.9+",
+        "suites": "1044 python OK, 16 node OK, manifest rebuilt and verified"
+      },
+      "id": "2e900246-b428-4c10-9405-33d721243baa",
+      "input_files": [],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .; node --test tests/test_package.cjs; adversarial CLI/fake-runner probes",
+          "plan_item": "P-005",
+          "requirement_ids": [
+            "A-001",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006"
+          ],
+          "result": "passed",
+          "retries": 0
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-25T03:20:34.306354Z",
+      "producer": {
+        "id": "independent-checker-20261125",
+        "role": "check"
+      },
+      "read_only": true,
+      "report": {
+        "path": ".fstar/tasks/repro-0111-followup/checks/final.md",
+        "sha256": "7d8db1a741c451139ce44dc5044c6edeec0910d2bed96373431132e3fccd865f"
+      },
+      "run_id": "check-20261125-final",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/repro-0111-followup/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "b0571fc20bd4b7e5031406f04f9282f4a294c53ee5e4ccbe62cbcaf8ce3b7f9a"
+            },
+            {
+              "id": "A-003",
+              "sha256": "37e5bb6491da6e52262b5bf976bb2d8b12e71161d52f645c9314dbb825940289"
+            },
+            {
+              "id": "A-004",
+              "sha256": "4428d20a5b6e310f872dd67e8e0466cece9a9b1bb8ef7ef95f762b3ebc33d1a4"
+            },
+            {
+              "id": "A-005",
+              "sha256": "120dc73626ae918337225ede7df597396b3b97e6780af68677b021bdec5d32f8"
+            },
+            {
+              "id": "A-006",
+              "sha256": "10e4f719eb2e18c60aa9eb1a976e44afcd102a39a38e68ece538a6e805d209ab"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "b0571fc20bd4b7e5031406f04f9282f4a294c53ee5e4ccbe62cbcaf8ce3b7f9a"
+            },
+            {
+              "id": "A-003",
+              "sha256": "37e5bb6491da6e52262b5bf976bb2d8b12e71161d52f645c9314dbb825940289"
+            },
+            {
+              "id": "A-004",
+              "sha256": "4428d20a5b6e310f872dd67e8e0466cece9a9b1bb8ef7ef95f762b3ebc33d1a4"
+            },
+            {
+              "id": "A-005",
+              "sha256": "120dc73626ae918337225ede7df597396b3b97e6780af68677b021bdec5d32f8"
+            },
+            {
+              "id": "A-006",
+              "sha256": "10e4f719eb2e18c60aa9eb1a976e44afcd102a39a38e68ece538a6e805d209ab"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-24T14:36:24.183966Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "recovery"
+      ],
+      "reason": "User explicitly authorized recovery of both interrupted tasks",
+      "scope": "custom",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-24T14:36:24.183753Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "888589bafb8cf744fa977b1d34cf3a4bf78c4d90a5d234bd186e836f86c01a25"
+      }
+    }
+  ],
+  "id": "3f86e3f7-b27f-49fd-96a2-d621ced38d8a",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/repro-0111-followup/criteria.md": {
+          "A-001": {
+            "dependencies": [],
+            "end_marker": "<!-- A-001:end -->",
+            "start_marker": "<!-- A-001:start -->"
+          },
+          "A-002": {
+            "dependencies": [],
+            "end_marker": "<!-- A-002:end -->",
+            "start_marker": "<!-- A-002:start -->"
+          },
+          "A-003": {
+            "dependencies": [],
+            "end_marker": "<!-- A-003:end -->",
+            "start_marker": "<!-- A-003:start -->"
+          },
+          "A-004": {
+            "dependencies": [],
+            "end_marker": "<!-- A-004:end -->",
+            "start_marker": "<!-- A-004:start -->"
+          },
+          "A-005": {
+            "dependencies": [],
+            "end_marker": "<!-- A-005:end -->",
+            "start_marker": "<!-- A-005:start -->"
+          },
+          "A-006": {
+            "dependencies": [],
+            "end_marker": "<!-- A-006:end -->",
+            "start_marker": "<!-- A-006:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "e4dc428dd301a44965fc24f1fdec42a56f5979ac4331fc2ddd3abff50723047a",
+      "artifact_map_source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator"
+        },
+        "reference": "criteria map A-001..A-006 (A-006 user-approved 2026-11-24)",
+        "type": "system"
+      },
+      "dispatch_harvested": [
+        "f2fee6b6-e201-4688-be5a-4189c4f18c2b"
+      ]
+    }
+  },
+  "name": "repro-0111-followup",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "Fix verified 0.11.1 reproduction gaps",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}

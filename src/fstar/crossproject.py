@@ -565,6 +565,76 @@ class CrossProjectService:
                 "scope": "cross-project", "validates": ""}
 
 
+def foreign_task_candidates(store: TaskStore, task_ref: str, *, limit: int = 5) -> dict:
+    """Read-only foreign-project candidate hints for a local task_not_found (A-005).
+
+    Reads ONLY the configured user project registry
+    (``<user_home>/projects.json``); no filesystem-wide scan, no project
+    switching, no writes anywhere. Every registered project other than the
+    local one is probed read-only: a broken, moved, corrupt, or otherwise
+    unreadable project is skipped safely and reported under ``skipped``,
+    never raised as an error. Same-name matches in several projects stay
+    explicit separate candidates. The result is advisory detail for the
+    failure message; the local lookup semantics never change.
+    """
+    result = {"candidates": [], "skipped": []}
+    try:
+        registry = _read_registry(_registry_path(store.user_home))
+    except (DomainError, OSError, ValueError):
+        return result
+    seen_projects = set()
+    for project_id, entry in sorted(registry.get("projects", {}).items()):
+        if not isinstance(entry, dict):
+            continue
+        recorded = entry.get("path", "")
+        if not isinstance(recorded, str) or not recorded:
+            continue
+        try:
+            target_root = Path(recorded).expanduser().resolve()
+        except (OSError, RuntimeError, ValueError):
+            result["skipped"].append({"project_id": project_id, "path": recorded})
+            continue
+        # The registry may name the project we are already in: its tasks
+        # were already searched by the failing local lookup.
+        if target_root == store.project_root:
+            continue
+        if target_root in seen_projects:
+            continue
+        seen_projects.add(target_root)
+        try:
+            probe = TaskStore(target_root, user_home=store.user_home,
+                              runtime_root=store.runtime_root)
+            probe.require_project()
+        except (DomainError, OSError, RuntimeError, ValueError, TypeError):
+            # Unavailable/corrupt unrelated project: never break the local
+            # lookup; record it as skipped for honest reporting.
+            result["skipped"].append({"project_id": project_id, "path": recorded})
+            continue
+        for archived_flag in (False, True):
+            try:
+                hits = probe.scan(archived=archived_flag)
+            except (DomainError, OSError, ValueError, TypeError, RuntimeError):
+                result["skipped"].append({"project_id": project_id, "path": recorded})
+                continue
+            for task in hits:
+                root = probe.archive_root if archived_flag else probe.tasks_root
+                relative = str(Path(task["_path"]).relative_to(root))
+                if task_ref not in (task.get("id"), task.get("name"), relative):
+                    continue
+                result["candidates"].append({
+                    "project_id": project_id,
+                    "project": str(target_root),
+                    "task_id": task.get("id"),
+                    "name": task.get("name"),
+                    "phase": task.get("phase"),
+                    "archived": archived_flag,
+                    "path": task.get("_path", ""),
+                })
+                if len(result["candidates"]) >= limit:
+                    return result
+    return result
+
+
 def unified_acceptance_children(store: TaskStore, ref: str) -> list:
     """Resolve the master task's cross-project child links for unified acceptance.
 

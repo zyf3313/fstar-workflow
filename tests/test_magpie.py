@@ -49,6 +49,7 @@ class MagpieCase(unittest.TestCase):
         state.mkdir(parents=True, exist_ok=True)
         instructions_file = state / "instructions.md"
         instructions_file.write_text(instructions, encoding="utf-8")
+        rm_fail_file = state / "rm-fails"
         if hang:
             body = "import time; time.sleep(60)\n"
         elif fail:
@@ -65,6 +66,10 @@ class MagpieCase(unittest.TestCase):
                     "    print(%r); sys.exit(0)\n"
                     "if len(args) >= 4 and args[:3] == ['library', 'skill', 'hand-over']:\n"
                     "    print('handed over ' + ' '.join(args[3:])); sys.exit(0)\n"
+                    "if len(args) == 4 and args[:3] == ['library', 'skill', 'rm']:\n"
+                    "    if (state / 'rm-fails').exists():\n"
+                    "        print('rm refused'); sys.exit(4)\n"
+                    "    print('removed ' + args[3]); sys.exit(0)\n"
                     "if args == ['library', 'instructions']:\n"
                     "    sys.stdout.write(instructions.read_text() if instructions.is_file() else '')\n"
                     "    sys.exit(0)\n"
@@ -433,6 +438,185 @@ class TestSoftRouter(MagpieCase):
         self.assertNotIn("ownership", entry)
 
 
+class TestStalePrune(MagpieCase):
+    """A-001/A-002: stale handed-over skills are reconciled and pruned
+    through the guarded public ``library skill rm`` path. Never the real
+    Magpie app; the fake runner/binary seam is the only invocation."""
+
+    def _route(self, *, binary=None, runner=None, **kwargs):
+        return magpie.route_skills(skills_root=self.skills_root,
+                                   agents_source=self.agents_source,
+                                   user_root=self.user_root,
+                                   binary=str(binary) if binary else None,
+                                   discover=lambda: str(binary) if binary else None,
+                                   runner=runner or magpie.default_runner,
+                                   **kwargs)
+
+    def _record(self) -> dict:
+        return json.loads((self.user_root / "magpie-integration.json").read_text(encoding="utf-8"))
+
+    def _hand_over(self, name: str, content: str = "fstar skill\n"):
+        import hashlib
+        _write(self.skills_root / name / "SKILL.md", content)
+        binary = self._fake_binary()
+        report = self._route(binary=binary)
+        assert report["library"].get(name) == "handed_over", report
+        # Remove the skill from the bundle: it is now stale.
+        import shutil
+        shutil.rmtree(self.skills_root / name)
+        return binary
+
+    def test_dry_run_reports_stale_pending_removal(self):
+        binary = self._hand_over("fstar-init")
+        report = self._route(binary=binary, dry_run=True)
+        stale = [item for item in report["skills"] if item["skill"] == "fstar-init"]
+        self.assertEqual(len(stale), 1)
+        self.assertEqual(stale[0]["action"], "stale_pending_removal")
+        self.assertEqual(report["library"]["fstar-init"], "handed_over")
+        # Dry run mutates neither the ledger nor the library.
+        self.assertEqual(self._record()["skills"]["fstar-init"]["library"], "handed_over")
+        self.assertTrue((self.agents_source / "fstar-init" / "SKILL.md").is_file())
+
+    def test_apply_retains_unverified_library_independent_of_staging(self):
+        binary = self._hand_over("fstar-init")
+        library = _write(self.tmp / "fake-library" / "fstar-init" / "SKILL.md", "user modified library\n")
+        calls = []
+        def runner(argv, timeout):
+            calls.append(list(argv))
+            return (0, "fake", "")
+        before = self._record()
+        report = self._route(binary=binary, runner=runner)
+        self.assertEqual(report["skills"][0]["action"], "stale_but_modified")
+        self.assertEqual(library.read_text(), "user modified library\n")
+        self.assertEqual(self._record(), before)
+        self.assertTrue((self.agents_source / "fstar-init" / "SKILL.md").is_file())
+        self.assertFalse(any(call[1:4] == ["library", "skill", "rm"] for call in calls))
+
+    def test_modified_library_content_is_never_deleted(self):
+        self._hand_over("fstar-init")
+        # The user edited the handed-over content after the hand-over.
+        (self.agents_source / "fstar-init" / "SKILL.md").write_text("user edits\n", encoding="utf-8")
+        binary = self._fake_binary()
+        report = self._route(binary=binary)
+        stale = [item for item in report["skills"] if item["skill"] == "fstar-init"]
+        self.assertEqual(stale[0]["action"], "stale_but_modified")
+        self.assertIn("cannot be independently verified", stale[0]["reason"])
+        # Content preserved, ledger unmutated, and the run is degraded.
+        self.assertEqual((self.agents_source / "fstar-init" / "SKILL.md").read_text(encoding="utf-8"),
+                         "user edits\n")
+        self.assertEqual(self._record()["skills"]["fstar-init"]["library"], "handed_over")
+        self.assertEqual(report["status"], "degraded")
+
+    def test_a_non_fstar_skill_is_never_pruned(self):
+        # A non-fstar skill staged in the shared source directory, with no
+        # ledger entry: fstar never handed it over, so it is not stale, is
+        # never mentioned in the results, and no rm is ever issued for it.
+        _write(self.agents_source / "somebody-else" / "SKILL.md", "not ours\n")
+        _write(self.skills_root / "fstar-init" / "SKILL.md", "fstar skill\n")
+        calls = []
+        original_runner = magpie.default_runner
+
+        def recording_runner(argv, timeout):
+            calls.append(list(argv))
+            return original_runner(argv, timeout=timeout)
+
+        binary = self._fake_binary()
+        report = self._route(binary=binary, runner=recording_runner)
+        self.assertFalse(any(item["skill"] == "somebody-else" for item in report["skills"]))
+        self.assertEqual((self.agents_source / "somebody-else" / "SKILL.md").read_text(encoding="utf-8"),
+                         "not ours\n")
+        rm_calls = [call for call in calls if len(call) >= 4 and call[1:4] == ["library", "skill", "rm"]]
+        self.assertFalse(any("somebody-else" in call for call in rm_calls))
+
+    def test_the_fstar_managed_guard_rejects_foreign_names(self):
+        # A-002 guard 3: the fstar-managed check itself. An entry recorded
+        # as handed_over under a foreign name has no fstar- prefix and (for
+        # the direct helper call) no sibling history, so the prune refuses
+        # before any rm is attempted. In route_skills a recorded entry is by
+        # definition fstar history, so this guard fires for hand-written
+        # ledgers or future non-fstar integrations.
+        import hashlib
+        _write(self.agents_source / "somebody-else" / "SKILL.md", "not ours\n")
+        record = {"schema": magpie.INTEGRATION_SCHEMA,
+                  "skills": {"somebody-else": {"sha256": hashlib.sha256(b"not ours\n").hexdigest(),
+                                               "library": "handed_over"}}}
+        binary = self._fake_binary()
+        calls = []
+        original_runner = magpie.default_runner
+
+        def refusing_runner(argv, timeout):
+            calls.append(list(argv))
+            return original_runner(argv, timeout=timeout)
+
+        outcome = magpie._prune_stale_skill(name="somebody-else", record=record,
+                                            agents_source=self.agents_source,
+                                            binary=str(binary), runner=refusing_runner)
+        self.assertEqual(outcome["action"], "prune_failed")
+        self.assertIn("not fstar-managed", outcome["reason"])
+        # No rm was attempted for the foreign name.
+        self.assertFalse(any(call[1:4] == ["library", "skill", "rm"] for call in calls
+                             if len(call) >= 4))
+        self.assertEqual((self.agents_source / "somebody-else" / "SKILL.md").read_text(encoding="utf-8"),
+                         "not ours\n")
+
+    def test_rm_is_not_attempted_when_library_content_unverifiable(self):
+        binary = self._hand_over("fstar-init")
+        before = self._record()
+        calls = []
+        def runner(argv, timeout):
+            calls.append(argv)
+            return (4, "", "rm refused") if argv[1:4] == ["library", "skill", "rm"] else (0, "fake", "")
+        report = self._route(binary=binary, runner=runner)
+        self.assertEqual(report["skills"][0]["action"], "stale_but_modified")
+        self.assertEqual(self._record(), before)
+        self.assertFalse(any(call[1:4] == ["library", "skill", "rm"] for call in calls))
+
+    def test_stale_entries_with_magpie_absent_are_informational(self):
+        self._hand_over("fstar-init")
+        report = self._route(binary=None)
+        stale = [item for item in report["skills"] if item["skill"] == "fstar-init"]
+        self.assertEqual(stale[0]["action"], "stale_pending_removal")
+        self.assertEqual(report["library"]["fstar-init"], "handed_over")
+        self.assertEqual(report["status"], "skipped")
+        self.assertEqual(self._record()["skills"]["fstar-init"]["library"], "handed_over")
+
+    def test_native_only_reports_stale_informationally(self):
+        self._hand_over("fstar-init")
+        binary = self._fake_binary()
+        report = self._route(binary=binary, native_only=True)
+        stale = [item for item in report["skills"] if item["skill"] == "fstar-init"]
+        self.assertEqual(stale[0]["action"], "stale_pending_removal")
+        self.assertFalse(report["magpie"]["consulted"])
+        self.assertEqual(report["library"]["fstar-init"], "handed_over")
+        self.assertEqual(self._record()["skills"]["fstar-init"]["library"], "handed_over")
+
+    def test_skills_the_ledger_never_recorded_are_not_stale(self):
+        # A skill merely absent from the bundle, with no ledger entry, never
+        # appears in the results.
+        self._hand_over("fstar-init")
+        report = self._route(binary=self._fake_binary())
+        self.assertFalse(any(item["skill"] == "never-recorded" for item in report["skills"]))
+
+    def test_a_failing_prune_does_not_block_the_rest_of_the_update(self):
+        self._hand_over("fstar-init")
+        (self.tmp / "magpie-state" / "rm-fails").write_text("", encoding="utf-8")
+        self._stage_skill("fstar-plan")
+        binary = self._fake_binary()
+        report = self._route(binary=binary)
+        actions = {item["skill"]: item["action"] for item in report["skills"]}
+        self.assertEqual(actions["fstar-init"], "stale_but_modified")
+        self.assertEqual(actions["fstar-plan"], "handed_over")
+
+    def test_missing_source_copy_is_stale_but_modified(self):
+        import shutil
+        self._hand_over("fstar-init")
+        shutil.rmtree(self.agents_source / "fstar-init")
+        binary = self._fake_binary()
+        report = self._route(binary=binary)
+        stale = [item for item in report["skills"] if item["skill"] == "fstar-init"]
+        self.assertEqual(stale[0]["action"], "stale_but_modified")
+
+
 class TestSharedInstructions(MagpieCase):
     """The shared library instructions channel (R-004)."""
 
@@ -515,6 +699,51 @@ class TestInstallMagpieOption(MagpieCase):
         self.assertTrue((self.user_root / "magpie-integration.json").is_file())
         record = json.loads((self.user_root / "magpie-integration.json").read_text(encoding="utf-8"))
         self.assertEqual(record["skills"]["fstar-init"]["library"], "handed_over")
+
+    def test_install_prunes_a_stale_library_entry_and_reports_it(self):
+        # A skill that left the bundle but is still recorded as handed over:
+        # the install reports it and prunes it through the guarded rm path.
+        import hashlib
+        payload = b"old fstar skill\n"
+        _write(self.agents_source / "fstar-old" / "SKILL.md", payload.decode())
+        _write(self.user_root / "magpie-integration.json", json.dumps({
+            "schema": magpie.INTEGRATION_SCHEMA,
+            "skills": {"fstar-old": {"sha256": hashlib.sha256(payload).hexdigest(),
+                                     "library": "handed_over",
+                                     "at": "2026-11-20T00:00:00Z"}}}))
+        binary = self._fake_binary()
+        code, output = self._install(binary=binary, agents_source=self.agents_source,
+                                     user_root=self.user_root)
+        self.assertEqual(code, 0)
+        payload = json.loads(output)
+        stale = [item for item in payload["magpie"]["skills"] if item["skill"] == "fstar-old"]
+        self.assertEqual(len(stale), 1)
+        self.assertEqual(stale[0]["action"], "stale_but_modified")
+        # The stale ledger entry remains; other skills are still handed over.
+        record = json.loads((self.user_root / "magpie-integration.json").read_text(encoding="utf-8"))
+        self.assertIn("fstar-old", record["skills"])
+        self.assertEqual(record["skills"]["fstar-init"]["library"], "handed_over")
+
+    def test_install_dry_run_reports_a_stale_entry_without_removing_it(self):
+        import hashlib
+        payload = b"old fstar skill\n"
+        _write(self.agents_source / "fstar-old" / "SKILL.md", payload.decode())
+        _write(self.user_root / "magpie-integration.json", json.dumps({
+            "schema": magpie.INTEGRATION_SCHEMA,
+            "skills": {"fstar-old": {"sha256": hashlib.sha256(payload).hexdigest(),
+                                     "library": "handed_over",
+                                     "at": "2026-11-20T00:00:00Z"}}}))
+        binary = self._fake_binary()
+        code, output = self._install(binary=binary, agents_source=self.agents_source,
+                                     user_root=self.user_root, extra=["--dry-run"])
+        self.assertEqual(code, 0)
+        payload = json.loads(output)
+        stale = [item for item in payload["magpie"]["skills"] if item["skill"] == "fstar-old"]
+        self.assertEqual(stale[0]["action"], "stale_pending_removal")
+        # Nothing was removed: the ledger and the source copy are untouched.
+        record = json.loads((self.user_root / "magpie-integration.json").read_text(encoding="utf-8"))
+        self.assertEqual(record["skills"]["fstar-old"]["library"], "handed_over")
+        self.assertTrue((self.agents_source / "fstar-old" / "SKILL.md").is_file())
 
     def test_native_copies_exist_even_when_skills_are_handed_over(self):
         # R-003 rework: /fstar-* slash commands are a client feature supplied

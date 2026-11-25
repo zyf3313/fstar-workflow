@@ -1338,7 +1338,80 @@ class TestDurableRecovery(InstallerCase):
         target.write_bytes(b"user newer content")
         installer.recover_pending(self.roots())
         self.assertEqual(target.read_bytes(), b"user newer content")
+        self.assertTrue(journal.exists())
+        installer.recover_pending(self.roots())
+        self.assertEqual(target.read_bytes(), b"user newer content")
+        self.assertTrue(journal.exists())
+        target.write_bytes(b"crashed value")
+        installer.recover_pending(self.roots())
         self.assertFalse(journal.exists())
+
+    def test_recovery_retains_journal_for_later_symlink_and_retries(self):
+        target = self.host_root / "victim"
+        external = self.tmp / "external-target"
+        external.write_bytes(b"user data")
+        target.symlink_to(external)
+        journal = self._crash_journal(target, b"original", b"crashed")
+        installer.recover_pending(self.roots())
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(external.read_bytes(), b"user data")
+        self.assertTrue(journal.exists())
+        target.unlink()
+        target.write_bytes(b"crashed")
+        installer.recover_pending(self.roots())
+        self.assertEqual(target.read_bytes(), b"original")
+        self.assertFalse(journal.exists())
+        installer.recover_pending(self.roots())
+        self.assertEqual(target.read_bytes(), b"original")
+
+    def test_partial_recovery_is_idempotent_across_multiple_writes(self):
+        import base64
+        first = self.host_root / "first"
+        second = self.host_root / "second"
+        first.write_bytes(b"latest")
+        second.write_bytes(b"user edit")
+        journal = self.user_root / "install-backups" / self.OP / "journal.jsonl"
+        journal.parent.mkdir(parents=True)
+        records = [
+            {"path": str(first), "before": base64.b64encode(b"original").decode(), "after_sha": _sha_bytes(b"middle")},
+            {"path": str(first), "before": base64.b64encode(b"middle").decode(), "after_sha": _sha_bytes(b"latest")},
+            {"path": str(second), "before": None, "after_sha": _sha_bytes(b"created")},
+        ]
+        journal.write_text("".join(json.dumps(record) + "\n" for record in records))
+        installer.recover_pending(self.roots())
+        self.assertEqual(first.read_bytes(), b"original")
+        self.assertEqual(second.read_bytes(), b"user edit")
+        self.assertTrue(journal.exists())
+        installer.recover_pending(self.roots())
+        self.assertEqual(first.read_bytes(), b"original")
+        self.assertTrue(journal.exists())
+        second.write_bytes(b"created")
+        installer.recover_pending(self.roots())
+        self.assertFalse(second.exists())
+        self.assertFalse(journal.exists())
+
+    def test_recovery_keeps_nonempty_created_directory_until_retry(self):
+        directory = self.host_root / "created-dir"
+        directory.mkdir()
+        extra = directory / "user-file"
+        extra.write_text("keep")
+        journal = self.user_root / "install-backups" / self.OP / "journal.jsonl"
+        journal.parent.mkdir(parents=True)
+        journal.write_text(json.dumps({"mkdir": str(directory.resolve())}) + "\n")
+        installer.recover_pending(self.roots())
+        self.assertEqual(extra.read_text(), "keep")
+        self.assertTrue(journal.exists())
+        extra.unlink()
+        installer.recover_pending(self.roots())
+        self.assertFalse(directory.exists())
+        self.assertFalse(journal.exists())
+
+    def test_recovery_keeps_unreadable_journal(self):
+        journal = self.user_root / "install-backups" / self.OP / "journal.jsonl"
+        journal.parent.mkdir(parents=True)
+        journal.write_text('{"path":')
+        installer.recover_pending(self.roots())
+        self.assertTrue(journal.exists())
 
     def test_recovery_removes_file_created_by_crashed_transaction(self):
         created = self.user_root / "resources" / BUNDLE_VERSION / "runtime" / "created.md"
@@ -1521,6 +1594,103 @@ class TestDoctor(InstallerCase):
     def test_knowledge_schema_is_reported_pending(self):
         report = installer.doctor(roots=self.roots())
         self.assertEqual(report["schema_report"]["knowledge_schema"]["status"], "pending")
+
+
+class TestMagpiePruneReporting(InstallerCase):
+    """A-003/A-004: the Magpie prune path is reported accurately and the
+    doctor links a stale hand-over to the update path that prunes it."""
+
+    def _write_record(self, skills: dict) -> None:
+        (self.user_root / "magpie-integration.json").write_text(
+            json.dumps({"schema": "fstar.magpie-integration.v1", "skills": skills}),
+            encoding="utf-8")
+
+    def _extra_skill(self, name: str) -> Path:
+        """A skill directory in the installed resource cache that is not
+        part of the fixed inventory (the RESOURCE_EXTRA case)."""
+        path = self.user_root / "resources" / BUNDLE_VERSION / "skills" / name / "SKILL.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("---\nname: %s\ndescription: extra\n---\n\nbody\n" % name,
+                        encoding="utf-8")
+        return path
+
+    def test_uninstall_points_at_the_prune_path_instead_of_manual_magpie_surgery(self):
+        self.install(hosts=["claude"])
+        self._write_record({"fstar-init": {"sha256": "a" * 64, "library": "handed_over",
+                                           "at": "2026-11-20T00:00:00Z"}})
+        args = argparse.Namespace(host=["claude"], dry_run=False, user_level=False,
+                                  project=None, storage=None)
+        with mock.patch.object(installer, "_roots", return_value=self.roots()):
+            result = installer._handle_uninstall(args)
+        self.assertEqual(result["magpie"]["status"], "kept_in_library")
+        self.assertEqual(result["magpie"]["skills"], ["fstar-init"])
+        self.assertIn("retain", result["magpie"]["reason"])
+        self.assertNotIn("remove them through Magpie", result["magpie"]["reason"])
+
+    def test_doctor_hints_a_handed_over_extra_skill(self):
+        self.install(hosts=["claude"])
+        self._extra_skill("fstar-doc")
+        self._write_record({"fstar-doc": {"sha256": "b" * 64, "library": "handed_over",
+                                          "at": "2026-11-20T00:00:00Z"}})
+        report = installer.doctor(roots=self.roots())
+        extra = [item for item in report["diagnostics"] if item["code"] == "RESOURCE_EXTRA"]
+        self.assertTrue(extra, report["diagnostics"])
+        hinted = [item for item in extra if item["path"].endswith("fstar-doc/SKILL.md")]
+        self.assertTrue(hinted)
+        self.assertIn("handed over", hinted[0]["message"])
+        self.assertIn("retained", hinted[0]["message"])
+        self.assertTrue(hinted[0]["details"]["magpie_handed_over"])
+
+    def test_doctor_leaves_unrelated_resource_extra_output_untouched(self):
+        self.install(hosts=["claude"])
+        self._extra_skill("fstar-doc")
+        self._write_record({"fstar-init": {"sha256": "c" * 64, "library": "handed_over",
+                                           "at": "2026-11-20T00:00:00Z"}})
+        report = installer.doctor(roots=self.roots())
+        extra = [item for item in report["diagnostics"] if item["code"] == "RESOURCE_EXTRA"]
+        self.assertTrue(extra)
+        for item in extra:
+            self.assertEqual(item["message"], "Unexpected resource in fixed inventory")
+            self.assertNotIn("details", item)
+
+    def test_doctor_without_a_ledger_adds_no_hint(self):
+        self.install(hosts=["claude"])
+        self._extra_skill("fstar-doc")
+        report = installer.doctor(roots=self.roots())
+        extra = [item for item in report["diagnostics"] if item["code"] == "RESOURCE_EXTRA"]
+        self.assertTrue(extra)
+        for item in extra:
+            self.assertEqual(item["message"], "Unexpected resource in fixed inventory")
+
+
+class TestLinkRecoverySafety(InstallerCase):
+    def test_shared_skills_link_is_kept_in_preview_and_apply(self):
+        self.install(hosts=["claude"])
+        skills = self.host_root / "skills"
+        external = self.tmp / "external"
+        shutil.move(str(skills), str(external))
+        (external / "other-user-skill").mkdir()
+        (external / "other-user-skill" / "SKILL.md").write_text("keep")
+        (external / "fstar-init" / "SKILL.md").write_text("changed")
+        skills.symlink_to(external, target_is_directory=True)
+        plan = installer.plan_install(operation="update", roots=self.roots(), hosts=["claude"])
+        entry = next(e for e in plan["host_files"] if e.get("skill") == "fstar-init")
+        self.assertEqual(entry["action"], "conflict")
+        installer.apply_plan(plan, roots=self.roots())
+        self.assertTrue(skills.is_symlink())
+        self.assertEqual((external / "fstar-init" / "SKILL.md").read_text(), "changed")
+        self.assertEqual((external / "other-user-skill" / "SKILL.md").read_text(), "keep")
+
+    def test_rollback_preserves_later_symlink_and_directory(self):
+        roots = self.roots().resolved()
+        for kind in ("symlink", "directory"):
+            path = roots.host_roots["claude"] / ("later-" + kind)
+            if kind == "symlink":
+                path.symlink_to(self.tmp / "target")
+            else:
+                path.mkdir()
+            installer._restore_entries([{"path": path, "before": None, "after": None}], roots)
+            self.assertTrue(path.is_symlink() if kind == "symlink" else path.is_dir())
 
 
 class TestVersionReport(InstallerCase):

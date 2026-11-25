@@ -542,65 +542,100 @@ class DispatchService:
 
     # -- registration -----------------------------------------------------
 
+    # Dispatch identities persist in meta.templates (they survive event
+    # compaction; the dispatch_registered event itself is foldable noise).
+    _REGISTRATIONS_KEY = "dispatch_registrations"
+
+    @staticmethod
+    def _registration_identity(payload: dict) -> str:
+        """Hash the entire effective payload, including optional/future fields."""
+        from .store import content_hash
+        return content_hash(payload)
+
+    def _registration_records(self, task: dict) -> dict:
+        records = task.get("meta", {}).get("templates", {}).get(self._REGISTRATIONS_KEY)
+        return records if isinstance(records, dict) else {}
+
+    def _verify_registration_identity(self, task: dict, payload: dict) -> object:
+        record = self._registration_records(task).get(payload["dispatch_id"])
+        identity = record.get("sha256") if isinstance(record, dict) else record
+        if identity is not None and identity != self._registration_identity(payload):
+            raise DomainError("dispatch_id_conflict",
+                              "Dispatch id already has a different effective payload; use a new id",
+                              {"dispatch_id": payload["dispatch_id"]}, status=4)
+        return record
+
     def register(self, payload: dict, *, coordinator_id: str = "coordinator",
                  actor: Optional[dict] = None) -> dict:
-        """Register a dispatch. Session-only payloads persist nothing."""
+        """Register atomically; replay reports existing work without restarting it."""
         validate_payload(payload)
         task_ref = payload["task_ref"]
-        self.authorize_role(payload)
-        if task_ref != "session-only":
-            # Persisted records are authoritative even if the caller supplied
-            # stale session context for the same task.
-            payload = dict(payload, extensions=self.store.read(task_ref)["extensions"])
         if task_ref == "session-only":
-            # Minimal loop: validate only. No fstar metadata is created.
+            self.authorize_role(payload)
             return {"registered": False, "persistence": "session_only",
                     "payload": payload, "adapter": adapter_invocation_note()}
-        task = self.store.read(task_ref)
-        if task["phase"] != "in_progress":
-            raise DomainError("dispatch_not_allowed", "Dispatch registration requires an in-progress task", {"phase": task["phase"]}, status=3)
-        # Post-replan gate: a plan that predates a replan must be re-derived
-        # from the reconciled documents, not carried over. The replan records
-        # plan.md's digest; dispatching while plan.md still matches that
-        # digest means the plan was not rewritten after the replan.
-        replan = (task.get("meta") or {}).get("replan")
-        plan_before = replan.get("plan_sha256") if isinstance(replan, dict) else None
-        if plan_before:
-            from .evidence import file_digest
-            task_dir = self.store.resolve(task_ref)
-            plan_path = task_dir / "plan.md"
-            if plan_path.is_file() and file_digest(plan_path) == plan_before:
-                raise DomainError("stale_plan_dispatch", "plan.md predates the latest replan; re-derive it from the reconciled documents before dispatching", {"replanned_at": replan.get("at")}, status=3)
-        lease = task.get("lease")
-        token = None
-        if lease and lease.get("expires_at", "") > self.clock():
-            if lease.get("holder", {}).get("id") != coordinator_id:
-                raise DomainError("lease_conflict", "Another writer holds the task lease", {"holder": lease.get("holder")}, status=4)
-            token = lease.get("token")
-        else:
-            acquired = self.tasks.acquire_lease(task_ref, holder=coordinator_id, role="coordinator", actor=actor)
-            token = acquired["token"]
         with self.store.transaction():
             task_dir = self.store.resolve(task_ref)
-            current = self.store._read_path(task_dir / "task.json")
-            # The rewritten plan has now entered a dispatch: the replan
-            # revisit block is consumed and stops surfacing in session
-            # context or gating later registrations.
-            if (current.get("meta") or {}).get("replan"):
-                current["meta"]["replan"] = None
-            current["events"].append(make_event(
+            task = self.store._read_path(task_dir / "task.json")
+            payload = dict(payload, extensions=task["extensions"])
+            self.authorize_role(payload)
+            record = self._verify_registration_identity(task, payload)
+            lease = task.get("lease")
+            active = bool(lease and lease.get("expires_at", "") > self.clock())
+            response = {"registered": True, "persistence": "task",
+                        "dispatch_id": payload["dispatch_id"], "payload": payload,
+                        "adapter": adapter_invocation_note()}
+            if record is not None:
+                if active and lease.get("holder", {}).get("id") != coordinator_id:
+                    raise DomainError("lease_conflict", "Another writer holds the task lease",
+                                      {"holder": lease.get("holder")}, status=4)
+                state = record.get("state", "registered") if isinstance(record, dict) else "registered"
+                if payload["dispatch_id"] in self._harvested_ids(task):
+                    state = "harvested"
+                usable = (state == "registered" and active and task["phase"] == "in_progress"
+                          and not task.get("meta", {}).get("disposition"))
+                return dict(response, existing_registration=True,
+                            registration_state=state, phase=task["phase"],
+                            lease_token=lease["token"] if usable else None,
+                            recovery_required=not usable and state == "registered")
+            # Old tasks remain usable with NEW ids. Historical registrations
+            # without an identity cannot safely be recreated from a retry.
+            historical = payload["dispatch_id"] in self._harvested_ids(task) or any(
+                event.get("type") == "dispatch_registered" and
+                event.get("data", {}).get("dispatch_id") == payload["dispatch_id"]
+                for event in task.get("events", []))
+            if historical:
+                raise DomainError("dispatch_identity_unknown", "Legacy dispatch identity is unavailable; use a new id", status=4)
+            if task["phase"] != "in_progress" or task.get("meta", {}).get("disposition"):
+                raise DomainError("dispatch_not_allowed", "Dispatch registration requires an active task",
+                                  {"phase": task["phase"]}, status=3)
+            replan = (task.get("meta") or {}).get("replan")
+            plan_before = replan.get("plan_sha256") if isinstance(replan, dict) else None
+            plan_path = task_dir / "plan.md"
+            if plan_before and plan_path.is_file() and file_digest(plan_path) == plan_before:
+                raise DomainError("stale_plan_dispatch", "plan.md predates the latest replan; re-derive it from the reconciled documents before dispatching",
+                                  {"replanned_at": replan.get("at")}, status=3)
+            if active:
+                if lease.get("holder", {}).get("id") != coordinator_id:
+                    raise DomainError("lease_conflict", "Another writer holds the task lease", {"holder": lease.get("holder")}, status=4)
+            else:
+                lease = self.tasks._acquire_lease(task, holder=coordinator_id, role="coordinator", actor=actor)
+            if replan:
+                task["meta"]["replan"] = None
+            task["events"].append(make_event(
                 "dispatch_registered",
                 {"source_id": str(uuid.uuid4()), "type": "system", "at": self.clock(),
                  "actor": actor or {"role": "coordinator", "id": coordinator_id},
                  "reference": "dispatch %s" % payload["dispatch_id"], "quote": "",
                  "scope": "dispatch", "validates": ""},
                 {"dispatch_id": payload["dispatch_id"], "role": payload["role"],
-                 "plan_item_ids": payload["plan_item_ids"]},
-                self.clock()))
-            self.store.write(task_dir, current)
-        return {"registered": True, "persistence": "task", "lease_token": token,
-                "dispatch_id": payload["dispatch_id"], "payload": payload,
-                "adapter": adapter_invocation_note()}
+                 "plan_item_ids": payload["plan_item_ids"]}, self.clock()))
+            templates = task.setdefault("meta", {}).setdefault("templates", {})
+            records = dict(self._registration_records(task))
+            records[payload["dispatch_id"]] = {"sha256": self._registration_identity(payload), "state": "registered"}
+            templates[self._REGISTRATIONS_KEY] = records
+            self.tasks._write(task_dir, task)
+            return dict(response, lease_token=lease["token"], registration_state="registered")
 
     # -- parallel reservation layer (multi-agent/parallel-implement) ----------
     _RESERVATIONS_KEY = "dispatch_reservations"
@@ -1149,6 +1184,10 @@ class DispatchService:
         if result["role"] != payload["role"]:
             raise DomainError("identity_mismatch", "Result role does not match the payload", {"expected": payload["role"], "actual": result["role"]}, status=4)
         task_ref = payload["task_ref"]
+        if task_ref != "session-only":
+            task = self.store.read(task_ref)
+            effective = dict(payload, extensions=task["extensions"])
+            self._verify_registration_identity(task, effective)
         # Check scope before deciding which inputs are claimed worker outputs.
         out_of_scope = sorted(set(result["changed_paths"]) - set(payload["allowed_paths"]))
         if out_of_scope:
@@ -1354,6 +1393,16 @@ class DispatchService:
         decision = propagation_decision(tier, change)
         result = {"dispatch_id": dispatch_id, "reason": reason, "mode": mode,
                   "intent_registered": True, "propagation": decision}
+        if task_ref != "session-only":
+            with self.store.transaction():
+                task_dir = self.store.resolve(task_ref)
+                task = self.store._read_path(task_dir / "task.json")
+                if release_lease_token and (task.get("lease") or {}).get("token") != release_lease_token:
+                    raise DomainError("invalid_lease", "Lease token is no longer current", status=4)
+                record = self._registration_records(task).get(dispatch_id)
+                if isinstance(record, dict) and dispatch_id not in self._harvested_ids(task):
+                    record["state"] = "interrupted"
+                    self.tasks._write(task_dir, task)
         if task_ref != "session-only" and release_lease_token:
             self.tasks.release_lease(task_ref, token=release_lease_token, reason="interrupt: %s" % reason)
             result["lease_released"] = True
@@ -1376,6 +1425,13 @@ def _load_json_file(path: Optional[str], label: str) -> dict:
     import json
     if not path:
         raise DomainError("file_required", "%s file is required" % label)
+    if path == "-":
+        # A-004: one stdin JSON document per invocation, shared with the
+        # core CLI reader so two '-' flags in one command (e.g. harvest
+        # --result - --payload -) fail deterministically instead of hanging
+        # or silently reusing the other document.
+        from .cli import _read_stdin_json
+        return _read_stdin_json(label)
     try:
         with Path(path).open("r", encoding="utf-8") as stream:
             value = json.load(stream)
@@ -1403,7 +1459,7 @@ def register_commands(subparsers) -> None:
 
     # B-03: read-only schema reference; never touches tasks or the project.
     schema = subparsers.add_parser("schema", help="show a dispatch protocol schema and a minimal example")
-    schema.add_argument("name", choices=("payload", "result", "change"))
+    schema.add_argument("name", choices=("payload", "result", "change", "evidence"))
     schema.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_schema})
 
     dispatch = subparsers.add_parser("dispatch")
@@ -1516,7 +1572,7 @@ SCHEMA_REFERENCE = {
             "task_ref": "session-only",
             "role": "implement",
             "plan_item_ids": [],
-            "baseline": {"artifact_items": [], "delivery": {"paths": [], "digest": ""}},
+            "baseline": {},
             "allowed_paths": [],
             "return_conditions": {"done": "", "blocked": "", "failed": ""},
             "prompt_first_line": "Active task: session-only",
@@ -1534,8 +1590,8 @@ SCHEMA_REFERENCE = {
             ("artifact_refs", "object[]", "pointers to produced artifacts"),
             ("validation_facts", "object[]", "required entries; each needs {command, result}"),
             ("blockers", "string[]", "why the dispatch is blocked, if it is"),
-            ("input_baseline", "object", "input fingerprints the worker observed"),
-            ("delivery_baseline", "object", "post-work delivery snapshot"),
+            ("input_baseline", "object", "required; observed input fingerprints, or {} when none are reported"),
+            ("delivery_baseline", "object", "required; observed delivery snapshot, or {} when none is reported; harvest computes its own delivery snapshot"),
             ("skill_usage", "object[]", "optional; S-5 usage entries"),
         ],
         "example": {
@@ -1549,6 +1605,32 @@ SCHEMA_REFERENCE = {
             "blockers": [],
             "input_baseline": {},
             "delivery_baseline": {},
+        },
+    },
+    "evidence": {
+        "schema": "check evidence (no schema field required)",
+        "validator": "EvidenceService.record / EvidenceService._validate_check",
+        "guidance": "Illustrative fixture: example.txt contains UTF-8 'hello\\n' and A-001 is mapped to the whole file. Replace fixture values with actual snapshots, an established artifact map, and facts from an independent check; do not submit this example as a real check.",
+        "fields": [
+            ("kind", "string", "required; check"),
+            ("producer", "object", "required; role check and an independent producer id"),
+            ("validates", "object[]", "required; established artifact and item snapshots, including dependencies"),
+            ("scope", "string", "required; incremental or final"),
+            ("run_id", "string", "required; identify the actual check run"),
+            ("environment", "object", "required; actual check environment"),
+            ("delivery", "object", "required; delivery_snapshot of the checked paths"),
+            ("items", "object[]", "required; plan_item, requirement_ids, result, and command or review_method for a pass"),
+            ("read_only", "boolean", "required true for final checks"),
+            ("report", "object", "optional; project-relative path and raw-byte sha256"),
+        ],
+        "example": {
+            "kind": "check",
+            "producer": {"role": "check", "id": "fixture-checker"},
+            "validates": [{"artifact": "example.txt", "items": [{"id": "A-001", "sha256": "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"}], "dependencies": [{"id": "A-001", "sha256": "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"}], "granularity": "file"}],
+            "scope": "final", "run_id": "fixture-run", "environment": {"name": "fixture"},
+            "delivery": {"paths": [{"path": "example.txt", "exists": True, "sha256": "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"}], "digest": "a59fb931f20d091981781ef41ad8436ec02ffa312e93fd064178548dfc6c5a8a"},
+            "items": [{"plan_item": "P-001", "requirement_ids": ["A-001"], "result": "passed", "review_method": "fixture review"}],
+            "read_only": True,
         },
     },
     "change": {
