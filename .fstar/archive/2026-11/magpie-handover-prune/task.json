@@ -1,9 +1,9 @@
 {
   "acceptance": {
-    "confirmed_at": "2026-11-25T03:39:06.036299Z",
+    "confirmed_at": "2026-11-25T03:39:14.679217Z",
     "confirmed_by": "user",
     "evidence_refs": [
-      "2e900246-b428-4c10-9405-33d721243baa"
+      "36c30638-1148-455a-86ad-ecc9d53c798d"
     ],
     "source": {
       "actor": {
@@ -17,17 +17,17 @@
       "scope": "accept",
       "source_id": "conversation:2026-11-25 user approved commit and merge",
       "type": "conversation",
-      "validates": "19d8b0cdc01990e6bcba2ae7f0ad2db1f6d042690032848feeab1997ea3a68f2"
+      "validates": "5ff0eb6ece4f0a326069906828be3d45c89fb46be9314829dffd609e1bb2cc6e"
     },
     "state": "valid",
     "validates": {
       "delivery": [
-        "7b0394536cb3218f27e48e44ef3dc1e3451e96ccf30ee0a6ac7a2c780ef677d6"
+        "db329f9827f426719cf719c58878fcfcf053133882cc0242f04e5f0ddcef40d0"
       ],
-      "task": "19d8b0cdc01990e6bcba2ae7f0ad2db1f6d042690032848feeab1997ea3a68f2"
+      "task": "5ff0eb6ece4f0a326069906828be3d45c89fb46be9314829dffd609e1bb2cc6e"
     }
   },
-  "archivedAt": null,
+  "archivedAt": "2026-11-25T09:02:47.907628Z",
   "assignee": null,
   "base_branch": "origin/main",
   "blocked": null,
@@ -35,60 +35,60 @@
   "capabilities": [],
   "children": [],
   "commit": "9e980e1d2e256acfa4afb938f5543491a670900b",
-  "completedAt": "2026-11-25T03:39:06.036485Z",
-  "createdAt": "2026-11-24T12:28:35.880671Z",
+  "completedAt": "2026-11-25T03:39:14.679447Z",
+  "createdAt": "2026-11-24T13:15:48.172632Z",
   "creator": "agent",
-  "description": "B-11 evidence mapping end-to-end, safe symlink update, B-07 idempotent dispatch; stdin inputs and cross-project not-found hints. User approved verified follow-up scope.",
+  "description": "route_skills ledger reconciliation, guarded magpie library skill rm for upstream-deleted skills, stale comment removal. From uTools note/1795525324268 (verified).",
   "events": [
     {
-      "at": "2026-11-24T12:28:35.880915Z",
+      "at": "2026-11-24T13:15:48.172895Z",
       "data": {
         "parent": null
       },
-      "id": "faf39bf2-2baa-402a-acbe-0e2d6e6e039d",
+      "id": "f68655dd-6237-4b5b-b438-f9b7f30194a4",
       "source": {
         "actor": {
           "id": "agent",
           "role": "agent",
           "session": null
         },
-        "at": "2026-11-24T12:28:35.880912Z",
+        "at": "2026-11-24T13:15:48.172891Z",
         "quote": "",
         "reference": "task create",
         "scope": "task create",
-        "source_id": "c8fdd782-4c91-4cf7-8ea1-2f1e7aed2f15",
+        "source_id": "7d056c72-b936-445c-bd9c-cfc265eb6cac",
         "type": "system",
         "validates": ""
       },
       "type": "created"
     },
     {
-      "at": "2026-11-24T12:30:30.137192Z",
+      "at": "2026-11-24T13:16:56.236477Z",
       "data": {
         "branch": "fix/repro-0111-followup",
         "detached": false,
-        "snapshot": "888589bafb8cf744fa977b1d34cf3a4bf78c4d90a5d234bd186e836f86c01a25",
+        "snapshot": "0ac94801234544ed1b031a12c610917a694bfcb262efcaf0743ec959a630f076",
         "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
       },
-      "id": "0fdc7b70-1930-4199-8aa5-caa27b2481fc",
+      "id": "7b601e74-7510-4864-aa87-d91e5b36a96c",
       "source": {
         "actor": {
           "id": "user",
           "role": "user",
           "session": null
         },
-        "at": "2026-11-24T12:30:30.098518Z",
+        "at": "2026-11-24T13:16:56.197748Z",
         "quote": "",
-        "reference": "conversation:2026-11-24 user approved verified follow-up proposal 行",
+        "reference": "conversation:2026-11-24 按照你的建议来就行",
         "scope": "start",
-        "source_id": "conversation:2026-11-24 user approved verified follow-up proposal 行",
+        "source_id": "conversation:2026-11-24 按照你的建议来就行",
         "type": "command",
-        "validates": "2cb5a733b269dd616f196cb4996e63ef75a63151a8b20ce57555a29e49bfa473"
+        "validates": "1a8e6337426ec3fe2f86ce5bf08f4d7fd610d7760049e4d712be018c46e94851"
       },
       "type": "started"
     },
     {
-      "at": "2026-11-24T12:30:30.457979Z",
+      "at": "2026-11-24T13:17:09.618091Z",
       "data": {
         "new_holder": {
           "id": "coordinator",
@@ -98,57 +98,55 @@
         "old_holder": null,
         "reason": null
       },
-      "id": "be4abfd6-b1c5-485c-85ae-ff2561a9c1e4",
+      "id": "7d77a8ed-9548-40be-b13d-b5cac1f590a8",
       "source": {
         "actor": {
           "id": "coordinator",
           "role": "coordinator",
           "session": null
         },
-        "at": "2026-11-24T12:30:30.457976Z",
+        "at": "2026-11-24T13:17:09.618088Z",
         "quote": "",
         "reference": "lease",
         "scope": "lease",
-        "source_id": "ec22cc23-5113-41fc-967b-4750a3d77e9b",
+        "source_id": "dc8e6904-3987-4e54-ac48-b05217616305",
         "type": "system",
         "validates": ""
       },
       "type": "lease_acquired"
     },
     {
-      "at": "2026-11-24T12:30:30.460281Z",
+      "at": "2026-11-24T13:17:09.620307Z",
       "data": {
-        "dispatch_id": "c2dc9d9a-feea-412f-abf8-e528e8dcf5ac",
+        "dispatch_id": "87b0baa6-9fdc-4659-80f5-46d15e4e0c8e",
         "plan_item_ids": [
-          "P-001",
-          "P-002",
-          "P-003",
-          "P-004"
+          "P-1",
+          "P-2"
         ],
         "role": "implement"
       },
-      "id": "b2fbe44e-d01a-4c10-9b66-e588193f7ac0",
+      "id": "77d4a996-74b6-4119-a42a-ee25ffe51bbe",
       "source": {
         "actor": {
           "id": "coordinator",
           "role": "coordinator",
           "session": null
         },
-        "at": "2026-11-24T12:30:30.460272Z",
+        "at": "2026-11-24T13:17:09.620301Z",
         "quote": "",
-        "reference": "dispatch c2dc9d9a-feea-412f-abf8-e528e8dcf5ac",
+        "reference": "dispatch 87b0baa6-9fdc-4659-80f5-46d15e4e0c8e",
         "scope": "dispatch",
-        "source_id": "93660a0d-cc81-4daa-9cf0-4176136eda47",
+        "source_id": "a9966743-4cb7-4752-8dd8-a21b0f5f292c",
         "type": "system",
         "validates": ""
       },
       "type": "dispatch_registered"
     },
     {
-      "at": "2026-11-24T14:36:24.185005Z",
+      "at": "2026-11-24T14:36:31.660909Z",
       "data": {
         "new": {
-          "enabled_at": "2026-11-24T14:36:24.183966Z",
+          "enabled_at": "2026-11-24T14:36:31.659698Z",
           "excluded": [],
           "id": "persistent-task",
           "included": [
@@ -162,36 +160,36 @@
               "role": "user",
               "session": null
             },
-            "at": "2026-11-24T14:36:24.183753Z",
+            "at": "2026-11-24T14:36:31.659409Z",
             "quote": "",
             "reference": "interactive-cli",
             "scope": "extension",
             "source_id": "cli",
             "type": "command",
-            "validates": "888589bafb8cf744fa977b1d34cf3a4bf78c4d90a5d234bd186e836f86c01a25"
+            "validates": "ff454f339ca63d4e01b0e984cb9a85984bdc474c1130078c78f4c1590fc078a2"
           }
         },
         "old": null
       },
-      "id": "9d35a4d5-e201-4340-994e-f012fab1187a",
+      "id": "80564471-6897-4211-aea2-aaff78e510fb",
       "source": {
         "actor": {
           "id": "user",
           "role": "user",
           "session": null
         },
-        "at": "2026-11-24T14:36:24.183753Z",
+        "at": "2026-11-24T14:36:31.659409Z",
         "quote": "",
         "reference": "interactive-cli",
         "scope": "extension",
         "source_id": "cli",
         "type": "command",
-        "validates": "888589bafb8cf744fa977b1d34cf3a4bf78c4d90a5d234bd186e836f86c01a25"
+        "validates": "ff454f339ca63d4e01b0e984cb9a85984bdc474c1130078c78f4c1590fc078a2"
       },
       "type": "extension_enabled"
     },
     {
-      "at": "2026-11-24T14:37:34.732276Z",
+      "at": "2026-11-24T14:37:45.337821Z",
       "data": {
         "new_holder": {
           "id": "agent",
@@ -205,53 +203,52 @@
         },
         "reason": "Resume authorized work after expired lease and stopped worker"
       },
-      "id": "e558b9d8-ed0b-4a66-94b4-ba2c76d0ea72",
+      "id": "d62b7673-59ee-4c7a-90d4-a31c318d0a6c",
       "source": {
         "actor": {
           "id": "agent",
           "role": "agent",
           "session": null
         },
-        "at": "2026-11-24T14:37:34.732273Z",
+        "at": "2026-11-24T14:37:45.337812Z",
         "quote": "",
         "reference": "lease",
         "scope": "lease",
-        "source_id": "4ba87bb8-be06-4491-8030-b38e8302fc0c",
+        "source_id": "6b9d7b25-5339-41f2-9c12-54cd011d761e",
         "type": "system",
         "validates": ""
       },
       "type": "lease_taken_over"
     },
     {
-      "at": "2026-11-24T14:42:31.020681Z",
+      "at": "2026-11-24T14:40:20.094211Z",
       "data": {
-        "dispatch_id": "883612e1-8f7e-47c0-907f-6339ebe5124c",
+        "dispatch_id": "537bb85b-585d-4450-947e-6580d2b5abee",
         "plan_item_ids": [
-          "P-001",
-          "P-003",
-          "P-004"
+          "P-1",
+          "P-2"
         ],
         "role": "implement"
       },
-      "id": "a34e4723-27db-4033-8404-9c1871162199",
+      "id": "bbabbf76-4731-48ff-b73a-708a7ff6d0d8",
       "source": {
         "actor": {
           "id": "agent",
           "role": "coordinator",
           "session": null
         },
-        "at": "2026-11-24T14:42:31.020673Z",
+        "at": "2026-11-24T14:40:20.094207Z",
         "quote": "",
-        "reference": "dispatch 883612e1-8f7e-47c0-907f-6339ebe5124c",
+        "reference": "dispatch 537bb85b-585d-4450-947e-6580d2b5abee",
         "scope": "dispatch",
-        "source_id": "c81afb03-57a1-44a9-b462-4d3a1bff742f",
+        "source_id": "c8bf85c4-1770-4e1e-962f-3c03a4051a49",
         "type": "system",
         "validates": ""
       },
       "type": "dispatch_registered"
     },
     {
-      "at": "2026-11-24T15:08:13.532183Z",
+      "at": "2026-11-25T02:13:46.493565Z",
       "data": {
         "new_holder": {
           "id": "agent",
@@ -265,135 +262,51 @@
         },
         "reason": "expired lease"
       },
-      "id": "2bbc8014-6349-464f-a577-eef38dda45bb",
+      "id": "fb624b6e-dc39-43fb-9d34-6ca9890113c9",
       "source": {
         "actor": {
           "id": "agent",
           "role": "coordinator",
           "session": null
         },
-        "at": "2026-11-24T15:08:13.532180Z",
+        "at": "2026-11-25T02:13:46.493562Z",
         "quote": "",
         "reference": "lease",
         "scope": "lease",
-        "source_id": "dc0f6a02-568d-4ea2-bdd0-77f46afec298",
+        "source_id": "1fe63a4e-04e9-4438-8096-9673eba34d04",
         "type": "system",
         "validates": ""
       },
       "type": "lease_taken_over"
     },
     {
-      "at": "2026-11-24T15:08:13.536757Z",
+      "at": "2026-11-25T02:13:46.496893Z",
       "data": {
-        "dispatch_id": "878c12b6-82c4-46cd-9b80-41ac8ccd8d26",
+        "dispatch_id": "85d37129-1d96-4341-9d31-0b4ecf01cb71",
         "plan_item_ids": [
-          "P-006"
-        ],
-        "role": "implement"
-      },
-      "id": "9d9eb457-275c-4453-9255-a5e438818afe",
-      "source": {
-        "actor": {
-          "id": "agent",
-          "role": "coordinator",
-          "session": null
-        },
-        "at": "2026-11-24T15:08:13.536752Z",
-        "quote": "",
-        "reference": "dispatch 878c12b6-82c4-46cd-9b80-41ac8ccd8d26",
-        "scope": "dispatch",
-        "source_id": "0840019a-07fb-4576-ab80-71bdd057432c",
-        "type": "system",
-        "validates": ""
-      },
-      "type": "dispatch_registered"
-    },
-    {
-      "at": "2026-11-24T15:09:04.614615Z",
-      "data": {
-        "dispatch_id": "43617253-b4d0-4f0d-a4b5-fa0f70818bde",
-        "plan_item_ids": [
-          "P-006"
-        ],
-        "role": "implement"
-      },
-      "id": "e021aed0-739c-45f5-a9fb-c59350af1efb",
-      "source": {
-        "actor": {
-          "id": "agent",
-          "role": "coordinator",
-          "session": null
-        },
-        "at": "2026-11-24T15:09:04.614608Z",
-        "quote": "",
-        "reference": "dispatch 43617253-b4d0-4f0d-a4b5-fa0f70818bde",
-        "scope": "dispatch",
-        "source_id": "b0e96f34-909f-4bd7-9f01-1410f3373609",
-        "type": "system",
-        "validates": ""
-      },
-      "type": "dispatch_registered"
-    },
-    {
-      "at": "2026-11-25T02:12:15.330993Z",
-      "data": {
-        "new_holder": {
-          "id": "agent",
-          "role": "coordinator",
-          "session": null
-        },
-        "old_holder": {
-          "id": "agent",
-          "role": "coordinator",
-          "session": null
-        },
-        "reason": "expired lease"
-      },
-      "id": "ea9e5118-9a55-45da-9ce9-5e60e03dab3b",
-      "source": {
-        "actor": {
-          "id": "agent",
-          "role": "coordinator",
-          "session": null
-        },
-        "at": "2026-11-25T02:12:15.330990Z",
-        "quote": "",
-        "reference": "lease",
-        "scope": "lease",
-        "source_id": "be385bc5-c085-46b2-b9f2-7c8c826e1e2c",
-        "type": "system",
-        "validates": ""
-      },
-      "type": "lease_taken_over"
-    },
-    {
-      "at": "2026-11-25T02:12:15.333615Z",
-      "data": {
-        "dispatch_id": "f2fee6b6-e201-4688-be5a-4189c4f18c2b",
-        "plan_item_ids": [
-          "P-005"
+          "P-3"
         ],
         "role": "check"
       },
-      "id": "7988236f-f8d8-43f9-9894-2238e50f67ce",
+      "id": "b7bff135-b288-4c0b-8475-64e80cc94762",
       "source": {
         "actor": {
           "id": "agent",
           "role": "coordinator",
           "session": null
         },
-        "at": "2026-11-25T02:12:15.333611Z",
+        "at": "2026-11-25T02:13:46.496888Z",
         "quote": "",
-        "reference": "dispatch f2fee6b6-e201-4688-be5a-4189c4f18c2b",
+        "reference": "dispatch 85d37129-1d96-4341-9d31-0b4ecf01cb71",
         "scope": "dispatch",
-        "source_id": "448b51a2-346a-43fa-825b-e157d87c4ccc",
+        "source_id": "9d0d8e86-17f2-4429-a1bf-ef0678a3776c",
         "type": "system",
         "validates": ""
       },
       "type": "dispatch_registered"
     },
     {
-      "at": "2026-11-25T03:20:07.681135Z",
+      "at": "2026-11-25T03:20:52.928933Z",
       "data": {
         "new_holder": {
           "id": "agent",
@@ -407,30 +320,30 @@
         },
         "reason": "Renew coordinator lease to record the independent final check"
       },
-      "id": "5bd37dff-9a0c-474b-8380-5e187b38ef09",
+      "id": "9da84acf-f4f2-4818-ab9f-2d198b7f7bdf",
       "source": {
         "actor": {
           "id": "agent",
           "role": "agent",
           "session": null
         },
-        "at": "2026-11-25T03:20:07.681132Z",
+        "at": "2026-11-25T03:20:52.928930Z",
         "quote": "",
         "reference": "lease",
         "scope": "lease",
-        "source_id": "bc831e56-86b1-467d-b2b4-ce5d8717f09d",
+        "source_id": "3a7b2a49-4db2-4f74-b3b8-4e416b31efd3",
         "type": "system",
         "validates": ""
       },
       "type": "lease_taken_over"
     },
     {
-      "at": "2026-11-25T03:20:34.314512Z",
+      "at": "2026-11-25T03:21:28.638352Z",
       "data": {
-        "evidence_id": "2e900246-b428-4c10-9405-33d721243baa",
+        "evidence_id": "36c30638-1148-455a-86ad-ecc9d53c798d",
         "state": "valid"
       },
-      "id": "88136746-5ace-4bca-9e04-9a38a9f06feb",
+      "id": "565b97d0-84bb-4859-a73a-7af1a5a8b5f1",
       "source": {
         "id": "independent-checker-20261125",
         "role": "check"
@@ -438,11 +351,11 @@
       "type": "evidence_added"
     },
     {
-      "at": "2026-11-25T03:22:54.163044Z",
+      "at": "2026-11-25T03:22:54.170347Z",
       "data": {
         "reason": "final check recorded; releasing writer lease before awaiting_acceptance"
       },
-      "id": "7659ff9a-7096-4014-bcac-d299e6f97dc0",
+      "id": "af20ac2b-7a65-4578-8376-144385854b4e",
       "source": {
         "id": "agent",
         "role": "agent",
@@ -451,38 +364,38 @@
       "type": "lease_released"
     },
     {
-      "at": "2026-11-25T03:23:19.834418Z",
+      "at": "2026-11-25T03:23:31.223881Z",
       "data": {
         "completedAt": null,
         "evidence_refs": [
-          "2e900246-b428-4c10-9405-33d721243baa"
+          "36c30638-1148-455a-86ad-ecc9d53c798d"
         ]
       },
-      "id": "5faf0d4b-c10c-4722-93c3-899b65269113",
+      "id": "03a30c33-59d9-478c-815a-2d85bb669576",
       "source": {
         "actor": {
           "id": "agent",
           "role": "agent",
           "session": null
         },
-        "at": "2026-11-25T03:23:19.834218Z",
+        "at": "2026-11-25T03:23:31.223641Z",
         "quote": "",
         "reference": "enter_awaiting_acceptance",
         "scope": "enter_awaiting_acceptance",
-        "source_id": "e5ea6abb-923d-4e47-8845-0df172362e16",
+        "source_id": "296f2c84-5439-4552-b533-bf1125d889c9",
         "type": "system",
         "validates": ""
       },
       "type": "awaiting_acceptance"
     },
     {
-      "at": "2026-11-25T03:39:06.036489Z",
+      "at": "2026-11-25T03:39:14.679450Z",
       "data": {
         "evidence_refs": [
-          "2e900246-b428-4c10-9405-33d721243baa"
+          "36c30638-1148-455a-86ad-ecc9d53c798d"
         ]
       },
-      "id": "6ef3494a-d602-4ca0-b432-50be759c054d",
+      "id": "ae7f95f9-1854-43a5-98f8-6ad840ca6d8f",
       "source": {
         "actor": {
           "id": "user",
@@ -495,20 +408,67 @@
         "scope": "accept",
         "source_id": "conversation:2026-11-25 user approved commit and merge",
         "type": "conversation",
-        "validates": "19d8b0cdc01990e6bcba2ae7f0ad2db1f6d042690032848feeab1997ea3a68f2"
+        "validates": "5ff0eb6ece4f0a326069906828be3d45c89fb46be9314829dffd609e1bb2cc6e"
       },
       "type": "accepted"
+    },
+    {
+      "at": "2026-11-25T09:02:47.907628Z",
+      "data": {
+        "archived_at": "2026-11-25T09:02:47.907628Z",
+        "operation_id": "8811c462-bbf8-451c-a4ae-5396c7764003",
+        "target": ".fstar/archive/2026-11/magpie-handover-prune"
+      },
+      "id": "f9458f9b-fda1-409a-9279-313f2c8bd8a3",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T08:50:00Z",
+        "quote": "归档吧 开工另外个任务",
+        "reference": "conversation:2026-11-25 归档吧 开工另外个任务",
+        "scope": "archive",
+        "source_id": "conversation:2026-11-25 user approved archive",
+        "type": "conversation",
+        "validates": "90845a84703e2aaebce8ef8276afecf7bc718ca46097a132fbe158c909c201d7"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-25T09:02:47.911798Z",
+      "data": {
+        "operation_id": "8811c462-bbf8-451c-a4ae-5396c7764003",
+        "target": ".fstar/archive/2026-11/magpie-handover-prune"
+      },
+      "id": "33318049-24e6-4641-83f4-d0654044a5cd",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T08:50:00Z",
+        "quote": "归档吧 开工另外个任务",
+        "reference": "conversation:2026-11-25 归档吧 开工另外个任务",
+        "scope": "archive",
+        "source_id": "conversation:2026-11-25 user approved archive",
+        "type": "conversation",
+        "validates": "90845a84703e2aaebce8ef8276afecf7bc718ca46097a132fbe158c909c201d7"
+      },
+      "type": "archived"
     }
   ],
   "evidence": [
     {
       "delivery": {
-        "digest": "7b0394536cb3218f27e48e44ef3dc1e3451e96ccf30ee0a6ac7a2c780ef677d6",
+        "digest": "db329f9827f426719cf719c58878fcfcf053133882cc0242f04e5f0ddcef40d0",
         "paths": [
           {
             "exists": true,
-            "path": ".fstar/tasks/repro-0111-followup/checks/final.md",
-            "sha256": "7d8db1a741c451139ce44dc5044c6edeec0910d2bed96373431132e3fccd865f"
+            "path": ".fstar/tasks/magpie-handover-prune/checks/2026-11-25-85d37129.md",
+            "sha256": "4749299b7bcf7c70614b1de3844dd217cb352c60b2291edf6a9da64795b0f4ef"
           },
           {
             "exists": true,
@@ -582,88 +542,70 @@
           }
         ]
       },
-      "dispatch_id": "f2fee6b6-e201-4688-be5a-4189c4f18c2b",
+      "dispatch_id": "85d37129-1d96-4341-9d31-0b4ecf01cb71",
       "environment": {
         "python": "stdlib 3.9+",
         "suites": "1044 python OK, 16 node OK, manifest rebuilt and verified"
       },
-      "id": "2e900246-b428-4c10-9405-33d721243baa",
+      "id": "36c30638-1148-455a-86ad-ecc9d53c798d",
       "input_files": [],
       "items": [
         {
           "command": "PYTHONPATH=src python3 -m unittest discover -s tests -t .; node --test tests/test_package.cjs; adversarial CLI/fake-runner probes",
-          "plan_item": "P-005",
+          "plan_item": "P-3",
           "requirement_ids": [
             "A-001",
             "A-003",
-            "A-004",
-            "A-005",
-            "A-006"
+            "A-004"
           ],
           "result": "passed",
           "retries": 0
         }
       ],
       "kind": "check",
-      "produced_at": "2026-11-25T03:20:34.306354Z",
+      "produced_at": "2026-11-25T03:21:28.634670Z",
       "producer": {
         "id": "independent-checker-20261125",
         "role": "check"
       },
       "read_only": true,
       "report": {
-        "path": ".fstar/tasks/repro-0111-followup/checks/final.md",
-        "sha256": "7d8db1a741c451139ce44dc5044c6edeec0910d2bed96373431132e3fccd865f"
+        "path": ".fstar/tasks/magpie-handover-prune/checks/2026-11-25-85d37129.md",
+        "sha256": "4749299b7bcf7c70614b1de3844dd217cb352c60b2291edf6a9da64795b0f4ef"
       },
       "run_id": "check-20261125-final",
       "scope": "final",
       "state": "valid",
       "validates": [
         {
-          "artifact": ".fstar/tasks/repro-0111-followup/criteria.md",
+          "artifact": ".fstar/tasks/magpie-handover-prune/criteria.md",
           "dependencies": [
             {
               "id": "A-001",
-              "sha256": "b0571fc20bd4b7e5031406f04f9282f4a294c53ee5e4ccbe62cbcaf8ce3b7f9a"
+              "sha256": "bbbf1de0d26c29f135004fa2e3304e33c4de423356bb23f389c18f006cbabd52"
             },
             {
               "id": "A-003",
-              "sha256": "37e5bb6491da6e52262b5bf976bb2d8b12e71161d52f645c9314dbb825940289"
+              "sha256": "9dbd75287b6e4f4e566f9dda88e914a687ceb7c6d5a1fc30ad0c23b837f20554"
             },
             {
               "id": "A-004",
-              "sha256": "4428d20a5b6e310f872dd67e8e0466cece9a9b1bb8ef7ef95f762b3ebc33d1a4"
-            },
-            {
-              "id": "A-005",
-              "sha256": "120dc73626ae918337225ede7df597396b3b97e6780af68677b021bdec5d32f8"
-            },
-            {
-              "id": "A-006",
-              "sha256": "10e4f719eb2e18c60aa9eb1a976e44afcd102a39a38e68ece538a6e805d209ab"
+              "sha256": "66660d039628ee105c3d776732df0a48b1835437e67b00fd401ac552108c425d"
             }
           ],
           "granularity": "item",
           "items": [
             {
               "id": "A-001",
-              "sha256": "b0571fc20bd4b7e5031406f04f9282f4a294c53ee5e4ccbe62cbcaf8ce3b7f9a"
+              "sha256": "bbbf1de0d26c29f135004fa2e3304e33c4de423356bb23f389c18f006cbabd52"
             },
             {
               "id": "A-003",
-              "sha256": "37e5bb6491da6e52262b5bf976bb2d8b12e71161d52f645c9314dbb825940289"
+              "sha256": "9dbd75287b6e4f4e566f9dda88e914a687ceb7c6d5a1fc30ad0c23b837f20554"
             },
             {
               "id": "A-004",
-              "sha256": "4428d20a5b6e310f872dd67e8e0466cece9a9b1bb8ef7ef95f762b3ebc33d1a4"
-            },
-            {
-              "id": "A-005",
-              "sha256": "120dc73626ae918337225ede7df597396b3b97e6780af68677b021bdec5d32f8"
-            },
-            {
-              "id": "A-006",
-              "sha256": "10e4f719eb2e18c60aa9eb1a976e44afcd102a39a38e68ece538a6e805d209ab"
+              "sha256": "66660d039628ee105c3d776732df0a48b1835437e67b00fd401ac552108c425d"
             }
           ]
         }
@@ -672,7 +614,7 @@
   ],
   "extensions": [
     {
-      "enabled_at": "2026-11-24T14:36:24.183966Z",
+      "enabled_at": "2026-11-24T14:36:31.659698Z",
       "excluded": [],
       "id": "persistent-task",
       "included": [
@@ -686,17 +628,17 @@
           "role": "user",
           "session": null
         },
-        "at": "2026-11-24T14:36:24.183753Z",
+        "at": "2026-11-24T14:36:31.659409Z",
         "quote": "",
         "reference": "interactive-cli",
         "scope": "extension",
         "source_id": "cli",
         "type": "command",
-        "validates": "888589bafb8cf744fa977b1d34cf3a4bf78c4d90a5d234bd186e836f86c01a25"
+        "validates": "ff454f339ca63d4e01b0e984cb9a85984bdc474c1130078c78f4c1590fc078a2"
       }
     }
   ],
-  "id": "3f86e3f7-b27f-49fd-96a2-d621ced38d8a",
+  "id": "29517cdb-1804-4394-bd07-ababe122e52a",
   "lease": null,
   "meta": {
     "disposition": null,
@@ -708,7 +650,7 @@
     "reminders": {},
     "templates": {
       "artifact_map": {
-        ".fstar/tasks/repro-0111-followup/criteria.md": {
+        ".fstar/tasks/magpie-handover-prune/criteria.md": {
           "A-001": {
             "dependencies": [],
             "end_marker": "<!-- A-001:end -->",
@@ -728,38 +670,33 @@
             "dependencies": [],
             "end_marker": "<!-- A-004:end -->",
             "start_marker": "<!-- A-004:start -->"
-          },
-          "A-005": {
-            "dependencies": [],
-            "end_marker": "<!-- A-005:end -->",
-            "start_marker": "<!-- A-005:start -->"
-          },
-          "A-006": {
-            "dependencies": [],
-            "end_marker": "<!-- A-006:end -->",
-            "start_marker": "<!-- A-006:start -->"
           }
         }
       },
-      "artifact_map_sha256": "e4dc428dd301a44965fc24f1fdec42a56f5979ac4331fc2ddd3abff50723047a",
+      "artifact_map_sha256": "3faeca89c74a9c068ac1574da3f126a912c1acd93dbe6dd7e97b9e6836ee63cf",
       "artifact_map_source": {
         "actor": {
-          "id": "agent",
+          "id": "coordinator",
           "role": "coordinator"
         },
-        "reference": "criteria map A-001..A-006 (A-006 user-approved 2026-11-24)",
-        "type": "system"
+        "at": "2026-11-24T13:16:56.415304Z",
+        "quote": "按照你的建议来就行",
+        "reference": "按照你的建议来就行",
+        "scope": "planning",
+        "source_id": "approved-20261124",
+        "type": "system",
+        "validates": ""
       },
       "dispatch_harvested": [
-        "f2fee6b6-e201-4688-be5a-4189c4f18c2b"
+        "85d37129-1d96-4341-9d31-0b4ecf01cb71"
       ]
     }
   },
-  "name": "repro-0111-followup",
+  "name": "magpie-handover-prune",
   "notes": "",
   "phase": "completed",
   "pr_url": "",
   "priority": "P2",
-  "title": "Fix verified 0.11.1 reproduction gaps",
+  "title": "Magpie hand-over prune: stale skills propagation",
   "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
 }
