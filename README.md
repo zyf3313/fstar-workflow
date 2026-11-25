@@ -342,6 +342,22 @@ used from a linked worktree. Corrupt, symlinked, or path-mismatched pointers
 are not followed; an unusable local pointer prevents fallback to the main
 project. Moving a project still requires an explicit rebind.
 
+`fstar init` refuses to initialize a linked worktree with no local identity
+when its main tree is already initialized. The error names the main project
+and its data root. To deliberately create a separate identity, use
+`fstar init --force-separate` (optionally with `--storage user-directory` or
+another storage mode). The init result records `force_separate: true`. If local project metadata
+already exists, separation is refused without changing it. Existing initialized
+worktrees can be re-initialized with their existing storage mode; main-tree
+re-initialization and standalone initialization retain their existing behavior.
+
+The learn bridge resolves its supplied `project_root` through the same
+project discovery before reading, preparing, or applying knowledge changes.
+A healthy linked worktree therefore uses the main project's knowledge and
+task grants without creating local fstar files. Unresolvable roots receive
+explicit resolution guidance; initializing a linked worktree is not a repair
+for a broken pointer. CLI `--project` overrides still take precedence.
+
 If neither the linked worktree nor the main worktree is initialized,
 worktree commands fail with `project_not_initialized` and never write
 anything implicitly. Run `fstar init` in the main worktree first, and linked
@@ -351,6 +367,14 @@ worktree uses the main tree, `fstar doctor` reports the sharing:
 ```json
 "worktree": {"shared": true, "main_root": "/path/to/main", "message": "当前 worktree 共享自 /path/to/main"}
 ```
+
+If a worktree pointer records a different data root, doctor reports
+`status: "split"`, the worktree path, and both data roots. An unreadable or
+unsafe pointer is reported as `status: "unreadable"`. A usable pointer that
+shares the main data root keeps the healthy output above. These reports are
+read-only: inspect and preserve both data roots, then rebind the intended
+identity or remove the worktree pointer only with user confirmation. Doctor
+never merges data, deletes a pointer, or rewrites either identity.
 
 ## Cross-project tasks (master + child in different repositories)
 

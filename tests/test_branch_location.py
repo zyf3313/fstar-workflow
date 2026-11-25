@@ -166,7 +166,11 @@ class BranchBindingCase(unittest.TestCase):
                         "-q", str(wt)], check=True, capture_output=True)
         for project_root, name, branch in ((repo, "root", "feat/two"),
                                            (wt, "root", "feat/two")):
-            initialize_project(project_root, self.user_root, storage="project-shared")
+            # A linked worktree of an initialized main tree needs the explicit
+            # separate-identity opt-in (A-001); this test models two distinct
+            # project identities that happen to share the repository.
+            initialize_project(project_root, self.user_root, storage="project-shared",
+                               force_separate=(project_root is wt))
             store = TaskStore(project_root, user_home=self.user_root,
                               runtime_root=self.runtime)
             service = TaskService(store)
@@ -191,7 +195,7 @@ class BranchBindingCase(unittest.TestCase):
         wt = (self.base / "wt2").resolve()
         subprocess.run(["git", "-C", str(repo), "worktree", "add", "--detach",
                         "-q", str(wt)], check=True, capture_output=True)
-        initialize_project(wt, self.user_root, storage="project-shared")
+        initialize_project(wt, self.user_root, storage="project-shared", force_separate=True)
         store = TaskStore(wt, user_home=self.user_root, runtime_root=self.runtime)
         service = TaskService(store)
         service.create(name="in-wt", title="W", description="", actor=self.actor)
@@ -430,7 +434,9 @@ class BranchBindingCase(unittest.TestCase):
         wt = (self.base / "wt-broken").resolve()
         subprocess.run(["git", "-C", str(repo), "worktree", "add", "--detach",
                         "-q", str(wt)], check=True, capture_output=True)
-        initialize_project(wt, self.user_root, storage="project-shared")
+        # A linked worktree with its own task data needs the explicit
+        # separate-identity opt-in (A-001) even when its data is unreadable.
+        initialize_project(wt, self.user_root, storage="project-shared", force_separate=True)
         broken = wt / ".fstar" / "tasks" / "broken"
         broken.mkdir(parents=True)
         (broken / "task.json").write_text("{oops", encoding="utf-8")

@@ -233,7 +233,7 @@ def _resolve_ref(args, store: TaskStore) -> str:
 
 def _service(args) -> TaskService:
     explicit = Path(args.project).expanduser().resolve() if args.project else None
-    project = explicit or find_project_root(Path.cwd())
+    project = explicit or find_project_root(Path.cwd(), strict_worktree_errors=True)
     if project is None:
         raise DomainError("project_not_initialized", "No initialized fstar project found; pass --project PATH")
     user_home = Path(args.user_data_root).expanduser().resolve() if args.user_data_root else None
@@ -297,7 +297,8 @@ def _dispatch(args):
     handler = getattr(args, OPTIONAL_HANDLER_ATTR, None)
     if handler is not None:
         return handler(args)
-    if args.command == "extension" and not args.project and find_project_root(Path.cwd()) is None:
+    if (args.command == "extension" and not args.project
+            and find_project_root(Path.cwd(), strict_worktree_errors=True) is None):
         # Session-only extension authorization: no project metadata exists and
         # none may be created implicitly. Validation of scope/members still
         # runs through the service layer without touching the filesystem.

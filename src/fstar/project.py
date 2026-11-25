@@ -51,6 +51,7 @@ class InitResult:
     warnings: Tuple[InitWarning, ...]
     context_complete: bool
     dry_run: bool
+    force_separate: bool = False
 
 
 class InitError(Exception):
@@ -343,36 +344,66 @@ def _git_repo_root(root: Path) -> Optional[Path]:
 
 def doctor_worktree_report(invoke_root: Optional[Path],
                            project_root: Optional[Path]) -> Optional[dict]:
-    """Doctor's worktree-sharing report entry, or None when not applicable.
+    """Report sharing, split pointers, and unreadable worktree identities.
 
-    Reports "当前 worktree 共享自 <主工作树路径>" when the command was
-    invoked inside a linked git worktree AND project resolution actually
-    landed on the main worktree root (sharing active). When the main tree
-    is not initialized, the entry carries the ``fstar init`` guidance
-    instead — fstar never writes into a worktree implicitly. None for main
-    worktrees, non-worktree directories, and explicit --project overrides
-    keeps every other doctor output unchanged. Read-only.
+    Read-only: recovery always needs user confirmation. Explicit --project
+    overrides supply no invoke_root, preserving their existing behavior.
     """
     if invoke_root is None:
         return None
-    from .store import worktree_shared_main_root
+    from .store import (DomainError, POINTER_FILE, _initialized_at,
+                        _pointer_path_matches, _read_pointer, _resolve_data_root,
+                        _safe_pointer_data_root, worktree_shared_main_root)
+    worktree_root = _git_repo_root(Path(invoke_root).resolve())
     main_root = worktree_shared_main_root(Path(invoke_root))
-    if main_root is None:
+    if main_root is None or worktree_root is None:
         return None
-    if project_root is not None \
-            and Path(project_root).resolve(strict=False) == main_root:
-        return {
-            "shared": True,
-            "main_root": str(main_root),
-            "message": "当前 worktree 共享自 %s" % main_root,
-        }
-    marker = main_root / ".fstar" / ".schema-version"
-    if project_root is None and not marker.is_file():
-        return {
-            "shared": False,
-            "main_root": str(main_root),
-            "message": uninitialized_init_hint(main_root),
-        }
+    shared = {"shared": True, "main_root": str(main_root),
+              "message": "当前 worktree 共享自 %s" % main_root}
+    report = {"shared": False, "main_root": str(main_root),
+              "worktree_root": str(worktree_root), "main_data_root": None,
+              "worktree_data_root": None}
+    recovery = ("Inspect and preserve both data roots. Pointer removal or data migration "
+                "requires user confirmation. Rebinding the intended identity does not merge data. "
+                "Doctor does not change files.")
+    try:
+        main_data_root = _resolve_data_root(main_root)
+        report["main_data_root"] = str(main_data_root)
+        main_initialized = _initialized_at(main_root)
+        pointer = worktree_root / POINTER_FILE
+        if pointer.exists() or pointer.is_symlink():
+            if pointer.is_symlink():
+                raise DomainError("corrupt_pointer", "Worktree pointer is a symbolic link")
+            record = _read_pointer(pointer)
+            # Use the recorded binding as the anchor, as the layout resolver
+            # does for a moved pointer. Never follow an unsafe data root.
+            matches = _pointer_path_matches(worktree_root, record)
+            anchor = Path(record["bound_path"]) if not matches else worktree_root
+            report["worktree_data_root"] = record["data_root"]
+            data_root = _safe_pointer_data_root(anchor, record)
+            report["worktree_data_root"] = str(data_root)
+            if data_root != main_data_root:
+                report.update(status="split", message=(
+                    "Worktree %s has a split project identity: main data root %s; "
+                    "worktree recorded data root %s. %s" %
+                    (worktree_root, main_data_root, data_root, recovery)))
+                return report
+            if main_initialized and matches and _initialized_at(worktree_root):
+                return shared
+            report.update(status="pointer_needs_rebind", message=(
+                "Worktree %s pointer does not resolve to an initialized project. %s" %
+                (worktree_root, recovery)))
+            return report
+    except (DomainError, OSError, UnicodeError, ValueError, RuntimeError) as exc:
+        report.update(status="unreadable", message=(
+            "Worktree %s project pointer or data root is unreadable: %s. %s" %
+            (worktree_root, exc, recovery)))
+        return report
+    if project_root is not None and Path(project_root).resolve(strict=False) == main_root:
+        return shared
+    if project_root is None and not main_initialized:
+        return {"shared": False, "main_root": str(main_root),
+                "message": uninitialized_init_hint(main_root)}
     return None
 
 
@@ -505,21 +536,45 @@ def _resolve_storage_mode(mode: Optional[str]) -> str:
 
 
 def initialize_project(path: Path, user_root: Path, *, context: Optional[ProjectContext] = None,
-                       dry_run: bool = False, storage: Optional[str] = None) -> InitResult:
-    from .store import POINTER_FILE, register_user_directory_project
+                       dry_run: bool = False, storage: Optional[str] = None,
+                       force_separate: bool = False) -> InitResult:
+    from .store import (POINTER_FILE, _initialized_at, _linked_worktree_main_root,
+                        _resolve_data_root, _resolve_project_layout)
 
     mode = _resolve_storage_mode(storage)
     root = path.expanduser().resolve()
     if not root.exists() or not root.is_dir():
         raise InitError("PROJECT_ROOT_INVALID", "Project root must be an existing directory", path=root)
+    main_root = _linked_worktree_main_root(_git_repo_root(root) or root)
+    if main_root is not None:
+        metadata = (root / ".fstar", root / POINTER_FILE)
+        if force_separate and any(p.exists() or p.is_symlink() for p in metadata):
+            raise InitError("WORKTREE_IDENTITY_EXISTS",
+                            "Cannot create a separate identity while local project metadata exists; "
+                            "existing data was left unchanged.", path=root)
+        if _initialized_at(root):
+            existing_mode = _resolve_project_layout(root)[1]
+            if storage is not None and mode != existing_mode:
+                raise InitError("WORKTREE_IDENTITY_EXISTS",
+                                "Cannot change the storage of an existing worktree identity during init.",
+                                path=root)
+            mode = existing_mode
+        elif not force_separate and _initialized_at(main_root):
+            raise InitError(
+                "WORKTREE_SHARED_PROJECT",
+                "Linked worktree shares the initialized main project %s (data root: %s). "
+                "Use that shared project, or pass --force-separate to explicitly initialize "
+                "a separate project identity in this worktree." % (main_root, _resolve_data_root(main_root)),
+                path=root)
     if storage is None and (root / POINTER_FILE).is_file():
         # Re-initializing an existing user-directory project: its mode comes
         # from the pointer, so a bare `fstar init` never creates a second
         # (in-repo) data root.
         mode = "user-directory"
     if mode == "user-directory":
-        return _initialize_user_directory(root, Path(user_root).expanduser(),
-                                          context=context, dry_run=dry_run)
+        result = _initialize_user_directory(root, Path(user_root).expanduser(),
+                                            context=context, dry_run=dry_run)
+        return replace(result, force_separate=force_separate)
     index, complete = _project_index(root, context)
     project_id = str(uuid.uuid4())
     files = [("index.md", index),
@@ -537,7 +592,7 @@ def initialize_project(path: Path, user_root: Path, *, context: Optional[Project
         created, warnings = list(result.created), list(result.warnings)
         _apply_local_exclude(root, created, warnings, dry_run=False)
         result = replace(result, created=tuple(created), warnings=tuple(warnings))
-    return result
+    return replace(result, force_separate=force_separate)
 
 
 def _initialize_user_directory(root: Path, user_root: Path, *, context: Optional[ProjectContext],
@@ -622,7 +677,8 @@ def initialize_workflow_project(path: Path, user_root: Path, *, task_ref: str,
                                 extensions: Optional[list] = None,
                                 context: Optional[ProjectContext] = None,
                                 dry_run: bool = False,
-                                storage: Optional[str] = None) -> InitResult:
+                                storage: Optional[str] = None,
+                                force_separate: bool = False) -> InitResult:
     """Initialize both roots, validating and repairing a partial user layout."""
     from .extensions import grants
     from .store import TaskStore
@@ -637,11 +693,12 @@ def initialize_workflow_project(path: Path, user_root: Path, *, task_ref: str,
     grants(records)  # Validate any supplied context; initialization needs no governance grant.
     # Validate project inputs before creating either root. User initialization
     # also validates an existing config and repairs files missing beside it.
-    preview = initialize_project(root, user_root, context=context, dry_run=True, storage=storage)
+    preview = initialize_project(root, user_root, context=context, dry_run=True, storage=storage,
+                                 force_separate=force_separate)
     user_result = initialize_user(user_root, dry_run=dry_run)
     try:
         result = preview if dry_run else initialize_project(root, user_root, context=context,
-                                                            storage=storage)
+                                                            storage=storage, force_separate=force_separate)
     except InitError as exc:
         raise InitError(exc.code, exc.message, path=exc.path,
                         created=user_result.created + exc.created)
@@ -671,6 +728,8 @@ def register_commands(subparsers) -> None:
     parser.add_argument("path", nargs="?", default=".")
     parser.add_argument("--user", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--force-separate", action="store_true",
+                        help="explicitly initialize a separate project in a linked worktree")
     parser.add_argument("--storage", choices=list(STORAGE_MODES), default=None,
                         help="where project data lives: project-shared (default), "
                              "project-local (local git exclude), or user-directory")
@@ -752,7 +811,7 @@ def _handle_init(args):
     context = _context_file(args.context) if args.context else None
     result = initialize_user(user_root, dry_run=args.dry_run) if args.user else initialize_workflow_project(
         Path(args.path), user_root, task_ref="session-only", context=context, dry_run=args.dry_run,
-        storage=getattr(args, "storage", None))
+        storage=getattr(args, "storage", None), force_separate=getattr(args, "force_separate", False))
     if not args.user and getattr(args, "storage", None):
         value = asdict(result)
         value["storage_mode"] = getattr(args, "storage", None)

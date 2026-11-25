@@ -1,0 +1,1046 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-25T12:10:22.679119Z",
+    "confirmed_by": "user",
+    "criteria_refs": [
+      "A-001",
+      "A-002",
+      "A-003",
+      "A-004"
+    ],
+    "evidence_refs": [
+      "adec92c0-c95c-4d16-bd65-3f991399f9d7"
+    ],
+    "rule_ref": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md",
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user",
+        "session": null
+      },
+      "at": "2026-11-25T12:10:04.064502Z",
+      "quote": "我现在有个难受的点就是当前这个fstar工作流我没有办法自己去验收，只能信任你去验收，我觉得当前项目需要个自验收的全流程，以后开发完某项任务时都走这个自验收流程就代表我已经验收通过",
+      "reference": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md:14",
+      "scope": "acceptance",
+      "source_id": "conversation:2026-11-21-self-acceptance-rule",
+      "type": "conversation",
+      "validates": "c7da4cc6bc09b5ac51b3e7fb7f7f414a071745d392e4093bae5a483abaedafba"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "c136e4af83a964ecc768b64854d129a1c489be7c5a7b1ba8b45f87283b8146ab"
+      ],
+      "task": "c7da4cc6bc09b5ac51b3e7fb7f7f414a071745d392e4093bae5a483abaedafba"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "origin/main",
+  "blocked": null,
+  "branch": "feat/worktree-identity",
+  "capabilities": [],
+  "children": [],
+  "commit": "d310863687e515fd3353ac0bdad212569aeed2ad",
+  "completedAt": "2026-11-25T12:10:22.679331Z",
+  "createdAt": "2026-11-25T09:08:00.774711Z",
+  "creator": "agent",
+  "description": "Linked worktree init split and learn bridge resolution gaps from uTools note/1795529117950 (source-verified). Init must refuse or explicitly allow a second identity in a linked worktree of an initialized main tree; learn bridge must resolve the project root like the CLI so worktrees share the main data root; doctor reports split worktrees.",
+  "events": [
+    {
+      "at": "2026-11-25T09:08:00.774970Z",
+      "data": {
+        "parent": null
+      },
+      "id": "f1590104-3904-441a-931b-9b3ee961a7af",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-25T09:08:00.774967Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "d73c7016-fe40-4d4a-a87e-31192a7750f2",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-25T09:09:05.050892Z",
+      "data": {
+        "branch": "feat/worktree-identity",
+        "detached": false,
+        "snapshot": "06a469eae61e23b363ded51e462760c1f8c43dff3214a5d986ba63c08d9b8db4",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "a9f86ff9-1638-46dd-968b-0d847d8887f0",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T09:00:00Z",
+        "quote": "归档吧 开工另外个任务",
+        "reference": "conversation:2026-11-25 归档吧 开工另外个任务",
+        "scope": "start",
+        "source_id": "conversation:2026-11-25 user approved archive and new task start",
+        "type": "conversation",
+        "validates": "954c76863e70723a3ed152e53440f059d0b17f5f4d935eb3a9a7996d4efe02d1"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-25T09:10:34.226204Z",
+      "data": {
+        "new_holder": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "3a00007c-fc0a-44b1-9372-3d03f981f432",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T09:10:34.226201Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "24450951-8e2a-4293-b427-3155bf96071c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-25T09:10:34.226218Z",
+      "data": {
+        "dispatch_id": "8f57359d-e5a9-4fb8-94a5-73903f5fb4f5",
+        "plan_item_ids": [
+          "W-1",
+          "W-2",
+          "W-3"
+        ],
+        "role": "implement"
+      },
+      "id": "5528e224-be94-48a6-ae8f-db3d74847055",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T09:10:34.226215Z",
+        "quote": "",
+        "reference": "dispatch 8f57359d-e5a9-4fb8-94a5-73903f5fb4f5",
+        "scope": "dispatch",
+        "source_id": "68cd9f29-c94d-44d6-837f-9a9c71174a9c",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T09:37:17.343728Z",
+      "data": {
+        "dispatch_id": "79ffba05-4c70-4dc7-95e5-459f70b22548",
+        "plan_item_ids": [
+          "W-4"
+        ],
+        "role": "check"
+      },
+      "id": "0fe550a2-4204-41a9-8780-d3cb2f5f8c83",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T09:37:17.343725Z",
+        "quote": "",
+        "reference": "dispatch 79ffba05-4c70-4dc7-95e5-459f70b22548",
+        "scope": "dispatch",
+        "source_id": "562c67af-efd0-4feb-8845-2d7681d6fcd1",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T10:30:39.911537Z",
+      "data": {
+        "new_holder": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "expired lease"
+      },
+      "id": "b25a9561-422e-4713-a45e-6d185a65ca71",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T10:30:39.911535Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "e50c6d31-86f5-454e-9605-c536eba1d789",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-25T10:30:39.911551Z",
+      "data": {
+        "dispatch_id": "5cdecfe3-2c6f-41df-bc9d-a57beb1ac192",
+        "plan_item_ids": [
+          "W-1",
+          "W-2",
+          "W-3"
+        ],
+        "role": "implement"
+      },
+      "id": "0d5eeb7e-edc7-493f-8be0-b2c9d9bda700",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T10:30:39.911549Z",
+        "quote": "",
+        "reference": "dispatch 5cdecfe3-2c6f-41df-bc9d-a57beb1ac192",
+        "scope": "dispatch",
+        "source_id": "d3b71586-ba9c-4fef-8d44-c8dbd0496c46",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T10:38:23.092820Z",
+      "data": {
+        "dispatch_id": "272d06a5-0aeb-4873-b493-f2508c71c960",
+        "plan_item_ids": [
+          "W-1",
+          "W-2",
+          "W-3"
+        ],
+        "role": "implement"
+      },
+      "id": "884a79db-23ff-45b8-a4f6-a69eaa1b4dca",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T10:38:23.092817Z",
+        "quote": "",
+        "reference": "dispatch 272d06a5-0aeb-4873-b493-f2508c71c960",
+        "scope": "dispatch",
+        "source_id": "139b34c2-6523-45d3-983a-96c09a8cea3a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T10:45:09.142630Z",
+      "data": {
+        "dispatch_id": "ac4285aa-1476-4396-b47c-2e012c70cd24",
+        "plan_item_ids": [
+          "W-4"
+        ],
+        "role": "check"
+      },
+      "id": "a48b5ffa-a5e5-457a-954c-558b933e02cc",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T10:45:09.142626Z",
+        "quote": "",
+        "reference": "dispatch ac4285aa-1476-4396-b47c-2e012c70cd24",
+        "scope": "dispatch",
+        "source_id": "f8eabfc3-908f-4cfa-9d05-c87adc0ca054",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T11:34:40.545876Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-25T11:34:40.544948Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "recovery"
+          ],
+          "reason": "用户授权仅为本任务恢复并完成收尾",
+          "scope": "custom",
+          "source": {
+            "actor": {
+              "id": "user",
+              "role": "user",
+              "session": null
+            },
+            "at": "2026-11-25T11:34:40.544707Z",
+            "quote": "",
+            "reference": "interactive-cli",
+            "scope": "extension",
+            "source_id": "cli",
+            "type": "command",
+            "validates": "e4658e7fcdb56a7fd4a758c6752ef2ad64a90d644ee06a46dfbb933aeda01aee"
+          }
+        },
+        "old": null
+      },
+      "id": "ff2c9dbc-7c57-47f0-8b65-1a1cd4796efb",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T11:34:40.544707Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "e4658e7fcdb56a7fd4a758c6752ef2ad64a90d644ee06a46dfbb933aeda01aee"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-25T11:35:00.387398Z",
+      "data": {
+        "new_holder": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "old_holder": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "reason": "用户授权恢复当前任务以完成检查与收尾"
+      },
+      "id": "ece8eed7-bdd3-4fa9-82b7-716ef266d14a",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-25T11:35:00.387392Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "51f2055d-8cc8-48f2-aac4-1440bb3beec6",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_taken_over"
+    },
+    {
+      "at": "2026-11-25T11:36:59.517881Z",
+      "data": {
+        "dispatch_id": "1641d14d-29ae-4832-a0f6-86ff7db94ad5",
+        "plan_item_ids": [
+          "W-4"
+        ],
+        "role": "check"
+      },
+      "id": "1d48d91d-80d0-4beb-bcea-327fd4ec6705",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T11:36:59.517878Z",
+        "quote": "",
+        "reference": "dispatch 1641d14d-29ae-4832-a0f6-86ff7db94ad5",
+        "scope": "dispatch",
+        "source_id": "da747cb9-1761-46f7-b52b-c6d2797c18eb",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T11:44:11.098592Z",
+      "data": {
+        "blockers": [
+          "A-003 specific stale-pointer diagnostic and complete data-preserving recovery guidance do not meet criterion"
+        ],
+        "dispatch_id": "1641d14d-29ae-4832-a0f6-86ff7db94ad5",
+        "role": "check",
+        "status": "failed"
+      },
+      "id": "b269136c-f9dc-440c-9b21-e83d9ff06c17",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-25T11:44:11.098401Z",
+        "quote": "",
+        "reference": "dispatch 1641d14d-29ae-4832-a0f6-86ff7db94ad5",
+        "scope": "dispatch",
+        "source_id": "11f41885-8871-4ba4-bb66-a69318ec404a",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_terminal"
+    },
+    {
+      "at": "2026-11-25T11:44:52.975705Z",
+      "data": {
+        "dispatch_id": "5c0d78fe-40cb-4c7a-8078-c92465ae8dc2",
+        "plan_item_ids": [
+          "W-3"
+        ],
+        "role": "implement"
+      },
+      "id": "5250e9a4-7ed7-4512-b334-b1152e405b88",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T11:44:52.975702Z",
+        "quote": "",
+        "reference": "dispatch 5c0d78fe-40cb-4c7a-8078-c92465ae8dc2",
+        "scope": "dispatch",
+        "source_id": "576e547b-1550-4f0a-b48c-6b705ec02026",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T11:49:01.110245Z",
+      "data": {
+        "evidence_id": "92b8af0d-ed72-49a4-9c01-afc8084dcc96",
+        "state": "valid"
+      },
+      "id": "34729709-3cea-470f-bdca-1326fe8cb056",
+      "source": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-25T11:49:40.077961Z",
+      "data": {
+        "dispatch_id": "5ed2fd2f-9be1-4617-8114-4d537e714ba5",
+        "plan_item_ids": [
+          "W-4"
+        ],
+        "role": "check"
+      },
+      "id": "0034a821-a832-4731-bb26-46b9237f36d0",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-25T11:49:40.077957Z",
+        "quote": "",
+        "reference": "dispatch 5ed2fd2f-9be1-4617-8114-4d537e714ba5",
+        "scope": "dispatch",
+        "source_id": "af0cc530-d89a-4992-b72e-9062cb800a15",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-25T11:52:40.896972Z",
+      "data": {
+        "evidence_id": "adec92c0-c95c-4d16-bd65-3f991399f9d7",
+        "state": "valid"
+      },
+      "id": "4a5a264b-2319-4f94-a23b-b5d0d8ad47d1",
+      "source": {
+        "id": "independent-check-5ed2fd2f-9be1-4617-8114-4d537e714ba5",
+        "role": "check"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-25T11:53:03.541782Z",
+      "data": {
+        "reason": "interrupt: 独立检查完成，释放租约以进入验收"
+      },
+      "id": "cc3746b7-9279-4909-815d-6dbe0be74904",
+      "source": {
+        "id": "agent",
+        "role": "agent",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-25T11:53:18.497365Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "adec92c0-c95c-4d16-bd65-3f991399f9d7"
+        ]
+      },
+      "id": "65d5e706-c838-47e1-99ee-1b08a4ca6e62",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-25T11:53:18.497129Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "6681107b-2280-4b34-872f-09060e444e49",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-25T12:10:22.679334Z",
+      "data": {
+        "accepted_via_rule": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004"
+          ],
+          "quote": "我现在有个难受的点就是当前这个fstar工作流我没有办法自己去验收，只能信任你去验收，我觉得当前项目需要个自验收的全流程，以后开发完某项任务时都走这个自验收流程就代表我已经验收通过",
+          "report": ".fstar/tasks/worktree-identity/checks/self-acceptance.md",
+          "rule_ref": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md",
+          "scope": "fstar 开发类任务，含新功能、扩展和修复"
+        },
+        "evidence_refs": [
+          "adec92c0-c95c-4d16-bd65-3f991399f9d7"
+        ]
+      },
+      "id": "92dd5683-afe6-4dc9-acdc-68e54e8e82c1",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T12:10:04.064502Z",
+        "quote": "我现在有个难受的点就是当前这个fstar工作流我没有办法自己去验收，只能信任你去验收，我觉得当前项目需要个自验收的全流程，以后开发完某项任务时都走这个自验收流程就代表我已经验收通过",
+        "reference": "/Users/zhangyangfan/.fstar/rules/self-acceptance.md:14",
+        "scope": "acceptance",
+        "source_id": "conversation:2026-11-21-self-acceptance-rule",
+        "type": "conversation",
+        "validates": "c7da4cc6bc09b5ac51b3e7fb7f7f414a071745d392e4093bae5a483abaedafba"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "a967d1ed0c1cfa863841b0e816108c3993794c9ae26ee5c5adeaaac1eb4e62ef",
+        "paths": [
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "0f4547aec07dfa04d38464afc9f6018aaa444561b741600f536ac1d4b47e9c5d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/project.py",
+            "sha256": "bcd1c911bd8b4fcd2e26e310a9ee9a668c9800fd2eed0afd42da246b308e8f81"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "2fceeecaa2b8a1b627b3ede889f8518a95b7250872e91c2f132ad923b25aff94"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_worktree_identity.py",
+            "sha256": "bf152a8df4c50fd17e8b77271090f4c4a1e2f93ad6b753093aec6bf71ff8532c"
+          }
+        ]
+      },
+      "dispatch_id": "5c0d78fe-40cb-4c7a-8078-c92465ae8dc2",
+      "id": "92b8af0d-ed72-49a4-9c01-afc8084dcc96",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/worktree-identity/criteria.md",
+          "sha256": "8d736bc16e20aeb1ab7dc265cebb3962779e842f29068decbb00a80c2956061b"
+        },
+        {
+          "path": ".fstar/tasks/worktree-identity/plan.md",
+          "sha256": "7103a5c16fd40722a55e3db2e4a086b53ec3d043b4ebedc9a246103ad72e51d2"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/tasks/worktree-identity/criteria.md",
+          "sha256": "8d736bc16e20aeb1ab7dc265cebb3962779e842f29068decbb00a80c2956061b"
+        },
+        {
+          "path": ".fstar/tasks/worktree-identity/plan.md",
+          "sha256": "7103a5c16fd40722a55e3db2e4a086b53ec3d043b4ebedc9a246103ad72e51d2"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        }
+      ],
+      "kind": "delivery",
+      "produced_at": "2026-11-25T11:49:01.108169Z",
+      "producer": {
+        "id": "coordinator",
+        "role": "implement",
+        "session_id": "coordinator"
+      },
+      "state": "valid",
+      "unverified_inputs": [],
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/worktree-identity/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "9fe4812345f10a1b228308a9656890aaa552bef4acadfc2b55332e95099e5bef"
+            },
+            {
+              "id": "A-002",
+              "sha256": "65425c26ecfdc64ce80557455b34f1d57c59cc7896c14bbecef58746f54fa001"
+            },
+            {
+              "id": "A-003",
+              "sha256": "69c10237abdccc19a0ac36087d77b466d116732e8b3a4b0dfd56da114179a48d"
+            },
+            {
+              "id": "A-004",
+              "sha256": "cd75b4ea494d1462721425265bdb534e2f704ccf0056b7664abf975963b704b6"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "9fe4812345f10a1b228308a9656890aaa552bef4acadfc2b55332e95099e5bef"
+            },
+            {
+              "id": "A-002",
+              "sha256": "65425c26ecfdc64ce80557455b34f1d57c59cc7896c14bbecef58746f54fa001"
+            },
+            {
+              "id": "A-003",
+              "sha256": "69c10237abdccc19a0ac36087d77b466d116732e8b3a4b0dfd56da114179a48d"
+            },
+            {
+              "id": "A-004",
+              "sha256": "cd75b4ea494d1462721425265bdb534e2f704ccf0056b7664abf975963b704b6"
+            }
+          ]
+        }
+      ],
+      "validation_facts": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -I /tmp/fstar-final-probe-1641.py",
+          "exit_code": 0,
+          "result": "Before repair reproduced generic project_not_initialized and incomplete guidance; after repair reported project_moved_needs_rebind with bound path and doctor guidance covering confirmation and no merge. Probe prints observations; regression tests assert behavior.",
+          "retries": 0
+        },
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest -v tests.test_worktree_identity tests.test_user_directory_resolution tests.test_branch_location",
+          "duration_seconds": 17.599,
+          "exit_code": 0,
+          "result": "44 tests passed, including real linked worktrees, nested stale pointer with initialized ancestor, explicit override, corrupt pointers and separate identity",
+          "retries": 0
+        },
+        {
+          "command": "node scripts/build-package.cjs",
+          "exit_code": 0,
+          "result": "Rebuilt 63 asset manifest entries",
+          "retries": 0
+        },
+        {
+          "command": "git diff --check",
+          "exit_code": 0,
+          "result": "passed",
+          "retries": 0
+        },
+        {
+          "command": "manifest and input SHA-256 verification",
+          "exit_code": 0,
+          "result": "input mismatches: []; manifest mismatches: []; 63 manifest entries",
+          "retries": 0
+        },
+        {
+          "command": "impact review",
+          "result": "Reviewed strict and reporting project root resolution, doctor, learn bridge, explicit overrides, ordinary and linked worktree cases using source, CodeGraph and focused tests; no further impact identified. Independent check and full suite remain for coordinator.",
+          "retries": 0
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "c136e4af83a964ecc768b64854d129a1c489be7c5a7b1ba8b45f87283b8146ab",
+        "paths": [
+          {
+            "exists": true,
+            "path": "README.md",
+            "sha256": "f9d72bac7b60fbbeecbec7e1b77c9be9c4057e5dc9f84e8ed8457e8b00db1a2e"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "0f4547aec07dfa04d38464afc9f6018aaa444561b741600f536ac1d4b47e9c5d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "224e6a04bf2933eba3f7f2d08e7165c28f77909c30f8d478435e0a680440db7e"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/installer.py",
+            "sha256": "798a5d6e5670013dc9d9d89f60e8a1ad0e77f3665a17ad57ef7eb8e9ca2bc858"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/knowledge.py",
+            "sha256": "408c66a39160482eee2797161c8148ef84c0a5cbd0a7706eb17c277914c30760"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/learn_bridge.py",
+            "sha256": "a56fde131ba4c4e2c7e1007ddd4bac7c54d6f5cba7d3e856a6a5570a81219723"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/project.py",
+            "sha256": "bcd1c911bd8b4fcd2e26e310a9ee9a668c9800fd2eed0afd42da246b308e8f81"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "2fceeecaa2b8a1b627b3ede889f8518a95b7250872e91c2f132ad923b25aff94"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_branch_location.py",
+            "sha256": "434eb6c68c09e79aa91d9e6712ed8500bcb775531663d9b9f7365328b77cb035"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_user_directory_resolution.py",
+            "sha256": "53f0f7237c7b458d0bbb44c25d8bf056db18dd986c887ba7c8f6425dbe83fa16"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_worktree_identity.py",
+            "sha256": "bf152a8df4c50fd17e8b77271090f4c4a1e2f93ad6b753093aec6bf71ff8532c"
+          }
+        ]
+      },
+      "dispatch_id": "5ed2fd2f-9be1-4617-8114-4d537e714ba5",
+      "environment": {
+        "elapsed_seconds": 82,
+        "ended_at": "2026-11-25T11:51:25Z",
+        "fixture": "temporary real git repositories and linked worktrees",
+        "os": "macOS-27.2.1-arm64-arm-64bit",
+        "python": "3.9.6",
+        "retries": 0,
+        "started_at": "2026-11-25T11:50:03Z"
+      },
+      "id": "adec92c0-c95c-4d16-bd65-3f991399f9d7",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/worktree-identity/criteria.md",
+          "sha256": "8d736bc16e20aeb1ab7dc265cebb3962779e842f29068decbb00a80c2956061b"
+        },
+        {
+          "path": ".fstar/tasks/worktree-identity/plan.md",
+          "sha256": "7103a5c16fd40722a55e3db2e4a086b53ec3d043b4ebedc9a246103ad72e51d2"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        },
+        {
+          "path": ".fstar/tasks/worktree-identity/criteria.md",
+          "sha256": "8d736bc16e20aeb1ab7dc265cebb3962779e842f29068decbb00a80c2956061b"
+        },
+        {
+          "path": ".fstar/tasks/worktree-identity/plan.md",
+          "sha256": "7103a5c16fd40722a55e3db2e4a086b53ec3d043b4ebedc9a246103ad72e51d2"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "6a00db2f56b56fde2027d6342efa1b4d6957d66c80a2ac5fb0e06388d0c3726d"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "sha256": "18d9e663d9a4f7460c664caa4eaf0c4f6666f9fe685dd287117e4a0aff1f0b71"
+        }
+      ],
+      "items": [
+        {
+          "details": "Real linked worktree init refusal, explicit separate identity, preserved re-init/storage and standalone behavior across storage modes; forced separation refuses existing metadata without writes.",
+          "plan_item": "W-4",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "Independent source review and temporary real Git worktree probes and focused regression tests"
+        },
+        {
+          "details": "Learn read/prepare/apply across modes against main root, no worktree mutation; explicit project override wins even with corrupt local pointer.",
+          "plan_item": "W-4",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "Independent source review and temporary real Git worktree probes and focused regression tests"
+        },
+        {
+          "details": "Prior stale bound-elsewhere pointer now gives project_moved_needs_rebind; doctor provides roots, migration/pointer removal confirmation and no-merge warning. Valid separate bound identity resolves worktree and reports split; matching pointer is shared, corrupt pointers retain diagnostics and block fallback, doctor read-only.",
+          "plan_item": "W-4",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "Independent source review and temporary real Git worktree probes and focused regression tests"
+        },
+        {
+          "details": "Healthy worktree learn avoids erroneous init guidance; unresolvable-root guidance names caller path, provider errors identify project and data roots.",
+          "plan_item": "W-4",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "Independent source review and temporary real Git worktree probes and focused regression tests"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-25T11:52:40.891443Z",
+      "producer": {
+        "id": "independent-check-5ed2fd2f-9be1-4617-8114-4d537e714ba5",
+        "role": "check"
+      },
+      "read_only": true,
+      "run_id": "5ed2fd2f-9be1-4617-8114-4d537e714ba5",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/worktree-identity/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "9fe4812345f10a1b228308a9656890aaa552bef4acadfc2b55332e95099e5bef"
+            },
+            {
+              "id": "A-002",
+              "sha256": "65425c26ecfdc64ce80557455b34f1d57c59cc7896c14bbecef58746f54fa001"
+            },
+            {
+              "id": "A-003",
+              "sha256": "69c10237abdccc19a0ac36087d77b466d116732e8b3a4b0dfd56da114179a48d"
+            },
+            {
+              "id": "A-004",
+              "sha256": "cd75b4ea494d1462721425265bdb534e2f704ccf0056b7664abf975963b704b6"
+            }
+          ],
+          "granularity": "item",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "9fe4812345f10a1b228308a9656890aaa552bef4acadfc2b55332e95099e5bef"
+            },
+            {
+              "id": "A-002",
+              "sha256": "65425c26ecfdc64ce80557455b34f1d57c59cc7896c14bbecef58746f54fa001"
+            },
+            {
+              "id": "A-003",
+              "sha256": "69c10237abdccc19a0ac36087d77b466d116732e8b3a4b0dfd56da114179a48d"
+            },
+            {
+              "id": "A-004",
+              "sha256": "cd75b4ea494d1462721425265bdb534e2f704ccf0056b7664abf975963b704b6"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-25T11:34:40.544948Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "recovery"
+      ],
+      "reason": "用户授权仅为本任务恢复并完成收尾",
+      "scope": "custom",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-25T11:34:40.544707Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "extension",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "e4658e7fcdb56a7fd4a758c6752ef2ad64a90d644ee06a46dfbb933aeda01aee"
+      }
+    }
+  ],
+  "id": "d7a0058d-b174-4b2e-ae8a-e57fc43423a2",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/worktree-identity/criteria.md": {
+          "A-001": {
+            "dependencies": [],
+            "end_marker": "<!-- A-001:end -->",
+            "start_marker": "<!-- A-001:start -->"
+          },
+          "A-002": {
+            "dependencies": [],
+            "end_marker": "<!-- A-002:end -->",
+            "start_marker": "<!-- A-002:start -->"
+          },
+          "A-003": {
+            "dependencies": [],
+            "end_marker": "<!-- A-003:end -->",
+            "start_marker": "<!-- A-003:start -->"
+          },
+          "A-004": {
+            "dependencies": [],
+            "end_marker": "<!-- A-004:end -->",
+            "start_marker": "<!-- A-004:start -->"
+          }
+        }
+      },
+      "artifact_map_sha256": "8fa808af755c677ec0557e4538f4ace386b4d06f566a118e69903abea7bd985d",
+      "artifact_map_source": {
+        "actor": {
+          "id": "agent",
+          "role": "coordinator"
+        },
+        "reference": "criteria map A-001..A-004",
+        "type": "system"
+      },
+      "dispatch_harvested": [
+        "1641d14d-29ae-4832-a0f6-86ff7db94ad5",
+        "5c0d78fe-40cb-4c7a-8078-c92465ae8dc2",
+        "5ed2fd2f-9be1-4617-8114-4d537e714ba5"
+      ],
+      "dispatch_registrations": {
+        "1641d14d-29ae-4832-a0f6-86ff7db94ad5": {
+          "sha256": "266e9bbe54986bc5f77261e324fdbd888ba9930888e157f3e4376d1cab57c4b9",
+          "state": "registered"
+        },
+        "272d06a5-0aeb-4873-b493-f2508c71c960": {
+          "sha256": "bd35a7a34da1aa90d9a4c0587ca6c1c2e3bc3502a8e81e7b51f43a226e951f90",
+          "state": "registered"
+        },
+        "5c0d78fe-40cb-4c7a-8078-c92465ae8dc2": {
+          "sha256": "00c43abebb01396d6445ab1618921c86f46ecc14c3324dd6139f6f5015b5105c",
+          "state": "registered"
+        },
+        "5cdecfe3-2c6f-41df-bc9d-a57beb1ac192": {
+          "sha256": "12835dbbf92e8bc0cc955d6305379061edc59b249f3d43c0c94a53386013e92b",
+          "state": "registered"
+        },
+        "5ed2fd2f-9be1-4617-8114-4d537e714ba5": {
+          "sha256": "08e80ed3ca814436d6492c47fc643fd08af56c1d6d0f5bce0fbf6df893c8d8cb",
+          "state": "registered"
+        },
+        "79ffba05-4c70-4dc7-95e5-459f70b22548": {
+          "sha256": "12c5ae6801e67314d7c3f8eb0df706c0b9d2ceba9509915b81df77256ec28feb",
+          "state": "registered"
+        },
+        "8f57359d-e5a9-4fb8-94a5-73903f5fb4f5": {
+          "sha256": "922d75e4a856dbfcd1ec0b6cf07ee432fa585a41039de080ae410130e31b6ec2",
+          "state": "registered"
+        },
+        "ac4285aa-1476-4396-b47c-2e012c70cd24": {
+          "sha256": "bbc3631d8185f621cbe5fcd0de8ddc859937bae2be1848653c12617a1a76b040",
+          "state": "registered"
+        }
+      }
+    }
+  },
+  "name": "worktree-identity",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "Worktree project identity and knowledge resolution",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}

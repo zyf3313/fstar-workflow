@@ -12,7 +12,7 @@ from pathlib import Path
 from . import knowledge as k
 from .extensions import grants, includes
 from .models import DomainError
-from .store import TaskStore
+from .store import TaskStore, find_project_root
 
 
 def _object(value, name):
@@ -97,6 +97,23 @@ def _read_result(catalog, bundle):
     }
 
 
+def _project_root(request):
+    supplied = Path(request["project_root"]).expanduser().resolve()
+    project = find_project_root(supplied)
+    if project is None:
+        # Preserve actionable moved/corrupt-pointer errors from the shared
+        # layout resolver before reporting a genuinely uninitialized root.
+        k._project_data_root(supplied)
+        raise DomainError(
+            "knowledge_invalid_schema",
+            "Cannot resolve supplied project_root %s to an initialized fstar project. "
+            "Check the main worktree and its pointer with fstar doctor, or supply the "
+            "intended initialized project root; do not initialize a linked worktree "
+            "to repair project resolution." % supplied,
+            {"project_root": str(supplied), "resolved_project_root": None})
+    return project
+
+
 def _read(request):
     """Read the applicable knowledge for one selection.
 
@@ -106,7 +123,7 @@ def _read(request):
     reason, plus the catalog snapshot hash a later assessment must carry.
     """
 
-    project = Path(request["project_root"]).expanduser().resolve()
+    project = _project_root(request)
     user = Path(request["user_root"]).expanduser().resolve()
     max_bytes = request.get("max_bytes")
     if max_bytes is not None and (not isinstance(max_bytes, int) or isinstance(max_bytes, bool)
@@ -124,7 +141,7 @@ def _read(request):
 
 
 def _prepare(request):
-    project = Path(request["project_root"]).expanduser().resolve()
+    project = _project_root(request)
     user = Path(request["user_root"]).expanduser().resolve()
     # Governance, including personal knowledge, requires an initialized project.
     k._require_initialized_project(project, data_root=k._project_data_root(project))
