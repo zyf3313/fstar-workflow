@@ -110,6 +110,11 @@ class CollaborationGrantTests(DispatchCase):
         self.grant(["version-injection"], ["change-propagation"])
         # Another service instance reads the persisted task rather than caller grants.
         recovered = DispatchService(self.store, clock=self.clock)
+        # Persisted grants are part of the effective dispatch identity.
+        with self.assertRaises(DomainError) as conflict:
+            recovered.register(payload)
+        self.assertEqual("dispatch_id_conflict", conflict.exception.code)
+        payload = self.payload(input_versions=[{"path": "doc/prd.md", "sha256": "abc"}])
         self.assertTrue(recovered.register(payload)["registered"])
         with self.assertRaises(DomainError):
             recovered.interrupt("d", reason="changed", mode="change_propagation", task_ref="root")
@@ -117,6 +122,7 @@ class CollaborationGrantTests(DispatchCase):
         self.service.release_lease("root", token=token, reason="test")
         self.grant(["change-propagation"], ["version-injection"])
         self.assertTrue(recovered.interrupt("d", reason="changed", mode="change_propagation", task_ref="root")["intent_registered"])
+        payload = self.payload(input_versions=[{"path": "doc/prd.md", "sha256": "abc"}])
         self.assertTrue(recovered.register(payload)["registered"])
         self.assertTrue(recovered.register(self.payload(role="check", input_versions=[{"path": "doc/prd.md", "sha256": "abc"}]))["registered"])
         token = self.store.read("root")["lease"]["token"]

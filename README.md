@@ -116,9 +116,12 @@ A coordinator hands **bounded scope** to implement and check roles. Every
 dispatch carries per-input path, hash, and version, so the harvest step can
 verify what the worker actually read. Sub-agents only touch their authorized
 scope; the main session integrates and inspects consequential changes.
-`fstar schema payload|result|change` prints each dispatch document's required
-fields plus a minimal runnable example, so payloads no longer have to be
-reverse-engineered from source. Editor dispatches accept any project-relative
+`fstar schema payload|result|change|evidence` prints field references and
+examples. The evidence example is an illustrative fixture, not a real check;
+use actual snapshots and an independent check's facts for your task. Result
+`input_baseline` and `delivery_baseline` must be objects and may be empty;
+harvest verifies the payload's input fingerprints and computes its own delivery
+snapshot rather than treating the result baseline as proof. Editor dispatches accept any project-relative
 delivery path (not just a
 fixed `doc/` directory) — the guard is the explicit per-file
 `allowed_paths` whitelist plus the harvest scope check, so authorization is
@@ -168,6 +171,21 @@ If the user reports a problem during `awaiting_acceptance`,
 and stales the evidence; the normal start → check cycle re-applies.
 `fstar evidence invalidate --file PATH`
 expires evidence on demand; `fstar acceptance status` shows what's missing.
+
+A delivery snapshot sorts and deduplicates project-relative paths and records
+`{path, exists, sha256}` for each, with `sha256` computed over raw file bytes
+(or `null` for a missing file). Its `delivery.digest` is the `content_hash` of
+that list: SHA-256 of UTF-8 JSON with sorted object keys, no extra whitespace,
+and non-ASCII characters preserved. Whole-file *item* snapshots instead hash
+UTF-8 text after CRLF and CR line endings are normalized to LF; these hashes
+can therefore differ from raw file hashes. Item dependencies are tracked too.
+
+When a baseline or check is stale, investigate which inputs, mapped items,
+dependencies, delivery files, or report changed. Recompute snapshots from the
+current files and established mappings, redispatch work when its inputs changed,
+record an updated delivery when needed, and run a fresh independent check for
+that delivery. Do not copy a reported actual hash over an expected hash to make
+a stale check pass; that would not establish that the new contents were checked.
 
 ### 6. Archive (`archive`, `drop`)
 
@@ -596,6 +614,15 @@ router. The hand-over is additive:
   diagnostic (the extra library share is unreachable; no skill is lost and
   no fallback install is needed).
 
+**Stale hand-over reconciliation.** The hand-over ledger
+(`~/.fstar/magpie-integration.json`) is compared with the current bundle on
+every install/update. A skill that left the bundle but is still recorded as
+handed over is *stale*: a dry run reports it as `stale_pending_removal`.
+An apply run retains it and reports `stale_but_modified` because the current
+library content cannot be independently verified. With Magpie absent, or
+with `--native-only`, stale entries are reported informationally. `fstar doctor`
+identifies extra skills recorded as handed over.
+
 Known trade-off: with both copies present, a request routed through Magpie
 can list the skills twice (the native listing plus the router skill's
 listing). Deduplication is a Magpie-side configuration (exclude the host in
@@ -618,9 +645,11 @@ Boundaries (verified against magpie 0.1.4582 on 2026-11-20):
 - Re-running is idempotent: a skill already handed over with the same
   content fingerprint is skipped (`already_integrated`); a changed
   fingerprint is re-staged and handed over again through the public CLI.
-- Removing a skill from Magpie's library has no verified public CLI path:
-  manage that through Magpie itself. `fstar uninstall` removes the native
-  copies it owns and reports any skill still present in the library.
+- Magpie 0.1.4722 exposes `magpie library skill rm <name>`, but fstar has
+  no verified public way to read and fingerprint the actual library skill.
+  The staging copy is independent, so fstar retains stale library entries
+  and their ledger records. `fstar uninstall` removes the native copies it
+  owns and reports skills recorded as handed over.
 
 ### Shared workflow instructions
 

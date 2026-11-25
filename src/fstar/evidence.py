@@ -30,6 +30,8 @@ def _extract_item(text: str, artifact_map: dict, item_id: str) -> Optional[str]:
     mapping = artifact_map.get(item_id)
     if not mapping:
         return None
+    if mapping.get("mode") == "file":
+        return hashlib.sha256(text.encode()).hexdigest()
     start, end = mapping.get("start_marker"), mapping.get("end_marker")
     if not start or not end or text.count(start) != 1 or text.count(end) != 1:
         raise DomainError("mapping_invalid", "Artifact mapping markers must each appear exactly once", {"item": item_id})
@@ -125,6 +127,9 @@ class EvidenceService:
                 raise DomainError("mapping_invalid", "Artifact mapping items must be an object", {"artifact": artifact})
             normalized[artifact] = {}
             for item_id, spec in sorted(items.items()):
+                if isinstance(spec, dict) and spec.get("mode") == "file":
+                    normalized[artifact][item_id] = {"mode": "file", "dependencies": sorted(set(spec.get("dependencies", [])))}
+                    continue
                 if not isinstance(spec, dict) or not spec.get("start_marker") or not spec.get("end_marker"):
                     raise DomainError("mapping_invalid", "Each item requires literal start and end markers", {"artifact": artifact, "item": item_id})
                 dependencies = sorted(set(spec.get("dependencies", [])))
@@ -158,8 +163,7 @@ class EvidenceService:
         snapshots = []
         granularity = "item"
         if file_mode:
-            # Whole-file conservative mode: no item-scoped extraction is
-            # trusted, so every item snapshot binds the entire file content.
+            # Preserve the legacy global conservative file mode.
             granularity = "file"
             file_digest = hashlib.sha256(text.encode()).hexdigest()
             for item_id in items:
@@ -174,6 +178,8 @@ class EvidenceService:
                     continue
                 raise DomainError("mapping_missing", "No explicit artifact mapping exists", {"artifact": artifact, "item": item_id})
             snapshots.append({"id": item_id, "sha256": digest})
+            if artifact_map[item_id].get("mode") == "file":
+                granularity = "file"
         # Bind the transitive dependency closure with content hashes so later
         # freshness checks can detect changes to any reachable item.
         dependencies = []

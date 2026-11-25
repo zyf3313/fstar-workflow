@@ -10,10 +10,16 @@ Verified public capabilities of the local app (magpie 0.1.4582,
   ``library instructions set <file|->`` REPLACES them with a file's text
   (``-`` reads stdin), so the writer must read the current text first and
   must never replace content it does not own.
+- ``library skill rm <name>``: remove a skill from Magpie's library
+  (verified present in magpie 0.1.4722, 2026-11-24; its help notes "skills
+  are installed from the app's Library page" and the folder goes to
+  magpie's backups). fstar retains stale entries because their actual library content cannot
+  currently be verified through a known public reader.
 - ``skill agents <name> <a,b>`` / ``skill router <name> direct`` /
   ``skill how`` / ``library sync`` exist, but their exact preconditions
-  were not verified; this module only uses ``hand-over`` and the library
-  instructions channel, never edits Magpie-private files
+  were not verified; this module only uses ``hand-over``, the guarded
+  and the library instructions channel, never edits
+  Magpie-private files
   (library.json/providers.json), never changes models/accounts/providers/
   routing, and never claims to import hooks or sub-agent definitions
   (Magpie's ``agents`` are coding tools, not fstar role definitions).
@@ -275,11 +281,100 @@ def _public_handover(names: Sequence[str], *, binary: str,
             "output": (out or "").strip()[:200]}
 
 
+def _public_skill_rm(names: Sequence[str], *, binary: str,
+                     runner: Callable = default_runner) -> dict:
+    """The verified public library removal command, by exact skill names.
+
+    ``magpie library skill rm <name>`` (present in magpie 0.1.4722):
+    removes a skill from Magpie's library (its folder goes to magpie's
+    backups). Invoked one name at a time by the guarded prune so one bad
+    skill never affects another.
+    """
+    argv = [binary, "library", "skill", "rm", *names]
+    try:
+        code, out, err = runner(argv, timeout=HANDOVER_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "reason": "library skill rm timed out"}
+    except OSError as exc:
+        return {"ok": False, "reason": "library skill rm failed: %s" % exc}
+    if code != 0:
+        return {"ok": False,
+                "reason": "library skill rm exited %s: %s" % (code, (err or out).strip()[:200])}
+    return {"ok": True, "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "output": (out or "").strip()[:200]}
+
+
+def _fstar_ledger_history(entry: Mapping) -> bool:
+    """True when the ledger entry carries fstar's own hand-over history.
+
+    fstar always writes the hand-over timestamp ``at`` (the retired
+    ownership model wrote ``ownership``); a hand-written or foreign ledger
+    entry has neither, so it is never treated as fstar history.
+    """
+    if not entry:
+        return False
+    if entry.get("at"):
+        return True
+    return entry.get("ownership") in ("magpie", "native", "staged")
+
+
+def _is_fstar_managed(name: str, record: Mapping) -> bool:
+    """A skill fstar may prune: the fstar- prefix or a ledger-recorded
+    fstar hand-over history for that exact name."""
+    if name.startswith("fstar-"):
+        return True
+    entry = (record.get("skills") or {}).get(name)
+    return bool(entry) and _fstar_ledger_history(entry)
+
+
+def _prune_stale_skill(*, name: str, record: dict, agents_source: Path,
+                       binary: str, runner: Callable) -> dict:
+    """Report a stale skill without deletion when library content is unverified.
+
+    A staged source copy cannot establish the current library fingerprint.
+    The public rm command exists, but no safe public content reader is known.
+    """
+    entry = (record.get("skills") or {}).get(name) or {}
+    state, _note = _library_state(entry)
+    if state != "handed_over":
+        return {"skill": name, "library": state or "absent", "action": "prune_failed",
+                "reason": "the ledger does not record this skill as handed over "
+                          "(state: %s); nothing was removed" % (state or "none")}
+    if not _is_fstar_managed(name, record):
+        return _prune_foreign_entry(name=name, record=record)
+    # The staged source is independent of the library and cannot prove its
+    # current contents. No verified public library-content reader is known.
+    return {"skill": name, "library": "handed_over", "action": "stale_but_modified",
+            "reason": "current library content cannot be independently verified; "
+                      "the stale skill and its ledger entry were kept"}
+
+
+def _prune_foreign_entry(*, name: str, record: dict) -> dict:
+    """A ledger entry fstar never created (a hand-written or foreign ledger):
+    the name is not fstar-managed, so it is reported and kept."""
+    return {"skill": name, "library": "handed_over", "action": "prune_failed",
+            "reason": "the skill is not fstar-managed (no fstar- prefix and no "
+                      "fstar hand-over history for this name); nothing was removed"}
+
+
+def _stale_handed_over(record: Mapping, names: Sequence[str]) -> List[str]:
+    """Ledger skills recorded as handed_over but absent from the current
+    bundle. Skills the ledger never recorded are never considered."""
+    current = set(names)
+    stale = []
+    for name, entry in (record.get("skills") or {}).items():
+        if name in current:
+            continue
+        if _library_state(entry or {})[0] == "handed_over":
+            stale.append(name)
+    return sorted(stale)
+
+
 def uninstall_local(*, user_root: Path, agents_source: Path) -> dict:
     """Remove only fstar-staged, fingerprint-matching entries we still own.
 
-    Magpie-managed content is never deleted (no verified public removal
-    API): those entries are reported for manual handling.
+    Magpie-managed content is not deleted here or by stale reconciliation:
+    actual library content cannot currently be independently verified.
     """
     record = _load_record(user_root)
     removed, kept = [], []
@@ -287,7 +382,9 @@ def uninstall_local(*, user_root: Path, agents_source: Path) -> dict:
         target = agents_source / name / "SKILL.md"
         state, _note = _library_state(entry or {})
         if state == "handed_over":
-            kept.append({"skill": name, "reason": "handed over to the Magpie library; remove it via Magpie"})
+            kept.append({"skill": name,
+                         "reason": "handed over to the Magpie library; the next "
+                                   "library content cannot currently be verified; retained"})
             continue
         if entry.get("ownership") == "native":
             # The skill lives in the host's native channel; nothing is staged
@@ -485,16 +582,25 @@ def route_skills(*, skills_root: Path, agents_source: Path, user_root: Path,
     there is no verified public library-update path, so a changed
     fingerprint re-stages and re-hands-over through the public CLI).
 
+    Stale reconciliation (A-001): skills the ledger records as handed_over
+    but that left the current bundle are surfaced in every mode. A dry run
+    reports them as ``stale_pending_removal``; an apply run retains them
+    because actual library content cannot be verified. With Magpie
+    absent or native_only they are reported informationally only, never
+    removed, consistent with the other informational actions.
+
     ``dry_run`` plans the same decisions without staging, handing over, or
     writing the record. ``native_only`` skips Magpie entirely (no probe, no
     staging, no hand-over): native copies only.
     """
     names = list(skill_names or sorted(path.parent.name for path in skills_root.glob("*/SKILL.md")))
     record = _load_record(user_root)
+    stale = _stale_handed_over(record, names)
     if native_only:
         # The user asked for native only: Magpie is not consulted at all, and
-        # the library distribution is left exactly as it is (removing a
-        # handed-over skill from Magpie's library has no verified public API).
+        # the library distribution is left exactly as it is. Stale handed-over
+        # entries are reported informationally (A-001); removal is a guarded
+        # library operation and runs on the next normal install/update.
         results = []
         for name in names:
             prior = record["skills"].get(name) or {}
@@ -503,17 +609,49 @@ def route_skills(*, skills_root: Path, agents_source: Path, user_root: Path,
             results.append({"skill": name, "library": library, "action": "native_only",
                             "reason": ("Magpie was not consulted; the library distribution "
                                        "state is unchanged" + (" (previously handed over)" if state else ""))})
+        for name in stale:
+            results.append({"skill": name, "library": "handed_over",
+                            "action": "stale_pending_removal",
+                            "reason": "the skill left the bundle but is still handed over to "
+                                      "the Magpie library; native-only does not consult Magpie, "
+                                      "so it remains in the library"})
+        library_map = {item["skill"]: item["library"] for item in results}
+        for name in stale:
+            library_map.setdefault(name, "handed_over")
         return {"schema": ROUTING_SCHEMA, "status": "preview" if dry_run else "native_only",
                 "magpie": {"available": False, "consulted": False,
                            "reason": "native-only install: Magpie was not consulted"},
                 "skills": results,
-                "library": {item["skill"]: item["library"] for item in results}}
+                "library": library_map}
 
     binary, status = _resolve_magpie(binary=binary, discover=discover, runner=runner,
                                     probe_status=probe_status)
     handover_call = handover or _public_handover
     results: List[dict] = []
     changed = False
+    # Stale reconciliation (A-001): ledger skills that left the bundle.
+    for name in stale:
+        if not status.available:
+            # Informational only, like library_handed_over_magpie_absent:
+            # nothing is removed while Magpie is unreachable.
+            results.append({"skill": name, "library": "handed_over",
+                            "action": "stale_pending_removal",
+                            "reason": "the skill left the bundle but is still handed over "
+                                      "to the Magpie library, which is not available (%s); "
+                                      "it remains in the library" % (status.reason or "not available")})
+            continue
+        if dry_run:
+            results.append({"skill": name, "library": "handed_over",
+                            "action": "stale_pending_removal",
+                            "reason": "the skill left the bundle; library content cannot currently "
+                                      "be verified, so it would be retained"})
+            continue
+        outcome = _prune_stale_skill(name=name, record=record,
+                                     agents_source=agents_source,
+                                     binary=binary, runner=runner)
+        if outcome.get("action") == "pruned_from_library":
+            changed = True
+        results.append(outcome)
     for name in names:
         payload = _skill_payload(skills_root, name)
         if payload is None:
@@ -570,7 +708,8 @@ def route_skills(*, skills_root: Path, agents_source: Path, user_root: Path,
         record["version"] = status.version
         record["binary"] = status.binary
         _atomic_write(_record_path(user_root), record)
-    degraded = any(item["action"] in ("handover_failed", "conflict")
+    degraded = any(item["action"] in ("handover_failed", "conflict",
+                                      "prune_failed", "stale_but_modified")
                    for item in results)
     if dry_run:
         overall = "preview"
@@ -584,6 +723,15 @@ def route_skills(*, skills_root: Path, agents_source: Path, user_root: Path,
                        "reason": status.reason},
             "skills": results,
             "library": {item["skill"]: item["library"] for item in results}}
+
+
+def stale_handed_over(user_root: Path, names: Optional[Sequence[str]] = None,
+                      skills_root: Optional[Path] = None) -> List[str]:
+    """Public read-only helper: ledger skills recorded handed_over that are
+    absent from the given bundle names (or the bundle under skills_root)."""
+    if names is None:
+        names = sorted(path.parent.name for path in skills_root.glob("*/SKILL.md"))
+    return _stale_handed_over(_load_record(user_root), names)
 
 
 # ---------------------------------------------------------------------------

@@ -53,7 +53,7 @@
       "source": "src/fstar/cli.py",
       "destination": "src/fstar/cli.py",
       "kind": "python",
-      "sha256": "4d322c9c65d31576e16a794b157a1240761171eb1ef0bc14e9ebbc67d3f77135"
+      "sha256": "2265c6f2beabc19105a293e527b80b0a361cc809ae4cad0cd0167baa796a559d"
     },
     {
       "source": "src/fstar/config.py",
@@ -71,19 +71,19 @@
       "source": "src/fstar/crossproject.py",
       "destination": "src/fstar/crossproject.py",
       "kind": "python",
-      "sha256": "e5304194c4d8156f2cdd4ebf5c750d7d9722197c5c90230d60031eed291ae67f"
+      "sha256": "b904a05eaa8c98eacca7574d2ad97e1211e1345130e21c1b1ae3feeb41c01f14"
     },
     {
       "source": "src/fstar/dispatch.py",
       "destination": "src/fstar/dispatch.py",
       "kind": "python",
-      "sha256": "cc6193649d7532b31b3d9e60076f5e3c0550cdcf0cf2a9bbea18c271631fa41a"
+      "sha256": "df2c6fde2fbf6c9e0a89a7af4db05705d4aa88ae01ac73ef639c8f21a04474d8"
     },
     {
       "source": "src/fstar/evidence.py",
       "destination": "src/fstar/evidence.py",
       "kind": "python",
-      "sha256": "82d1b6826103565cb2c489f9c8c537160453376f0de38eeff969ce559a55c22a"
+      "sha256": "53b8e6304181203b05b4359487523234136bc408fb59d31f7d0cce20146821b5"
     },
     {
       "source": "src/fstar/extensions.py",
@@ -101,7 +101,7 @@
       "source": "src/fstar/installer.py",
       "destination": "src/fstar/installer.py",
       "kind": "python",
-      "sha256": "debcb8ac0f2f26122c15af62a40008fe908ade98be6f1d191da2c0d011f77d24"
+      "sha256": "798a5d6e5670013dc9d9d89f60e8a1ad0e77f3665a17ad57ef7eb8e9ca2bc858"
     },
     {
       "source": "src/fstar/knowledge.py",
@@ -119,7 +119,7 @@
       "source": "src/fstar/magpie.py",
       "destination": "src/fstar/magpie.py",
       "kind": "python",
-      "sha256": "0eda775fdc210b431c9560f9d5c483ec7e6106bf454a2d934a949ecee64d8fac"
+      "sha256": "7a57175ec7cd5961674051f36c4249245ffe691aec8074a2e819ea256c9b5072"
     },
     {
       "source": "src/fstar/models.py",
@@ -173,7 +173,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "7d7769059dace8ed0b6913c01737b029c57a284359459b9c6fbe1a85aed7e247"
+      "sha256": "15473a6bf2f0332a2ee874615d350553fb26cb95032497916a6e244c6d540abb"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",

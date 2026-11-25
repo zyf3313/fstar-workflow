@@ -534,25 +534,31 @@ class TaskService:
             task = self.store._read_path(task_dir / "task.json")
             if workflow_recovery:
                 _require_workflow_member(task, "recovery")
-            if task["phase"] != "in_progress" or task.get("meta", {}).get("disposition"):
-                raise DomainError("lease_not_allowed", "A lease requires an active task", status=3)
-            now = self.clock()
-            old = task.get("lease")
-            if old and old.get("expires_at", "") > now and not takeover_reason:
-                raise DomainError("lease_conflict", "Task already has an active writer", {"holder": old.get("holder")}, status=4)
-            token = str(uuid.uuid4())
-            holder_data = {"id": holder, "role": role, "session": (actor or {}).get("session")}
-            takeovers = list(old.get("takeovers", [])) if old else []
-            event_type = "lease_acquired"
-            if old:
-                if not takeover_reason:
-                    takeover_reason = "expired lease"
-                takeovers.append({"at": now, "from": old.get("holder"), "to": holder_data, "reason": takeover_reason})
-                event_type = "lease_taken_over"
-            task["lease"] = {"holder": holder_data, "token": token, "acquired_at": now, "expires_at": plus_minutes(now, LEASE_MINUTES), "takeovers": takeovers}
-            self._event(task, event_type, self._actor_source(actor or holder_data, "lease"), {"old_holder": old.get("holder") if old else None, "new_holder": holder_data, "reason": takeover_reason})
+            lease = self._acquire_lease(task, holder=holder, role=role, takeover_reason=takeover_reason, actor=actor)
             self._write(task_dir, task)
-            return task["lease"]
+            return lease
+
+    def _acquire_lease(self, task: dict, *, holder: str, role: str,
+                       takeover_reason: Optional[str] = None, actor: Optional[dict] = None) -> dict:
+        """Mutate a loaded task under the caller's transaction; do not persist."""
+        if task["phase"] != "in_progress" or task.get("meta", {}).get("disposition"):
+            raise DomainError("lease_not_allowed", "A lease requires an active task", status=3)
+        now = self.clock()
+        old = task.get("lease")
+        if old and old.get("expires_at", "") > now and not takeover_reason:
+            raise DomainError("lease_conflict", "Task already has an active writer", {"holder": old.get("holder")}, status=4)
+        token = str(uuid.uuid4())
+        holder_data = {"id": holder, "role": role, "session": (actor or {}).get("session")}
+        takeovers = list(old.get("takeovers", [])) if old else []
+        event_type = "lease_acquired"
+        if old:
+            if not takeover_reason:
+                takeover_reason = "expired lease"
+            takeovers.append({"at": now, "from": old.get("holder"), "to": holder_data, "reason": takeover_reason})
+            event_type = "lease_taken_over"
+        task["lease"] = {"holder": holder_data, "token": token, "acquired_at": now, "expires_at": plus_minutes(now, LEASE_MINUTES), "takeovers": takeovers}
+        self._event(task, event_type, self._actor_source(actor or holder_data, "lease"), {"old_holder": old.get("holder") if old else None, "new_holder": holder_data, "reason": takeover_reason})
+        return task["lease"]
 
     def renew_lease(self, ref: str, *, token: str) -> dict:
         with self.store.transaction():
@@ -676,8 +682,18 @@ class TaskService:
             normalized = deliverable(entry)
         except (KeyError, TypeError):
             raise DomainError("invalid_deliverables", "A deliverable requires name and path")
-        if not normalized["name"].strip() or not normalized["path"].strip():
+        if not all(isinstance(normalized[key], str) and normalized[key].strip() for key in ("name", "path")):
             raise DomainError("invalid_deliverables", "deliverables entries require non-empty name and path")
+        path = normalized["path"]
+        if path.strip() != path or "\x00" in path or str(Path(path)) == "mode":
+            raise DomainError("unsafe_evidence_path", "Deliverable requires a safe file path", {"path": path})
+        resolved = self.store.project_file(path)
+        if resolved.is_dir() or not Path(path).parts:
+            raise DomainError("unsafe_evidence_path", "Deliverable path must name a file", {"path": path})
+        normalized["path"] = str(Path(path))
+        criteria = normalized["criteria_refs"]
+        if not isinstance(criteria, list) or not all(isinstance(item, str) and item.strip() for item in criteria):
+            raise DomainError("invalid_deliverables", "criteria_refs must contain non-empty strings")
         with self.store.transaction():
             task_dir = self.store.resolve(ref)
             task = self.store._read_path(task_dir / "task.json")
@@ -688,23 +704,18 @@ class TaskService:
                 entries[entries.index(previous)] = normalized
             else:
                 entries.append(normalized)
-            # B-11: the deliverable's path becomes an (empty) artifact-map
-            # entry in the SAME transaction, reusing persist_artifact_map's
-            # normalize shape so later check evidence can establish scope
-            # against it. Existing entries are merged, never deleted; a full
-            # mapping with markers still goes through EvidenceService.
+            # Bind only declared criteria (or the path itself when none were
+            # declared). Empty historical maps establish no requirement ids.
+            # Marker mappings remain authoritative in mixed artifact maps.
             templates = task.setdefault("meta", {}).setdefault("templates", {})
             artifact_map = dict(templates.get("artifact_map", {}) or {})
-            resolvable = True
-            try:
-                self.store.project_file(normalized["path"])
-            except DomainError:
-                # An unresolvable deliverable path must not poison the map:
-                # the deliverable is recorded, the map stays untouched.
-                resolvable = False
-            if resolvable and not isinstance(artifact_map.get(normalized["path"]), dict):
-                # Merge-only: an existing mapped artifact keeps its items.
-                artifact_map[normalized["path"]] = {}
+            path = normalized["path"]
+            existing = artifact_map.get(path)
+            if not existing or (isinstance(existing, dict) and all(
+                    isinstance(spec, dict) and spec.get("mode") == "file" for spec in existing.values())):
+                ids = {item for pointer in entries if pointer["path"] == path
+                       for item in (pointer.get("criteria_refs") or [path])}
+                artifact_map[path] = {item: {"mode": "file", "dependencies": []} for item in sorted(ids)}
                 templates["artifact_map"] = artifact_map
                 templates["artifact_map_sha256"] = content_hash(artifact_map)
                 templates["artifact_map_source"] = self._actor_source(actor, "register_deliverable")

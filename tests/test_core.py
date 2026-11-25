@@ -1122,7 +1122,7 @@ class DeliverableArtifactMapTests(CoreCase):
         self.service.register_deliverable("root", actor=self.agent, entry={"name": "report", "path": "report.md"})
         templates = self.store.read("root")["meta"]["templates"]
         self.assertIn("report.md", templates["artifact_map"])
-        self.assertEqual({}, templates["artifact_map"]["report.md"])
+        self.assertEqual({"report.md": {"mode": "file", "dependencies": []}}, templates["artifact_map"]["report.md"])
         self.assertIn("artifact_map_sha256", templates)
         self.assertEqual("register_deliverable", templates["artifact_map_source"]["reference"])
         # Merge-only: a pre-existing mapped artifact keeps its items.
@@ -1133,14 +1133,15 @@ class DeliverableArtifactMapTests(CoreCase):
         self.service.register_deliverable("root", actor=self.agent, entry={"name": "other", "path": "other.md"})
         mapping = self.store.read("root")["meta"]["templates"]["artifact_map"]
         self.assertIn("R-1", mapping["report.md"])
-        self.assertEqual({}, mapping["other.md"])
+        self.assertEqual({"other.md": {"mode": "file", "dependencies": []}}, mapping["other.md"])
 
-    def test_deliverable_outside_project_skips_map(self):
+    def test_deliverable_outside_project_rejected_without_mutation(self):
         self.create()
-        self.service.register_deliverable("root", actor=self.agent, entry={"name": "bad", "path": "../escape.md"})
-        task = self.store.read("root")
-        self.assertEqual(["bad"], [d["name"] for d in task["deliverables"]])
-        self.assertNotIn("artifact_map", task["meta"].get("templates", {}) or {})
+        before = self.store.read("root")
+        with self.assertRaises(DomainError) as caught:
+            self.service.register_deliverable("root", actor=self.agent, entry={"name": "bad", "path": "../escape.md"})
+        self.assertEqual("unsafe_evidence_path", caught.exception.code)
+        self.assertEqual(before, self.store.read("root"))
 
 
 class CliTests(CoreCase):
