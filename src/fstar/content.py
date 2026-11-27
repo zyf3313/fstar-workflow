@@ -9,7 +9,7 @@ from typing import Mapping, Optional, Sequence, Tuple
 MAP_SCHEMA = "fstar.template-map.v1"
 REQUIRED_SLOTS = ("artifact_type", "version", "review_state", "author", "date", "reviewer")
 SKILLS = ("init", "clarify", "plan", "execute", "check", "continue", "archive", "learn", "debug", "help")
-ROLES = ("research", "implement", "check", "editor")
+ROLES = ("research", "implement", "check", "editor", "learn")
 TEMPLATES = (
     "task/plan.md", "task/clarify.md", "task/research.md", "task/check.md", "task/criteria.md",
     "scenarios/software/prd.md", "scenarios/software/design.md",
@@ -335,11 +335,11 @@ def _mapping_diagnostics(root: Path) -> Sequence[Diagnostic]:
     return tuple(diagnostics)
 
 
-def validate_resources(resource_root: Path) -> Sequence[Diagnostic]:
+def validate_resources(resource_root: Path, *, roles: Sequence[str] = ROLES) -> Sequence[Diagnostic]:
     diagnostics = []
     root = resource_root
     expected_skills = {root / "skills" / ("fstar-%s" % name) / "SKILL.md" for name in SKILLS}
-    expected_roles = {root / "agents" / ("fstar-%s.md" % name) for name in ROLES}
+    expected_roles = {root / "agents" / ("fstar-%s.md" % name) for name in roles}
     expected_templates = {root / "templates" / value for value in TEMPLATES}
     actual_skills = set((root / "skills").glob("*/SKILL.md")) if (root / "skills").exists() else set()
     actual_roles = set((root / "agents").glob("fstar-*.md")) if (root / "agents").exists() else set()

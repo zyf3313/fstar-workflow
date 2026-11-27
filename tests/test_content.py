@@ -38,10 +38,23 @@ def artifact_text(item_id="需求一", reference=None):
 class InventoryTests(unittest.TestCase):
     def test_exact_inventory_and_validator(self):
         self.assertEqual(10, len(SKILLS))
-        self.assertEqual(4, len(ROLES))
+        self.assertEqual(5, len(ROLES))
         self.assertEqual(12, len(TEMPLATES))
         self.assertEqual([], list(validate_resources(RESOURCES)))
         self.assertEqual(4, len(list((RESOURCES / "templates").rglob("*.mapping.yaml"))))
+
+    def test_current_inventory_rejects_missing_and_extra_roles(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "resources"
+            shutil.copytree(RESOURCES, root)
+            (root / "agents" / "fstar-learn.md").unlink()
+            (root / "agents" / "fstar-other.md").write_text(
+                '---\nname: fstar-other\ndescription: "extra"\n---\n')
+            diagnostics = validate_resources(root)
+            self.assertTrue(any(d.code == "RESOURCE_MISSING" and d.path.endswith("fstar-learn.md")
+                                for d in diagnostics))
+            self.assertTrue(any(d.code == "RESOURCE_EXTRA" and d.path.endswith("fstar-other.md")
+                                for d in diagnostics))
 
     def test_descriptions_and_frontmatter(self):
         descriptions = []
@@ -281,7 +294,35 @@ class SemanticContentTests(unittest.TestCase):
         learn = (RESOURCES / "skills/fstar-learn/SKILL.md").read_text()
         self.assertIn("## Rejected-proposals ledger", learn)
         self.assertIn("## Procedure format", learn)
-        self.assertIn("read live", learn)
+        self.assertIn("read procedures live", learn)
+        self.assertIn("explicitly declined learning", learn)
+        self.assertIn("Do not dispatch another agent or ask the user questions", learn)
+        self.assertIn("do not interrupt the correction", learn)
+        self.assertIn("require the grant covering the destination", learn)
+        self.assertIn("exact proposal hash, scope and owners", learn)
+        # Dispatch-first learning: the coordinator must actually dispatch the
+        # background fstar-learn role instead of handling it inline.
+        states = (RESOURCES / "runtime" / "prompt-states.md").read_text()
+        reminder = " ".join(states.split("\n[skill-reminder]\n", 1)[1].split("[/skill-reminder]", 1)[0].split())
+        self.assertIn("required first action", reminder)
+        self.assertIn("native background Agent tool for the installed `fstar-learn` role", reminder)
+        self.assertIn("before you compose your reply", reminder)
+        self.assertIn("Do not substitute an inline proposal", reminder)
+        self.assertIn("say so explicitly", reminder)
+        self.assertIn("Report only an actual host acknowledgement", reminder)
+        self.assertIn("not an ordinary task instruction or a transient detail", reminder)
+        self.assertIn("explicit user refusal or instruction not to dispatch takes precedence", reminder)
+        routing = (RESOURCES / "runtime" / "routing.md").read_text()
+        self.assertIn("as its first action", routing)
+        self.assertIn("call the host Agent tool before composing the reply", routing)
+        self.assertIn("Never substitute an inline proposal", routing)
+        self.assertIn("never claim a dispatch without one", routing)
+        self.assertIn("not fire for ordinary task instructions or transient details", routing)
+        self.assertIn("the dispatch is the required first action", learn)
+        self.assertIn("an inline proposal never substitutes for it", learn)
+        execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
+        self.assertIn("the required first action is a real background dispatch", execute)
+        self.assertIn("an inline proposal never substitutes for it", execute)
         execute = (RESOURCES / "skills/fstar-execute/SKILL.md").read_text()
         self.assertIn("accepted_via_rule", execute)
         self.assertIn("correction record", execute)
@@ -355,8 +396,9 @@ class SemanticContentTests(unittest.TestCase):
         plan = (RESOURCES / "skills/fstar-plan/SKILL.md").read_text()
         self.assertIn("the plan runs only after the user reviews the settled requirements", plan)
         self.assertNotIn("not in `in_progress` with user-reviewed", plan)
-        # Simple items may skip a plan entirely (C-15 recommended-not-mandatory).
-        self.assertIn("A one-line goal plus its acceptance conditions (criteria.md)", plan)
+        # Simple session-only work can stay light; persistent development has a plan default.
+        self.assertIn("simple and session-only", plan)
+        self.assertIn("persistent development task", plan)
 
     def test_knowledge_spec_reading_stays_authorized(self):
         # Wording changes must not bypass authorization: discovery/reading

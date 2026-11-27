@@ -881,9 +881,12 @@ def _project_layout(project_root: Optional[Path]):
     """(data_root, storage_mode) for a project root, honoring pointer layouts."""
     if project_root is None:
         return None, None
-    from .store import _resolve_project_layout
-    layout = _resolve_project_layout(Path(project_root))
-    return layout[0], layout[1]
+    from .store import TaskStore
+    store = TaskStore(Path(project_root))
+    local = store.project_root / ".fstar"
+    if local != store.fstar_root and (local / ".schema-version").is_file():
+        return local, store.storage_mode
+    return store.fstar_root, store.storage_mode
 
 
 def _project_data_root(project_root: Optional[Path]) -> Optional[Path]:
@@ -2850,6 +2853,9 @@ def apply_change(proposal: KnowledgeProposal, confirmation: Confirmation, *, use
             raise _fail("knowledge_confirmation_mismatch", "The proposal was prepared for another project data root",
                         {"expected": str(expected_root), "actual": str(actual_root)})
 
+    if project is not None:
+        from .store import ensure_writable_layout
+        ensure_writable_layout(project)
     locks = _acquire_owner_locks(owner_roots, proposal.owners, DEFAULT_LOCK_TIMEOUT, exclusive=True)
     try:
         pending = _pending_operations(owner_roots)
@@ -3145,6 +3151,9 @@ def recover_changes(*, user_root, project_root=None) -> RecoveryReport:
     owner_roots: Dict[str, Path] = {OWNER_USER: user}
     if project is not None:
         owner_roots[OWNER_PROJECT] = _project_data_root(project)
+    if project is not None:
+        from .store import ensure_writable_layout
+        ensure_writable_layout(project)
     locks = _acquire_owner_locks(owner_roots, list(owner_roots), DEFAULT_LOCK_TIMEOUT, exclusive=True)
     try:
         records = _operation_records(owner_roots)

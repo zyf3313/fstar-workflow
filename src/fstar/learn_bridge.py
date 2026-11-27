@@ -12,7 +12,7 @@ from pathlib import Path
 from . import knowledge as k
 from .extensions import grants, includes
 from .models import DomainError
-from .store import TaskStore, find_project_root
+from .store import TaskStore, checkout_project_root
 
 
 def _object(value, name):
@@ -99,11 +99,12 @@ def _read_result(catalog, bundle):
 
 def _project_root(request):
     supplied = Path(request["project_root"]).expanduser().resolve()
-    project = find_project_root(supplied)
+    project = checkout_project_root(supplied)
     if project is None:
         # Preserve actionable moved/corrupt-pointer errors from the shared
         # layout resolver before reporting a genuinely uninitialized root.
-        k._project_data_root(supplied)
+        from .store import _resolve_project_layout
+        _resolve_project_layout(supplied)
         raise DomainError(
             "knowledge_invalid_schema",
             "Cannot resolve supplied project_root %s to an initialized fstar project. "

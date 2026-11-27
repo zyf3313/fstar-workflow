@@ -166,7 +166,7 @@ class PayloadValidationTests(DispatchCase):
 
     def test_bad_role_and_paths_rejected(self):
         broken = self.payload()
-        broken["role"] = "learn"
+        broken["role"] = "unknown-role"
         with self.assertRaises(DomainError):
             validate_payload(broken)
         for bad in ("/etc/passwd", "../escape.py", ""):

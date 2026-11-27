@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import tempfile
 import time
 from pathlib import Path
@@ -156,6 +157,159 @@ def worktree_shared_main_root(start: Path) -> Optional[Path]:
         if main_root is not None:
             return main_root
     return None
+
+
+def checkout_project_root(start: Path, *, strict_worktree_errors: bool = False) -> Optional[Path]:
+    """Find the execution checkout without changing legacy root discovery."""
+    resolved = find_project_root(start, strict_worktree_errors=strict_worktree_errors)
+    if resolved is None:
+        return None
+    current = Path(start).resolve()
+    if current.is_file():
+        current = current.parent
+    for candidate in (current,) + tuple(current.parents):
+        main = _linked_worktree_main_root(candidate)
+        if main is not None:
+            if resolved in (candidate, main):
+                return candidate
+            break
+        if candidate == resolved:
+            break
+    return resolved
+
+
+def _shared_worktree_layout(checkout: Path) -> Optional[tuple]:
+    """Resolve a shared data root only when no local task data is hidden."""
+    main = _linked_worktree_main_root(checkout)
+    if main is None or not _initialized_at(main):
+        return None
+    main_layout = _resolve_project_layout(main)
+    pointer = checkout / POINTER_FILE
+    if pointer.exists() or pointer.is_symlink():
+        if pointer.is_symlink():
+            raise DomainError("corrupt_pointer", "Worktree pointer is a symbolic link", {"path": str(pointer)})
+        local = _resolve_project_layout(checkout)
+        if local[0] != main_layout[0] or local[2] != main_layout[2]:
+            return None
+        local_root = checkout / ".fstar"
+        if local_root.is_symlink():
+            raise DomainError("worktree_data_conflict", "Local data root cannot be a symbolic link",
+                              {"worktree": str(checkout), "main_root": str(main), "path": str(local_root)}, status=4)
+        for area in ("tasks", "archive"):
+            path = local_root / area
+            if path.exists() or path.is_symlink():
+                raise DomainError("worktree_data_conflict", "Local task data cannot be hidden by a shared pointer",
+                                  {"worktree": str(checkout), "main_root": str(main), "path": str(path)}, status=4)
+        return main_layout
+    marker = checkout / ".fstar" / ".schema-version"
+    if not marker.is_file():
+        for area in ("tasks", "archive"):
+            path = checkout / ".fstar" / area
+            if path.exists() or path.is_symlink():
+                raise DomainError("worktree_data_conflict", "Unidentified local task data cannot be hidden",
+                                  {"worktree": str(checkout), "main_root": str(main), "path": str(path)}, status=4)
+        return main_layout
+    local = _resolve_project_layout(checkout)
+    if not local[2] or local[2] != main_layout[2] or local[1] != main_layout[1]:
+        return None
+    # A checked-out, unmodified historical task/archival copy is not an
+    # independently maintained data store. Every other file must be reported.
+    try:
+        tracked = subprocess.run(["git", "-C", str(checkout), "ls-files", "-z", "--", ".fstar/tasks", ".fstar/archive"],
+                                 check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+        changed = subprocess.run(["git", "-C", str(checkout), "diff", "--quiet", "HEAD", "--", ".fstar/tasks", ".fstar/archive"],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        if changed.returncode not in (0, 1):
+            raise subprocess.CalledProcessError(changed.returncode, changed.args, stderr=changed.stderr)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise DomainError("worktree_layout_unverifiable",
+                          "Git is unavailable or failed, so worktree task data cannot be verified "
+                          "for safe sharing; restore Git and retry",
+                          {"worktree": str(checkout), "main_root": str(main), "reason": str(exc)}, status=4)
+    try:
+        names = {x.decode("utf-8") for x in tracked.split(b"\0") if x}
+        if changed.returncode == 1:
+            raise ValueError("tracked task or archive files differ from HEAD")
+        for area in ("tasks", "archive"):
+            root = checkout / ".fstar" / area
+            if root.is_symlink():
+                raise ValueError("task or archive root is a symbolic link")
+            if root.exists():
+                for path in root.rglob("*"):
+                    if path.is_symlink() or (path.is_file() and path.relative_to(checkout).as_posix() not in names):
+                        raise ValueError("untracked or unsafe task or archive data: %s" % path)
+    except (OSError, UnicodeError, ValueError) as exc:
+        raise DomainError("worktree_data_conflict", "Worktree task data cannot be safely shared; inspect both roots",
+                          {"worktree": str(checkout), "main_root": str(main), "reason": str(exc)}, status=4)
+    return main_layout
+
+
+def _separate_marker_path(root: Path) -> Optional[Path]:
+    root = Path(root).resolve()
+    if _linked_worktree_main_root(root) is None:
+        return None
+    try:
+        text = (root / ".git").read_text(encoding="utf-8").strip()
+        gitdir = Path(text[len("gitdir:"):].strip())
+        if not gitdir.is_absolute():
+            gitdir = root / gitdir
+        gitdir = gitdir.resolve()
+        if Path((gitdir / "gitdir").read_text(encoding="utf-8").strip()).resolve() != root / ".git":
+            return None
+        return gitdir / "fstar-separate.json"
+    except (OSError, UnicodeError, ValueError):
+        return None
+
+
+def _separate_identity(root: Path) -> dict:
+    layout = _resolve_project_layout(root)
+    return {"schema": "fstar.worktree-separate.v1", "worktree": str(root.resolve()),
+            "data_root": str(layout[0].resolve()), "mode": layout[1], "project_id": layout[2]}
+
+
+def is_explicit_separate_worktree(root: Path) -> bool:
+    root = Path(root).resolve()
+    marker = _separate_marker_path(root)
+    if marker is None or marker.is_symlink():
+        return False
+    try:
+        with marker.open(encoding="utf-8") as stream:
+            return json.load(stream) == _separate_identity(root)
+    except (OSError, UnicodeError, ValueError, DomainError):
+        return False
+
+
+def record_explicit_separate_worktree(root: Path) -> None:
+    root = Path(root).resolve()
+    marker = _separate_marker_path(root)
+    if marker is None:
+        raise DomainError("worktree_data_conflict", "Cannot verify worktree Git metadata for separate identity",
+                          {"worktree": str(root)}, status=4)
+    with marker.open("x", encoding="utf-8") as stream:
+        json.dump(_separate_identity(root), stream, sort_keys=True)
+        stream.write("\n")
+
+
+def ensure_writable_layout(project_root: Path) -> None:
+    """Reject writes through an initialized worktree with a split identity."""
+    root = Path(project_root).resolve()
+    main = _linked_worktree_main_root(root)
+    if main is None or not _initialized_at(main) or not _initialized_at(root):
+        return
+    if is_explicit_separate_worktree(root):
+        return
+    shared = _shared_worktree_layout(root)
+    local = _resolve_project_layout(root, _tolerate_mismatch=True)
+    original = _resolve_project_layout(main, _tolerate_mismatch=True)
+    if shared is None or local[1] != original[1]:
+        raise DomainError(
+            "worktree_data_conflict",
+            "Worktree storage identity differs from the main checkout; inspect both data roots "
+            "with fstar doctor and restore the intended storage identity before writing. "
+            "Do not merge or remove data without reviewing it.",
+            {"worktree": str(root), "main_root": str(main),
+             "worktree_data_root": str(local[0]), "main_data_root": str(original[0]),
+             "worktree_mode": local[1], "main_mode": original[1]}, status=4)
 
 
 def _pointer_path_matches(project_root: Path, record: dict) -> bool:
@@ -385,7 +539,9 @@ def register_user_directory_project(*, user_home: Path, project_id: str, name: s
 
     Idempotent for the same id+path; refuses a colliding id bound to a
     different path instead of merging. A corrupted registry is an error, so
-    one bad file can never silently orphan every project.
+    one bad file can never silently orphan every project. Callers must first
+    call ensure_writable_layout; initialize_project is the only in-repository
+    caller and checks before beginning initialization.
     """
     del confirmation  # registration is machine bookkeeping; init owns user intent
     registry = _registry_path(Path(user_home))
@@ -447,6 +603,102 @@ def find_rebind_source(start: Path) -> Optional[Path]:
     return None
 
 
+def _check_rebind_target_pointer(target: Path, project_id: str, data_root: Path) -> None:
+    pointer = target / POINTER_FILE
+    if pointer.is_symlink() or (pointer.exists() and not pointer.is_file()):
+        raise DomainError("rebind_target_conflict", "Target pointer is not a regular file; inspect it before rebinding",
+                          {"path": str(pointer)}, status=4)
+    if pointer.is_file():
+        existing = _read_pointer(pointer)
+        anchor = Path(existing["bound_path"]) if existing.get("bound_path") else target
+        if (existing["project_id"] != project_id or (existing.get("mode") or "user-directory") != "user-directory"
+                or _safe_pointer_data_root(anchor, existing) != data_root.resolve()):
+            raise DomainError("rebind_target_conflict", "Target pointer belongs to another project; preserve it and choose another target",
+                              {"path": str(pointer)}, status=4)
+
+
+def _check_rebind_registry_target(record: dict, target: Path, project_id: str) -> None:
+    for other_id, entry in record.get("projects", {}).items():
+        if other_id != project_id and isinstance(entry, dict) and isinstance(entry.get("path"), str):
+            if Path(entry["path"]).resolve(strict=False) == target:
+                raise DomainError("rebind_target_conflict", "Target is registered to another project; preserve it and choose another target",
+                                  {"path": str(target), "project_id": other_id}, status=4)
+
+
+def _check_rebind_target(target: Path, project_id: str, data_root: Path) -> None:
+    ensure_writable_layout(target)
+    _check_rebind_target_pointer(target, project_id, data_root)
+    if (target / ".fstar").exists() or (target / ".fstar").is_symlink():
+        raise DomainError("rebind_target_conflict", "Target has project data; preserve it and choose another target",
+                          {"path": str(target / ".fstar")}, status=4)
+    main = _linked_worktree_main_root(target)
+    if main is not None and _initialized_at(main):
+        layout = _resolve_project_layout(main)
+        if layout[1] != "user-directory" or layout[2] != project_id or layout[0].resolve() != data_root.resolve():
+            raise DomainError("worktree_data_conflict",
+                              "Rebinding would split this worktree from its main project; use an explicit separate-project operation",
+                              {"worktree": str(target), "main_root": str(main)}, status=4)
+
+
+@contextlib.contextmanager
+def _rebind_registry_lock(user_home: Path) -> Iterator[None]:
+    # Lock the stable directory inode: replacing projects.json does not change it.
+    fd = os.open(str(user_home), os.O_RDONLY)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
+
+
+def _rebind_write_group(entries: list) -> None:
+    """Restore only our own bytes after a normal write failure."""
+    previous = {}
+    attempted = []
+    for path, _ in entries:
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise DomainError("rebind_target_conflict", "Rebind destination is not a regular file", {"path": str(path)}, status=4)
+        previous[path] = path.read_bytes() if path.exists() else None
+    try:
+        for path, payload in entries:
+            attempted.append((path, (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")))
+            atomic_write_json(path, payload)
+    except Exception as exc:
+        failures = []
+        for path, written in reversed(attempted):
+            try:
+                if path.is_symlink() or not path.is_file():
+                    if previous[path] is not None or path.exists() or path.is_symlink():
+                        failures.append(str(path))
+                    continue
+                current = path.read_bytes()
+                if current == previous[path]:
+                    continue
+                if current != written:
+                    failures.append(str(path))
+                    continue
+                if previous[path] is None:
+                    path.unlink()
+                else:
+                    fd, temporary = tempfile.mkstemp(prefix=".%s.restore-" % path.name, dir=str(path.parent))
+                    try:
+                        with os.fdopen(fd, "wb") as stream:
+                            stream.write(previous[path])
+                            stream.flush()
+                            os.fsync(stream.fileno())
+                        os.replace(temporary, str(path))
+                    finally:
+                        if os.path.exists(temporary):
+                            os.unlink(temporary)
+            except OSError:
+                failures.append(str(path))
+        if failures:
+            raise DomainError("rebind_recovery_failed", "Rebind failed and some paths could not be restored; inspect them before retrying",
+                              {"reason": str(exc), "paths": failures}, status=4) from exc
+        raise
+
+
 def rebind_registered(*, user_home: Path, source_path: Path, target_path: Path,
                       confirmation: Optional[dict] = None) -> dict:
     """Rebind a user-directory project identified by its registered path.
@@ -459,11 +711,17 @@ def rebind_registered(*, user_home: Path, source_path: Path, target_path: Path,
     """
     del confirmation  # rebinding is an explicit command; the command is the consent
     target = Path(target_path).expanduser().resolve()
+    ensure_writable_layout(target)
     source = Path(source_path).expanduser().resolve()
     if not target.is_dir():
         raise DomainError("rebind_target_invalid", "Rebind target must be an existing directory",
                           {"path": str(target)})
     registry = _registry_path(Path(user_home))
+    with _rebind_registry_lock(registry.parent):
+        return _rebind_registered_locked(registry, source, target)
+
+
+def _rebind_registered_locked(registry: Path, source: Path, target: Path) -> dict:
     record = _read_registry(registry)
     matches = [pid for pid, entry in sorted(record.get("projects", {}).items())
                if isinstance(entry, dict) and isinstance(entry.get("path"), str)
@@ -477,6 +735,7 @@ def rebind_registered(*, user_home: Path, source_path: Path, target_path: Path,
                           "Several projects are registered for this path; pass --project explicitly",
                           {"path": str(source), "project_ids": matches})
     project_id = matches[0]
+    _check_rebind_registry_target(record, target, project_id)
     entry = dict(record["projects"][project_id])
     data_root = Path(entry.get("data_root", "")).expanduser()
     marker = data_root / ".schema-version"
@@ -484,6 +743,7 @@ def rebind_registered(*, user_home: Path, source_path: Path, target_path: Path,
         raise DomainError("rebind_data_root_missing",
                           "The registered data root is missing or unreadable",
                           {"project_id": project_id, "data_root": str(data_root)})
+    _check_rebind_target(target, project_id, data_root)
     pointer_record = {"schema": POINTER_SCHEMA, "project_id": project_id,
                       "data_root": _pointer_data_root_payload(data_root, target),
                       "bound_path": str(target),
@@ -492,10 +752,10 @@ def rebind_registered(*, user_home: Path, source_path: Path, target_path: Path,
     entry["rebound_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     projects = dict(record.get("projects", {}))
     projects[project_id] = entry
-    atomic_write_json(registry, {"schema": "fstar.projects.v1", "projects": projects})
     new_pointer = target / POINTER_FILE
     _reject_symlinks(new_pointer.parent, target)
-    atomic_write_json(new_pointer, pointer_record)
+    _rebind_write_group([(new_pointer, pointer_record),
+                         (registry, {"schema": "fstar.projects.v1", "projects": projects})])
     return {"rebound": True, "project_root": str(target), "project_id": project_id,
             "data_root": str(data_root)}
 
@@ -547,10 +807,14 @@ class TaskStore:
         self.project_root = project_root.resolve()
         self.user_home = (user_home or (Path.home() / ".fstar")).resolve()
         self.runtime_root = (runtime_root or (self.user_home / "runtime")).resolve()
-        layout = _resolve_project_layout(self.project_root, _tolerate_mismatch=True)
+        layout = _shared_worktree_layout(self.project_root)
+        self.identity_root = _linked_worktree_main_root(self.project_root) if layout is not None else self.project_root
+        if layout is None:
+            layout = _resolve_project_layout(self.project_root, _tolerate_mismatch=True)
         self.fstar_root, self.storage_mode, self.project_id = layout[0], layout[1], layout[2]
+        if self.storage_mode == "user-directory":
+            self.identity_root = self.fstar_root
         self.moved_needs_rebind = len(layout) > 3 and bool(layout[3])
-        self.storage_mode, self.project_id = _storage_identity(self.project_root, self.fstar_root)
         self.tasks_root = self.fstar_root / "tasks"
         self.archive_root = self.fstar_root / "archive"
         # In user-directory mode the runtime slot is keyed by the stable
@@ -561,7 +825,7 @@ class TaskStore:
         if self.storage_mode == "user-directory" and self.project_id:
             project_key = "id-" + hashlib.sha256(self.project_id.encode()).hexdigest()
         else:
-            project_key = hashlib.sha256(str(self.project_root).encode()).hexdigest()
+            project_key = hashlib.sha256(str(self.identity_root).encode()).hexdigest()
         self.project_runtime = self.runtime_root / "projects" / project_key
         self.lock_path = self.project_runtime / "project.lock"
         self.lock_timeout = lock_timeout
@@ -587,8 +851,10 @@ class TaskStore:
             raise DomainError("unsafe_evidence_path", "Evidence path must be project-relative",
                               {"path": relative})
         if candidate.parts and candidate.parts[0] == ".fstar":
-            root = self.fstar_root
             parts = candidate.parts[1:]
+            local = self.project_root / ".fstar"
+            is_knowledge = bool(parts and parts[0] in ("index.md", "specs", "knowledge"))
+            root = local if is_knowledge and (local / ".schema-version").is_file() else self.fstar_root
         else:
             root = self.project_root
             parts = candidate.parts
@@ -653,13 +919,16 @@ class TaskStore:
         if not target.is_dir():
             raise DomainError("rebind_target_invalid", "Rebind target must be an existing directory",
                               {"path": str(target)})
+        _check_rebind_target(target, self.project_id, self.fstar_root)
         pointer_record = {"schema": POINTER_SCHEMA, "project_id": self.project_id,
                           "data_root": _pointer_data_root_payload(self.fstar_root, target),
                           "bound_path": str(target),
                           "mode": "user-directory"}
-        with self.transaction(moved_ok=True):
+        with self.transaction(moved_ok=True), _rebind_registry_lock(self.user_home):
+            _check_rebind_target(target, self.project_id, self.fstar_root)
             registry = _registry_path(self.user_home)
             record = _read_registry(registry)
+            _check_rebind_registry_target(record, target, self.project_id)
             existing = record.get("projects", {}).get(self.project_id)
             if existing is None:
                 raise DomainError("rebind_project_unregistered",
@@ -671,16 +940,16 @@ class TaskStore:
             projects = dict(record.get("projects", {}))
             projects[self.project_id] = existing
             payload = {"schema": "fstar.projects.v1", "projects": projects}
-            atomic_write_json(registry, payload)
-            # Pointers are written at the OLD path (if it still exists, for the
-            # unchanged case) and at the NEW path, both carrying the new
-            # binding; the new location is the one that resolves afterwards.
-            for location in {self.project_root, target}:
-                if not location.is_dir():
-                    continue
-                new_pointer = location / POINTER_FILE
-                _reject_symlinks(new_pointer.parent, location)
-                atomic_write_json(new_pointer, pointer_record)
+            entries = []
+            # A same-identity linked worktree must leave its main pointer bound
+            # to the main checkout so the shared identity remains resolvable.
+            main = _linked_worktree_main_root(target)
+            if self.project_root.is_dir() and self.project_root != target and self.project_root != main:
+                _check_rebind_target_pointer(self.project_root, self.project_id, self.fstar_root)
+                entries.append((self.project_root / POINTER_FILE, pointer_record))
+            _reject_symlinks(target, target)
+            entries.extend([(target / POINTER_FILE, pointer_record), (registry, payload)])
+            _rebind_write_group(entries)
         return {"rebound": True, "project_root": str(target), "project_id": self.project_id,
                 "data_root": str(self.fstar_root)}
 
@@ -696,9 +965,27 @@ class TaskStore:
         if marker.read_text(encoding="utf-8").strip() != SCHEMA_VERSION:
             raise DomainError("unsupported_schema", "Unsupported fstar schema version", {"path": str(marker)})
 
+    def _check_writable_layout(self) -> None:
+        """Reject a store whose cached roots no longer describe this checkout."""
+        ensure_writable_layout(self.project_root)
+        current = TaskStore(self.project_root, user_home=self.user_home, runtime_root=self.runtime_root,
+                            lock_timeout=self.lock_timeout)
+        cached = (self.fstar_root, self.storage_mode, self.project_id, self.identity_root,
+                  self.moved_needs_rebind)
+        observed = (current.fstar_root, current.storage_mode, current.project_id, current.identity_root,
+                    current.moved_needs_rebind)
+        if cached != observed:
+            raise DomainError("worktree_data_conflict",
+                              "Project storage identity changed since this store was opened; "
+                              "reopen the project before writing.",
+                              {"project_root": str(self.project_root),
+                               "cached_data_root": str(self.fstar_root),
+                               "current_data_root": str(current.fstar_root)}, status=4)
+
     @contextlib.contextmanager
     def transaction(self, *, moved_ok: bool = False) -> Iterator[None]:
         self.require_project(moved_ok=moved_ok)
+        self._check_writable_layout()
         self.lock_path.parent.mkdir(parents=True, exist_ok=True)
         with self.lock_path.open("a+") as stream:
             deadline = time.monotonic() + self.lock_timeout
@@ -711,6 +998,7 @@ class TaskStore:
                         raise DomainError("lock_timeout", "Timed out waiting for the project lock", status=4)
                     time.sleep(0.02)
             try:
+                self._check_writable_layout()
                 yield
             finally:
                 fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
@@ -759,6 +1047,7 @@ class TaskStore:
         return self._read_path(self.resolve(task_ref, archived=archived) / "task.json")
 
     def write(self, task_dir: Path, data: dict, *, expected_hash: Optional[str] = None) -> None:
+        self._check_writable_layout()
         validate_task(data)
         resolved_parent = task_dir.parent.resolve()
         if not _inside(resolved_parent, self.fstar_root.resolve()):
@@ -788,7 +1077,21 @@ class TaskStore:
     def set_current(self, session_id: str, task_dir: Path, task_id: str) -> None:
         if not session_id:
             return
-        atomic_write_json(self.session_path(session_id), {"project": str(self.project_root), "task_id": task_id, "task_path": str(task_dir)})
+        self._check_writable_layout()
+        atomic_write_json(self.session_path(session_id), {"project": str(self.project_root), "identity_root": str(self.identity_root), "task_id": task_id, "task_path": str(task_dir)})
+
+    def session_matches(self, pointer: dict) -> bool:
+        identity = pointer.get("identity_root")
+        if identity:
+            return identity == str(self.identity_root)
+        previous = pointer.get("project")
+        if not previous or previous in (str(self.project_root), str(self.identity_root)):
+            return True
+        try:
+            old = TaskStore(Path(previous), user_home=self.user_home, runtime_root=self.runtime_root)
+            return old.identity_root == self.identity_root and old.fstar_root == self.fstar_root
+        except (DomainError, OSError, ValueError):
+            return False
 
     def current(self, session_id: Optional[str]) -> Optional[dict]:
         if not session_id:
@@ -803,6 +1106,7 @@ class TaskStore:
             raise DomainError("corrupt_current", "Current-task pointer is corrupt", {"path": str(path), "reason": str(exc)})
 
     def clear_tree_pointers(self, task_ids: set) -> None:
+        self._check_writable_layout()
         sessions = self.project_runtime / "sessions"
         if not sessions.exists():
             return

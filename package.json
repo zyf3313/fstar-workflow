@@ -28,7 +28,7 @@
   },
   "fstar": {
     "cli_version": "0.11.3",
-    "resource_version": "10",
+    "resource_version": "11",
     "supported_data_schemas": [
       1
     ],

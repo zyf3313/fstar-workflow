@@ -21,11 +21,16 @@ short natural-language note to the user, not as a command for them to run.
 [prompt-state:planning]
 Task is in planning. Requirements are being settled through the clarify
 flow, acceptance criteria (criteria.md) are formed from the user's own
-words, and a plan is formed after the user reviews the settled basis when
-the item needs one — simple items proceed on the goal plus criteria. Only
-blocking open questions hold the work back; questions marked
-confirm-as-you-go proceed with their confirmation moment. Never treat an
-inference as the user's confirmation.
+words. For persistent development tasks, default to plan.md as the execution
+entry after the user reviews the settled basis, including for simple changes;
+reference criteria, applicable specifications and any design. Select a
+separate design according to complexity and decision needs. Planning and
+design still require their respective grants; when unavailable or declined,
+report the missing persistent plan and follow the authorized minimal loop
+where applicable. Simple session-only work can use a concise goal and
+acceptance conditions without lengthy documents. Only blocking open questions
+hold the work back; questions marked confirm-as-you-go proceed with their
+confirmation moment. Never treat an inference as the user's confirmation.
 [/prompt-state:planning]
 
 [prompt-state:in_progress]
@@ -54,15 +59,12 @@ child blocks all of it.
 [/prompt-state:awaiting_acceptance]
 
 [skill-reminder]
-Skill intent: before acting on this request, check whether the host's
-exposed local skills contain one that covers what the user asked for — the
-selection rules live in routing (semantic intent → local skill catalog →
-applicability; user-named applicable skills first; all phases and no_task
-alike). If a skill matches, read its applicable rules and actually invoke
-it, then continue the request; report installed/recommended/read separately
-from attempted and succeeded, and say why a skill was not used. No match is
-fine — proceed normally without installing, creating a task, or asking. Do
-not re-load a skill body that is still valid for the same action; re-judge
-when the intent changes. Never start the same fstar action recursively
-through a skill, and never treat a skill as new write permission.
+Skill intent: before acting, check the host's exposed local skills for the user's request; routing selects by intent → catalog → applicability, user-named applicable skills first, in all phases including no_task.
+Read applicable rules and invoke matching skills, then continue; report installed/recommended/read separately from attempted/succeeded and why a skill was not used.
+No match: proceed without installing, creating a task, or asking. Do not reload a still-valid skill body for the same action; re-judge when intent changes.
+Never recursively start the same fstar action through a skill or treat a skill as new write permission.
+Durable learning dispatch: on a durable convention, correction, or repeated request (not an ordinary task instruction or a transient detail), the required first action is to actually call the host's native background Agent tool for the installed `fstar-learn` role before you compose your reply; continue the current work without waiting.
+Do not substitute an inline proposal, in-conversation organizing, or a silent no-op for dispatch. If the role or background facility is unavailable or dispatch is rejected, say so explicitly and keep the candidate for later.
+Report only an actual host acknowledgement of dispatch and the later result; never claim dispatch without acknowledgement; explicit user refusal or instruction not to dispatch takes precedence.
+Background dispatch is not consent: the coordinator presents the complete proposal and obtains exact user confirmation before any write; never fall back to host-level memory.
 [/skill-reminder]
