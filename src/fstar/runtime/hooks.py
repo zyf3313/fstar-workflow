@@ -258,9 +258,8 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     persistent_context = False
 
     task_summary = None
-    learn_hint = ("Learn candidates attach to existing session/result/recovery/archive "
-                  "nodes; a durable convention stated by the user is a session-node "
-                  "candidate. No per-turn scan and no standalone candidate ledger exists.")
+    learn_hint = ("When you identify a durable learning candidate, follow the background "
+                  "fstar-learn role routing; a candidate is not permission to write.")
     if project_root is not None:
         store = located["store"]
         service = _service_for(store, clock)
@@ -297,6 +296,17 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
     # and project knowledge stay visible without an extension grant. Writing to
     # these surfaces still requires project-governance and explicit confirmation.
     inputs.extend(inject.index_inputs(project_root, user))
+    knowledge_source = None
+    if project_root is not None:
+        store = located["store"]
+        try:
+            index_path = store.project_file(".fstar/index.md")
+            knowledge_source = {"path": str(index_path),
+                                "kind": "checkout" if index_path.parent == project_root / ".fstar" else "shared_data"}
+        except DomainError as exc:
+            if exc.code != "unsafe_evidence_path":
+                raise
+            knowledge_source = {"path": None, "kind": "unsafe"}
     # B-10: enforced user rules load in full (index lines never substitute the
     # source body); they ride under the same budgets as every other input.
     enforced_rules = inject.enforced_rule_inputs(user)
@@ -316,8 +326,11 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
         result["learn_hint"] = learn_hint
         result["rejected_ledger"] = rejected_hint
         result["enforced_rule_count"] = len(enforced_rules)
+        result["knowledge_source"] = knowledge_source
         return result
     lines = [inject.render("fstar session context", inputs, budgets, footer=grant_text)]
+    if knowledge_source:
+        lines.append("Project knowledge source: %s (%s)" % (knowledge_source["path"], knowledge_source["kind"]))
     if rejected_hint:
         # One index line, not the full body: the ledger grows unboundedly and
         # full-body injection would inflate every session. The routing rule
@@ -531,7 +544,7 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
     payload = payload or {}
     role = role or _role_from_payload(payload)
     if role is None:
-        raise DomainError("role_required", "worker-context requires one of the four roles", {"roles": sorted(inject.ROLES)})
+        raise DomainError("role_required", "worker-context requires a supported role", {"roles": sorted(inject.ROLES)})
     task_ref = task_ref or _payload_str(payload, "task_ref", "task", "taskRef")
     session_id = _payload_str(payload, "session_id", "sessionId")
     plan_item_ids = list(plan_item_ids or payload.get("plan_item_ids") or [])
@@ -548,9 +561,17 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
     routing = inject.routing_input(root)
     if routing:
         inputs.append(routing)
-    card = inject.role_card(role, root)
-    if card:
-        inputs.append(card)
+    try:
+        card = inject.role_card(role, root)
+    except (OSError, UnicodeError):
+        card = None
+    if card is None:
+        raise DomainError(
+            "role_card_unavailable",
+            "The selected resource version does not provide a readable role card; "
+            "the worker context is unavailable. Use an installed version that provides it.",
+            {"role": role, "path": str(root / "agents" / ("fstar-%s.md" % role))}, status=3)
+    inputs.append(card)
     task_line = inject.session_only_reference()
     context = {}
     task_summary = None
@@ -599,7 +620,7 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
                     inputs.extend(inject.spec_body_inputs(project_root, allowed))
             # Item-level fingerprints for the plan items via core snapshot;
             # missing artifact maps are skipped, never fabricated.
-            artifact = str((task_dir.relative_to(project_root) / "plan.md").as_posix())
+            artifact = store.identity_path(task_dir / "plan.md")
             snap = (inject.item_snapshots(service.evidence, task_ref, artifact, plan_item_ids)
                     if includes(context, "planning-review", "plan") else None)
             task_summary = {"task_id": task["id"], "name": task["name"], "phase": task["phase"],

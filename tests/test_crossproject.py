@@ -17,6 +17,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from fstar.crossproject import (CROSS_LINKS_KEY, SPEC_NOTE_KEY,
                                 CrossProjectService, cross_project_locks,
@@ -514,10 +515,20 @@ class LockOrderingTests(CrossProjectCase):
             fcntl.flock(holder.fileno(), fcntl.LOCK_EX)
             fast = TaskStore(target, user_home=self.user_root, runtime_root=self.runtime,
                              lock_timeout=0.1)
-            with self.assertRaises(DomainError) as error:
-                with cross_project_locks(mstore, fast):
-                    pass
+            opened = []
+            original_open = Path.open
+            def track_open(path, *args, **kwargs):
+                stream = original_open(path, *args, **kwargs)
+                if path in (mstore.lock_path, fast.lock_path):
+                    opened.append(stream)
+                return stream
+            with mock.patch.object(Path, 'open', track_open):
+                with self.assertRaises(DomainError) as error:
+                    with cross_project_locks(mstore, fast):
+                        pass
             self.assertEqual("lock_timeout", error.exception.code)
+            self.assertEqual(2, len(opened))
+            self.assertTrue(all(stream.closed for stream in opened))
         # After the holder releases, the same operation succeeds: recoverable.
         with cross_project_locks(mstore, fast):
             pass
@@ -579,6 +590,74 @@ class SpecStatusTests(CrossProjectCase):
             "# Backend\n\n## Conventions\n\nAll service modules follow the "
             "lock-first write pattern described in this index.\n", encoding="utf-8")
         self.assertEqual("present", spec_status(store)["status"])
+
+
+class CrossProjectLockRecheckTests(CrossProjectCase):
+    """C: cross_project_locks re-checks each store's layout after locking."""
+
+    def test_cross_project_locks_recheck_layout_after_acquiring_lock(self):
+        import fcntl
+        main = (self.base / "recheck-main").resolve()
+        worktree = (self.base / "recheck-wt").resolve()
+        main.mkdir()
+        _git(main)
+        subprocess.run(["git", "-C", str(main), "-c", "user.name=Test",
+                        "-c", "user.email=test@example.invalid",
+                        "-c", "commit.gpgsign=false", "commit",
+                        "--allow-empty", "-qm", "baseline"], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        initialize_project(main, self.user_root, storage="project-shared")
+        subprocess.run(["git", "-C", str(main), "worktree", "add", "-q",
+                        "-b", "recheck", str(worktree)], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        from fstar.project import initialize_project as init_project
+        mstore = self._store(main)
+        wstore = self._store(worktree)
+        self.assertEqual(mstore.lock_path, wstore.lock_path)
+        from fstar.tasks import TaskService
+        TaskService(mstore).create(name="existing", title="E", description="",
+                                   actor=self.actor)
+        # An unrelated third project so the contended store is the master.
+        other = self._repo("recheck-other")
+        ostore = self._store(other)
+        actual_flock = fcntl.flock
+        changed = []
+
+        def transition(fd, operation):
+            result = actual_flock(fd, operation)
+            if operation & fcntl.LOCK_EX and not changed:
+                changed.append(True)
+                init_project(worktree, self.user_root, storage="project-shared",
+                             force_separate=True)
+            return result
+
+        with mock.patch("fstar.store.fcntl.flock", side_effect=transition):
+            with self.assertRaises(DomainError) as caught:
+                with cross_project_locks(wstore, ostore):
+                    self.fail("a stale store wrote through cross-project locks")
+        self.assertTrue(changed)
+        self.assertEqual("worktree_data_conflict", caught.exception.code)
+        # The transition completed under the contended lock; the master
+        # (stale, main-rooted) task carries no cross-project link records,
+        # and the fresh worktree identity has none either.
+        master_task = mstore.read("existing")
+        self.assertEqual([], master_task["meta"].get(CROSS_LINKS_KEY, []))
+        fresh = self._store(worktree)
+        for task in fresh.scan():
+            self.assertEqual([], task["meta"].get(CROSS_LINKS_KEY, []))
+        self.assertEqual([], ostore.scan())
+        self.assertFalse((main / ".fstar/tasks/wrong-root").exists())
+
+    def test_cross_project_lock_recheck_is_recoverable(self):
+        from fstar.crossproject import cross_project_locks
+        master, target = self._repo("recheck-a"), self._repo("recheck-b")
+        mstore, tstore = self._store(master), self._store(target)
+        # A plain acquisition with an unchanged layout still works after the
+        # post-lock recheck: the operation is retriable.
+        with cross_project_locks(mstore, tstore):
+            pass
+        with cross_project_locks(mstore, tstore):
+            pass
 
 
 if __name__ == "__main__":

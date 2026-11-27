@@ -9,7 +9,7 @@ from typing import Optional
 
 from .evidence import EvidenceService
 from .models import DomainError
-from .store import TaskStore, find_project_root
+from .store import TaskStore, find_project_root, checkout_project_root
 from .tasks import EXTENSIONS, TaskService, source_snapshot
 
 
@@ -233,7 +233,7 @@ def _resolve_ref(args, store: TaskStore) -> str:
 
 def _service(args) -> TaskService:
     explicit = Path(args.project).expanduser().resolve() if args.project else None
-    project = explicit or find_project_root(Path.cwd(), strict_worktree_errors=True)
+    project = explicit or checkout_project_root(Path.cwd(), strict_worktree_errors=True)
     if project is None:
         raise DomainError("project_not_initialized", "No initialized fstar project found; pass --project PATH")
     user_home = Path(args.user_data_root).expanduser().resolve() if args.user_data_root else None

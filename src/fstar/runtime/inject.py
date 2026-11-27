@@ -21,7 +21,7 @@ from typing import List, Optional
 from ..config import ConfigError, load_config
 from ..evidence import EvidenceService, file_digest
 from ..models import DomainError
-from ..store import TaskStore, find_project_root
+from ..store import TaskStore, checkout_project_root
 from ..store import _resolve_project_layout
 
 # Conservative defaults; the context_injection.* config keys are not yet
@@ -33,14 +33,14 @@ DEFAULT_BUDGETS = {
     "max_total_bytes": 2097152,
 }
 
-ROLES = ("research", "implement", "check", "editor")
+from ..content import ROLES
 
 HOOK_MARKER = "<!-- fstar-hook-injected -->"
 
 
 def _project_data_root(project_root: Path) -> Path:
     """The project's data root (the .fstar directory in every layout)."""
-    return _resolve_project_layout(Path(project_root))[0]
+    return TaskStore(Path(project_root)).fstar_root
 
 
 def resource_root(project_root: Optional[Path] = None,
@@ -137,7 +137,7 @@ def capabilities_input(root: Optional[Path] = None) -> Optional[InjectedInput]:
 
 
 def role_card(role: str, root: Optional[Path] = None) -> Optional[InjectedInput]:
-    """Full role card text for one of the four roles."""
+    """Full role card text for a supported role."""
     if role not in ROLES:
         raise DomainError("invalid_role", "Unknown dispatch role", {"role": role, "roles": sorted(ROLES)})
     root = root if root is not None else resource_root()
@@ -148,11 +148,16 @@ def index_inputs(project_root: Optional[Path], user_root: Path) -> List[Injected
     """Project and user indexes, read-only, each fingerprinted."""
     inputs = []
     if project_root is not None:
-        data_root = _project_data_root(project_root)
-        path = data_root / "index.md"
-        found = _fingerprinted("project_index", path, relative=".fstar/index.md") if _safe_context_path(data_root, path) else None
-        if found:
-            inputs.append(found)
+        store = TaskStore(project_root)
+        try:
+            path = store.project_file(".fstar/index.md")
+            data_root = path.parent
+            found = _fingerprinted("project_index", path, relative=".fstar/index.md") if _safe_context_path(data_root, path) else None
+            if found:
+                inputs.append(found)
+        except DomainError as exc:
+            if exc.code != "unsafe_evidence_path":
+                raise
     path = user_root / "index.md"
     found = _fingerprinted("user_index", path, relative="~/.fstar/index.md") if _safe_context_path(user_root, path) else None
     if found:
@@ -277,12 +282,7 @@ def project_file(project_root: Path, relative: str) -> Path:
     resolves against the data root, which lives inside the repository in
     project-shared/local mode and under the user root in user-directory mode.
     """
-    candidate = Path(relative)
-    parts = candidate.parts
-    data_root = _project_data_root(project_root)
-    if parts and parts[0] == ".fstar":
-        return data_root.joinpath(*parts[1:])
-    return project_root.joinpath(*parts)
+    return TaskStore(project_root).project_file(relative)
 
 
 def spec_body_inputs(project_root: Path, entries: List[dict]) -> List[InjectedInput]:
@@ -301,7 +301,8 @@ def spec_body_inputs(project_root: Path, entries: List[dict]) -> List[InjectedIn
             continue
         seen.add(relative)
         path = project_file(project_root, relative)
-        root = _project_data_root(project_root) if Path(relative).parts[:1] == (".fstar",) else project_root
+        data_root = _project_data_root(project_root)
+        root = data_root if path == data_root or data_root in path.parents else project_root
         if not _safe_context_path(root, path) or not path.is_file():
             continue
         found = _fingerprinted("spec", path, relative=relative)
@@ -414,7 +415,7 @@ def locate(start: Optional[Path] = None, *, user_root: Optional[Path] = None,
     otherwise current-task lookups silently miss (session isolation).
     """
     start = Path(start) if start is not None else Path.cwd()
-    project = find_project_root(start)
+    project = checkout_project_root(start)
     user = Path(user_root).expanduser() if user_root else Path.home() / ".fstar"
     runtime = Path(runtime_root).expanduser() if runtime_root else (user / "runtime")
     store = None

@@ -374,6 +374,7 @@ class TaskService:
         active, archived = [], []
         stores = [self.store]
         seen_roots = {str(self.store.project_root)}
+        seen_data_roots = {self.store.fstar_root.resolve()}
         current_info = git_repo_info(self.store.project_root)
         if current_info and current_info["worktree"]:
             listing = _git_output(["worktree", "list", "--porcelain"],
@@ -393,6 +394,10 @@ class TaskService:
                         sibling.require_project()
                     except (DomainError, OSError):
                         continue
+                    data_root = sibling.fstar_root.resolve()
+                    if data_root in seen_data_roots:
+                        continue
+                    seen_data_roots.add(data_root)
                     stores.append(sibling)
         for sibling in stores:
             try:
@@ -459,8 +464,7 @@ class TaskService:
                 # by a session in a different worktree of the same project
                 # does not silently win.
                 pointer = self.store.current(session_id) or {}
-                compatible = (pointer.get("project") == str(self.store.project_root)
-                              or (not pointer.get("project")))
+                compatible = self.store.session_matches(pointer)
                 if not branch or pointer_task.get("branch") == branch:
                     if compatible:
                         row = self._candidate_row(pointer_task, bool(pointer_task.get("archivedAt")))
@@ -488,6 +492,8 @@ class TaskService:
         pointer = self.store.current(session_id)
         if not pointer:
             return {"current": None, "status": "no_current"}
+        if not self.store.session_matches(pointer):
+            return {"current": None, "status": "stale_pointer", "details": {"reason": "project_identity_mismatch"}}
         try:
             task_dir = self.store.resolve(pointer["task_id"])
             task = self.store._read_path(task_dir / "task.json")

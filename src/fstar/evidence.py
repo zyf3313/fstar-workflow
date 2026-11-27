@@ -22,6 +22,56 @@ def file_digest(path: Path) -> str:
     return digest.hexdigest()
 
 
+def resolve_input_file(store: TaskStore, entry: dict) -> Path:
+    """Resolve a fingerprinted input under its declared, trusted root."""
+    relative = entry.get("path")
+    root_name = entry.get("root", "project")
+    if not isinstance(relative, str) or not relative or relative.strip() != relative or "\x00" in relative:
+        raise DomainError("unsafe_evidence_path", "Invalid input path", {"path": relative})
+    candidate = Path(relative)
+    if candidate.is_absolute() or ".." in candidate.parts or root_name not in ("project", "user"):
+        raise DomainError("unsafe_evidence_path", "Input must be relative to its declared root", {"path": relative, "root": root_name})
+    if root_name == "project":
+        checkout = entry.get("checkout")
+        if checkout is not None:
+            if not isinstance(checkout, str) or not Path(checkout).is_absolute():
+                raise DomainError("unsafe_evidence_path", "Invalid input checkout", {"checkout": checkout})
+            source = Path(checkout)
+            if not source.is_dir() or source.is_symlink() or source.resolve() != source:
+                raise DomainError("unsafe_evidence_path", "Input checkout is unavailable or aliased", {"checkout": checkout})
+            bound = TaskStore(source, user_home=store.user_home, runtime_root=store.runtime_root)
+            if (bound.identity_root != store.identity_root or bound.fstar_root != store.fstar_root
+                    or bound.storage_mode != store.storage_mode):
+                raise DomainError("unsafe_evidence_path", "Input checkout belongs to another project", {"checkout": checkout})
+            store = bound
+        path = store.project_file(relative)
+        if candidate.parts and candidate.parts[0] == ".fstar":
+            local = store.project_root / ".fstar"
+            knowledge = len(candidate.parts) > 1 and candidate.parts[1] in ("index.md", "specs", "knowledge")
+            root = local if knowledge and (local / ".schema-version").is_file() else store.fstar_root
+        else:
+            root = store.project_root
+    else:
+        user_root = entry.get("user_root")
+        if user_root is not None and user_root != str(store.user_home):
+            raise DomainError("unsafe_evidence_path", "Input user root differs from the configured root", {"user_root": user_root})
+        root = store.user_home
+        path = root / candidate
+    try:
+        relative_parts = path.relative_to(root).parts
+        path.resolve(strict=False).relative_to(root.resolve())
+        current = root
+        if current.is_symlink():
+            raise ValueError("symbolic link root")
+        for part in relative_parts:
+            current = current / part
+            if current.is_symlink():
+                raise ValueError("symbolic link input")
+    except (ValueError, OSError, RuntimeError) as exc:
+        raise DomainError("unsafe_evidence_path", "Input escapes its root or follows a symbolic link", {"path": relative, "root": root_name, "reason": str(exc)})
+    return path
+
+
 def _normal_text(path: Path) -> str:
     return path.read_bytes().decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
 
@@ -281,12 +331,15 @@ class EvidenceService:
                     reasons.append({"type": "dependency_changed", "artifact": artifact, "item": item_id})
         for entry in evidence.get("input_files", []):
             relative = entry.get("path")
+            reason = {"type": "input_file", "path": relative}
+            if entry.get("root") == "user":
+                reason["root"] = "user"
             try:
-                path = self.store.project_file(relative)
+                path = resolve_input_file(self.store, entry)
                 if not path.is_file() or file_digest(path) != entry.get("sha256"):
-                    reasons.append({"type": "input_file", "path": relative})
+                    reasons.append(reason)
             except (DomainError, OSError, ValueError, TypeError, RuntimeError):
-                reasons.append({"type": "input_file", "path": relative})
+                reasons.append(reason)
         delivery = evidence.get("delivery")
         if delivery:
             current = self.delivery_snapshot([entry["path"] for entry in delivery.get("paths", [])])

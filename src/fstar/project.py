@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import fcntl
+import hashlib
 import json
 import os
 import stat
 import tempfile
+import time
 import uuid
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path, PurePosixPath
@@ -352,8 +356,8 @@ def doctor_worktree_report(invoke_root: Optional[Path],
     if invoke_root is None:
         return None
     from .store import (DomainError, POINTER_FILE, _initialized_at,
-                        _pointer_path_matches, _read_pointer, _resolve_data_root,
-                        _safe_pointer_data_root, worktree_shared_main_root)
+                        _pointer_path_matches, _read_pointer, _resolve_data_root, _resolve_project_layout,
+                        _safe_pointer_data_root, _shared_worktree_layout, worktree_shared_main_root)
     worktree_root = _git_repo_root(Path(invoke_root).resolve())
     main_root = worktree_shared_main_root(Path(invoke_root))
     if main_root is None or worktree_root is None:
@@ -382,13 +386,24 @@ def doctor_worktree_report(invoke_root: Optional[Path],
             report["worktree_data_root"] = record["data_root"]
             data_root = _safe_pointer_data_root(anchor, record)
             report["worktree_data_root"] = str(data_root)
-            if data_root != main_data_root:
+            main_id = _resolve_project_layout(main_root)[2]
+            if data_root != main_data_root or record["project_id"] != main_id:
                 report.update(status="split", message=(
                     "Worktree %s has a split project identity: main data root %s; "
                     "worktree recorded data root %s. %s" %
                     (worktree_root, main_data_root, data_root, recovery)))
                 return report
             if main_initialized and matches and _initialized_at(worktree_root):
+                try:
+                    layout = _shared_worktree_layout(worktree_root)
+                    if layout is None:
+                        report.update(status="conflict", message="Worktree data cannot be safely shared. " + recovery)
+                        return report
+                except DomainError as exc:
+                    if exc.code != "worktree_data_conflict":
+                        raise
+                    report.update(status="conflict", message="Worktree data cannot be safely shared: %s. %s" % (exc, recovery))
+                    return report
                 return shared
             report.update(status="pointer_needs_rebind", message=(
                 "Worktree %s pointer does not resolve to an initialized project. %s" %
@@ -399,6 +414,19 @@ def doctor_worktree_report(invoke_root: Optional[Path],
             "Worktree %s project pointer or data root is unreadable: %s. %s" %
             (worktree_root, exc, recovery)))
         return report
+    if main_initialized:
+        try:
+            layout = _shared_worktree_layout(worktree_root)
+            if layout is not None:
+                return shared
+            local_data = _resolve_data_root(worktree_root)
+            report.update(status="split", worktree_data_root=str(local_data), message=(
+                "Worktree %s has an independent project identity; main data root %s; "
+                "worktree data root %s. %s" % (worktree_root, main_data_root, local_data, recovery)))
+            return report
+        except (DomainError, OSError, UnicodeError, ValueError, RuntimeError) as exc:
+            report.update(status="conflict", message="Worktree data cannot be safely shared: %s. %s" % (exc, recovery))
+            return report
     if project_root is not None and Path(project_root).resolve(strict=False) == main_root:
         return shared
     if project_root is None and not main_initialized:
@@ -535,9 +563,197 @@ def _resolve_storage_mode(mode: Optional[str]) -> str:
     return mode
 
 
+def _layout_conflicts(worktree: Path, main: Path) -> list:
+    from .store import _resolve_project_layout
+    worktree_layout = _resolve_project_layout(worktree, _tolerate_mismatch=True)
+    main_layout = _resolve_project_layout(main, _tolerate_mismatch=True)
+    return [worktree_layout[0], main_layout[0]]
+
+
+@contextlib.contextmanager
+def _transition_locks(paths: Sequence[Path], timeout: float) -> Iterator[None]:
+    """Non-blocking flock over a deduplicated, path-sorted set of lock files.
+
+    The same physical lock file must never be opened twice in one process
+    (flock on a second fd of the same file self-deadlocks to timeout), so
+    entries are deduplicated by path string and taken in sorted order, the
+    same convention as cross_project_locks. A conflict raises ``lock_timeout``
+    instead of blocking indefinitely.
+    """
+    from .models import DomainError
+    ordered = sorted({str(Path(path)) for path in paths})
+    streams = []
+    try:
+        for path in ordered:
+            lock_file = Path(path)
+            lock_file.parent.mkdir(parents=True, exist_ok=True)
+            stream = lock_file.open("a+")
+            try:
+                deadline = time.monotonic() + timeout
+                while True:
+                    try:
+                        fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        break
+                    except BlockingIOError:
+                        if time.monotonic() >= deadline:
+                            raise DomainError("lock_timeout",
+                                              "Timed out waiting for an identity "
+                                              "transition lock (nothing was written)",
+                                              {"lock": str(lock_file)}, status=4)
+                        time.sleep(0.02)
+                streams.append(stream)
+            except BaseException:
+                stream.close()
+                raise
+        yield
+    finally:
+        for stream in reversed(streams):
+            try:
+                fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+            finally:
+                stream.close()
+
+
+# Identity-transition lock timeout; matches the TaskStore default so a
+# blocked conversion surfaces as lock_timeout like a blocked transaction.
+_INIT_LOCK_TIMEOUT = 5.0
+
+
+def _shared_layout(root: Path, main: Path) -> bool:
+    """True when the worktree currently shares the initialized main identity."""
+    from .store import _initialized_at, _shared_worktree_layout
+    if not _initialized_at(main):
+        return False
+    try:
+        return _shared_worktree_layout(root) is not None
+    except (DomainError, OSError, RuntimeError, ValueError):
+        return False
+
+
+def _separate_worktree_lock_paths(worktree: Path, main: Path, user_root: Path,
+                                  runtime_root: Optional[Path], mode: str) -> list:
+    """Old and new identity lock paths for a separate conversion (A).
+
+    The old lock is the one a TaskStore on the worktree holds today (the
+    main identity's runtime slot). The new lock is the runtime slot the
+    future separate identity will own: path-keyed for project-shared /
+    project-local modes. In user-directory mode the new identity is a fresh
+    UUID nobody can hold yet, so no new lock is needed.
+    """
+    from .store import TaskStore
+    old_store = TaskStore(worktree, user_home=Path(user_root).expanduser(),
+                          runtime_root=runtime_root)
+    lock_paths = [old_store.lock_path]
+    if mode in ("project-shared", "project-local"):
+        runtime = (Path(runtime_root).expanduser() if runtime_root is not None
+                   else Path(user_root).expanduser() / "runtime").resolve()
+        new_key = hashlib.sha256(str(worktree).encode()).hexdigest()
+        lock_paths.append(runtime / "projects" / new_key / "project.lock")
+    return lock_paths
+
+
+def _initialize_separate_worktree(worktree: Path, main: Path, user_root: Path, *,
+                                  context: Optional[ProjectContext],
+                                  storage: Optional[str],
+                                  runtime_root: Optional[Path],
+                                  lock_timeout: float) -> InitResult:
+    """Real (non dry-run) ``--force-separate`` on a currently shared worktree.
+
+    Acquires the identity-transition lock set, re-verifies every precondition
+    INSIDE the locks, then performs data creation, registration and marker
+    write as one group. B (registry ordering) applies in user-directory mode:
+    the project lock is taken first (it is part of this lock set), and the
+    registry lock is acquired inside the region via _rebind_registry_lock
+    immediately before register_user_directory_project, matching
+    TaskStore.rebind's project-lock-before-registry-lock order.
+    """
+    from .models import DomainError
+    from .store import (POINTER_FILE, TaskStore, _initialized_at,
+                        _rebind_registry_lock, _shared_worktree_layout)
+
+    mode = _resolve_storage_mode(storage)
+    before = _layout_conflicts(worktree, main)
+    lock_paths = _separate_worktree_lock_paths(worktree, main, user_root,
+                                               runtime_root, mode)
+    with _transition_locks(lock_paths, lock_timeout):
+        # Re-verify every precondition under the locks.
+        current = _layout_conflicts(worktree, main)
+        if current != before:
+            raise DomainError("worktree_data_conflict",
+                              "Project layout changed while the transition lock "
+                              "was acquired; inspect both data roots and retry",
+                              {"worktree": str(worktree), "main_root": str(main)}, status=4)
+        for candidate in (worktree / ".fstar", worktree / POINTER_FILE):
+            if candidate.exists() or candidate.is_symlink():
+                raise DomainError("worktree_data_conflict",
+                                  "Worktree metadata appeared during the transition",
+                                  {"path": str(candidate)}, status=4)
+        if _initialized_at(worktree):
+            raise DomainError("worktree_data_conflict",
+                              "Worktree gained its own identity during the transition",
+                              {"worktree": str(worktree)}, status=4)
+        try:
+            shared = _shared_worktree_layout(worktree)
+        except (DomainError, OSError, RuntimeError, ValueError) as exc:
+            raise DomainError("worktree_data_conflict",
+                              "Worktree layout became unverifiable during the "
+                              "transition: %s" % exc,
+                              {"worktree": str(worktree)}, status=4)
+        if shared is None:
+            raise DomainError("worktree_data_conflict",
+                              "Worktree stopped sharing the main identity during "
+                              "the transition", {"worktree": str(worktree)}, status=4)
+        # Perform the conversion: data creation, registration and marker.
+        if mode == "user-directory":
+            # B: the project (identity) lock is already held above; take the
+            # registry lock only now, inside the region, immediately before
+            # registration — project lock first, registry lock second, the
+            # same order as TaskStore.rebind. Never the reverse.
+            with _rebind_registry_lock(Path(user_root).expanduser()):
+                return _init_separate_direct(worktree, user_root, context=context,
+                                             storage=storage, mode=mode)
+        return _init_separate_direct(worktree, user_root, context=context,
+                                     storage=storage, mode=mode)
+
+
+def _init_separate_direct(worktree: Path, user_root: Path, *, context, storage,
+                          mode: str) -> InitResult:
+    """Run the mode-specific init flow inside a held transition lock.
+
+    The shared-worktree guards in initialize_project are bypassed because the
+    caller holds the transition locks and has re-verified the preconditions;
+    the remaining validations (schema, path conflicts, registry) still run.
+    """
+    if mode == "user-directory":
+        result = _initialize_user_directory(worktree, Path(user_root).expanduser(),
+                                            context=context, dry_run=False)
+        from .store import record_explicit_separate_worktree
+        record_explicit_separate_worktree(worktree)
+        return replace(result, force_separate=True)
+    index, complete = _project_index(worktree, context)
+    project_id = str(uuid.uuid4())
+    files = [("index.md", index),
+             ("config.yaml", "schema_version: 1\nproject:\n  id: \"%s\"\n" % project_id),
+             (".gitignore", _PROJECT_IGNORE), (".schema-version", "1\n")]
+    if mode == "project-local":
+        files.append((STORAGE_MARKER_FILE, mode + "\n"))
+    files = tuple(files)
+    result = _initialize(worktree, files, dry_run=False, context_complete=complete,
+                         project=True,
+                         index_context=context is not None and bool(context.project_summary.strip()))
+    if mode == "project-local":
+        created, warnings = list(result.created), list(result.warnings)
+        _apply_local_exclude(worktree, created, warnings, dry_run=False)
+        result = replace(result, created=tuple(created), warnings=tuple(warnings))
+    from .store import record_explicit_separate_worktree
+    record_explicit_separate_worktree(worktree)
+    return replace(result, force_separate=True)
+
+
 def initialize_project(path: Path, user_root: Path, *, context: Optional[ProjectContext] = None,
                        dry_run: bool = False, storage: Optional[str] = None,
-                       force_separate: bool = False) -> InitResult:
+                       force_separate: bool = False,
+                       runtime_root: Optional[Path] = None) -> InitResult:
     from .store import (POINTER_FILE, _initialized_at, _linked_worktree_main_root,
                         _resolve_data_root, _resolve_project_layout)
 
@@ -545,13 +761,28 @@ def initialize_project(path: Path, user_root: Path, *, context: Optional[Project
     root = path.expanduser().resolve()
     if not root.exists() or not root.is_dir():
         raise InitError("PROJECT_ROOT_INVALID", "Project root must be an existing directory", path=root)
+    from .store import ensure_writable_layout
+    ensure_writable_layout(_git_repo_root(root) or root)
     main_root = _linked_worktree_main_root(_git_repo_root(root) or root)
+    # A real (non dry-run) separate conversion runs only when the worktree
+    # currently shares the main identity WITHOUT local project metadata
+    # (checked-out tracked metadata is an existing identity and is refused
+    # as WORKTREE_IDENTITY_EXISTS, preserving prior semantics). The shared
+    # guard is re-verified under the transition locks (A).
+    metadata = (root / ".fstar", root / POINTER_FILE)
+    if main_root is not None and force_separate and not dry_run \
+            and not any(p.exists() or p.is_symlink() for p in metadata) \
+            and _shared_layout(root, main_root):
+        return _initialize_separate_worktree(root, main_root, Path(user_root).expanduser(),
+                                             context=context, storage=storage,
+                                             runtime_root=runtime_root,
+                                             lock_timeout=_INIT_LOCK_TIMEOUT)
     if main_root is not None:
-        metadata = (root / ".fstar", root / POINTER_FILE)
-        if force_separate and any(p.exists() or p.is_symlink() for p in metadata):
-            raise InitError("WORKTREE_IDENTITY_EXISTS",
-                            "Cannot create a separate identity while local project metadata exists; "
-                            "existing data was left unchanged.", path=root)
+        if force_separate:
+            if any(p.exists() or p.is_symlink() for p in metadata):
+                raise InitError("WORKTREE_IDENTITY_EXISTS",
+                                "Cannot create a separate identity while local project metadata exists; "
+                                "existing data was left unchanged.", path=root)
         if _initialized_at(root):
             existing_mode = _resolve_project_layout(root)[1]
             if storage is not None and mode != existing_mode:
@@ -574,6 +805,9 @@ def initialize_project(path: Path, user_root: Path, *, context: Optional[Project
     if mode == "user-directory":
         result = _initialize_user_directory(root, Path(user_root).expanduser(),
                                             context=context, dry_run=dry_run)
+        if force_separate and main_root is not None and not dry_run:
+            from .store import record_explicit_separate_worktree
+            record_explicit_separate_worktree(root)
         return replace(result, force_separate=force_separate)
     index, complete = _project_index(root, context)
     project_id = str(uuid.uuid4())
@@ -592,6 +826,9 @@ def initialize_project(path: Path, user_root: Path, *, context: Optional[Project
         created, warnings = list(result.created), list(result.warnings)
         _apply_local_exclude(root, created, warnings, dry_run=False)
         result = replace(result, created=tuple(created), warnings=tuple(warnings))
+    if force_separate and main_root is not None and not dry_run:
+        from .store import record_explicit_separate_worktree
+        record_explicit_separate_worktree(root)
     return replace(result, force_separate=force_separate)
 
 
@@ -678,7 +915,8 @@ def initialize_workflow_project(path: Path, user_root: Path, *, task_ref: str,
                                 context: Optional[ProjectContext] = None,
                                 dry_run: bool = False,
                                 storage: Optional[str] = None,
-                                force_separate: bool = False) -> InitResult:
+                                force_separate: bool = False,
+                                runtime_root: Optional[Path] = None) -> InitResult:
     """Initialize both roots, validating and repairing a partial user layout."""
     from .extensions import grants
     from .store import TaskStore
@@ -687,18 +925,19 @@ def initialize_workflow_project(path: Path, user_root: Path, *, task_ref: str,
     if task_ref == "session-only":
         records = extensions if extensions is not None else []
     else:
-        store = TaskStore(root, user_home=Path(user_root))
+        store = TaskStore(root, user_home=Path(user_root), runtime_root=runtime_root)
         store.require_project()
         records = store.read(task_ref)["extensions"]
     grants(records)  # Validate any supplied context; initialization needs no governance grant.
     # Validate project inputs before creating either root. User initialization
     # also validates an existing config and repairs files missing beside it.
     preview = initialize_project(root, user_root, context=context, dry_run=True, storage=storage,
-                                 force_separate=force_separate)
+                                 force_separate=force_separate, runtime_root=runtime_root)
     user_result = initialize_user(user_root, dry_run=dry_run)
     try:
         result = preview if dry_run else initialize_project(root, user_root, context=context,
-                                                            storage=storage, force_separate=force_separate)
+                                                            storage=storage, force_separate=force_separate,
+                                                            runtime_root=runtime_root)
     except InitError as exc:
         raise InitError(exc.code, exc.message, path=exc.path,
                         created=user_result.created + exc.created)
@@ -809,9 +1048,12 @@ def _handle_init(args):
     if args.user and args.context:
         raise DomainError("invalid_project_context", "Project context cannot be used with --user")
     context = _context_file(args.context) if args.context else None
+    runtime_root = (Path(args.runtime_root).expanduser()
+                    if getattr(args, "runtime_root", None) else None)
     result = initialize_user(user_root, dry_run=args.dry_run) if args.user else initialize_workflow_project(
         Path(args.path), user_root, task_ref="session-only", context=context, dry_run=args.dry_run,
-        storage=getattr(args, "storage", None), force_separate=getattr(args, "force_separate", False))
+        storage=getattr(args, "storage", None), force_separate=getattr(args, "force_separate", False),
+        runtime_root=runtime_root)
     if not args.user and getattr(args, "storage", None):
         value = asdict(result)
         value["storage_mode"] = getattr(args, "storage", None)

@@ -108,6 +108,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
     except DomainError as exc:
         print("fstar: %s: %s" % (exc.code, exc.message), file=sys.stderr)
+        # Claude registers worker-context only for PreToolUse Agent/Task. Its
+        # exit 2 blocks the tool call and forwards stderr; exit 1 does neither.
+        # Codex registers this hook on SubagentStart, not PreToolUse.
+        if (name == "worker-context" and exc.code == "role_card_unavailable"
+                and payload.get("hook_event_name") == "PreToolUse"
+                and payload.get("tool_name") in ("Agent", "Task")):
+            return 2
         return 1
 
 

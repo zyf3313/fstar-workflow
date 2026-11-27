@@ -77,6 +77,9 @@ def cross_project_locks(master: TaskStore, *others: TaskStore) -> Iterator[None]
     retriable as a whole.
     """
     ordered = [master] + sorted(others, key=lambda store: str(store.lock_path))
+    from .store import ensure_writable_layout
+    for store in ordered:
+        ensure_writable_layout(store.project_root)
     streams = []
     seen_locks = set()
     try:
@@ -90,19 +93,29 @@ def cross_project_locks(master: TaskStore, *others: TaskStore) -> Iterator[None]
             store.require_project()
             store.lock_path.parent.mkdir(parents=True, exist_ok=True)
             stream = store.lock_path.open("a+")
-            deadline = time.monotonic() + store.lock_timeout
-            while True:
-                try:
-                    fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                    break
-                except BlockingIOError:
-                    if time.monotonic() >= deadline:
-                        raise DomainError("lock_timeout",
-                                          "Timed out waiting for a cross-project lock "
-                                          "(no partial records were written)",
-                                          {"project": str(store.project_root)}, status=4)
-                    time.sleep(0.02)
-            streams.append(stream)
+            try:
+                deadline = time.monotonic() + store.lock_timeout
+                while True:
+                    try:
+                        fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        break
+                    except BlockingIOError:
+                        if time.monotonic() >= deadline:
+                            raise DomainError("lock_timeout",
+                                              "Timed out waiting for a cross-project lock "
+                                              "(no partial records were written)",
+                                              {"project": str(store.project_root)}, status=4)
+                        time.sleep(0.02)
+                streams.append(stream)
+            except BaseException:
+                stream.close()
+                raise
+        # Re-verify each store's layout after every lock is held, mirroring
+        # TaskStore.transaction's post-lock recheck: a stale store whose
+        # project identity changed (e.g. a separate-init transition) is
+        # refused here instead of writing through an outdated root.
+        for store in ordered:
+            store._check_writable_layout()
         yield
     finally:
         for stream in reversed(streams):

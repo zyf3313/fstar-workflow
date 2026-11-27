@@ -39,7 +39,7 @@ from .config import ConfigError, load_config
 from .content import ROLES, SKILLS, validate_resources
 from .models import DomainError
 from .runtime import registration
-from .store import find_project_root
+from .store import find_project_root, checkout_project_root
 
 MANIFEST_SCHEMA = "fstar.install.v1"
 ENTRY_INDEX_SCHEMA = "fstar.entries.v1"
@@ -56,7 +56,7 @@ CONFLICT_POLICIES = ("keep", "overwrite", "new")
 # Capability/resource invariants reported by doctor (parent design §4.4).
 EXPECTED_COUNTS = {
     "skills": 10,
-    "roles": 4,
+    "roles": len(ROLES),
     "hooks": 5,
     "templates": 11,
 }
@@ -157,7 +157,7 @@ def roots_from_args(args, *, bundle_root: Optional[Path] = None) -> Roots:
     # The invoke root records where the command ran; project resolution may
     # collapse a linked git worktree onto the shared main-tree root (P-002).
     invoke_root = Path.cwd()
-    project_root = Path(project).expanduser() if project else find_project_root(invoke_root)
+    project_root = Path(project).expanduser() if project else checkout_project_root(invoke_root)
     if "claude" not in host_roots:
         host_roots["claude"] = default_host_root(user_root)
     if "codex" not in host_roots:
@@ -2516,6 +2516,8 @@ def migrate(*, target_root: Path, from_schema: Optional[int] = None, to_schema: 
     if dry_run:
         return {"operation": "migrate", "from_schema": from_schema, "to_schema": to_schema,
                 "result": "dry-run", "operation_id": operation, "backup_root": str(backup_root)}
+    from .store import ensure_writable_layout
+    ensure_writable_layout(target_root)
     data_root = _data_root(target_root)
     backup_root.mkdir(parents=True, exist_ok=True)
     snapshot_root = backup_root / "snapshot"
@@ -2559,6 +2561,8 @@ def rollback_migration(*, target_root: Path, transaction_id: str, restore=None) 
     if not backup_root.exists():
         raise DomainError("migration_unknown_transaction", "No backup directory for this transaction id",
                           {"transaction_id": transaction_id})
+    from .store import ensure_writable_layout
+    ensure_writable_layout(target_root)
     if restore is not None:
         restored = restore(backup_root)
         return {"operation": "rollback", "transaction_id": transaction_id, "restored": restored,
@@ -2746,7 +2750,10 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None,
     resolved = roots.resolved()
     selection = resolve_resources(project_root=resolved.project_root, user_root=resolved.user_root,
                                   bundle_root=resolved.bundle_root, strict=False)
-    diagnostics = validate_resources(selection.root)
+    # Version 10 predates the learning role. A project pinned to that
+    # immutable cache must be checked against its own inventory.
+    roles = tuple(role for role in ROLES if role != "learn") if selection.version == "10" else ROLES
+    diagnostics = validate_resources(selection.root, roles=roles)
     counts = _resource_counts(selection.root)
     entry_index = _load_entry_index(resolved.user_root)
     entries_report = entry_index_report(resolved.user_root)
@@ -2787,7 +2794,7 @@ def doctor(*, roots: Roots, host_observations: Optional[Mapping] = None,
         "resource_source": selection.source,
         "resource_root": str(selection.root),
         "counts": counts,
-        "expected_counts": EXPECTED_COUNTS,
+        "expected_counts": {**EXPECTED_COUNTS, "roles": len(roles)},
         "diagnostics": (resource_diagnostics
                         + [{"code": p["code"], "path": "", "line": 1, "message": p["message"],
                             "details": p.get("details")} for p in selection.problems]
@@ -2899,9 +2906,10 @@ def _schema_report(roots: Roots) -> dict:
     if roots.project_root:
         # The marker lives in the resolved data root, which is <repo>/.fstar for
         # project-shared/project-local and the pointer target for user-directory.
-        from .store import _resolve_project_layout
+        from .store import TaskStore
         try:
-            data_root, storage_mode, _project_id, _moved = _resolve_project_layout(roots.project_root)
+            store = TaskStore(roots.project_root, user_home=roots.user_root, runtime_root=roots.runtime_root)
+            data_root, storage_mode = store.fstar_root, store.storage_mode
         except DomainError:
             data_root, storage_mode = roots.project_root / ".fstar", None
         marker = data_root / ".schema-version"
@@ -2919,6 +2927,11 @@ def _schema_report(roots: Roots) -> dict:
     from .project import doctor_worktree_report
     worktree_report = doctor_worktree_report(roots.invoke_root, roots.project_root)
     if worktree_report is not None:
+        from .store import is_explicit_separate_worktree
+        worktree_root = worktree_report.get("worktree_root")
+        if worktree_root and is_explicit_separate_worktree(Path(worktree_root)):
+            worktree_report["explicit_separate"] = True
+            worktree_report["message"] = "Explicitly separate worktree identity. " + worktree_report.get("message", "")
         result.setdefault("storage", {})["worktree"] = worktree_report
     return result
 
@@ -2957,7 +2970,16 @@ def _storage_checks(roots: Roots, storage_mode, data_root: Path) -> list:
                        "detail": "Registered project id and data-root folder agree"
                                  if consistent else
                                  "Data-root folder does not match the registered project id"})
-        if candidate.get("path") != str(roots.project_root):
+        from .store import _linked_worktree_main_root, _shared_worktree_layout
+        bound_matches = candidate.get("path") == str(roots.project_root)
+        if not bound_matches and roots.project_root is not None:
+            try:
+                main = _linked_worktree_main_root(roots.project_root)
+                layout = _shared_worktree_layout(roots.project_root)
+                bound_matches = bool(main and candidate.get("path") == str(main) and layout and layout[0] == data_root)
+            except (DomainError, OSError, ValueError):
+                pass
+        if not bound_matches:
             checks.append({"check": "bound_path", "status": "warning",
                            "detail": "Registered path %s differs from the current project root; "
                                      "run the rebind command if the project moved"

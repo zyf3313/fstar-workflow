@@ -94,6 +94,8 @@ class TestFreshInstall(InstallerCase):
         cache = self.user_root / "resources" / BUNDLE_VERSION
         self.assertTrue((cache / "manifest.json").is_file())
         self.assertTrue((cache / "runtime" / "routing.md").is_file())
+        self.assertTrue((cache / "agents" / "fstar-learn.md").is_file())
+        self.assertTrue((self.host_root / "agents" / "fstar-learn.md").is_file())
 
     def test_installed_matchers_are_pipe_separated_strings(self):
         # Claude Code consumes matcher as a single string ("Edit|Write", ""
@@ -449,6 +451,48 @@ class TestResourceVersions(InstallerCase):
         self.assertTrue((self.user_root / "resources" / "A" / "runtime" / "routing.md").is_file())
         self.assertTrue((self.user_root / "resources" / BUNDLE_VERSION).is_dir())
 
+    def test_doctor_checks_version_10_against_its_own_inventory(self):
+        self.install(hosts=["claude"])
+        cache = self.user_root / "resources" / BUNDLE_VERSION
+        old_cache = self.user_root / "resources" / "10"
+        cache.rename(old_cache)
+        (old_cache / "agents" / "fstar-learn.md").unlink()
+        manifest_path = old_cache / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["resource_version"] = "10"
+        manifest["files"] = [item for item in manifest["files"]
+                             if item.get("source") != "agents/fstar-learn.md"]
+        manifest_path.write_text(json.dumps(manifest))
+        (self.user_root / "version").write_text("10\n")
+        # The current inventory would misdiagnose the valid old role set.
+        self.assertTrue(any(d.code == "RESOURCE_MISSING" and d.path.endswith("fstar-learn.md")
+                            for d in installer.validate_resources(old_cache)))
+        report = installer.doctor(roots=self.roots())
+        self.assertFalse(any(d["code"] == "RESOURCE_MISSING" and d["path"].endswith("fstar-learn.md")
+                             for d in report["diagnostics"]))
+        self.assertEqual(report["expected_counts"]["roles"], 4)
+        from fstar.runtime import hooks
+        from fstar.runtime import inject
+        self.assertIsNone(inject.role_card("learn", old_cache))
+        with self.assertRaises(DomainError) as caught:
+            hooks.worker_context({"subagent_type": "fstar-learn", "task_ref": "session-only"},
+                                 start=self.tmp, user_root=self.user_root, as_json=True)
+        self.assertEqual(caught.exception.code, "role_card_unavailable")
+        self.assertEqual(caught.exception.details["role"], "learn")
+        self.assertEqual(caught.exception.details["path"], str(old_cache / "agents" / "fstar-learn.md"))
+        with self.assertRaises(DomainError) as caught:
+            hooks.worker_context({"subagent_type": "fstar-learn", "task_ref": "session-only"},
+                                 start=self.tmp, user_root=self.user_root)
+        self.assertEqual(caught.exception.code, "role_card_unavailable")
+        existing = hooks.worker_context({"subagent_type": "fstar-check", "task_ref": "session-only"},
+                                        start=self.tmp, user_root=self.user_root, as_json=True)
+        self.assertTrue(any(item.get("path") == "agents/fstar-check.md" for item in existing["inputs"]))
+        # Missing an old role is still an error.
+        (old_cache / "agents" / "fstar-check.md").unlink()
+        report = installer.doctor(roots=self.roots())
+        self.assertTrue(any(d["code"] == "RESOURCE_MISSING" and d["path"].endswith("fstar-check.md")
+                            for d in report["diagnostics"]))
+
     def test_same_version_with_different_content_is_refused(self):
         self.install(hosts=["claude"])
         cache = self.user_root / "resources" / BUNDLE_VERSION
@@ -552,7 +596,7 @@ class TestHostEntryDetails(InstallerCase):
         hooks = [entry for entry in index["entries"] if entry["kind"] == "hook"]
         host_files = [entry for entry in index["entries"] if entry["kind"] in ("skill", "agent")]
         self.assertEqual(len(hooks), 5)
-        self.assertEqual(len(host_files), 14)
+        self.assertEqual(len(host_files), 15)
         for entry in index["entries"]:
             self.assertTrue(Path(entry["installed_path"]).is_file())
             self.assertEqual(entry["ownership"], "owned")
@@ -587,7 +631,7 @@ class TestMultiRootUpdate(InstallerCase):
         self.assertEqual("uninstall_host_root_mismatch", caught.exception.code)
         # An explicit --host-root is the user's selection and is authoritative.
         plan = self.plan_update_at(self.host_root, explicit=True)
-        self.assertEqual(14, len(plan["host_files"]))
+        self.assertEqual(15, len(plan["host_files"]))
 
     def test_implicit_update_passes_when_host_file_records_own_the_root(self):
         other = self.tmp / "host" / "other-claude"
@@ -603,7 +647,7 @@ class TestMultiRootUpdate(InstallerCase):
                                         if Path(record["settings_path"]).parent.resolve() == other.resolve()]
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
         plan = self.plan_update_at(self.host_root, explicit=False)
-        self.assertEqual(14, len(plan["host_files"]))
+        self.assertEqual(15, len(plan["host_files"]))
         self.assertTrue(all(entry["host"] == "claude" for entry in plan["host_files"]))
 
     def test_settings_records_are_kept_per_host_root(self):
@@ -653,7 +697,7 @@ class TestHostSkillAdaptation(InstallerCase):
         agents = sorted(p.name for p in (self.host_root / "agents").glob("fstar-*.md"))
         self.assertEqual(len(skills), 10)
         self.assertEqual(agents, ["fstar-check.md", "fstar-editor.md",
-                                  "fstar-implement.md", "fstar-research.md"])
+                                  "fstar-implement.md", "fstar-learn.md", "fstar-research.md"])
         for record in installer.plan_install(operation="install", roots=self.roots())["host_files"]:
             self.assertEqual(_sha(Path(record["destination"])), record["expected_hash"])
 
@@ -764,7 +808,7 @@ class TestHostSkillAdaptation(InstallerCase):
         before = _tree_snapshot(self.host_root)
         plan = installer.plan_install(operation="install", roots=self.roots(), hosts=["claude"])
         self.assertEqual(_tree_snapshot(self.host_root), before)
-        self.assertEqual(len(plan["host_files"]), 14)
+        self.assertEqual(len(plan["host_files"]), 15)
 
     def test_mid_transaction_failure_rolls_back_host_files(self):
         plan = installer.plan_install(operation="install", roots=self.roots(), hosts=["claude"])
@@ -992,7 +1036,7 @@ class TestStaleHostFileRetirement(InstallerCase):
         self.install(hosts=["claude"])
         roots = self.roots()
         plan = installer.plan_install(operation="update", roots=roots)
-        self.assertEqual(len(plan["host_files"]), 14)
+        self.assertEqual(len(plan["host_files"]), 15)
         self.assertFalse(any(entry.get("stale") for entry in plan["host_files"]))
         self.assertTrue(all(entry["action"] == "reuse_owned" for entry in plan["host_files"]))
         installer.apply_plan(plan, roots=roots)
@@ -1557,7 +1601,7 @@ class TestDoctor(InstallerCase):
         before = _tree_snapshot(self.user_root)
         report = installer.doctor(roots=self.roots())
         self.assertEqual(report["counts"]["skills"], 10)
-        self.assertEqual(report["counts"]["roles"], 4)
+        self.assertEqual(report["counts"]["roles"], 5)
         self.assertEqual(report["counts"]["templates"], 12)
         self.assertNotIn("capabilities", report["counts"])
         self.assertEqual(report["counts"]["hooks"], 5)

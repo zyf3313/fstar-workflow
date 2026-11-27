@@ -6,9 +6,20 @@ description: "Save authorized knowledge with scope, conflict, and index checks. 
 # Learn
 
 ## Do NOT use when
-- No project-governance grant covers the destination: negotiate it first; never write without authorization.
-- The user is mid-correction on task output: continue the task first; offer the learn candidate after the work settles.
-- The knowledge is actually a procedure ("how to do X step by step"): record it under the project references category in the procedure format (below); no separate export path exists — procedures are read live from the knowledge base, never converted into host skills.
+
+- The user has explicitly declined learning for the candidate: do not dispatch, prepare, or write it, and do not ask again without materially new facts.
+- The request is only to resume the current task, not to discover or organize durable knowledge: follow the applicable continuation workflow instead.
+
+## Entry and authorization
+
+The coordinator and a dispatched `fstar-learn` worker use different entry paths:
+
+- **Coordinator:** When a durable candidate is identified, dispatch the dedicated role in the host's background facility as directed by routing and continue the main task; the dispatch is the required first action, and an inline proposal never substitutes for it. If it is unavailable or fails, report the limitation explicitly and retain the candidate for later. If the user is correcting task output, do not interrupt the correction to offer a candidate; present it when the work settles.
+- **Dispatched worker:** Use this skill's read and preparation instructions for the assigned candidate. Do not dispatch another agent or ask the user questions; return candidates, missing authorization, and any complete proposal to the coordinator.
+
+Discovery, read-only review, and organizing candidates need no project-governance grant. The bridge's `prepare` and `apply` actions require the grant covering the destination; without it the worker returns the candidate and missing authorization, and the coordinator may negotiate the grant subject to the user's decisions. Applying also requires the user's genuine approval of the exact proposal hash, scope and owners as specified below. Never invent or infer approval, bypass a refusal, or write without authorization.
+
+Procedures ("how to do X step by step") are routed by applicable scope, not by their kind: a procedure whose applicability is this project goes under the project references category in the format below; a procedure the user explicitly states applies across projects goes to user rules (enforced or default convention) or user memory (preference or lesson) in the existing user knowledge format, with its user index updated; there is no separate `user/procedures` directory to invent. When the scope is unknown or cannot be shown to be cross-project, keep the candidate and report it undecided — do not write it anywhere and do not narrow it to project scope just because it is a procedure.
 
 ## Rejected-proposals ledger
 
@@ -26,9 +37,9 @@ Writing follows the normal pipeline (project-governance `knowledge` member, prop
 
 ## Procedure format
 
-Procedural knowledge ("how to do X") is recorded under `.fstar/knowledge/references/procedures/<name>.md` in the same authorized pipeline. Each stage must carry an `evidence` field (how to prove the stage was done right); stages stay tool-agnostic (no host-specific commands, model names, or absolute paths). Workers read procedures live through dispatch `read_context` (path + sha256); the file in the knowledge base is the only authoritative copy.
+A procedure whose applicable scope is this project is recorded under `.fstar/knowledge/references/procedures/<name>.md` in the same authorized pipeline (`knowledge` member). A procedure the user explicitly states applies across projects is recorded under the user's `rules/<name>.md` or `memory/<name>.md` in the user knowledge format (rule strength or memory kind/trust, APPLIES/NOT, optional scope fields) with the user index updated — requiring the `rules` or `memory` member respectively, the same as any other user write. Each stage must carry an `evidence` field (how to prove the stage was done right); stages stay tool-agnostic (no host-specific commands, model names, or absolute paths). Workers read procedures live through dispatch `read_context` (path + sha256); the file in the knowledge base is the only authoritative copy. A procedure whose scope is unknown is not written: retain it as an undecided candidate.
 
-Use after project-governance authorization. Read complete indexes and applicable bodies, prefer an existing topic, and justify a new one. Show candidate content, source, destination scope, and conflicts; save only when that exact content and scope are authorized. Use a general background Agent for lengthy organization; deferred optional learning does not block archive.
+Read complete indexes and applicable bodies, prefer an existing topic, and justify a new one. Show candidate content, source, destination scope, and conflicts; save only when that exact content and scope are authorized. Follow the coordinator or dispatched worker entry above; deferred optional learning does not block archive.
 
 Invoke the packaged internal bridge with `python3 -I <package-root>/bin/fstar-bootstrap.py learn_bridge`, passing one JSON object on stdin. Resolve the package root from the installed fstar executable, not the current project. It returns one JSON envelope on stdout. This is an internal skill interface, not a new user command.
 

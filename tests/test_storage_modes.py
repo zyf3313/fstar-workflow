@@ -453,6 +453,13 @@ class HooksAcrossModesTests(StorageModeCase):
                 self.assertTrue(result["processed"])
                 self.assertEqual(".fstar/tasks/demo/doc/prd.md", result["artifact"])
 
+    def test_worker_context_accepts_task_outside_repository(self):
+        from fstar.runtime import hooks
+        repo, store, service, task_dir = self._setup("worker-userdir", "user-directory")
+        result = hooks.worker_context({}, role="implement", task_ref="demo", start=repo,
+                                      user_root=self.user_root, runtime_root=self.base / "runtime")
+        self.assertEqual(str(task_dir), result["active_task"].removeprefix("Active task: "))
+
     def test_session_context_injects_the_project_index_in_every_mode(self):
         from fstar.runtime import hooks
         for storage, name in (("project-shared", "shared"), ("project-local", "local"),
