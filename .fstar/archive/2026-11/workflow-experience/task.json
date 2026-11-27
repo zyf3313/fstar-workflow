@@ -1,0 +1,725 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-27T13:15:51.067658Z",
+    "confirmed_by": "user",
+    "evidence_refs": [
+      "18f2e578-aebe-4548-9278-9b53acdf52e8"
+    ],
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user"
+      },
+      "at": "2026-11-27T13:47:00+08:00",
+      "quote": "发布完了",
+      "reference": "本会话 2026-11-27：用户对 workflow-experience 任务先后确认\"确认走合并发布流程吧\"\"push吧\"\"归档\"，验收依据为 v0.12.0 发布完成（npm 0.12.0 验证通过）与 checks/check-final-impact-001.md",
+      "scope": "workflow-experience 任务验收",
+      "source_id": "conversation-2026-11-27-accept-wfe",
+      "type": "conversation",
+      "validates": "5a2fc41e3c36aa1a5b337239aa7e5684be90bc6daac6d43a48f2fad0a9344dda"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "236b5a96da66f6567faadacfde11e4be533e8b706499a803b08da794ed6e2207"
+      ],
+      "task": "5a2fc41e3c36aa1a5b337239aa7e5684be90bc6daac6d43a48f2fad0a9344dda"
+    }
+  },
+  "archivedAt": "2026-11-27T13:17:34.325674Z",
+  "assignee": null,
+  "base_branch": "origin/main",
+  "blocked": null,
+  "branch": "feat/workflow-experience",
+  "capabilities": [],
+  "children": [],
+  "commit": "3acd9ce94a374f110dc3519cdfe6d2d3a610ec77",
+  "completedAt": "2026-11-27T13:15:51.067897Z",
+  "createdAt": "2026-11-25T14:30:28.929979Z",
+  "creator": "agent",
+  "deliverables": [
+    {
+      "criteria_refs": [
+        "A-001",
+        "A-002",
+        "A-003",
+        "A-004",
+        "A-005",
+        "A-006",
+        "A-007",
+        "A-008"
+      ],
+      "format": "markdown",
+      "name": "workflow-experience-delivery",
+      "path": ".fstar/tasks/workflow-experience/progress.md",
+      "version": ""
+    }
+  ],
+  "description": "落实用户确认的七项体验改进：主动沉淀、worktree 项目与任务接续、知识归属、设计与执行计划、角色派发、按需规范读取、固定流程脚本化",
+  "events": [
+    {
+      "at": "2026-11-25T14:30:28.930267Z",
+      "data": {
+        "parent": null
+      },
+      "id": "9df4aeda-ab9e-4ec6-85b9-36da89b5beb4",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-25T14:30:28.930261Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "3c5b93de-d09d-4d87-a893-aa40c62add47",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-26T13:25:03.371256Z",
+      "data": {
+        "branch": "feat/workflow-experience",
+        "detached": false,
+        "snapshot": "0fb61c5868d69e4cd006c3ce19fe64b69a313003f2a5d9a1c8669e3616770101",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "879093c8-3723-4138-bf9d-d264d5ba6f0e",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-26T13:25:03.335821Z",
+        "quote": "",
+        "reference": "interactive-cli",
+        "scope": "start",
+        "source_id": "cli",
+        "type": "command",
+        "validates": "a8ab14c67f4b91f08f97382a7df0bb5fb49e58de3628c412174031efa2a73aa3"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-27T13:08:58.736202Z",
+      "data": {
+        "new": {
+          "enabled_at": "2026-11-27T13:08:58.735472Z",
+          "excluded": [],
+          "id": "persistent-task",
+          "included": [
+            "archive"
+          ],
+          "reason": "归档",
+          "scope": "custom",
+          "source": {
+            "confirmed_at": "2026-11-27T13:00:00+08:00",
+            "quote": "归档",
+            "source_ref": "2026-11-27 用户在 v0.12.0 发布完成后明确指示\"归档\"",
+            "source_type": "conversation"
+          }
+        },
+        "old": null
+      },
+      "id": "fb490b63-a2b0-4427-a2b0-7c9357ebc4aa",
+      "source": {
+        "confirmed_at": "2026-11-27T13:00:00+08:00",
+        "quote": "归档",
+        "source_ref": "2026-11-27 用户在 v0.12.0 发布完成后明确指示\"归档\"",
+        "source_type": "conversation"
+      },
+      "type": "extension_enabled"
+    },
+    {
+      "at": "2026-11-27T13:11:50.670926Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006",
+            "A-007",
+            "A-008"
+          ],
+          "format": "markdown",
+          "name": "workflow-experience-delivery",
+          "path": ".fstar/tasks/workflow-experience/progress.md",
+          "version": ""
+        },
+        "old": null
+      },
+      "id": "0f6237da-3740-4252-b730-c7e56ca09ce3",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-27T13:11:50.670923Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "6ed40817-1e44-4310-a242-e5f325a106da",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-27T13:13:06.228186Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator-acceptance-2026-11-27",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "cd477d6c-4ed7-46d0-a89e-4141eef2eaa1",
+      "source": {
+        "actor": {
+          "id": "coordinator-acceptance-2026-11-27",
+          "role": "coordinator"
+        },
+        "at": "2026-11-27T13:13:06.228184Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "32738187-4a8d-481e-aace-3b8388015fcc",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-27T13:14:08.100883Z",
+      "data": {
+        "evidence_id": "c5403b1f-a2d5-4c52-a245-4594366a66c3",
+        "state": "stale"
+      },
+      "id": "b8abb200-32f0-4c11-b032-86d3a2fa11bb",
+      "source": {
+        "id": "check-final-impact-001-agent",
+        "role": "check",
+        "session": null
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-27T13:15:00.443638Z",
+      "data": {
+        "evidence_id": "18f2e578-aebe-4548-9278-9b53acdf52e8",
+        "state": "valid"
+      },
+      "id": "f98a25e3-c36f-45b2-9c40-699e34ec5291",
+      "source": {
+        "id": "check-final-impact-001-agent",
+        "role": "check",
+        "session": null
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-27T13:46:00",
+      "data": {
+        "holder": "coordinator-acceptance-2026-11-27"
+      },
+      "id": "lease-released-20261127",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator"
+        },
+        "at": "2026-11-27T13:46:00",
+        "quote": "",
+        "reference": "lease release after evidence recorded",
+        "scope": "lease",
+        "source_id": "coordinator",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-27T13:15:25.595034Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "18f2e578-aebe-4548-9278-9b53acdf52e8"
+        ]
+      },
+      "id": "170d52fc-6a0c-4baa-ba21-129d5e809a65",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-27T13:15:25.594835Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "149e16d1-4335-4b13-8150-8e72ee4f9b0d",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-27T13:15:51.067900Z",
+      "data": {
+        "evidence_refs": [
+          "18f2e578-aebe-4548-9278-9b53acdf52e8"
+        ]
+      },
+      "id": "6297c7be-92a8-44d8-b7d5-1c9437d09674",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-27T13:47:00+08:00",
+        "quote": "发布完了",
+        "reference": "本会话 2026-11-27：用户对 workflow-experience 任务先后确认\"确认走合并发布流程吧\"\"push吧\"\"归档\"，验收依据为 v0.12.0 发布完成（npm 0.12.0 验证通过）与 checks/check-final-impact-001.md",
+        "scope": "workflow-experience 任务验收",
+        "source_id": "conversation-2026-11-27-accept-wfe",
+        "type": "conversation",
+        "validates": "5a2fc41e3c36aa1a5b337239aa7e5684be90bc6daac6d43a48f2fad0a9344dda"
+      },
+      "type": "accepted"
+    },
+    {
+      "at": "2026-11-27T13:17:34.325674Z",
+      "data": {
+        "archived_at": "2026-11-27T13:17:34.325674Z",
+        "operation_id": "dd305e0c-f3c5-46d7-845e-5a4ff9e7bbae",
+        "target": ".fstar/archive/2026-11/workflow-experience"
+      },
+      "id": "30db8ee0-50ce-4f6d-b58a-b231a3a6a8bc",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-27T13:48:00+08:00",
+        "quote": "归档",
+        "reference": "本会话 2026-11-27：v0.12.0 发布验证（npm 0.12.0）并完成验收后用户明确指示\"归档\"",
+        "scope": "workflow-experience 全任务树归档",
+        "source_id": "conversation-2026-11-27-archive-wfe",
+        "type": "conversation",
+        "validates": "9713f747a1d09590eab61d871b1e7c3a5a6ca698e3761d7a35397ddf8f26365d"
+      },
+      "type": "archive_operation"
+    },
+    {
+      "at": "2026-11-27T13:17:34.328805Z",
+      "data": {
+        "operation_id": "dd305e0c-f3c5-46d7-845e-5a4ff9e7bbae",
+        "target": ".fstar/archive/2026-11/workflow-experience"
+      },
+      "id": "c1c9ea33-b531-4a80-80ed-9f778a6a23a3",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-27T13:48:00+08:00",
+        "quote": "归档",
+        "reference": "本会话 2026-11-27：v0.12.0 发布验证（npm 0.12.0）并完成验收后用户明确指示\"归档\"",
+        "scope": "workflow-experience 全任务树归档",
+        "source_id": "conversation-2026-11-27-archive-wfe",
+        "type": "conversation",
+        "validates": "9713f747a1d09590eab61d871b1e7c3a5a6ca698e3761d7a35397ddf8f26365d"
+      },
+      "type": "archived"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "paths": [
+          {
+            "path": ".fstar/tasks/workflow-experience/progress.md",
+            "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+          }
+        ]
+      },
+      "environment": "macOS isolated mktemp env; logs /tmp/fstar-final-regress.nTCu7h + /tmp/fstar-impact.tkqrlF",
+      "id": "c5403b1f-a2d5-4c52-a245-4594366a66c3",
+      "items": [
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-27T13:14:08.099808Z",
+      "producer": {
+        "id": "check-final-impact-001-agent",
+        "role": "check",
+        "session": null
+      },
+      "read_only": true,
+      "report": {
+        "path": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+        "sha256": "8584154acec19e3d11db0406193e1c0bb989410396b678d6b1b29b7a7c4584a7"
+      },
+      "run_id": "check-final-impact-001",
+      "scope": "final",
+      "stale_reasons": [
+        {
+          "actual": "236b5a96da66f6567faadacfde11e4be533e8b706499a803b08da794ed6e2207",
+          "expected": null,
+          "type": "delivery"
+        }
+      ],
+      "state": "stale",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/workflow-experience/progress.md",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-002",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-003",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-004",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-005",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-006",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-007",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-008",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "236b5a96da66f6567faadacfde11e4be533e8b706499a803b08da794ed6e2207",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/workflow-experience/progress.md",
+            "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+          }
+        ]
+      },
+      "environment": "macOS isolated mktemp env; logs /tmp/fstar-final-regress.nTCu7h + /tmp/fstar-impact.tkqrlF",
+      "id": "18f2e578-aebe-4548-9278-9b53acdf52e8",
+      "items": [
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed"
+        },
+        {
+          "command": "fstar dispatch harvest check-final-impact-001; isolated regression Python 1115 + Node 16 OK (post-manifest-rebuild)",
+          "plan_item": "final-impact-check",
+          "report": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-27T13:15:00.442292Z",
+      "producer": {
+        "id": "check-final-impact-001-agent",
+        "role": "check",
+        "session": null
+      },
+      "read_only": true,
+      "report": {
+        "path": ".fstar/tasks/workflow-experience/checks/check-final-impact-001.md",
+        "sha256": "8584154acec19e3d11db0406193e1c0bb989410396b678d6b1b29b7a7c4584a7"
+      },
+      "run_id": "check-final-impact-001",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/workflow-experience/progress.md",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-002",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-003",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-004",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-005",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-006",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-007",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            },
+            {
+              "id": "A-008",
+              "sha256": "9fc67ec50288844bd3db66cd8d916a958009953d212781acb5f065cb046e0c2c"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "enabled_at": "2026-11-27T13:08:58.735472Z",
+      "excluded": [],
+      "id": "persistent-task",
+      "included": [
+        "archive"
+      ],
+      "reason": "归档",
+      "scope": "custom",
+      "source": {
+        "confirmed_at": "2026-11-27T13:00:00+08:00",
+        "quote": "归档",
+        "source_ref": "2026-11-27 用户在 v0.12.0 发布完成后明确指示\"归档\"",
+        "source_type": "conversation"
+      }
+    }
+  ],
+  "id": "14a75cc1-3138-42d2-8ee9-b7c22dc49766",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/workflow-experience/progress.md": {
+          "A-001": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-002": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-003": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-004": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-005": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-006": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-007": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-008": {
+            "dependencies": [],
+            "mode": "file"
+          }
+        }
+      },
+      "artifact_map_sha256": "6e13e27e2f55bd006864bf05289035485c5ed1b12262dfa5bb7a2b2f15faea93",
+      "artifact_map_source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-27T13:11:50.670728Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "91287c7f-c38a-4362-a213-dd6356877a37",
+        "type": "system",
+        "validates": ""
+      }
+    }
+  },
+  "name": "workflow-experience",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "工作流体验与知识闭环改进",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}
