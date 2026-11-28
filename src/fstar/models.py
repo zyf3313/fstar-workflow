@@ -15,7 +15,10 @@ TASK_FIELDS = (
 # Optional collaboration fields (design §4): all may be absent; absence means
 # the default (status "active", no work items / next step / deliverables).
 # They sit at the top level next to `phase` and never enter source_snapshot.
-OPTIONAL_TASK_FIELDS = ("status", "status_detail", "work_items", "next_step", "deliverables")
+# `origin` (antigravity-adoption design §1) marks the parent requirement task
+# a follow-up task grew from: {task_id, archive_path, reason}. Absent origin =
+# pre-origin behavior, so old task.json files read and write unchanged.
+OPTIONAL_TASK_FIELDS = ("status", "status_detail", "work_items", "next_step", "deliverables", "origin")
 STATUSES = {"active", "waiting_user", "waiting_external", "paused"}
 WORK_ITEM_STATES = {"done", "active", "blocked", "cancelled"}
 PHASES = {"planning", "in_progress", "awaiting_acceptance", "completed"}
@@ -161,6 +164,21 @@ def validate_optional_fields(data: dict) -> None:
             unknown = sorted(set(entry) - {"name", "path", "format", "criteria_refs", "version"})
             if unknown:
                 raise DomainError("invalid_deliverables", "deliverable contains unknown keys", {"name": entry["name"], "unknown": unknown})
+
+
+    origin = data.get("origin")
+    if origin is not None:
+        if not isinstance(origin, dict):
+            raise DomainError("invalid_origin", "origin must be an object")
+        unknown = sorted(set(origin) - {"task_id", "archive_path", "reason"})
+        if unknown:
+            raise DomainError("invalid_origin", "origin contains unknown keys", {"unknown": unknown})
+        if not isinstance(origin.get("task_id"), str) or not origin["task_id"].strip():
+            raise DomainError("invalid_origin", "origin requires a non-empty task_id")
+        if not isinstance(origin.get("archive_path"), str) or not origin["archive_path"].strip():
+            raise DomainError("invalid_origin", "origin requires a non-empty archive_path")
+        if not isinstance(origin.get("reason"), str):
+            raise DomainError("invalid_origin", "origin reason must be a string")
 
 
 def validate_task(data: dict) -> None:

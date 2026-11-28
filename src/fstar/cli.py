@@ -68,7 +68,9 @@ def _confirmation(args, service: TaskService, ref: str) -> dict:
         try:
             task = service.store.read(ref)
         except DomainError as exc:
-            if args.command != "archive" or not args.operation_id or exc.code != "task_not_found":
+            reads_archived = (args.command == "archive" and args.operation_id) or \
+                (args.command == "task" and getattr(args, "task_command", None) == "unarchive")
+            if not reads_archived or exc.code != "task_not_found":
                 raise
             task = service.store.read(ref, archived=True)
         return {"source_id": getattr(args, "invocation", None) or "cli", "type": "command", "at": service.clock(), "actor": _actor(args, "user"), "reference": getattr(args, "invocation", None) or "interactive-cli", "quote": "", "scope": args.command, "validates": source_snapshot(task)}
@@ -104,6 +106,11 @@ def register_core_commands(subparsers) -> None:
     create.add_argument("--description", default="")
     create.add_argument("--parent")
     create.add_argument("--related")
+    create.add_argument("--origin", help="JSON file {task_id, archive_path, reason} linking this follow-up to a possibly archived parent requirement task")
+    unarchive = task_sub.add_parser("unarchive")
+    _add_target(unarchive)
+    _add_confirmation(unarchive)
+    unarchive.add_argument("--reason", help="why the archived task is moving back to the active root")
     listing = task_sub.add_parser("list")
     mode = listing.add_mutually_exclusive_group()
     mode.add_argument("--active", action="store_true")
@@ -317,7 +324,35 @@ def _dispatch(args):
             # filesystem or project metadata.
             validator = TaskService.__new__(TaskService)
             validator.clock = _static_clock
-            return validator.enable_extension(None, authorization={"id": args.id, "scope": args.scope, "included": args.include, "excluded": args.exclude, "reason": args.reason, "source": source}, actor=_actor(args, "user"))
+            record = validator.enable_extension(None, authorization={"id": args.id, "scope": args.scope, "included": args.include, "excluded": args.exclude, "reason": args.reason, "source": source}, actor=_actor(args, "user"))
+            # A-009: when a session id is declared, persist the record into
+            # the session grants store so the worker-context hook can read it
+            # back on host dispatches whose payload carries no extensions
+            # array. Without a session id the record stays in this process's
+            # return value (legacy behavior).
+            if getattr(args, "session", None):
+                runtime = Path(args.runtime_root).expanduser().resolve() if getattr(args, "runtime_root", None) else None
+                user_home = Path(args.user_data_root).expanduser().resolve() if getattr(args, "user_data_root", None) else None
+                if user_home is None and runtime is None:
+                    user_home = Path.home() / ".fstar"
+                # The store needs an initialized project for the runtime slot;
+                # outside a project the record stays process-local (honest
+                # degradation, same as before).
+                project = find_project_root(Path(args.project) if getattr(args, "project", None) else Path.cwd(), strict_worktree_errors=False)
+                if project is not None:
+                    TaskStore(project, user_home=user_home, runtime_root=runtime).set_session_grants(args.session, [record["authorization"]])
+            return record
+        if args.extension_command == "disable" and getattr(args, "session", None):
+            # Mirror the store: a disable removes the matching package record.
+            project = find_project_root(Path(args.project) if getattr(args, "project", None) else Path.cwd(), strict_worktree_errors=False)
+            if project is not None:
+                runtime = Path(args.runtime_root).expanduser().resolve() if getattr(args, "runtime_root", None) else None
+                user_home = Path(args.user_data_root).expanduser().resolve() if getattr(args, "user_data_root", None) else None
+                if user_home is None and runtime is None:
+                    user_home = Path.home() / ".fstar"
+                store = TaskStore(project, user_home=user_home, runtime_root=runtime)
+                remaining = [item for item in store.read_session_grants(args.session) if item.get("id") != args.id]
+                store.set_session_grants(args.session, remaining)
         return {"id": args.id, "disabled": True, "persistence": "session_only", "source": source}
     service = _service(args)
     store = service.store
@@ -325,7 +360,11 @@ def _dispatch(args):
     if args.command == "task":
         if args.task_command == "create":
             related = _json_file(args.related, "related").get("related", []) if args.related else None
-            return service.create(name=args.name, title=args.title, description=args.description, actor=_actor(args), parent=args.parent, related=related, session_id=args.session)
+            origin = _json_file(args.origin, "origin") if args.origin else None
+            return service.create(name=args.name, title=args.title, description=args.description, actor=_actor(args), parent=args.parent, related=related, origin=origin, session_id=args.session)
+        if args.task_command == "unarchive":
+            confirmation = _confirmation(args, service, ref)
+            return service.unarchive(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, reason=args.reason)
         if args.task_command == "list":
             if args.all:
                 return {"active": service.list_tasks(query=args.query), "archived": service.list_tasks(archived=True, query=args.query)}
@@ -442,7 +481,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--runtime-root")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--actor")
-    parser.add_argument("--actor-role", choices=("user", "agent", "coordinator", "implement", "check"))
+    parser.add_argument("--actor-role", choices=("user", "agent", "coordinator", "implement", "check", "steward"))
     subparsers = parser.add_subparsers(dest="command", required=True)
     register_core_commands(subparsers)
     for module in ("project", "runtime", "dispatch", "installer", "crossproject",

@@ -1,0 +1,218 @@
+{
+  "acceptance": null,
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "origin/main",
+  "blocked": null,
+  "branch": "feat/antigravity-adoption",
+  "capabilities": [],
+  "children": [],
+  "commit": "0997742996515901a611f841becc69b9b0563617",
+  "completedAt": null,
+  "createdAt": "2026-11-28T13:47:16.781384Z",
+  "creator": "agent",
+  "deliverables": [
+    {
+      "criteria_refs": [
+        "A-001"
+      ],
+      "format": "md",
+      "name": "clarify",
+      "path": ".fstar/tasks/package-restructure/clarify.md",
+      "version": ""
+    },
+    {
+      "criteria_refs": [
+        "A-001"
+      ],
+      "format": "md",
+      "name": "criteria",
+      "path": ".fstar/tasks/package-restructure/criteria.md",
+      "version": ""
+    },
+    {
+      "criteria_refs": [
+        "A-001"
+      ],
+      "format": "md",
+      "name": "plan",
+      "path": ".fstar/tasks/package-restructure/plan.md",
+      "version": ""
+    }
+  ],
+  "description": "包结构体系重构：核心分包（core/skills/agents/install）、插件接口骨架（工厂模式）、host 集成独立 integrations/、一次性迁移与布局版本机制",
+  "events": [
+    {
+      "at": "2026-11-28T13:47:16.781624Z",
+      "data": {
+        "parent": null
+      },
+      "id": "13056c3c-e174-4789-bc00-4557f8662c74",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T13:47:16.781621Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "b7cd652c-e43c-4d69-bb75-660a16d2348e",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-28T13:48:34.250262Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001"
+          ],
+          "format": "md",
+          "name": "clarify",
+          "path": ".fstar/tasks/package-restructure/clarify.md",
+          "version": ""
+        },
+        "old": null
+      },
+      "id": "c98f5803-2ecf-4ac2-a488-772a23dfee14",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T13:48:34.250259Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "8d804953-b007-4257-929f-5ab841f9ef7b",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-28T13:48:34.567111Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001"
+          ],
+          "format": "md",
+          "name": "criteria",
+          "path": ".fstar/tasks/package-restructure/criteria.md",
+          "version": ""
+        },
+        "old": null
+      },
+      "id": "086558b6-13e5-4971-8cc9-03cfa2220dcd",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T13:48:34.567108Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "cb1e8bc1-d707-484a-a467-467c6a2132d9",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-28T13:48:34.881254Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001"
+          ],
+          "format": "md",
+          "name": "plan",
+          "path": ".fstar/tasks/package-restructure/plan.md",
+          "version": ""
+        },
+        "old": null
+      },
+      "id": "d9ada12e-1d98-4e5c-ac18-a89aef804af2",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T13:48:34.881251Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "93e4ba9b-c11a-4fec-baa6-b1077c3907b7",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    }
+  ],
+  "evidence": [],
+  "extensions": [],
+  "id": "14a1f2db-155e-4cc8-af10-0e510c34f0be",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/package-restructure/clarify.md": {
+          "A-001": {
+            "dependencies": [],
+            "mode": "file"
+          }
+        },
+        ".fstar/tasks/package-restructure/criteria.md": {
+          "A-001": {
+            "dependencies": [],
+            "mode": "file"
+          }
+        },
+        ".fstar/tasks/package-restructure/plan.md": {
+          "A-001": {
+            "dependencies": [],
+            "mode": "file"
+          }
+        }
+      },
+      "artifact_map_sha256": "c56df06c13501945375c27ae7ec634ae13094c025b3c3047225d5e1706fa3d05",
+      "artifact_map_source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T13:48:34.881042Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "fc38e1c3-b065-4853-80e1-70251224c183",
+        "type": "system",
+        "validates": ""
+      }
+    }
+  },
+  "name": "package-restructure",
+  "notes": "",
+  "phase": "planning",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "package-restructure",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}

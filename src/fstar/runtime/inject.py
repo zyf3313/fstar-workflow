@@ -240,6 +240,111 @@ def task_doc_inputs(project_root: Path, task_dir: Path, members: Optional[set] =
     return inputs
 
 
+# Parent context injection (antigravity-adoption design §3.2): candidate
+# documents in the origin parent's directory. doc/ is the settled layout;
+# the root-level names cover archived parents written by the older layout.
+PARENT_DOC_CANDIDATES = (
+    ("parent_design", ("doc/design.md", "design.md")),
+    ("parent_walkthrough", ("doc/walkthrough.md", "walkthrough.md")),
+    ("parent_criteria", ("criteria.md",)),
+)
+
+
+def resolve_origin_parent(store: TaskStore, origin: dict) -> tuple:
+    """Resolve the origin parent's directory (id authoritative, path a hint).
+
+    Returns ``(parent_dir, failure_reason)``: exactly one is None. The
+    archive_path is tried first (same ".fstar/" prefix rule as
+    meta.related_tasks); when it no longer matches (the parent was unarchived
+    and moved), the id is scanned over the archive tree and the active top
+    level — the same resolution order create-time validation uses.
+    """
+    task_id = origin.get("task_id")
+    archive_path = origin.get("archive_path")
+
+    def _read_id(directory: Path) -> Optional[str]:
+        try:
+            return store._read_path(directory / "task.json").get("id")
+        except (OSError, ValueError, DomainError):
+            return None
+
+    candidates: List[Path] = []
+    if isinstance(archive_path, str) and archive_path.strip():
+        raw = Path(archive_path)
+        if not raw.is_absolute():
+            parts = raw.parts
+            if parts and parts[0] == ".fstar":
+                raw = store.fstar_root.joinpath(*parts[1:])
+            else:
+                raw = store.project_root / raw
+        candidates.append(raw.parent if raw.name == "task.json" else raw)
+    for candidate in candidates:
+        if candidate.is_dir() and _read_id(candidate) == task_id:
+            return candidate, None
+    # Path missed or moved: fall back to the id scan.
+    for base in (store.archive_root, store.tasks_root):
+        if not base.exists():
+            continue
+        for task_file in sorted(base.rglob("task.json")):
+            if _read_id(task_file.parent) == task_id:
+                return task_file.parent, None
+    reason = "origin parent task not found by archive_path or id scan"
+    if candidates and candidates[0].is_dir():
+        reason = "origin archive_path holds a different task id"
+    return None, reason
+
+
+def parent_context_inputs(store: TaskStore, task: dict, budgets: dict) -> Optional[dict]:
+    """Origin-parent doc inputs with an honest tri-state report (design §3.2).
+
+    Returns None when the task carries no origin (compatibility: the whole
+    injection path stays untouched). Otherwise returns
+    ``{"inputs": [...loaded InjectedInput...], "report": parent_context}``
+    where the report records status loaded/partial/missing, what was
+    injected, and what was deferred by the budget — never silently dropping
+    an over-budget parent document.
+    """
+    origin = task.get("origin") if isinstance(task, dict) else None
+    if not isinstance(origin, dict) or not origin.get("task_id"):
+        return None
+    report = {"origin": {"task_id": origin.get("task_id"),
+                         "archive_path": origin.get("archive_path"),
+                         "reason": origin.get("reason", "") if isinstance(origin.get("reason"), str) else ""},
+              "status": "missing", "loaded": [], "deferred": [], "reason": ""}
+    parent_dir, failure = resolve_origin_parent(store, origin)
+    if parent_dir is None:
+        report["reason"] = failure
+        return {"inputs": [], "report": report}
+    report["parent_path"] = store.identity_path(parent_dir)
+    data_root = store.fstar_root
+    inputs: List[InjectedInput] = []
+    for kind, relatives in PARENT_DOC_CANDIDATES:
+        path = next((parent_dir / relative for relative in relatives
+                     if (parent_dir / relative).is_file()
+                     and _safe_context_path(data_root, parent_dir / relative)), None)
+        if path is None:
+            continue
+        try:
+            found = _fingerprinted(kind, path,
+                                   relative="%s/%s" % (parent_dir.name, path.relative_to(parent_dir).as_posix()))
+        except OSError:
+            continue
+        if found:
+            inputs.append(found)
+    if not inputs:
+        report["reason"] = "no parent documents (doc/design.md, doc/walkthrough.md, criteria.md) found under %s" % report["parent_path"]
+        return {"inputs": [], "report": report}
+    # Same per-file/total budgets as every other input; over-budget parent
+    # documents are deferred (listed with path/sha256/bytes), never silently
+    # truncated or dropped.
+    budgeted = _budgeted(inputs, budgets)
+    report["loaded"] = [{"kind": item.kind, "path": item.path, "sha256": item.sha256}
+                        for item in budgeted["loaded"]]
+    report["deferred"] = budgeted["unloaded"]
+    report["status"] = "loaded" if not budgeted["unloaded"] else "partial"
+    return {"inputs": list(budgeted["loaded"]), "report": report}
+
+
 def manifest_entries(project_root: Path, task_dir: Path, action: str) -> List[dict]:
     """Read {file, reason} entries from implement.jsonl / check.jsonl.
 

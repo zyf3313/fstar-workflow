@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antigravity → fstar-workflow 借鉴清单</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --panel2: #1d212b;
+    --text: #e6e8ee; --muted: #9aa1af; --line: #2a2f3b;
+    --green: #4ade80; --amber: #fbbf24; --blue: #60a5fa; --red: #f87171; --purple: #c084fc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.7; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  h2 { font-size: 20px; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  h2 .num { color: var(--blue); margin-right: 8px; font-family: ui-monospace, monospace; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+  .tag { display: inline-block; font-size: 12px; padding: 1px 10px; border-radius: 99px; margin-left: 10px; vertical-align: middle; font-weight: normal; }
+  .tag.do { background: #14532d; color: var(--green); }
+  .tag.skip { background: #3f1d1d; color: var(--red); }
+  .tag.same { background: #1e3a5f; color: var(--blue); }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 13px; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { white-space: nowrap; }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .card h3 { font-size: 16px; margin-bottom: 8px; }
+  .card p { font-size: 14px; color: #c7ccd8; }
+  .card .meta { font-size: 12px; color: var(--muted); margin-top: 12px; }
+  .b { color: var(--amber); font-weight: 600; }
+
+  .diagram { background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; white-space: pre; overflow-x: auto; line-height: 1.6; }
+  .ok { color: var(--green); } .bad { color: var(--red); } .hi { color: var(--amber); font-weight: bold; } .dim { color: var(--muted); }
+
+  .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; font-size: 13px; }
+  .step b { display: block; margin-bottom: 4px; font-size: 14px; }
+  .step .note { color: var(--muted); font-size: 12px; }
+  .step.same { border-color: #1e3a5f; } .step.new { border-color: #14532d; }
+
+  .legend { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+  footer { margin-top: 64px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Antigravity → fstar-workflow</h1>
+<p class="sub">Gemini Antigravity 调研结果与 fstar 工作流的对照 · 哪里已同构、哪里值得借鉴、哪里明确不做</p>
+<p class="sub">调研来源：antigravity.google 官方文档与发布博客（2025-11-18 发布，2026-11 文档版），未实测产品</p>
+<div class="legend">
+  <span class="tag same">已同构</span><span style="margin-left:4px"></span>
+  <span class="tag do">建议采纳</span><span style="margin-left:4px"></span>
+  <span class="tag skip">不做</span>
+</div>
+
+<!-- ===== 1. 总览 ===== -->
+<h2><span class="num">01</span>Antigravity 是什么</h2>
+<div class="card">
+  <p>Google 于 2025-11-18 与 Gemini 3 同日发布的 <b class="b">agent-first 开发平台</b>。核心四原则：<b>Trust / Autonomy / Feedback / Self-improvement</b>。产品形态包括 Agent Manager（桌面）、IDE、CLI、SDK 及各 IDE 扩展。多模型可选（Gemini 3 Pro / Claude Sonnet 4.5 / GPT-OSS）。</p>
+  <p class="meta">与 fstar 属同一类东西：计划门 → 实施 → 独立验证 → 知识沉淀的任务工作流系统。</p>
+</div>
+
+<!-- ===== 2. 同构 ===== -->
+<h2><span class="num">02</span>已同构的部分 — 不用学<span class="tag same">已同构</span></h2>
+<table>
+  <tr><th>Antigravity 机制</th><th>fstar 对应</th></tr>
+  <tr><td>Planning mode + 计划审批门</td><td>fstar-plan 计划评审</td></tr>
+  <tr><td><code>/plan</code> 无论设置如何都强制停下等批准</td><td>显式 gate（用户确认才进入实施）</td></tr>
+  <tr><td>Critic / Auditor 对抗验证</td><td>fstar-check 独立检查</td></tr>
+  <tr><td>Knowledge base 自改进</td><td>fstar-learn + magpie-memory</td></tr>
+  <tr><td>里程碑间换 orchestrator 继任者（防上下文退化）</td><td>dispatch 上下文收据（v0.12）</td></tr>
+</table>
+
+<!-- ===== 3. 借鉴 ===== -->
+<h2><span class="num">03</span>建议采纳的四个点<span class="tag do">建议采纳</span></h2>
+
+<div class="card">
+  <h3>① Artifact 交接制 <span class="tag do">核心</span></h3>
+  <p>Antigravity Teamwork 中 agent 间<b class="b">不共享会话上下文，全部通过 workspace 内结构化 artifact（Request / Plan / Progress）协调</b>，官方明确以此解决长项目上下文膨胀。落到 fstar：联调期任务通过文件继承父任务知识，而不是靠人重新解释。</p>
+</div>
+
+<div class="card">
+  <h3>② 每条需求绑定独立客观验证方式</h3>
+  <p>Teamwork Phase 1 访谈强制每个需求块写清"怎么证明做到了"，Auditor 后续核对证据与真实命令输出、防 mock/跳过。fstar 的 plan_item 目前只写"做什么"——联调期问题一半源头在验收标准含糊。</p>
+</div>
+
+<div class="card">
+  <h3>③ Challenger 型检查</h3>
+  <p><code>/boost</code> 的 implement → challenge → fix → re-verify 管线：不只验证"做了"，还专门构造反例和边界用例。可作为 fstar-check 的规则增强，不动内核。</p>
+</div>
+
+<div class="card">
+  <h3>④ Walkthrough 标准化收尾产物</h3>
+  <p>统一"改了什么 + 如何验证 + 证据（命令输出/截图）"的收尾文档格式。它同时是联调任务最好的背景材料——①的注入源。</p>
+</div>
+
+<!-- ===== 4. 场景图 ===== -->
+<h2><span class="num">04</span>核心场景：大需求联调期的断链与修复</h2>
+<p class="sub">左边是现状，右边是借鉴 Artifact 交接制后的改造</p>
+
+<div class="diagram">现状（断链）
+─────────────────────────────────────────────────────────
+大需求 ──计划─→ 子任务... ──全部验收─→ ✅ archive/大需求/
+                                            ├─ prd.md
+                                            ├─ design.md
+                                            └─ (终点，知识锁死)
+
+        联调期：用户报问题 → <span class="bad">开孤立任务 A → 归档到 2026-11/ 平铺</span>
+                         → <span class="bad">开孤立任务 B → 归档</span>
+                         → <span class="bad">开孤立任务 C → 归档</span>
+
+<span class="bad">✗ A/B/C 互不知晓，context 里没有父任务设计，事后无法回溯完整边界</span></div>
+
+<div class="diagram">改造后（树会生长）
+─────────────────────────────────────────────────────────
+大需求 ──计划─→ 子任务... ──全部验收─→ ✅ archive/大需求/
+                                            ├─ prd.md
+                                            ├─ design.md
+                                            ├─ <span class="hi">walkthrough.md   ★④ 统一收尾产物</span>
+                                            └─ <span class="hi">followups.md     ★聚合联调任务</span>
+
+        联调期：用户报问题
+                   ↓
+          <span class="hi">prompt-state 识别问题落在已归档大需求范围内</span>
+                   ↓
+          修复任务 A：<span class="hi">origin: 大需求ID          ★① 来源标记</span>
+                   ↓
+          dispatch 时自动注入 ← design.md
+                              ← walkthrough.md <span class="hi">★③ 上下文继承</span>
+                   ↓
+          fstar-check（<span class="hi">+ Challenger 构造反例  ★②</span>）
+                   ↓
+          ✅ 归档 → <span class="hi">自动写进父任务 followups.md ★归档聚合</span>
+
+<span class="ok">✓ 树"生长"而非断裂；联调任务继承需求上下文；一条链路看全完整度</span></div>
+
+<!-- ===== 5. 流程映射 ===== -->
+<h2><span class="num">05</span>映射到 fstar 工作流各阶段</h2>
+<div class="flow">
+  <div class="step same"><b>clarify</b>证据澄清<span class="note">现状保留</span></div>
+  <div class="step new"><b>plan</b><span class="note">★ plan_item 强制绑定验证方式</span></div>
+  <div class="step same"><b>execute</b>派发实施<span class="note">现状保留</span></div>
+  <div class="step new"><b>check</b><span class="note">★ Challenger 反例检查</span></div>
+  <div class="step new"><b>验收归档</b><span class="note">★ walkthrough.md 标准化</span></div>
+  <div class="step new"><b>联调期</b><span class="note">★ origin 链 + 上下文注入 + followups 聚合</span></div>
+  <div class="step same"><b>learn</b>知识沉淀<span class="note">现状保留</span></div>
+</div>
+
+<h2><span class="num">06</span>改动落点与优先级</h2>
+<table>
+  <tr><th>改动</th><th>位置</th><th>成本</th><th>优先级</th></tr>
+  <tr><td>origin: 字段</td><td>src/fstar/tasks.py（schema）</td><td>小</td><td class="b">P1</td></tr>
+  <tr><td>followups.md 归档聚合</td><td>archive 命令</td><td>小</td><td class="b">P1</td></tr>
+  <tr><td>Challenger + plan 验证方式列</td><td>workflow 内容 / skill 规则层</td><td>小</td><td class="b">P2</td></tr>
+  <tr><td>walkthrough.md 标准化</td><td>execute/check 产出规则</td><td>小</td><td class="b">P2</td></tr>
+  <tr><td>dispatch 上下文继承</td><td>src/fstar/dispatch.py</td><td>中</td><td class="b">P3</td></tr>
+</table>
+
+<h2><span class="num">07</span>明确不做的<span class="tag skip">不做</span></h2>
+<table>
+  <tr><th>机制</th><th>原因</th></tr>
+  <tr><td>异步 inline 评论不打断执行</td><td>依赖 host UI 形态，成本高、收益存疑</td></tr>
+  <tr><td>/swarm、/boost 等命令形态</td><td>与 fstar "少命令、规则内嵌" 方向相反</td></tr>
+  <tr><td>浏览器录屏 artifact</td><td>依赖 IDE 形态，CLI 场景不适用</td></tr>
+  <tr><td>Integrity modes 三档</td><td>role card / capabilities 已有等价物</td></tr>
+</table>
+
+<footer>
+  基于 2026-11 对 antigravity.google 官方文档的调研 · 机制描述均来自官方资料，未实测产品 ·
+  调研报告存于本会话 fstar-research 产物
+</footer>
+</div>
+</body>
+</html>

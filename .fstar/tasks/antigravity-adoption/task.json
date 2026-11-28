@@ -1,0 +1,1728 @@
+{
+  "acceptance": {
+    "confirmed_at": "2026-11-28T14:48:54.175233Z",
+    "confirmed_by": "user",
+    "criteria_refs": [
+      "A-001",
+      "A-002",
+      "A-003",
+      "A-004",
+      "A-005",
+      "A-006"
+    ],
+    "evidence_refs": [
+      "5139d51e-2fd3-43ea-ac57-14446dbadb0a"
+    ],
+    "rule_ref": "memory:branch-workflow-rules (user rule, 2026-11-28 update)",
+    "source": {
+      "actor": {
+        "id": "user",
+        "role": "user"
+      },
+      "at": "2026-11-28T14:48:44.222529Z",
+      "quote": "每次开发新的功能或者修复什么问题都基于master 拉一个新的分支出来然后再进行开发，开发完之后你验收完就相当于我验收完了直接跳过用户验收阶段 提交并合并到main 分支 走发布流程",
+      "reference": "memory branch-workflow-rules update from 2026-11-28 conversation (auto-memory, persisted user rule)",
+      "scope": "accept",
+      "source_id": "conversation-20261128-branch-workflow-rules",
+      "type": "conversation",
+      "validates": "653479937fe241fd23ee6f03fe4e61724ee39f1406c18fad2e8d44339f467585"
+    },
+    "state": "valid",
+    "validates": {
+      "delivery": [
+        "74b7f97e596d5bb98b785c3a7009926f7ba90d8be99249eccdbfc3342cfd833b"
+      ],
+      "task": "653479937fe241fd23ee6f03fe4e61724ee39f1406c18fad2e8d44339f467585"
+    }
+  },
+  "archivedAt": null,
+  "assignee": null,
+  "base_branch": "origin/main",
+  "blocked": null,
+  "branch": "main",
+  "capabilities": [],
+  "children": [],
+  "commit": "d612f32606a883197bd997f611091dda9b240a0d",
+  "completedAt": "2026-11-28T14:48:54.175463Z",
+  "createdAt": "2026-11-28T07:59:56.150951Z",
+  "creator": "agent",
+  "deliverables": [
+    {
+      "criteria_refs": [
+        "A-001",
+        "A-002",
+        "A-003",
+        "A-004",
+        "A-005",
+        "A-006"
+      ],
+      "format": "md",
+      "name": "clarify",
+      "path": ".fstar/tasks/antigravity-adoption/clarify.md",
+      "version": "1"
+    },
+    {
+      "criteria_refs": [
+        "A-001",
+        "A-002",
+        "A-003",
+        "A-004",
+        "A-005",
+        "A-006"
+      ],
+      "format": "md",
+      "name": "criteria",
+      "path": ".fstar/tasks/antigravity-adoption/criteria.md",
+      "version": "1"
+    },
+    {
+      "criteria_refs": [
+        "A-001",
+        "A-002",
+        "A-003",
+        "A-004",
+        "A-005",
+        "A-006"
+      ],
+      "format": "md",
+      "name": "plan",
+      "path": ".fstar/tasks/antigravity-adoption/plan.md",
+      "version": "1"
+    }
+  ],
+  "description": "Antigravity 借鉴落地 + 大需求联调期任务关联修复：子任务挂靠已归档父任务（reopen 语义）、origin 字段、dispatch 上下文继承、Challenger 检查规则、walkthrough 标准化",
+  "events": [
+    {
+      "at": "2026-11-28T07:59:56.151418Z",
+      "data": {
+        "parent": null
+      },
+      "id": "a421032d-0af3-4c39-bdbb-e69a9f676a4f",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T07:59:56.151414Z",
+        "quote": "",
+        "reference": "task create",
+        "scope": "task create",
+        "source_id": "09fe6f27-d83b-45eb-b57a-c4c208538c74",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "created"
+    },
+    {
+      "at": "2026-11-28T08:03:38.234971Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006"
+          ],
+          "format": "md",
+          "name": "clarify",
+          "path": ".fstar/tasks/antigravity-adoption/clarify.md",
+          "version": "1"
+        },
+        "old": null
+      },
+      "id": "9b3f2636-da18-4ff6-9082-f506abd2c9c0",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T08:03:38.234967Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "59724b0e-8ab0-4167-801e-c6ef5e47d035",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-28T08:03:38.544549Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006"
+          ],
+          "format": "md",
+          "name": "criteria",
+          "path": ".fstar/tasks/antigravity-adoption/criteria.md",
+          "version": "1"
+        },
+        "old": null
+      },
+      "id": "8a87f076-e819-4d48-9b83-45101dbf12e0",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T08:03:38.544546Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "a407b957-57a5-46b2-9ff6-79bfd605c205",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-28T08:03:38.856964Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006"
+          ],
+          "format": "md",
+          "name": "plan",
+          "path": ".fstar/tasks/antigravity-adoption/plan.md",
+          "version": "1"
+        },
+        "old": null
+      },
+      "id": "c17f73a1-b356-4a08-86c3-d7d0de52d0a3",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T08:03:38.856962Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "d7b3c2a9-05c9-490c-b157-2b062d446a48",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-28T08:03:45.135872Z",
+      "data": {
+        "new": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006"
+          ],
+          "format": "md",
+          "name": "plan",
+          "path": ".fstar/tasks/antigravity-adoption/plan.md",
+          "version": "1"
+        },
+        "old": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006"
+          ],
+          "format": "md",
+          "name": "plan",
+          "path": ".fstar/tasks/antigravity-adoption/plan.md",
+          "version": "1"
+        }
+      },
+      "id": "cddb6a55-8fa8-475f-8e9d-7bc3c86c59c2",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T08:03:45.135869Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "e232c958-d959-4057-9ae1-b6eb16b44292",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "deliverable_updated"
+    },
+    {
+      "at": "2026-11-28T09:46:37.866580Z",
+      "data": {
+        "branch": "main",
+        "detached": false,
+        "snapshot": "f22f045b68e3e381fc7788a115d94b880908762c1ffea2ab25d7391304406ae0",
+        "worktree": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+      },
+      "id": "9c2dcf45-fbb1-40b8-be6f-36b4764a0b8d",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user",
+          "session": null
+        },
+        "at": "2026-11-28T09:35:00Z",
+        "quote": "开始",
+        "reference": "会话中 planning 收口（六轮反馈全部确认）后用户下达启动指令",
+        "scope": "start antigravity-adoption",
+        "source_id": "9dd21dde-282c-4fc4-86a9-bbd0c0ec0de6",
+        "type": "conversation",
+        "validates": "31be4ad73bd05fabd56cd8a4be36180cf294cc127ff85d2181417b5a05479481"
+      },
+      "type": "started"
+    },
+    {
+      "at": "2026-11-28T14:25:59.015496Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "1958119a-7e4b-427b-8214-6369daa8f9ae",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-28T14:25:59.015494Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "775f6a25-2469-4f95-bfb8-8b61c5dc46f4",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-28T14:25:59.015509Z",
+      "data": {
+        "dispatch_id": "20d9887e-1ac9-4944-b004-e7c005d54944",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004",
+          "P-005"
+        ],
+        "role": "check"
+      },
+      "id": "9a9ba577-ddff-40d4-8de0-4587596bd35e",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-28T14:25:59.015506Z",
+        "quote": "",
+        "reference": "dispatch 20d9887e-1ac9-4944-b004-e7c005d54944",
+        "scope": "dispatch",
+        "source_id": "3acf380c-48cf-42b7-802f-3b3241a8233f",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-28T14:41:14.228659Z",
+      "data": {
+        "evidence_id": "ad139a3b-f5f9-4fa6-8e70-6c21f8b3b60e",
+        "state": "valid"
+      },
+      "id": "4d046e07-009b-4ec0-a2b0-237feb99b79d",
+      "source": {
+        "id": "fstar-check-final-20d9887e",
+        "role": "check",
+        "session_id": "fstar-check"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-28T14:42:14.022051Z",
+      "data": {
+        "reason": "check dispatch 20d9887e harvested (final check recorded); explicit release before entering awaiting_acceptance"
+      },
+      "id": "c512a6d3-bc88-4b22-90bd-ed99872f8927",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-28T14:43:36.950707Z",
+      "data": {
+        "new_holder": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "old_holder": null,
+        "reason": null
+      },
+      "id": "f48e1a43-a10c-4dd5-931b-3f7ee913cf0f",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-28T14:43:36.950705Z",
+        "quote": "",
+        "reference": "lease",
+        "scope": "lease",
+        "source_id": "4f0a4867-6e8a-4ab7-a5b2-e87329fdb878",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "lease_acquired"
+    },
+    {
+      "at": "2026-11-28T14:43:36.950720Z",
+      "data": {
+        "dispatch_id": "e242fdbc-2954-4bed-b6e5-3698bda3f484",
+        "plan_item_ids": [
+          "P-001",
+          "P-002",
+          "P-003",
+          "P-004",
+          "P-005"
+        ],
+        "role": "check"
+      },
+      "id": "74eceb1f-1823-4222-83f4-6613078be55d",
+      "source": {
+        "actor": {
+          "id": "coordinator",
+          "role": "coordinator",
+          "session": null
+        },
+        "at": "2026-11-28T14:43:36.950718Z",
+        "quote": "",
+        "reference": "dispatch e242fdbc-2954-4bed-b6e5-3698bda3f484",
+        "scope": "dispatch",
+        "source_id": "bbd3fff5-3ede-4c90-bde4-cd7f6e721a53",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "dispatch_registered"
+    },
+    {
+      "at": "2026-11-28T14:45:17.405323Z",
+      "data": {
+        "evidence_id": "5139d51e-2fd3-43ea-ac57-14446dbadb0a",
+        "state": "valid"
+      },
+      "id": "2f8ce6b0-ad92-4996-8e3a-63a240b2c01a",
+      "source": {
+        "id": "fstar-check-final-e242fdbc",
+        "role": "check",
+        "session_id": "fstar-check"
+      },
+      "type": "evidence_added"
+    },
+    {
+      "at": "2026-11-28T14:45:58.085545Z",
+      "data": {
+        "reason": "final check dispatch e242fdbc harvested (evidence 5139d51e valid); explicit release before entering awaiting_acceptance"
+      },
+      "id": "1dad3612-ba02-4ae1-8615-1d7eaf463eb9",
+      "source": {
+        "id": "coordinator",
+        "role": "coordinator",
+        "session": null
+      },
+      "type": "lease_released"
+    },
+    {
+      "at": "2026-11-28T14:46:20.355157Z",
+      "data": {
+        "completedAt": null,
+        "evidence_refs": [
+          "5139d51e-2fd3-43ea-ac57-14446dbadb0a"
+        ]
+      },
+      "id": "99975dc0-268e-42f5-90cb-79d74e3ff60b",
+      "source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T14:46:20.354966Z",
+        "quote": "",
+        "reference": "enter_awaiting_acceptance",
+        "scope": "enter_awaiting_acceptance",
+        "source_id": "86f0d89d-e444-4463-ae61-ecd42d4d50c7",
+        "type": "system",
+        "validates": ""
+      },
+      "type": "awaiting_acceptance"
+    },
+    {
+      "at": "2026-11-28T14:48:54.175465Z",
+      "data": {
+        "accepted_via_rule": {
+          "criteria_refs": [
+            "A-001",
+            "A-002",
+            "A-003",
+            "A-004",
+            "A-005",
+            "A-006"
+          ],
+          "quote": "每次开发新的功能或者修复什么问题都基于master 拉一个新的分支出来然后再进行开发，开发完之后你验收完就相当于我验收完了直接跳过用户验收阶段 提交并合并到main 分支 走发布流程",
+          "report": ".fstar/tasks/antigravity-adoption/checks/final-check.md",
+          "rule_ref": "memory:branch-workflow-rules (user rule, 2026-11-28 update)",
+          "scope": "antigravity-adoption delivery on feat/antigravity-adoption, final check 5139d51e-2fd3-43ea-ac57-14446dbadb0a"
+        },
+        "evidence_refs": [
+          "5139d51e-2fd3-43ea-ac57-14446dbadb0a"
+        ]
+      },
+      "id": "2455bb67-1e0e-4769-bf3a-47a0ba9d1810",
+      "source": {
+        "actor": {
+          "id": "user",
+          "role": "user"
+        },
+        "at": "2026-11-28T14:48:44.222529Z",
+        "quote": "每次开发新的功能或者修复什么问题都基于master 拉一个新的分支出来然后再进行开发，开发完之后你验收完就相当于我验收完了直接跳过用户验收阶段 提交并合并到main 分支 走发布流程",
+        "reference": "memory branch-workflow-rules update from 2026-11-28 conversation (auto-memory, persisted user rule)",
+        "scope": "accept",
+        "source_id": "conversation-20261128-branch-workflow-rules",
+        "type": "conversation",
+        "validates": "653479937fe241fd23ee6f03fe4e61724ee39f1406c18fad2e8d44339f467585"
+      },
+      "type": "accepted"
+    }
+  ],
+  "evidence": [
+    {
+      "delivery": {
+        "digest": "500d1569707dda0260f3eaab75182d34348223027d82bcc2f02768f718c29c74",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/checks/final-check.md",
+            "sha256": "e79a0e886863d46d555ec617693e0c68fb738395bb609b45e7f5cb3cb7c86310"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/clarify.md",
+            "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/criteria.md",
+            "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/design.md",
+            "sha256": "0e772818f770de032b8f8db6bf8d7b7fabb5412b20195b26ade1c6148c94e6eb"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/doc/antigravity-comparison.html",
+            "sha256": "93f8de69cceee39a2616e8d577728628f690748498d5b3d8e16fde006ae34463"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/doc/walkthrough.md",
+            "sha256": "5af3724d1a5e8a4b0d5fea0adc1710cb4e5e555712c9487551dcb8283fc71960"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/plan.md",
+            "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/task.json",
+            "sha256": "c2a81ab28425b1a9788b9cca9b5b96175e51aeed9a1e35aedb90ca87fff89ea0"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/clarify.md",
+            "sha256": "3e70f179031bf1bb368a0226da1f44dd3c439fe838f3454d209b46503edff358"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/criteria.md",
+            "sha256": "431236c4f1fe429bbc0fe717d3c29ca9beb78125246c3abb9f4c057696157654"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/design.md",
+            "sha256": "112738d4706559b39b8ec347d3eb2bc0eda327473417c06de68670eab847f47f"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/plan.md",
+            "sha256": "d8ecf328f8e7a3a113f37ac27a24dc14c3b2f46879a5f7d347dc3e9f2e94850a"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/task.json",
+            "sha256": "fcaf411edc94e2baf349f4277c7d91747fa7d358be03d809ffe3ee63e5163154"
+          },
+          {
+            "exists": true,
+            "path": "CONTRIBUTING.md",
+            "sha256": "0d4609152515c380f23e720ca48a9cb2304ad481cf22fb950272822dd810b7d2"
+          },
+          {
+            "exists": true,
+            "path": "resources/agents/fstar-steward.md",
+            "sha256": "2d7dd8597bc3f9a25d0318b9f7c82b6fe9e0b8247ded33b77c94c4683a711c50"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "f2d56d3b84655515d5014e08f01348662720499378acc7c90b9afe2a3d5c10ad"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/capabilities.md",
+            "sha256": "3bda1d6643a8c45921563b9bbcb3c1b4844b44cab238b112d0a71f0c3fbf9b7d"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "bac2d490669c5669aeac85b42b51b62ec2d0a2f58b4b283352033cf120274eba"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "7c16f7d3711f53cc65bfe03db431b78f7e56be29d6db9cfb245f20296280824b"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-archive/SKILL.md",
+            "sha256": "53305227287f7d09b52b64725ad4bc8a00da2dfa59dc6f6fbec04ae85a69d30e"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-check/SKILL.md",
+            "sha256": "14457f352db9c50065413cc1958fc208072b7419b93b1456a34e8fcdbbccc126"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-clarify/SKILL.md",
+            "sha256": "bdc2fe3ff1899c77970d99156d7780302c42c19e337d5e255a1fbeef9a7a90c5"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-execute/SKILL.md",
+            "sha256": "1811687715f48461cae7262a1ab726e8dc97326ae55d1dc8e2b3dbff185d2425"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-plan/SKILL.md",
+            "sha256": "b7d3304bd284b4a797465c5a11001ee64dee9b952118478e9a140031c76ddd2b"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/task/plan.md",
+            "sha256": "014fe8e9df160da234ae0f3b2e894374f6dc66f2bb75b8f19cb677596bc76278"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "4bfaaf160e25dabed6be63a028700c342e8248e38283e50d909caaa0e6086a4a"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/content.py",
+            "sha256": "2bcc5a60c54f6a11f5441bd375c6e47f2481fb51a6a7b846537d0d9e24224a29"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "4545bdff44573c76cbd73eeb5ec49fb921d6c3516d0f25299bf55a931414f513"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/models.py",
+            "sha256": "ad70458092cd07b1bbb8c6287f7d20183a2f84ab8562c30941f8358e6804778d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "4716b752fca56560e00ac9bb1e3b6a120b9c58fe3e670b4ec2ed9d52236569f8"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "e36db3f53d8a140f421b83ef3af22160ca7caa9e70f9cb7935e69982aad71905"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "8a3bec33e921a921db79d42c852dbb0167a36523a198ac81a725f2dcda5d76f7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "c5ebc3a600c710878c4a460d9b794c61b7ad6d962a754f3ea2f7c7061765da79"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "06c4eabd4f4092149f3cc54a0c0fba847837fcec0d326ccce35303321f0b96c6"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "e0a206def99ebec3427e8bb513a02b10a544f453243be5a0b47d66ee2ec5a108"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "702eeeb71a427ce94196a7dcb38ca8c834355c1cfce5218b37a59177cd8b65b0"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "4cea8ca4598384915c48fb71c2a7aab89ddeeee333d1167616cba61e9f141f87"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "3f317eab724c54b1255c586a0883d0f83db8375e50fd8ee7b99d425d25adecae"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_integration_wiring.py",
+            "sha256": "2567739044c6c9c9e2bd760e3b9fce06f3c132fa3348be169d540ea555be9b96"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_origin_unarchive.py",
+            "sha256": "5f26ce809af77758462b137b117e098bc1a33f2d5047c74146d4e13ae05a64f3"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_p004_rules.py",
+            "sha256": "c16be0234c189b6dbd7ee368b302a24f539c9734e869f4bf030b2923caf6c735"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_parent_context.py",
+            "sha256": "e07d1372f2f3dccf67d3cc354a059d8a63b9dc6abd71e6528e2e6df7cc900b4f"
+          }
+        ]
+      },
+      "dispatch_id": "20d9887e-1ac9-4944-b004-e7c005d54944",
+      "environment": {
+        "branch": "feat/antigravity-adoption",
+        "name": "macOS Darwin 27.2.0",
+        "node": "v24.14.0",
+        "python": "3.9.6"
+      },
+      "id": "ad139a3b-f5f9-4fa6-8e70-6c21f8b3b60e",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/antigravity-adoption/clarify.md",
+          "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+        },
+        {
+          "path": ".fstar/tasks/antigravity-adoption/criteria.md",
+          "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+        },
+        {
+          "path": ".fstar/tasks/antigravity-adoption/plan.md",
+          "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+        }
+      ],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-001: unarchive() top-level-only/user-confirmation/milestone event, _origin_followups() attach aggregation, full re-archive cycle verified live (Challenger)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-002: _validate_origin id match, parent_context_inputs injection, three-state degradation, archive_path-as-cache id-scan fallback verified (Challenger)"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-003: plan template + fstar-plan SKILL.md verification-binding rule; this task's own plan items carry verification methods"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-004: fstar-check SKILL.md Challenger duty present; this check executed it (adversarial table in final-check.md)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-005: archive(workflow=True) walkthrough_missing gate, PARENT_DOC_CANDIDATES injection, doc/walkthrough.md produced"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-006: comparison material under task doc/ per routing.md:68; OPTIONAL_TASK_FIELDS compatibility, no schema bump, legacy suites green"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-007: fstar-clarify SKILL.md post-creation clarification loop + routing.md:60 sync (content-layer verification)"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-008: routing.md:56 coordinator pure-dispatch mode with explicit exception boundary (content-layer verification)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-009"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-009: session grants store + dual-channel hook fallback + CLI enable --session; real-host e2e honestly reported as not automatable here"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-010"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-010: steward in content.ROLES, agents/fstar-steward.md, role_member mapping both sides, installer asset list"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-011"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-011: Grill mode section + research-dispatch routing rule (content-layer verification)"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-012"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-012: four clarification rules verbatim-checked in fstar-clarify SKILL.md (content-layer verification)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-013"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-013: fstar-plan dual gate, prompt-states planning rule, fstar start _needs_design_doc soft gate with 3-state test coverage"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-28T14:41:14.222637Z",
+      "producer": {
+        "id": "fstar-check-final-20d9887e",
+        "role": "check",
+        "session_id": "fstar-check"
+      },
+      "read_only": true,
+      "report": {
+        "path": ".fstar/tasks/antigravity-adoption/checks/final-check.md",
+        "sha256": "e79a0e886863d46d555ec617693e0c68fb738395bb609b45e7f5cb3cb7c86310"
+      },
+      "run_id": "final-check-antigravity-adoption-20261128",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/antigravity-adoption/clarify.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-002",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-003",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-004",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-005",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-006",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            }
+          ],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-002",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-003",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-004",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-005",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-006",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/antigravity-adoption/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-002",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-003",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-004",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-005",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-006",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            }
+          ],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-002",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-003",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-004",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-005",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-006",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/antigravity-adoption/plan.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-002",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-003",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-004",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-005",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-006",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            }
+          ],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-002",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-003",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-004",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-005",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-006",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "delivery": {
+        "digest": "74b7f97e596d5bb98b785c3a7009926f7ba90d8be99249eccdbfc3342cfd833b",
+        "paths": [
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/checks/final-check.md",
+            "sha256": "e79a0e886863d46d555ec617693e0c68fb738395bb609b45e7f5cb3cb7c86310"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/clarify.md",
+            "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/criteria.md",
+            "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/design.md",
+            "sha256": "0e772818f770de032b8f8db6bf8d7b7fabb5412b20195b26ade1c6148c94e6eb"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/doc/antigravity-comparison.html",
+            "sha256": "93f8de69cceee39a2616e8d577728628f690748498d5b3d8e16fde006ae34463"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/doc/walkthrough.md",
+            "sha256": "5af3724d1a5e8a4b0d5fea0adc1710cb4e5e555712c9487551dcb8283fc71960"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/antigravity-adoption/plan.md",
+            "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/clarify.md",
+            "sha256": "3e70f179031bf1bb368a0226da1f44dd3c439fe838f3454d209b46503edff358"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/criteria.md",
+            "sha256": "431236c4f1fe429bbc0fe717d3c29ca9beb78125246c3abb9f4c057696157654"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/design.md",
+            "sha256": "112738d4706559b39b8ec347d3eb2bc0eda327473417c06de68670eab847f47f"
+          },
+          {
+            "exists": true,
+            "path": ".fstar/tasks/package-restructure/plan.md",
+            "sha256": "d8ecf328f8e7a3a113f37ac27a24dc14c3b2f46879a5f7d347dc3e9f2e94850a"
+          },
+          {
+            "exists": true,
+            "path": "CONTRIBUTING.md",
+            "sha256": "0d4609152515c380f23e720ca48a9cb2304ad481cf22fb950272822dd810b7d2"
+          },
+          {
+            "exists": true,
+            "path": "resources/agents/fstar-steward.md",
+            "sha256": "2d7dd8597bc3f9a25d0318b9f7c82b6fe9e0b8247ded33b77c94c4683a711c50"
+          },
+          {
+            "exists": true,
+            "path": "resources/package-assets.json",
+            "sha256": "f2d56d3b84655515d5014e08f01348662720499378acc7c90b9afe2a3d5c10ad"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/capabilities.md",
+            "sha256": "3bda1d6643a8c45921563b9bbcb3c1b4844b44cab238b112d0a71f0c3fbf9b7d"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/prompt-states.md",
+            "sha256": "bac2d490669c5669aeac85b42b51b62ec2d0a2f58b4b283352033cf120274eba"
+          },
+          {
+            "exists": true,
+            "path": "resources/runtime/routing.md",
+            "sha256": "7c16f7d3711f53cc65bfe03db431b78f7e56be29d6db9cfb245f20296280824b"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-archive/SKILL.md",
+            "sha256": "53305227287f7d09b52b64725ad4bc8a00da2dfa59dc6f6fbec04ae85a69d30e"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-check/SKILL.md",
+            "sha256": "14457f352db9c50065413cc1958fc208072b7419b93b1456a34e8fcdbbccc126"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-clarify/SKILL.md",
+            "sha256": "bdc2fe3ff1899c77970d99156d7780302c42c19e337d5e255a1fbeef9a7a90c5"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-execute/SKILL.md",
+            "sha256": "1811687715f48461cae7262a1ab726e8dc97326ae55d1dc8e2b3dbff185d2425"
+          },
+          {
+            "exists": true,
+            "path": "resources/skills/fstar-plan/SKILL.md",
+            "sha256": "b7d3304bd284b4a797465c5a11001ee64dee9b952118478e9a140031c76ddd2b"
+          },
+          {
+            "exists": true,
+            "path": "resources/templates/task/plan.md",
+            "sha256": "014fe8e9df160da234ae0f3b2e894374f6dc66f2bb75b8f19cb677596bc76278"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/cli.py",
+            "sha256": "4bfaaf160e25dabed6be63a028700c342e8248e38283e50d909caaa0e6086a4a"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/content.py",
+            "sha256": "2bcc5a60c54f6a11f5441bd375c6e47f2481fb51a6a7b846537d0d9e24224a29"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/dispatch.py",
+            "sha256": "4545bdff44573c76cbd73eeb5ec49fb921d6c3516d0f25299bf55a931414f513"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/models.py",
+            "sha256": "ad70458092cd07b1bbb8c6287f7d20183a2f84ab8562c30941f8358e6804778d"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/hooks.py",
+            "sha256": "4716b752fca56560e00ac9bb1e3b6a120b9c58fe3e670b4ec2ed9d52236569f8"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/runtime/inject.py",
+            "sha256": "e36db3f53d8a140f421b83ef3af22160ca7caa9e70f9cb7935e69982aad71905"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/store.py",
+            "sha256": "8a3bec33e921a921db79d42c852dbb0167a36523a198ac81a725f2dcda5d76f7"
+          },
+          {
+            "exists": true,
+            "path": "src/fstar/tasks.py",
+            "sha256": "c5ebc3a600c710878c4a460d9b794c61b7ad6d962a754f3ea2f7c7061765da79"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_content.py",
+            "sha256": "06c4eabd4f4092149f3cc54a0c0fba847837fcec0d326ccce35303321f0b96c6"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_core.py",
+            "sha256": "e0a206def99ebec3427e8bb513a02b10a544f453243be5a0b47d66ee2ec5a108"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_e2e_scenarios.py",
+            "sha256": "702eeeb71a427ce94196a7dcb38ca8c834355c1cfce5218b37a59177cd8b65b0"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_hooks.py",
+            "sha256": "4cea8ca4598384915c48fb71c2a7aab89ddeeee333d1167616cba61e9f141f87"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_installer.py",
+            "sha256": "3f317eab724c54b1255c586a0883d0f83db8375e50fd8ee7b99d425d25adecae"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_integration_wiring.py",
+            "sha256": "2567739044c6c9c9e2bd760e3b9fce06f3c132fa3348be169d540ea555be9b96"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_origin_unarchive.py",
+            "sha256": "5f26ce809af77758462b137b117e098bc1a33f2d5047c74146d4e13ae05a64f3"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_p004_rules.py",
+            "sha256": "c16be0234c189b6dbd7ee368b302a24f539c9734e869f4bf030b2923caf6c735"
+          },
+          {
+            "exists": true,
+            "path": "tests/test_parent_context.py",
+            "sha256": "e07d1372f2f3dccf67d3cc354a059d8a63b9dc6abd71e6528e2e6df7cc900b4f"
+          }
+        ]
+      },
+      "dispatch_id": "e242fdbc-2954-4bed-b6e5-3698bda3f484",
+      "environment": {
+        "branch": "feat/antigravity-adoption",
+        "name": "macOS Darwin 27.2.0",
+        "node": "v24.14.0",
+        "python": "3.9.6"
+      },
+      "id": "5139d51e-2fd3-43ea-ac57-14446dbadb0a",
+      "input_files": [
+        {
+          "path": ".fstar/tasks/antigravity-adoption/clarify.md",
+          "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+        },
+        {
+          "path": ".fstar/tasks/antigravity-adoption/criteria.md",
+          "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+        },
+        {
+          "path": ".fstar/tasks/antigravity-adoption/plan.md",
+          "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+        }
+      ],
+      "items": [
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "A-001"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-001: unarchive() top-level-only/user-confirmation/milestone event, _origin_followups() attach aggregation, full re-archive cycle verified live (Challenger)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "A-002"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-002: _validate_origin id match, parent_context_inputs injection, three-state degradation, archive_path-as-cache id-scan fallback verified (Challenger)"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-003"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-003: plan template + fstar-plan SKILL.md verification-binding rule; this task's own plan items carry verification methods"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-004"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-004: fstar-check SKILL.md Challenger duty present; this check executed it (adversarial table in final-check.md)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-005"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-005: archive(workflow=True) walkthrough_missing gate, PARENT_DOC_CANDIDATES injection, doc/walkthrough.md produced"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-002",
+          "requirement_ids": [
+            "A-006"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-006: comparison material under task doc/ per routing.md:68; OPTIONAL_TASK_FIELDS compatibility, no schema bump, legacy suites green"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-007"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-007: fstar-clarify SKILL.md post-creation clarification loop + routing.md:60 sync (content-layer verification)"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-008"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-008: routing.md:56 coordinator pure-dispatch mode with explicit exception boundary (content-layer verification)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-009"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-009: session grants store + dual-channel hook fallback + CLI enable --session; real-host e2e honestly reported as not automatable here"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-010"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-010: steward in content.ROLES, agents/fstar-steward.md, role_member mapping both sides, installer asset list"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-011"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-011: Grill mode section + research-dispatch routing rule (content-layer verification)"
+        },
+        {
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-012"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-012: four clarification rules verbatim-checked in fstar-clarify SKILL.md (content-layer verification)"
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest discover -s tests (Ran 1146, OK); node --test tests/test_package.cjs (16 pass)",
+          "plan_item": "P-004",
+          "requirement_ids": [
+            "A-013"
+          ],
+          "result": "passed",
+          "review_method": "final-check.md A-013: fstar-plan dual gate, prompt-states planning rule, fstar start _needs_design_doc soft gate with 3-state test coverage"
+        }
+      ],
+      "kind": "check",
+      "produced_at": "2026-11-28T14:45:17.393656Z",
+      "producer": {
+        "id": "fstar-check-final-e242fdbc",
+        "role": "check",
+        "session_id": "fstar-check"
+      },
+      "read_only": true,
+      "report": {
+        "path": ".fstar/tasks/antigravity-adoption/checks/final-check.md",
+        "sha256": "e79a0e886863d46d555ec617693e0c68fb738395bb609b45e7f5cb3cb7c86310"
+      },
+      "run_id": "final-check-antigravity-adoption-20261128-r2",
+      "scope": "final",
+      "state": "valid",
+      "validates": [
+        {
+          "artifact": ".fstar/tasks/antigravity-adoption/clarify.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-002",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-003",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-004",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-005",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-006",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            }
+          ],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-002",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-003",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-004",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-005",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            },
+            {
+              "id": "A-006",
+              "sha256": "4a7a59895e244ad55536306f58c9e91b676ccdea654b5d867aeb5859aaf8d39a"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/antigravity-adoption/criteria.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-002",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-003",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-004",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-005",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-006",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            }
+          ],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-002",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-003",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-004",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-005",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            },
+            {
+              "id": "A-006",
+              "sha256": "782b3b797a10eee0e8f8487b59a3c767c6bc5cfff2f603d6c73a89e71d076d8c"
+            }
+          ]
+        },
+        {
+          "artifact": ".fstar/tasks/antigravity-adoption/plan.md",
+          "dependencies": [
+            {
+              "id": "A-001",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-002",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-003",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-004",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-005",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-006",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            }
+          ],
+          "granularity": "file",
+          "items": [
+            {
+              "id": "A-001",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-002",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-003",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-004",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-005",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            },
+            {
+              "id": "A-006",
+              "sha256": "722d2b10bdc52deebdeaf55ebfdb964cd7c7e6aa95f3b5f6ca9d24fa47a911d5"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "id": "90b994e0-9105-4042-aef1-abdf3d3edde2",
+  "lease": null,
+  "meta": {
+    "disposition": null,
+    "git_binding": {
+      "detached": false,
+      "recorded_by": "branch_binding"
+    },
+    "related_tasks": [],
+    "reminders": {},
+    "templates": {
+      "artifact_map": {
+        ".fstar/tasks/antigravity-adoption/clarify.md": {
+          "A-001": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-002": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-003": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-004": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-005": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-006": {
+            "dependencies": [],
+            "mode": "file"
+          }
+        },
+        ".fstar/tasks/antigravity-adoption/criteria.md": {
+          "A-001": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-002": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-003": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-004": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-005": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-006": {
+            "dependencies": [],
+            "mode": "file"
+          }
+        },
+        ".fstar/tasks/antigravity-adoption/plan.md": {
+          "A-001": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-002": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-003": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-004": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-005": {
+            "dependencies": [],
+            "mode": "file"
+          },
+          "A-006": {
+            "dependencies": [],
+            "mode": "file"
+          }
+        }
+      },
+      "artifact_map_sha256": "4d9ac46327df5a50fe227fb1da465015d0aa04f547af2d881e2c893ed01bc793",
+      "artifact_map_source": {
+        "actor": {
+          "id": "agent",
+          "role": "agent",
+          "session": null
+        },
+        "at": "2026-11-28T08:03:45.135615Z",
+        "quote": "",
+        "reference": "register_deliverable",
+        "scope": "register_deliverable",
+        "source_id": "e0fc9336-f76d-47fd-9f88-1b0702587b2e",
+        "type": "system",
+        "validates": ""
+      },
+      "dispatch_harvested": [
+        "20d9887e-1ac9-4944-b004-e7c005d54944",
+        "e242fdbc-2954-4bed-b6e5-3698bda3f484"
+      ],
+      "dispatch_registrations": {
+        "20d9887e-1ac9-4944-b004-e7c005d54944": {
+          "sha256": "0d43fd0073b611519a4c383084eac22b76d9ed60019978ea80c6d2812b845379",
+          "state": "registered"
+        },
+        "e242fdbc-2954-4bed-b6e5-3698bda3f484": {
+          "sha256": "ae705ac78d0e35e31b5befa6fc4d26f1206026777de535e55712e1fd5cb226ec",
+          "state": "registered"
+        }
+      }
+    }
+  },
+  "name": "antigravity-adoption",
+  "notes": "",
+  "phase": "completed",
+  "pr_url": "",
+  "priority": "P2",
+  "title": "antigravity-adoption",
+  "worktree_path": "/Users/zhangyangfan/workspace/projects/vibecoding/fstar-workflow"
+}

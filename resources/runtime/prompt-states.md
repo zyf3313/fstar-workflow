@@ -21,16 +21,27 @@ short natural-language note to the user, not as a command for them to run.
 [prompt-state:planning]
 Task is in planning. Requirements are being settled through the clarify
 flow, acceptance criteria (criteria.md) are formed from the user's own
-words. For persistent development tasks, default to plan.md as the execution
-entry after the user reviews the settled basis, including for simple changes;
-reference criteria, applicable specifications and any design. Select a
-separate design according to complexity and decision needs. Planning and
-design still require their respective grants; when unavailable or declined,
-report the missing persistent plan and follow the authorized minimal loop
-where applicable. Simple session-only work can use a concise goal and
-acceptance conditions without lengthy documents. Only blocking open questions
-hold the work back; questions marked confirm-as-you-go proceed with their
-confirmation moment. Never treat an inference as the user's confirmation.
+words. The clarification loop continues after task creation: answer the
+user's opinion-seeking first, keep the round-trip until requirements are
+clarified, and while it is incomplete generate no planning document,
+advance no phase, and do not ask about next steps. Planning sequence:
+plan only after clarification converged (user acknowledged requirements,
+no blocking open question) and, for a design-needing task (state-machine
+or schema changes, multi-option trade-offs — a design-required marker in
+criteria.md), after the design document exists and has been shown to the
+user; design precedes plan, and "settled" is judged against these gates,
+not a single sentence of authorization. The start command enforces the
+same design soft gate. For persistent development tasks, default to
+plan.md as the execution entry after the user reviews the settled basis,
+including for simple changes; reference criteria, applicable
+specifications and any design. Select a separate design according to
+complexity and decision needs. Planning and design still require their
+respective grants; when unavailable or declined, report the missing
+persistent plan and follow the authorized minimal loop where applicable.
+Simple session-only work can use a concise goal and acceptance conditions
+without lengthy documents. Only blocking open questions hold the work
+back; questions marked confirm-as-you-go proceed with their confirmation
+moment. Never treat an inference as the user's confirmation.
 [/prompt-state:planning]
 
 [prompt-state:in_progress]

@@ -290,7 +290,13 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
                 context = {}
 
     if not persistent_context:
-        context = grants(payload.get("extensions", []))
+        # A-009 dual channel: payload extensions first; when the host event
+        # payload carries no records, read the session grants store written
+        # by `fstar extension enable --session <id>` for this session.
+        session_records = payload.get("extensions")
+        if not session_records and session_id and project_root is not None:
+            session_records = located["store"].read_session_grants(session_id)
+        context = grants(session_records or [])
 
     # Indexes are read-only context: inject them by default so user-level rules
     # and project knowledge stay visible without an extension grant. Writing to
@@ -575,6 +581,7 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
     task_line = inject.session_only_reference()
     context = {}
     task_summary = None
+    footer_parent_lines: List[str] = []
     if task_ref and task_ref != "session-only" and project_root is None:
         raise DomainError("project_not_initialized", "Persistent worker context requires an initialized project")
     if project_root is not None:
@@ -625,17 +632,47 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
                     if includes(context, "planning-review", "plan") else None)
             task_summary = {"task_id": task["id"], "name": task["name"], "phase": task["phase"],
                             "plan_item_ids": plan_item_ids, "item_snapshot": snap}
+            # P-003 (antigravity-adoption design §3.2): tasks carrying an
+            # origin inject the parent requirement task's design/walkthrough
+            # docs. Tasks without origin skip this path entirely (A-006).
+            parent_report = inject.parent_context_inputs(store, task, budgets)
+            if parent_report is not None:
+                inputs.extend(parent_report["inputs"])
+                report = parent_report["report"]
+                task_summary["parent_context"] = report
+                if report["status"] == "missing":
+                    footer_parent = ("Parent context unavailable: %s (origin %s)" % (
+                        report["reason"], report["origin"]["task_id"]))
+                elif report["status"] == "partial":
+                    footer_parent = ("Parent context partial: %s deferred under the injection budget "
+                                     "(see Unloaded inputs); read the parent documents yourself before executing" % (
+                                         ", ".join(sorted(entry["kind"] for entry in report["deferred"]))))
+                else:
+                    footer_parent = ("Parent context loaded from %s (%s)" % (
+                        report.get("parent_path"), ", ".join(sorted(entry["kind"] for entry in report["loaded"]))
+                        or "no documents"))
+                footer_parent_lines.append(footer_parent)
 
     if not task_ref or task_ref == "session-only":
-        context = grants(payload.get("extensions", []))
+        # A-009 dual channel: payload extensions first; the host dispatch
+        # payload carries them when the host preserves the extensions
+        # array. When it strips them, read the session grants store written
+        # by `fstar extension enable --session <id>` (same records, payload
+        # first, readback fallback).
+        session_records = payload.get("extensions")
+        if not session_records and session_id and project_root is not None:
+            session_records = located["store"].read_session_grants(session_id)
+        context = grants(session_records or [])
     role_member = {"research": ("multi-agent", "research"),
-                   "editor": ("planning-review", "editor")}.get(role)
+                   "editor": ("planning-review", "editor"),
+                   "steward": ("multi-agent", "steward")}.get(role)
     if role_member and not includes(context, *role_member):
         raise DomainError("extension_not_authorized", "Worker role requires an included extension member",
                           {"package": role_member[0], "member": role_member[1]}, status=3)
 
     footer = ["%s" % task_line, "Extension members in this context: %s" % json.dumps(
         {key: sorted(value) for key, value in context.items()}, sort_keys=True)]
+    footer.extend(footer_parent_lines)
     footer.append("Role: %s. Read complete applicable context; summaries do not replace source bodies." % role)
     footer.append("If any input is listed under 'Unloaded inputs', you MUST read it in full before executing.")
     # S-5: the dispatch's selected skills ride along so the worker actually

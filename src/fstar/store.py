@@ -1074,6 +1074,41 @@ class TaskStore:
         digest = hashlib.sha256(session_id.encode()).hexdigest()
         return self.project_runtime / "sessions" / (digest + ".json")
 
+    def session_grants_path(self, session_id: str) -> Path:
+        # A-009: session-only extension grants live beside the session
+        # pointer under the same hashed, project-scoped runtime slot, so a
+        # host PreToolUse hook can resolve them with the payload's
+        # session_id even when the host stripped the extensions array.
+        digest = hashlib.sha256(session_id.encode()).hexdigest()
+        return self.project_runtime / "sessions" / (digest + ".grants.json")
+
+    def set_session_grants(self, session_id: Optional[str], records: list) -> None:
+        """Persist session-only extension records for hook readback.
+
+        Written by `fstar extension enable --session <id>` on the session-only
+        path; routing context only (not a security boundary, same as the
+        records themselves). Passing an empty list writes an empty store so a
+        later disable is reflected.
+        """
+        if not session_id:
+            raise DomainError("session_required", "Storing session grants requires a session id")
+        path = self.session_grants_path(session_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write_json(path, {"project": str(self.project_root), "session_id": session_id,
+                                 "extensions": records})
+
+    def read_session_grants(self, session_id: Optional[str]) -> list:
+        """Read session-only extension records; missing/unreadable → empty."""
+        if not session_id:
+            return []
+        try:
+            with self.session_grants_path(session_id).open("r", encoding="utf-8") as stream:
+                data = json.load(stream)
+        except (OSError, ValueError):
+            return []
+        records = data.get("extensions") if isinstance(data, dict) else None
+        return records if isinstance(records, list) else []
+
     def set_current(self, session_id: str, task_dir: Path, task_id: str) -> None:
         if not session_id:
             return

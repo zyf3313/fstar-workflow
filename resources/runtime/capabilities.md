@@ -23,7 +23,9 @@ recommend only the highest-value one. Do not enable anything yourself.
   takeover/recovery bookkeeping.
 - `multi-agent` — bounded research and parallel implementation by sub-agents.
   Needed when the task needs evidence gathered in the background or multiple
-  independent write scopes at once.
+  independent write scopes at once. Includes the `steward` member for the
+  fstar-steward role (task lifecycle operations and first-draft task-document
+  creation), which the coordinator's pure-dispatch mode relies on.
 
 The project index (`.fstar/index.md`) and user index (`~/.fstar/index.md`) are
 injected read-only at session start regardless of grants. Writing to those

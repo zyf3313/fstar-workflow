@@ -354,8 +354,8 @@ class EntryIndexTests(WiringCase):
         plan = installer.plan_install(operation="install", roots=roots, hosts=["claude"])
         installer.apply_plan(plan, roots=roots)
         report = installer.entry_index_report(self.user_root)
-        # 5 hook registrations plus 15 adapted host files (10 skills, 5 agents).
-        self.assertEqual(len(report["active"]), 20)
+        # 5 hook registrations plus 16 adapted host files (10 skills, 6 agents).
+        self.assertEqual(len(report["active"]), 21)
         self.assertEqual(report["missing"], [])
         settings = host_root / "settings.json"
         original = settings.read_text(encoding="utf-8")
@@ -373,7 +373,7 @@ class EntryIndexTests(WiringCase):
         settings.write_text(json.dumps(document), encoding="utf-8")
         report = installer.entry_index_report(self.user_root)
         self.assertIn("claude:SessionStart", report["missing"])
-        self.assertEqual(len(report["active"]), 19)
+        self.assertEqual(len(report["active"]), 20)
         self.assertFalse(installer.doctor(roots=roots)["healthy"])
         settings.write_text(original, encoding="utf-8")
         # Uninstall removes the settings file: the index must stop claiming

@@ -431,8 +431,8 @@ class WorkerContextTests(HookCase):
             hooks.worker_context({}, start=self.project, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock)
 
     def test_four_roles_inject_role_cards(self):
-        records = [self.service.enable_extension(None, authorization={"id": package, "scope": "custom", "included": [member], "source": {"type": "test"}}, actor=self.user)["authorization"]
-                   for package, member in (("multi-agent", "research"), ("planning-review", "editor"))]
+        records = [self.service.enable_extension(None, authorization={"id": package, "scope": "custom", "included": members, "source": {"type": "test"}}, actor=self.user)["authorization"]
+                   for package, members in (("multi-agent", ["research", "steward"]), ("planning-review", ["editor"]))]
         for role in inject.ROLES:
             result = hooks.worker_context({"extensions": records}, role=role, start=self.project, user_root=self.user_root, runtime_root=self.runtime_root, clock=self.clock)
             self.assertIn(("fstar-%s.md" % role), result["text"])

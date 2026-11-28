@@ -1954,11 +1954,11 @@ class S6TwoHost(ScenarioCase):
 
         # S6-3 doctor: disk-verified entries; indexed-but-uninstalled -> stale
         self.step("S6-3", ["doctor"] + self.host_args(),
-                  expected="10 skills, 5 roles, 5 hooks, 12 templates; entries disk-verified",
+                  expected="10 skills, 6 roles, 5 hooks, 12 templates; entries disk-verified",
                   check=self.expect_ok(lambda p: (
                       "counts=%s healthy=%s" % (p["counts"], p["healthy"]))))
         report = json.loads(self.last_stdout)
-        self.assertEqual({"skills": 10, "roles": 5, "templates": 12,
+        self.assertEqual({"skills": 10, "roles": 6, "templates": 12,
                           "hooks": 5}, report["counts"])
         self.assertTrue(report["healthy"])
         # Stale entry index: remove an installed entry file, doctor must flag it.

@@ -38,7 +38,7 @@ def artifact_text(item_id="需求一", reference=None):
 class InventoryTests(unittest.TestCase):
     def test_exact_inventory_and_validator(self):
         self.assertEqual(10, len(SKILLS))
-        self.assertEqual(5, len(ROLES))
+        self.assertEqual(6, len(ROLES))
         self.assertEqual(12, len(TEMPLATES))
         self.assertEqual([], list(validate_resources(RESOURCES)))
         self.assertEqual(4, len(list((RESOURCES / "templates").rglob("*.mapping.yaml"))))
