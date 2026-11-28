@@ -68,7 +68,9 @@ def _confirmation(args, service: TaskService, ref: str) -> dict:
         try:
             task = service.store.read(ref)
         except DomainError as exc:
-            if args.command != "archive" or not args.operation_id or exc.code != "task_not_found":
+            reads_archived = (args.command == "archive" and args.operation_id) or \
+                (args.command == "task" and getattr(args, "task_command", None) == "unarchive")
+            if not reads_archived or exc.code != "task_not_found":
                 raise
             task = service.store.read(ref, archived=True)
         return {"source_id": getattr(args, "invocation", None) or "cli", "type": "command", "at": service.clock(), "actor": _actor(args, "user"), "reference": getattr(args, "invocation", None) or "interactive-cli", "quote": "", "scope": args.command, "validates": source_snapshot(task)}
@@ -104,6 +106,11 @@ def register_core_commands(subparsers) -> None:
     create.add_argument("--description", default="")
     create.add_argument("--parent")
     create.add_argument("--related")
+    create.add_argument("--origin", help="JSON file {task_id, archive_path, reason} linking this follow-up to a possibly archived parent requirement task")
+    unarchive = task_sub.add_parser("unarchive")
+    _add_target(unarchive)
+    _add_confirmation(unarchive)
+    unarchive.add_argument("--reason", help="why the archived task is moving back to the active root")
     listing = task_sub.add_parser("list")
     mode = listing.add_mutually_exclusive_group()
     mode.add_argument("--active", action="store_true")
@@ -325,7 +332,11 @@ def _dispatch(args):
     if args.command == "task":
         if args.task_command == "create":
             related = _json_file(args.related, "related").get("related", []) if args.related else None
-            return service.create(name=args.name, title=args.title, description=args.description, actor=_actor(args), parent=args.parent, related=related, session_id=args.session)
+            origin = _json_file(args.origin, "origin") if args.origin else None
+            return service.create(name=args.name, title=args.title, description=args.description, actor=_actor(args), parent=args.parent, related=related, origin=origin, session_id=args.session)
+        if args.task_command == "unarchive":
+            confirmation = _confirmation(args, service, ref)
+            return service.unarchive(ref, actor=_confirmation_actor(args, confirmation), confirmation=confirmation, reason=args.reason)
         if args.task_command == "list":
             if args.all:
                 return {"active": service.list_tasks(query=args.query), "archived": service.list_tasks(archived=True, query=args.query)}

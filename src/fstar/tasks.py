@@ -18,7 +18,7 @@ LEASE_MINUTES = 30
 EVENT_LIMIT = 200
 # correction stays out of compaction: retro analysis quotes the user's exact
 # words from these events, so they are load-bearing records, not noise.
-MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "accepted", "dropped", "revived", "archived", "extension_enabled", "extension_changed", "correction", "awaiting_acceptance", "rework_requested", "recheck_requested", "reopened", "unified_acceptance", "evidence_invalidated"}
+MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "accepted", "dropped", "revived", "archived", "extension_enabled", "extension_changed", "correction", "awaiting_acceptance", "rework_requested", "recheck_requested", "reopened", "unified_acceptance", "evidence_invalidated", "unarchived"}
 EXTENSIONS = {
     "planning-review": {"clarify", "prd", "design", "plan", "editor", "doc-check"},
     "persistent-task": {"task", "evidence", "lease", "events", "recovery", "archive"},
@@ -44,7 +44,7 @@ def _require_workflow_member(task: dict, member: str) -> None:
 # doc/prd.md and doc/design.md entries as COMPATIBILITY recognition
 # (_docs_to_revisit only reports the files that actually exist) and adds
 # criteria.md, the acceptance criteria every task now forms.
-_REVISIT_DOCS = ("doc/prd.md", "doc/design.md", "plan.md", "clarify.md", "criteria.md")
+_REVISIT_DOCS = ("doc/prd.md", "doc/design.md", "doc/walkthrough.md", "plan.md", "clarify.md", "criteria.md")
 
 
 def _docs_to_revisit(task_dir: Path) -> list:
@@ -188,6 +188,17 @@ def make_event(event_type: str, source: dict, data: dict, now: str) -> dict:
     return {"id": str(uuid.uuid4()), "at": now, "source": source, "type": event_type, "data": data}
 
 
+def _resolve_archive_origin_path(store: TaskStore, archive_path: str) -> Path:
+    """Resolve an origin/related archive_path (".fstar/" prefixed identity path)."""
+    candidate = Path(archive_path)
+    if candidate.is_absolute():
+        return candidate
+    parts = candidate.parts
+    if parts and parts[0] == ".fstar":
+        return store.fstar_root.joinpath(*parts[1:])
+    return store.project_root / candidate
+
+
 def compact_events(events: list) -> list:
     if len(events) <= EVENT_LIMIT:
         return events
@@ -269,13 +280,65 @@ class TaskService:
             raise DomainError("children_inconsistent", "children does not match nested task directories", {"expected": expected, "actual": actual}, status=3)
         return actual
 
-    def create(self, *, name: str, title: str, description: str, actor: dict, parent: Optional[str] = None, related: Optional[list] = None, session_id: Optional[str] = None) -> dict:
+    def _validate_origin(self, origin: dict) -> dict:
+        """Validate and normalize a create-time origin (antigravity design §1.2).
+
+        The parent task may live in the archive tree (identity path with the
+        ".fstar/" prefix, same resolution rule as meta.related_tasks) or at
+        the tasks_root top level (already unarchived). The referenced
+        task.json id must match origin.task_id, otherwise the link is
+        refused: a wrong origin silently injects the wrong parent context
+        in P-003.
+        """
+        if not isinstance(origin, dict):
+            raise DomainError("invalid_origin", "origin must be an object", status=3)
+        task_id = origin.get("task_id")
+        archive_path = origin.get("archive_path")
+        if not isinstance(task_id, str) or not task_id.strip():
+            raise DomainError("invalid_origin", "origin requires a non-empty task_id", status=3)
+        if not isinstance(archive_path, str) or not archive_path.strip():
+            raise DomainError("invalid_origin", "origin requires a non-empty archive_path", status=3)
+        resolved = _resolve_archive_origin_path(self.store, archive_path)
+        origin_dir = resolved.parent if resolved.name == "task.json" else resolved
+        parent_task = None
+        try:
+            origin_dir.resolve().relative_to(self.store.archive_root.resolve())
+        except ValueError:
+            # Not inside the archive tree: the parent may already be
+            # unarchived; accept a top-level active location as well.
+            if origin_dir.parent != self.store.tasks_root:
+                raise DomainError("invalid_origin", "origin archive_path must point inside the archive or at a top-level active task", {"archive_path": archive_path}, status=3)
+            if not (origin_dir / "task.json").is_file():
+                raise DomainError("invalid_origin", "Origin parent task does not exist", {"archive_path": archive_path}, status=3)
+            parent_task = self.store._read_path(origin_dir / "task.json")
+        else:
+            if not (origin_dir / "task.json").is_file():
+                raise DomainError("invalid_origin", "Origin parent task does not exist", {"archive_path": archive_path}, status=3)
+            parent_task = self.store._read_path(origin_dir / "task.json")
+        if parent_task["id"] != task_id:
+            raise DomainError("invalid_origin", "Origin task_id does not match the parent task.json", {"task_id": task_id, "actual": parent_task["id"]}, status=3)
+        return {"task_id": task_id, "archive_path": self.store.identity_path(origin_dir), "reason": origin.get("reason", "") if isinstance(origin.get("reason"), str) else ""}
+
+    def create(self, *, name: str, title: str, description: str, actor: dict, parent: Optional[str] = None, related: Optional[list] = None, origin: Optional[dict] = None, session_id: Optional[str] = None) -> dict:
         if actor.get("role") not in {"user", "agent"} or not actor.get("id"):
             raise DomainError("invalid_actor", "Creating a task requires a declared actor")
+        if origin is not None and parent is not None:
+            # origin points at a (possibly archived) parent requirement task;
+            # parent expresses the same relation for an ACTIVE parent via
+            # physical nesting. Carrying both would leave two competing
+            # parent pointers that can drift apart.
+            raise DomainError("invalid_origin", "Use parent for an active parent or origin for a possibly archived one, not both", status=3)
+        if origin is not None:
+            origin = self._validate_origin(origin)
         with self.store.transaction():
             now = self.clock()
             task = new_task(name, title, description, creator=actor["id"], now=now)
             task["meta"] = {"disposition": None, "templates": {}, "related_tasks": [], "reminders": {}}
+            if origin:
+                # Keep the original (possibly still valid) archive location
+                # recorded verbatim; the normalized identity lives in
+                # archive_path. Kept as provided by _validate_origin.
+                task["origin"] = origin
             if related:
                 for relation in related:
                     archive_path = Path(relation.get("archive_path", ""))
@@ -1587,6 +1650,100 @@ class TaskService:
 
     def _scan_tree(self, root: Path) -> list:
         return [self.store._read_path(path) for path in root.rglob("task.json")]
+
+    def _origin_followups(self, parent_id: str) -> list:
+        """Top-level active tasks whose origin.task_id points at ``parent_id``."""
+        found = []
+        if not self.store.tasks_root.exists():
+            return found
+        for path in self.store.tasks_root.iterdir():
+            if not path.is_dir() or path.is_symlink() or path.parent != self.store.tasks_root:
+                continue
+            task_file = path / "task.json"
+            if not task_file.is_file():
+                continue
+            try:
+                task = self.store._read_path(task_file)
+            except DomainError:
+                continue
+            if (task.get("origin") or {}).get("task_id") == parent_id:
+                found.append((path, task))
+        return found
+
+    def unarchive(self, ref: str, *, actor: dict, confirmation: dict, reason: Optional[str] = None) -> dict:
+        """Move an archived top-level task tree back to the active root (A-001).
+
+        Mirrors archive() in reverse: only a top-level archived task can be
+        unarchived (the archive tree is an accepted snapshot; partial
+        recovery would leave a month directory with a broken parent tree).
+        Requires an explicit user confirmation through the same
+        validate_source chain as start/reopen. The phase is untouched
+        (the parent stays completed); acceptance/evidence stay exactly as
+        recorded. Follow-up tasks that grew at the tasks_root top level
+        with origin.task_id pointing at this parent are attached into its
+        subtasks/ (children registered, origin kept for traceability).
+        """
+        with self.store.transaction():
+            task_dir = self.store.resolve(ref, archived=True)
+            try:
+                task_dir.relative_to(self.store.archive_root)
+            except ValueError:
+                raise DomainError("not_archived", "Only an archived task can be unarchived", {"path": str(task_dir)}, status=3)
+            if task_dir.parent.parent != self.store.archive_root:
+                raise DomainError("unarchive_child_forbidden", "Subtasks are unarchived only with their root task", status=3)
+            task = self.store._read_path(task_dir / "task.json")
+            if actor.get("role") != "user":
+                raise DomainError("unarchive_forbidden", "Only a user may move an archived task back to the active root", status=3)
+            validate_source(confirmation, task, actor=actor)
+            acceptance = task.get("acceptance")
+            if acceptance is not None and acceptance.get("state") != "valid":
+                # Defensive only: a non-valid acceptance should not exist in
+                # the archive tree. Refuse loudly instead of silently
+                # repairing (design §4).
+                raise DomainError("unarchive_blocked", "Archived task does not carry a valid acceptance", {"task": task["name"]}, status=3)
+            target = self.store.tasks_root / task["name"]
+            if target.exists() or target.is_symlink():
+                raise DomainError("archive_conflict", "Unarchive destination already exists", {"target": str(target)}, status=4)
+            tree = self._scan_tree(task_dir)
+            tree_ids = {item["id"] for item in tree}
+            from_path = self.store.identity_path(task_dir)
+            archived_at = task.get("archivedAt")
+            # Move first, event after: a failed rename leaves the archive
+            # tree untouched and no event is written (archive()'s convention).
+            self.store.tasks_root.mkdir(parents=True, exist_ok=True)
+            os.rename(str(task_dir), str(target))
+            for item_path in sorted(target.rglob("task.json")):
+                item = self.store._read_path(item_path)
+                if item.get("archivedAt") is not None:
+                    item["archivedAt"] = None
+                    self._write(item_path.parent, item)
+            task = self.store._read_path(target / "task.json")
+            self._event(task, "unarchived", confirmation, {"from": from_path, "reason": reason or "", "archivedAt": archived_at})
+            self._write(target, task)
+            # Attach aggregation (design §2.4): top-level follow-up tasks
+            # whose origin points at this parent migrate into its subtasks/.
+            attached = []
+            for followup_dir, followup in self._origin_followups(task["id"]):
+                if followup["name"] in task["children"]:
+                    continue
+                self._children_consistency(target, task)
+                destination = target / "subtasks" / followup["name"]
+                if destination.exists() or destination.is_symlink():
+                    raise DomainError("archive_conflict", "Attach destination already exists", {"target": str(destination)}, status=4)
+                os.rename(str(followup_dir), str(destination))
+                task["children"].append(followup["name"])
+                # origin is kept verbatim for traceability; the physical
+                # relation is now expressed through children like any other
+                # nested subtask.
+                self._write(target, task)
+                attached.append(followup["name"])
+            if attached:
+                # Record the attach on the same milestone event so the
+                # aggregation stays auditable without a second event type.
+                task["events"][-1]["data"]["attached"] = attached
+                self._write(target, task)
+            self.store.clear_tree_pointers(tree_ids)
+            return {"task": task, "path": str(target), "from": from_path, "attached": attached}
 
     def record_reminders(self, reminders: list, *, defer_days: int = 7) -> list:
         updated = []
