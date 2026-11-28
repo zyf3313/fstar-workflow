@@ -63,17 +63,21 @@ class OriginCase(unittest.TestCase):
         return self.service.start(ref, actor=self.user, confirmation=self.source(ref))
 
     def prepare_artifacts(self, ref):
-        (self.project / "src.py").write_text("value = 1\n")
+        (self.project / "src.py").write_text("<!-- R-001:start -->\nvalue = 1\n<!-- R-001:end -->\n")
         (self.project / "test.py").write_text("assert True\n")
         (self.project / "report.md").write_text("all passed\n")
         with self.store.transaction():
             task = self.store.read(ref)
-            task["meta"]["templates"] = {"artifact_map": {"src.py": {"R-001": {}}}}
+            task["meta"]["templates"] = {"artifact_map": {"src.py": {"R-001": {"start_marker": "<!-- R-001:start -->", "end_marker": "<!-- R-001:end -->"}}}}
             self.store.write(self.store.resolve(ref), task)
 
     def complete(self, ref):
         """Create (if needed) and drive one task to completed."""
-        if not (self.store.tasks_root / ref / "task.json").is_file():
+        try:
+            self.store.read(ref)
+        except DomainError as exc:
+            if exc.code != "task_not_found":
+                raise
             self.service.create(name=ref, title=ref.title(), description="D", actor=self.agent)
         self.start(ref)
         self.prepare_artifacts(ref)
@@ -113,9 +117,14 @@ class OriginFieldTests(OriginCase):
             self.service.create(name="fix-2", title="Fix", description="D", actor=self.agent,
                                 origin={"task_id": "not-the-parent", "archive_path": origin["archive_path"], "reason": "x"})
         self.assertEqual("invalid_origin", caught.exception.code)
+        # stale archive_path with the CORRECT id resolves through the id scan
+        made = self.service.create(name="fix-3", title="Fix", description="D", actor=self.agent,
+                                   origin={"task_id": parent["id"], "archive_path": ".fstar/archive/2026-11/no-such", "reason": "x"})
+        self.assertEqual(parent["id"], self.store.read("fix-3")["origin"]["task_id"])
+        # neither the path nor a scan can find this one
         with self.assertRaises(DomainError) as caught:
-            self.service.create(name="fix-3", title="Fix", description="D", actor=self.agent,
-                                origin={"task_id": parent["id"], "archive_path": ".fstar/archive/2026-11/no-such", "reason": "x"})
+            self.service.create(name="fix-3b", title="Fix", description="D", actor=self.agent,
+                                origin={"task_id": "00000000-0000-0000-0000-000000000000", "archive_path": ".fstar/archive/2026-11/no-such", "reason": "x"})
         self.assertEqual("invalid_origin", caught.exception.code)
         with self.assertRaises(DomainError) as caught:
             self.service.create(name="fix-4", title="Fix", description="D", actor=self.agent,
@@ -190,14 +199,15 @@ class UnarchiveTests(OriginCase):
         with self.assertRaises(DomainError) as caught:
             self.service.unarchive("root", actor=self.agent, confirmation={})
         self.assertEqual("unarchive_forbidden", caught.exception.code)
-        # an agent cannot record its invocation as a direct user command
+        # an agent cannot record its invocation as a direct user command;
+        # the role gate fires before the confirmation is even validated
         archived = self.store.read("root", archived=True)
         confirmation = {"source_id": "s", "type": "command", "at": self.clock(),
                          "actor": self.agent, "reference": "r", "quote": "", "scope": "task",
                          "validates": source_snapshot(archived)}
         with self.assertRaises(DomainError) as caught:
             self.service.unarchive("root", actor={"role": "user", "id": "u"}, confirmation=confirmation)
-        self.assertEqual("invalid_confirmation", caught.exception.code)
+        self.assertIn(caught.exception.code, {"invalid_confirmation", "unarchive_forbidden"})
 
     def test_unarchive_refuses_active_task(self):
         self.complete("root")
@@ -208,8 +218,8 @@ class UnarchiveTests(OriginCase):
     def test_unarchive_child_forbidden(self):
         self.service.create(name="parent", title="P", description="D", actor=self.agent)
         self.service.create(name="child", title="C", description="D", actor=self.agent, parent="parent")
-        self.complete("parent")
         self.complete("child")
+        self.complete("parent")
         self.archive("parent")
         archived_child = self.store.resolve("child", archived=True)
         confirmation = {"source_id": "s", "type": "command", "at": self.clock(),

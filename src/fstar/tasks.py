@@ -307,17 +307,32 @@ class TaskService:
             # Not inside the archive tree: the parent may already be
             # unarchived; accept a top-level active location as well.
             if origin_dir.parent != self.store.tasks_root:
-                raise DomainError("invalid_origin", "origin archive_path must point inside the archive or at a top-level active task", {"archive_path": archive_path}, status=3)
-            if not (origin_dir / "task.json").is_file():
-                raise DomainError("invalid_origin", "Origin parent task does not exist", {"archive_path": archive_path}, status=3)
-            parent_task = self.store._read_path(origin_dir / "task.json")
-        else:
-            if not (origin_dir / "task.json").is_file():
-                raise DomainError("invalid_origin", "Origin parent task does not exist", {"archive_path": archive_path}, status=3)
-            parent_task = self.store._read_path(origin_dir / "task.json")
+                origin_dir = None
+        if origin_dir is None or not (origin_dir / "task.json").is_file():
+            # archive_path is a hint, the id is authoritative (design §1.2):
+            # a parent that was unarchived moved, so fall back to an id scan
+            # over the archive tree and the active top level.
+            origin_dir = self._locate_origin_parent(task_id)
+            if origin_dir is None:
+                raise DomainError("invalid_origin", "Origin parent task does not exist", {"archive_path": archive_path, "task_id": task_id}, status=3)
+        parent_task = self.store._read_path(origin_dir / "task.json")
         if parent_task["id"] != task_id:
             raise DomainError("invalid_origin", "Origin task_id does not match the parent task.json", {"task_id": task_id, "actual": parent_task["id"]}, status=3)
         return {"task_id": task_id, "archive_path": self.store.identity_path(origin_dir), "reason": origin.get("reason", "") if isinstance(origin.get("reason"), str) else ""}
+
+    def _locate_origin_parent(self, task_id: str) -> Optional[Path]:
+        """Find a parent task.json by id under the archive tree or tasks root."""
+        for archived in (True, False):
+            if not (self.store.archive_root if archived else self.store.tasks_root).exists():
+                continue
+            for task_file in (self.store.archive_root if archived else self.store.tasks_root).rglob("task.json"):
+                try:
+                    data = self.store._read_path(task_file)
+                except DomainError:
+                    continue
+                if data.get("id") == task_id:
+                    return task_file.parent
+        return None
 
     def create(self, *, name: str, title: str, description: str, actor: dict, parent: Optional[str] = None, related: Optional[list] = None, origin: Optional[dict] = None, session_id: Optional[str] = None) -> dict:
         if actor.get("role") not in {"user", "agent"} or not actor.get("id"):
@@ -977,7 +992,7 @@ class TaskService:
         # Optional collaboration fields (design §4): absent fields are omitted
         # rather than reported as null; status defaults to "active".
         result["status"] = task.get("status", "active")
-        for field in ("status_detail", "work_items", "next_step", "deliverables"):
+        for field in ("status_detail", "work_items", "next_step", "deliverables", "origin"):
             value = task.get(field)
             if value is not None:
                 result[field] = value
@@ -1684,7 +1699,19 @@ class TaskService:
         subtasks/ (children registered, origin kept for traceability).
         """
         with self.store.transaction():
-            task_dir = self.store.resolve(ref, archived=True)
+            try:
+                task_dir = self.store.resolve(ref, archived=True)
+            except DomainError as exc:
+                if exc.code != "task_not_found":
+                    raise
+                # The ref resolves in NEITHER tree: an active hit means the
+                # caller asked to unarchive something never archived; a pure
+                # miss keeps the honest task_not_found.
+                try:
+                    self.store.resolve(ref)
+                except DomainError:
+                    raise exc
+                raise DomainError("not_archived", "Only an archived task can be unarchived", {"task": ref}, status=3) from exc
             try:
                 task_dir.relative_to(self.store.archive_root)
             except ValueError:
@@ -1695,6 +1722,12 @@ class TaskService:
             if actor.get("role") != "user":
                 raise DomainError("unarchive_forbidden", "Only a user may move an archived task back to the active root", status=3)
             validate_source(confirmation, task, actor=actor)
+            if (confirmation.get("actor") or {}).get("role") != "user":
+                # The confirmation itself must record a user actor: moving an
+                # accepted snapshot back to the working surface cannot be
+                # driven by an agent-recorded source even when the caller
+                # wraps it in a user actor.
+                raise DomainError("invalid_confirmation", "Unarchive requires a direct user confirmation", status=3)
             acceptance = task.get("acceptance")
             if acceptance is not None and acceptance.get("state") != "valid":
                 # Defensive only: a non-valid acceptance should not exist in
@@ -1730,6 +1763,7 @@ class TaskService:
                 destination = target / "subtasks" / followup["name"]
                 if destination.exists() or destination.is_symlink():
                     raise DomainError("archive_conflict", "Attach destination already exists", {"target": str(destination)}, status=4)
+                destination.parent.mkdir(parents=True, exist_ok=True)
                 os.rename(str(followup_dir), str(destination))
                 task["children"].append(followup["name"])
                 # origin is kept verbatim for traceability; the physical

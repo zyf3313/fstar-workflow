@@ -53,7 +53,7 @@
       "source": "src/fstar/cli.py",
       "destination": "src/fstar/cli.py",
       "kind": "python",
-      "sha256": "64f8e7956cfe7d60167cec0ff02ce8366be271dc96f9bf1663ddb3604e580927"
+      "sha256": "cb978143b9f4fcc73b571291864ad0297da763f8b34053816f93f2d150fe4016"
     },
     {
       "source": "src/fstar/config.py",
@@ -125,7 +125,7 @@
       "source": "src/fstar/models.py",
       "destination": "src/fstar/models.py",
       "kind": "python",
-      "sha256": "c383ae523ee21be513e53d57f7c391ed003ce48468584e02f806a1642e202bda"
+      "sha256": "ad70458092cd07b1bbb8c6287f7d20183a2f84ab8562c30941f8358e6804778d"
     },
     {
       "source": "src/fstar/project.py",
@@ -173,7 +173,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "579a4d0d1873c9f4a0fc3e94868edc5c506752fcf27905a7075adc98696658cb"
+      "sha256": "2caef2ef98601cabfc70634a3e437e0c72b9edd5066d5bfe20c87c013cbe3d10"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",
