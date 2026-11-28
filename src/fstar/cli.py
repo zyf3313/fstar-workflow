@@ -324,7 +324,35 @@ def _dispatch(args):
             # filesystem or project metadata.
             validator = TaskService.__new__(TaskService)
             validator.clock = _static_clock
-            return validator.enable_extension(None, authorization={"id": args.id, "scope": args.scope, "included": args.include, "excluded": args.exclude, "reason": args.reason, "source": source}, actor=_actor(args, "user"))
+            record = validator.enable_extension(None, authorization={"id": args.id, "scope": args.scope, "included": args.include, "excluded": args.exclude, "reason": args.reason, "source": source}, actor=_actor(args, "user"))
+            # A-009: when a session id is declared, persist the record into
+            # the session grants store so the worker-context hook can read it
+            # back on host dispatches whose payload carries no extensions
+            # array. Without a session id the record stays in this process's
+            # return value (legacy behavior).
+            if getattr(args, "session", None):
+                runtime = Path(args.runtime_root).expanduser().resolve() if getattr(args, "runtime_root", None) else None
+                user_home = Path(args.user_data_root).expanduser().resolve() if getattr(args, "user_data_root", None) else None
+                if user_home is None and runtime is None:
+                    user_home = Path.home() / ".fstar"
+                # The store needs an initialized project for the runtime slot;
+                # outside a project the record stays process-local (honest
+                # degradation, same as before).
+                project = find_project_root(Path(args.project) if getattr(args, "project", None) else Path.cwd(), strict_worktree_errors=False)
+                if project is not None:
+                    TaskStore(project, user_home=user_home, runtime_root=runtime).set_session_grants(args.session, [record["authorization"]])
+            return record
+        if args.extension_command == "disable" and getattr(args, "session", None):
+            # Mirror the store: a disable removes the matching package record.
+            project = find_project_root(Path(args.project) if getattr(args, "project", None) else Path.cwd(), strict_worktree_errors=False)
+            if project is not None:
+                runtime = Path(args.runtime_root).expanduser().resolve() if getattr(args, "runtime_root", None) else None
+                user_home = Path(args.user_data_root).expanduser().resolve() if getattr(args, "user_data_root", None) else None
+                if user_home is None and runtime is None:
+                    user_home = Path.home() / ".fstar"
+                store = TaskStore(project, user_home=user_home, runtime_root=runtime)
+                remaining = [item for item in store.read_session_grants(args.session) if item.get("id") != args.id]
+                store.set_session_grants(args.session, remaining)
         return {"id": args.id, "disabled": True, "persistence": "session_only", "source": source}
     service = _service(args)
     store = service.store
@@ -453,7 +481,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--runtime-root")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--actor")
-    parser.add_argument("--actor-role", choices=("user", "agent", "coordinator", "implement", "check"))
+    parser.add_argument("--actor-role", choices=("user", "agent", "coordinator", "implement", "check", "steward"))
     subparsers = parser.add_subparsers(dest="command", required=True)
     register_core_commands(subparsers)
     for module in ("project", "runtime", "dispatch", "installer", "crossproject",

@@ -655,7 +655,8 @@ class DispatchService:
         task_ref = payload["task_ref"]
         records = payload.get("extensions", []) if task_ref == "session-only" else self.store.read(task_ref)["extensions"]
         context = grants(records)
-        role_member = {"research": ("multi-agent", "research"), "editor": ("planning-review", "editor")}.get(payload["role"])
+        role_member = {"research": ("multi-agent", "research"), "editor": ("planning-review", "editor"),
+                       "steward": ("multi-agent", "steward")}.get(payload["role"])
         if role_member and not includes(context, *role_member):
             raise DomainError("extension_not_authorized", "Dispatch role requires an included extension member", {"package": role_member[0], "member": role_member[1]}, status=3)
         # Input fingerprints are part of every dispatch protocol, including

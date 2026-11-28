@@ -22,7 +22,7 @@ MILESTONES = {"started", "replanned", "lease_taken_over", "review_recorded", "ac
 EXTENSIONS = {
     "planning-review": {"clarify", "prd", "design", "plan", "editor", "doc-check"},
     "persistent-task": {"task", "evidence", "lease", "events", "recovery", "archive"},
-    "multi-agent": {"research", "parallel-implement", "version-injection", "change-propagation"},
+    "multi-agent": {"research", "parallel-implement", "version-injection", "change-propagation", "steward"},
     "project-governance": {"specs", "knowledge", "rules", "memory"},
 }
 
@@ -597,6 +597,16 @@ class TaskService:
                 templates = task.get("meta", {}).get("templates", {})
                 if not templates.get("artifact_map"):
                     raise DomainError("planning_artifacts_missing", "Planning review requires mapped current planning artifacts", status=3)
+                # A-013 planning-sequence soft gate: a task that uses a
+                # design document AND declares the need in criteria.md must
+                # have a design.md on disk before starting. Simple tasks
+                # (no design-member grant, or criteria that does not declare
+                # a design need) are unaffected.
+                if self._needs_design_doc(task, task_dir):
+                    raise DomainError(
+                        "design_doc_missing",
+                        "criteria.md declares a design need but no design document exists; "
+                        "write design.md (and have the user review it) before starting", status=3)
             task["phase"] = "in_progress"
             # Branch binding at start time (P-004/D-006): the task records the
             # branch/worktree it actually runs on; an explicit recorded value
@@ -611,6 +621,26 @@ class TaskService:
             if session_id:
                 self.store.set_current(session_id, task_dir, task["id"])
             return task
+
+    def _needs_design_doc(self, task: dict, task_dir: Path) -> bool:
+        """A-013: criteria declares a design need and no design.md exists.
+
+        The declaration signal is a machine-checkable marker line in
+        criteria.md: ``design-required`` (e.g. in a 判定边界 or 依据 line, or a
+        standalone marker). Tasks whose criteria does not carry the marker,
+        or that already have doc/design.md / design.md, pass. Called only
+        for tasks with a prd/design planning-review member, so simple tasks
+        are never touched.
+        """
+        for relative in ("doc/design.md", "design.md"):
+            if (task_dir / relative).is_file():
+                return False
+        criteria = task_dir / "criteria.md"
+        try:
+            text = criteria.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            return False
+        return "design-required" in text
 
     def acquire_lease(self, ref: str, *, holder: str, role: str, takeover_reason: Optional[str] = None, actor: Optional[dict] = None, workflow_recovery: bool = False) -> dict:
         with self.store.transaction():
@@ -1612,6 +1642,16 @@ class TaskService:
             task = self.store._read_path(task_dir / "task.json")
             if workflow:
                 _require_workflow_member(task, "archive")
+                # A-005 hard gate on the workflow-consumption path: no
+                # walkthrough.md, no archive. The document records what
+                # changed, how it was verified, and the evidence — and it is
+                # the follow-up injection source for origin-linked tasks.
+                # Direct/legacy archives (tests, recoveries) are unaffected.
+                if not (task_dir / "doc" / "walkthrough.md").is_file() and not (task_dir / "walkthrough.md").is_file():
+                    raise DomainError("walkthrough_missing",
+                                      "Archiving requires the task walkthrough (doc/walkthrough.md: "
+                                      "what changed, how it was verified, evidence)",
+                                      {"task": task["name"]}, status=3)
             validate_source(confirmation, task, actor=actor)
             finalizations = []
             tree_ids = self._validate_archive_tree(task_dir, finalizations)

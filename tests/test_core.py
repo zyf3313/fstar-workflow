@@ -400,6 +400,9 @@ class EvidenceArchiveTests(CoreCase):
     def prepare_artifacts(self, ref="root"):
         (self.project / "doc").mkdir(exist_ok=True)
         (self.project / "doc" / "prd.md").write_text("<!-- R1:start -->\nfirst\n<!-- R1:end -->\n<!-- R2:start -->\nsecond\n<!-- R2:end -->\n")
+        (self.store.resolve(ref) / "doc").mkdir(exist_ok=True)
+        (self.store.resolve(ref) / "doc" / "walkthrough.md").write_text(
+            "# walkthrough\n\n- 改了什么/如何验证/证据（测试脚手架占位）\n", encoding="utf-8")
         (self.project / "src.py").write_text("value = 1\n")
         (self.project / "test.py").write_text("assert True\n")
         (self.project / "config.ini").write_text("enabled=1\n")

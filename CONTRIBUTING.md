@@ -15,7 +15,7 @@
 
 - 一律小写短横线命名，不含空格与中文。
 - 一个分支对应一个可独立验收的交付；混合内容拆成多个分支。
-- 分支合入 `main` 前需要用户验收（fstar 工作流的 accept 步骤）。
+- 分支合入 `main` 前需要用户验收（fstar 工作流的 accept 步骤）。用户记录的规则可按类别委托验收：活动/生效规则明确覆盖该类工作时，agent 独立检查通过后，按 rule-driven acceptance（`fstar accept <task> --rule`，事件记 `accepted_via_rule`）合入；无匹配规则不得豁免，发版、推送、破坏性变更等 never-covered 事项仍须用户亲验。
 
 ## 版本与 npm 对齐
 

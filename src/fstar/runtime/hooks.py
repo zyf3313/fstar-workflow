@@ -290,7 +290,13 @@ def session_context(payload: Optional[dict] = None, *, start: Optional[Path] = N
                 context = {}
 
     if not persistent_context:
-        context = grants(payload.get("extensions", []))
+        # A-009 dual channel: payload extensions first; when the host event
+        # payload carries no records, read the session grants store written
+        # by `fstar extension enable --session <id>` for this session.
+        session_records = payload.get("extensions")
+        if not session_records and session_id and project_root is not None:
+            session_records = located["store"].read_session_grants(session_id)
+        context = grants(session_records or [])
 
     # Indexes are read-only context: inject them by default so user-level rules
     # and project knowledge stay visible without an extension grant. Writing to
@@ -648,9 +654,18 @@ def worker_context(payload: Optional[dict] = None, *, role: Optional[str] = None
                 footer_parent_lines.append(footer_parent)
 
     if not task_ref or task_ref == "session-only":
-        context = grants(payload.get("extensions", []))
+        # A-009 dual channel: payload extensions first; the host dispatch
+        # payload carries them when the host preserves the extensions
+        # array. When it strips them, read the session grants store written
+        # by `fstar extension enable --session <id>` (same records, payload
+        # first, readback fallback).
+        session_records = payload.get("extensions")
+        if not session_records and session_id and project_root is not None:
+            session_records = located["store"].read_session_grants(session_id)
+        context = grants(session_records or [])
     role_member = {"research": ("multi-agent", "research"),
-                   "editor": ("planning-review", "editor")}.get(role)
+                   "editor": ("planning-review", "editor"),
+                   "steward": ("multi-agent", "steward")}.get(role)
     if role_member and not includes(context, *role_member):
         raise DomainError("extension_not_authorized", "Worker role requires an included extension member",
                           {"package": role_member[0], "member": role_member[1]}, status=3)
