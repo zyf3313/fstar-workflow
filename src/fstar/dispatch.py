@@ -185,7 +185,8 @@ def build_payload(*, role: str, task_ref: str, plan_item_ids: Sequence[str],
     return payload
 
 
-def prepare_read_context(store: TaskStore, selection: dict) -> dict:
+def prepare_read_context(store: TaskStore, selection: dict, *,
+                          task_ref: Optional[str] = None) -> dict:
     """Load coordinator-selected files; semantic relevance remains the caller's decision."""
     import hashlib
     from .runtime.inject import read_budgets
@@ -229,7 +230,25 @@ def prepare_read_context(store: TaskStore, selection: dict) -> dict:
             unloaded.append(dict(ref, status="missing", reason="file not found"))
         except (OSError, UnicodeError, DomainError, ValueError, RuntimeError) as exc:
             unloaded.append(dict(ref, status="error", reason=str(exc)))
-    return {"read_context": refs, "context_report": {"selection_reason": reason, "unloaded": unloaded},
+    context_report = {"selection_reason": reason, "unloaded": unloaded}
+    # Dual channel (antigravity-adoption design §3.2): the coordinator may
+    # hand-select parent-requirement excerpts through this explicit channel
+    # while the automatic origin injection rides in the hook. A task_ref with
+    # an origin adds the same tri-state parent_context report here, so the
+    # dispatch payload and the harvest record both tell the truth about what
+    # the parent contributed.
+    if task_ref and task_ref != "session-only":
+        from .runtime.inject import parent_context_inputs
+        from .runtime.inject import read_budgets as _read_budgets
+        try:
+            task = store.read(task_ref)
+        except DomainError:
+            task = None
+        if task is not None:
+            parent = parent_context_inputs(store, task, budgets)
+            if parent is not None:
+                context_report["parent_context"] = parent["report"]
+    return {"read_context": refs, "context_report": context_report,
             "loaded": loaded, "total_bytes": total}
 
 
@@ -332,6 +351,19 @@ def validate_payload(payload: dict) -> dict:
             if item.get("root", "project") not in ("project", "user") or item.get("status") not in ("missing", "error", "deferred"):
                 raise DomainError("invalid_dispatch_payload", "Invalid unloaded context entry")
             _require_str(item.get("reason"), "context_report reason")
+        # P-003 dual channel: the coordinator's context report may carry the
+        # origin parent's tri-state injection report. Optional, but when
+        # present it must be honest — a loaded/partial status requires its
+        # listed documents, and the status vocabulary is closed.
+        if "parent_context" in report:
+            parent = _require_dict(report["parent_context"], "context_report parent_context")
+            if parent.get("status") not in ("loaded", "partial", "missing"):
+                raise DomainError("invalid_dispatch_payload", "Invalid parent_context status", {"status": parent.get("status")})
+            origin = _require_dict(parent.get("origin"), "parent_context origin")
+            _require_str(origin.get("task_id"), "parent_context origin task_id")
+            _require_list(parent.get("loaded", []), "parent_context loaded")
+            _require_list(parent.get("deferred", []), "parent_context deferred")
+            _require_str(parent.get("reason", "") or "ok", "parent_context reason")
     _require_dict(payload.get("baseline"), "baseline")
     _require_dict(payload.get("return_conditions", {}), "return_conditions")
     # Prompt first line must stay consistent with task_ref: session-only must
@@ -1412,6 +1444,12 @@ class DispatchService:
         if payload.get("context_report"):
             validation_facts.append({"command": "context selection (coordinator-reported)",
                                      "result": json.dumps(payload["context_report"], ensure_ascii=False)})
+            # P-003 (A-002): the origin parent context tri-state report rides
+            # into the recorded evidence, so an injection failure is auditable
+            # and no dispatch can claim a parent injection that did not happen.
+            if "parent_context" in payload["context_report"]:
+                validation_facts.append({"command": "parent context inheritance (origin-resolved, hook-reported)",
+                                         "result": json.dumps(payload["context_report"]["parent_context"], ensure_ascii=False)})
         if result.get("skill_usage"):
             validation_facts.append({
                 "command": "skill_usage (worker-reported provenance, not verified by harvest)",
@@ -1631,6 +1669,7 @@ def register_commands(subparsers) -> None:
         role_parser.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_dispatch})
     context = dispatch_sub.add_parser("context", help="load coordinator-selected context files")
     context.add_argument("--selection", required=True, help="JSON selection with selection_reason and entries")
+    context.add_argument("--task-ref", help="task reference; a task with origin also reports parent_context (dual channel)")
     context.set_defaults(**{OPTIONAL_HANDLER_ATTR: _handle_context})
     harvest = dispatch_sub.add_parser("harvest")
     harvest.add_argument("--result", required=True)
@@ -1881,7 +1920,7 @@ def _handle_context(args):
     from .store import checkout_project_root
     root = Path(args.project).expanduser() if args.project else (checkout_project_root(Path.cwd()) or Path.cwd())
     user = Path(args.user_data_root).expanduser() if getattr(args, "user_data_root", None) else None
-    return prepare_read_context(TaskStore(root, user_home=user), selection)
+    return prepare_read_context(TaskStore(root, user_home=user), selection, task_ref=getattr(args, "task_ref", None))
 
 
 def _handle_harvest(args):

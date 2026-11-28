@@ -77,7 +77,7 @@
       "source": "src/fstar/dispatch.py",
       "destination": "src/fstar/dispatch.py",
       "kind": "python",
-      "sha256": "38a8dd94034ad94907f31105ee929d41a8a730ddd947ff2da00932827575a682"
+      "sha256": "936c8ebea29c167645151c4430699a6b956cd77d54680ab62275dd96a7282a10"
     },
     {
       "source": "src/fstar/evidence.py",
@@ -149,13 +149,13 @@
       "source": "src/fstar/runtime/hooks.py",
       "destination": "src/fstar/runtime/hooks.py",
       "kind": "python",
-      "sha256": "6a5ec30d967eb929bde270fb71cd82880a70e974719c17f0ddacf86568805e08"
+      "sha256": "6b91355a7b8c69823814f8b5e6f99738a1a93f740ea783e7b546088fed89e661"
     },
     {
       "source": "src/fstar/runtime/inject.py",
       "destination": "src/fstar/runtime/inject.py",
       "kind": "python",
-      "sha256": "ee53664824cdfd691065557006abed12987ab3b33a66bbdd995ac0dfad4e76c7"
+      "sha256": "e36db3f53d8a140f421b83ef3af22160ca7caa9e70f9cb7935e69982aad71905"
     },
     {
       "source": "src/fstar/runtime/registration.py",
@@ -173,7 +173,7 @@
       "source": "src/fstar/tasks.py",
       "destination": "src/fstar/tasks.py",
       "kind": "python",
-      "sha256": "2caef2ef98601cabfc70634a3e437e0c72b9edd5066d5bfe20c87c013cbe3d10"
+      "sha256": "268362d87beac521b4db770f85b4e73919c0ef1d5d824dc76c99ab41bb3bccfb"
     },
     {
       "source": "resources/skills/fstar-archive/SKILL.md",
